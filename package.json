@@ -1,0 +1,29 @@
+{
+  "name": "appkit-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "turbo": "node scripts/turbo.mjs",
+    "build": "node scripts/turbo.mjs run build",
+    "test": "node scripts/turbo.mjs run test",
+    "typecheck": "node scripts/turbo.mjs run typecheck",
+    "verify": "node scripts/turbo.mjs run build typecheck test && bun run check:release && bun run check:docs",
+    "check:release": "node --test scripts/release.test.mjs",
+    "docs:generate": "node scripts/generate-docs.mjs",
+    "check:docs": "node scripts/check-docs.mjs",
+    "test:consumer": "node scripts/check-consumer.mjs"
+  },
+  "devDependencies": {
+    "turbo": "2.11.9",
+    "typescript": "6.0.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vitest": "4.1.12"
+  }
+}

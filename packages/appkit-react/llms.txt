@@ -1,0 +1,11 @@
+# @alneas/appkit-react
+
+Install @alneas/appkit-react; import its explicit feature subpaths.
+
+- [README.md](README.md)
+- [docs/ai.md](docs/ai.md)
+- [docs/exports.md](docs/exports.md)
+- [docs/index.md](docs/index.md)
+- [docs/request-form.md](docs/request-form.md)
+- [docs/tools.md](docs/tools.md)
+- [docs/ui.md](docs/ui.md)

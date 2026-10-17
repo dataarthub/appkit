@@ -1,0 +1,84 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!dist/**",
+        "!llms.txt",
+        "!llms-full.txt",
+        "!docs/exports.md",
+        "!docs/index.md"
+      ],
+      "outputs": [
+        "dist/**",
+        "llms.txt",
+        "llms-full.txt",
+        "docs/exports.md",
+        "docs/index.md"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!dist/**",
+        "!llms.txt",
+        "!llms-full.txt"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!dist/**",
+        "!llms.txt",
+        "!llms-full.txt",
+        "$TURBO_ROOT$/scripts/test-unit.mjs",
+        "$TURBO_ROOT$/scripts/vitest.config.ts"
+      ]
+    },
+    "@alneas/appkit-react#build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!dist/**",
+        "!llms.txt",
+        "!llms-full.txt",
+        "!docs/exports.md",
+        "!docs/index.md",
+        "$TURBO_ROOT$/scripts/generate-notices.mjs",
+        "!THIRD_PARTY_NOTICES.md",
+        "!src/tools/paraglide/**"
+      ],
+      "outputs": [
+        "dist/**",
+        "llms.txt",
+        "llms-full.txt",
+        "docs/exports.md",
+        "docs/index.md",
+        "THIRD_PARTY_NOTICES.md",
+        "src/tools/paraglide/**"
+      ]
+    }
+  },
+  "globalDependencies": [
+    "scripts/turbo.mjs",
+    "scripts/generate-docs.mjs"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "TZ",
+    "APPKIT_TASK_RUNTIME",
+    "APPKIT_CI_IMAGE"
+  ]
+}

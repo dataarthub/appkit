@@ -1,0 +1,362 @@
+<!-- README.md -->
+
+# Appkit React
+
+React 19 forms, validation and record views connected to application-owned adapters.
+
+## Why
+
+Feature subpaths keep provider decisions visible while installation uses just two npm packages. Align schemas with validation and record operations; retain application control over data writes.
+
+## Highlights
+
+- `@alneas/appkit-react/ui`: [Compose React UI and shared providers](docs/ui.md).
+- `@alneas/appkit-react/tools`: [Build schema forms and record tables](docs/tools.md).
+- `@alneas/appkit-react/ai`: [Review AI proposals in React](docs/ai.md).
+
+## Quickstart
+
+Use an existing React 19 application with React DOM 19.
+
+```bash
+bun add @alneas/appkit-react
+```
+
+```tsx
+import {Button} from '@alneas/appkit-react/ui';
+import '@alneas/appkit-react/styles';
+export function SaveButton() {return <Button>Save</Button>;}
+```
+
+## Next steps
+
+[Public exports and optional peers](docs/exports.md) · [Contributing](../../CONTRIBUTING.md) · [Releasing](../../RELEASING.md)
+
+[Complete request form](docs/request-form.md). FormView requires collection, QueryClientProvider and DataAccessProvider.
+
+Compiled CSS license texts are retained in `THIRD_PARTY_NOTICES.md`.
+
+
+---
+
+<!-- docs/ai.md -->
+
+---
+title: "Review AI proposals in React"
+description: "React proposal review and generative UI bindings"
+archetype: how-to
+project: tools
+---
+
+# Review AI proposals in React
+
+## Prerequisites
+
+Install the package; feature subpaths are import targets.
+
+```bash
+bun add @alneas/appkit-react
+```
+
+Use React and React DOM 19 matching the package peer ranges.
+
+## Public import
+
+`@alneas/appkit-react/ai`
+
+## Step-by-Step Implementation
+
+```tsx
+import * as ai from '@alneas/appkit-react/ai';
+console.log(Object.keys(ai).length > 0);
+```
+
+## Verification
+
+Type-check this example in your application. See [the export reference](exports.md) for narrower entry points and exact optional peers. Package import/type checks do not certify hosted providers.
+
+## Troubleshooting / Common Pitfalls
+
+React proposal review and generative UI bindings. The optional chat transport requires the ai SDK peer. Proposals do not authorize execution or stored-record changes.
+
+
+---
+
+<!-- docs/exports.md -->
+
+---
+title: "Public exports and optional peers"
+description: "Exact install package, public import subpaths and optional peer requirements."
+archetype: reference
+project: tools
+---
+
+# Public exports and optional peers
+
+Generated from package.json; edit the manifest and regenerate.
+
+## Installation
+
+```bash
+bun add @alneas/appkit-react
+```
+
+## Public import
+
+| Import target | Kind |
+| --- | --- |
+| `@alneas/appkit-react` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ui` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ai` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/styles` | CSS |
+| `@alneas/appkit-react/ui/theme` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ui/utils` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ui/hooks` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/core` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/ui` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/form` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/data-table` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/filter` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/pane` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/workflow` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/sidebar` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/header` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/splash` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/priority-queue` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/editable-table` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/error` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/i18n` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/data-access/react` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/theme` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/kanban` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/calendar` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/chart` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/barcode` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/file-browser` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/auth` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/tools/gantt` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ai/generative-ui` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ai/proposal` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ai/action` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ai/ai-chat` | ESM, CommonJS and NodeNext declarations |
+| `@alneas/appkit-react/ui/styles` | CSS |
+| `@alneas/appkit-react/tools/styles` | CSS |
+| `@alneas/appkit-react/ai-instructions` | Metadata |
+| `@alneas/appkit-react/package-context.json` | Metadata |
+
+## Optional peers
+
+Install an optional peer only when using its feature. Core entry loading does not certify a hosted backend.
+
+| Peer | Version | Required |
+| --- | --- | --- |
+| `react` | `^19.2.3` | Yes |
+| `react-dom` | `^19.2.3` | Yes |
+| `recharts` | `^3.6.0` | No; feature-specific |
+| `jsbarcode` | `^3.12.1` | No; feature-specific |
+| `react-qr-code` | `^2.0.18` | No; feature-specific |
+| `@yudiel/react-qr-scanner` | `^2.5.0` | No; feature-specific |
+| `ai` | `^7.0.105` | No; feature-specific |
+| `@types/json-schema` | `^7.0.15` | No; feature-specific |
+
+
+---
+
+<!-- docs/index.md -->
+
+---
+title: "Appkit React"
+description: "Unified React 19 business UI toolkit: accessible primitives, schema-driven forms, data tables, and AI chat interfaces"
+archetype: explanation
+project: tools
+---
+
+# Appkit React
+
+React 19 forms, validation and record views connected to application-owned adapters.
+
+## Why
+
+Feature subpaths keep provider decisions visible while installation uses just two npm packages. Align schemas with validation and record operations; retain application control over data writes.
+
+## Highlights
+
+- `@alneas/appkit-react/ui`: [Compose React UI and shared providers](ui.md).
+- `@alneas/appkit-react/tools`: [Build schema forms and record tables](tools.md).
+- `@alneas/appkit-react/ai`: [Review AI proposals in React](ai.md).
+
+## Quickstart
+
+Use an existing React 19 application with React DOM 19.
+
+```bash
+bun add @alneas/appkit-react
+```
+
+```tsx
+import {Button} from '@alneas/appkit-react/ui';
+import '@alneas/appkit-react/styles';
+export function SaveButton() {return <Button>Save</Button>;}
+```
+
+## Next steps
+
+[Public exports and optional peers](exports.md) · [Contributing](../../../CONTRIBUTING.md) · [Releasing](../../../RELEASING.md)
+
+[Complete request form](request-form.md). FormView requires collection, QueryClientProvider and DataAccessProvider.
+
+Compiled CSS license texts are retained in `THIRD_PARTY_NOTICES.md`.
+
+
+---
+
+<!-- docs/request-form.md -->
+
+---
+title: "Save a schema-driven request form"
+description: "Wire a schema to an application-owned adapter with retained input on failure."
+archetype: how-to
+project: tools
+---
+
+# Save a schema-driven request form
+
+## Prerequisites
+
+Install both Appkit packages and React/React DOM 19. Supply a DataAccessAdapter for your authenticated backend.
+
+## Public import
+
+- Form: `@alneas/appkit-react/tools/form`
+- Providers: `@alneas/appkit-react/tools/data-access/react`
+- Contract: `@alneas/appkit-core/data`
+- CSS: `@alneas/appkit-react/styles`
+
+## Step-by-Step Implementation
+
+```tsx
+import { useState, type ComponentProps } from 'react';
+import type { DataAccessAdapter } from '@alneas/appkit-core/data';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { createQueryClient, DataAccessProvider } from '@alneas/appkit-react/tools/data-access/react';
+import { FormView } from '@alneas/appkit-react/tools/form';
+import '@alneas/appkit-react/styles';
+
+const schema: ComponentProps<typeof FormView>['schema'] = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', title: 'Name', minLength: 2 },
+    reason: { type: 'string', title: 'Reason', 'x-ui': { widget: 'textarea' } },
+  },
+  required: ['name'],
+};
+export function RequestForm({ adapter }: { adapter: DataAccessAdapter }) {
+  const [client] = useState(createQueryClient);
+  const [saved, setSaved] = useState('');
+  return <QueryClientProvider client={client}><DataAccessProvider adapter={adapter}>
+    <FormView testId="persistence" collection="records" mode="create" schema={schema}
+      validation={{ emptyStrings: 'preserve', locale: 'en', cast: { numericMode: 'strict' } }}
+      onSuccess={record => setSaved(JSON.stringify(record))} />
+    <output aria-label="Persisted">{saved}</output>
+  </DataAccessProvider></QueryClientProvider>;
+}
+```
+
+## Verification
+
+Invalid names must not save; rejected saves must retain input for retry. Confirm onSuccess receives the server-confirmed result. The earlier separate-package recipe was exercised in Chromium; the consolidated packaging is checked separately. A fake adapter does not certify database persistence.
+
+## Troubleshooting / Common Pitfalls
+
+Keep QueryClientProvider and DataAccessProvider, including when using onSave. Authorization, migrations, version checks and durable idempotency belong on the server. Check backend semantics before retrying an operation that may already have committed.
+
+
+---
+
+<!-- docs/tools.md -->
+
+---
+title: "Build schema forms and record tables"
+description: "Schema-driven forms, tables, filters and CRUD views"
+archetype: how-to
+project: tools
+---
+
+# Build schema forms and record tables
+
+## Prerequisites
+
+Install the package; feature subpaths are import targets.
+
+```bash
+bun add @alneas/appkit-react
+```
+
+Use React and React DOM 19 matching the package peer ranges.
+
+## Public import
+
+`@alneas/appkit-react/tools`
+
+## Step-by-Step Implementation
+
+```tsx
+import {FormView, DataTable} from '@alneas/appkit-react/tools';
+import '@alneas/appkit-react/styles';
+export const components = {FormView, DataTable};
+```
+
+## Verification
+
+Type-check this example in your application. See [the export reference](exports.md) for narrower entry points and exact optional peers. Package import/type checks do not certify hosted providers.
+
+## Troubleshooting / Common Pitfalls
+
+Schema-driven forms, tables, filters and CRUD views. FormView requires collection, schema and mode, plus QueryClientProvider and DataAccessProvider, including when using onSave. Use the complete request-form recipe.
+
+See [save a schema-driven request form](request-form.md) for the complete providers and persistence boundary.
+
+
+---
+
+<!-- docs/ui.md -->
+
+---
+title: "Compose React UI and shared providers"
+description: "React 19 primitives, theme providers and hooks"
+archetype: how-to
+project: tools
+---
+
+# Compose React UI and shared providers
+
+## Prerequisites
+
+Install the package; feature subpaths are import targets.
+
+```bash
+bun add @alneas/appkit-react
+```
+
+Use React and React DOM 19 matching the package peer ranges.
+
+## Public import
+
+`@alneas/appkit-react/ui`
+
+## Step-by-Step Implementation
+
+```tsx
+import {Button} from '@alneas/appkit-react/ui';
+import '@alneas/appkit-react/styles';
+export function SaveButton() {return <Button>Save</Button>;}
+```
+
+## Verification
+
+Type-check this example in your application. See [the export reference](exports.md) for narrower entry points and exact optional peers. Package import/type checks do not certify hosted providers.
+
+## Troubleshooting / Common Pitfalls
+
+React 19 primitives, theme providers and hooks. Import CSS explicitly and share host providers. Check accessibility in the consuming application.

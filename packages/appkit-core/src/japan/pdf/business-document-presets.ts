@@ -1,0 +1,133 @@
+import type { BusinessDocumentTemplate } from "../../data/pdf";
+
+/**
+ * Default template definition presets for Japanese business documents.
+ */
+export const japaneseDocumentPresets: Record<
+  'quote' | 'invoice' | 'creditNote' | 'order' | 'delivery' | 'orderConfirmation',
+  BusinessDocumentTemplate
+> = {
+  quote: {
+    documentType: 'quote',
+    title: ' 御見積書 ',
+    leadText:
+      '拝啓　時下ますますご発展の事とお慶び申し上げます。\n下記の通りお見積り申し上げます。\nご検討のほど、何卒よろしくお願い申し上げます。',
+    documentNoLabel: '見積No.',
+    dateLabel: '発行日',
+    dateValueKey: 'quoteDate',
+    partyRole: 'client',
+    showStaffSeal: true,
+    showApproverSeal: true,
+    largeTotalLabel: '合計金額',
+    summaryFields: [
+      { label: '納期', valueKey: 'deliveryDate', formatterType: 'date' },
+      { label: '受渡場所', valueKey: 'deliveryLocation', formatterType: 'string' },
+      { label: '支払条件', valueKey: 'paymentTerms', formatterType: 'string' },
+      { label: '有効期限', valueKey: 'expirationDate', formatterType: 'expirationDate' },
+    ],
+    tableConfig: {
+      itemLabel: '項目',
+      remarksHeader: '備考',
+    },
+  },
+  invoice: {
+    documentType: 'invoice',
+    title: ' 請求書 ',
+    leadText: '下記の通り請求いたします。',
+    documentNoLabel: '請求No.',
+    dateLabel: '請求日',
+    dateValueKey: 'invoiceDate',
+    dueLabel: '支払期日',
+    dueValueKey: 'dueDate',
+    partyRole: 'client',
+    showStaffSeal: true,
+    showApproverSeal: true,
+    useLegacyInvoiceSummaryTable: true,
+    tableConfig: {
+      itemLabel: '項目',
+      useLegacyInvoiceTableFormat: true,
+    },
+    bankAccountsKey: 'bankAccount',
+    showPaymentMethod: true,
+    showFooterText: '以上、ご請求申し上げます。',
+  },
+  creditNote: {
+    documentType: 'creditNote',
+    title: ' 返還インボイス（貸方票） ',
+    leadText: '下記の通り返還（値引/返品）いたします。',
+    documentNoLabel: '伝票No.',
+    dateLabel: '発行日',
+    dateValueKey: 'invoiceDate',
+    dueLabel: '元請求書',
+    dueValueKey: 'billingReference',
+    partyRole: 'client',
+    showStaffSeal: true,
+    showApproverSeal: true,
+    largeTotalLabel: '返還額合計',
+    summaryFields: [
+      { label: '元請求書番号', valueKey: 'billingReference', formatterType: 'string' },
+    ],
+    tableConfig: {
+      itemLabel: '項目',
+      useLegacyInvoiceTableFormat: true,
+    },
+    showFooterText: '上記の通り返還いたします。',
+  },
+  order: {
+    documentType: 'order',
+    title: ' 発注書 ',
+    leadText: '下記の通り発注いたします。',
+    documentNoLabel: '発注No.',
+    dateLabel: '発注日',
+    dateValueKey: 'issueDate',
+    dueLabel: '納期',
+    dueValueKey: 'deliveryDate',
+    partyRole: 'supplier',
+    showStaffSeal: true,
+    showApproverSeal: true,
+    tableConfig: {
+      itemLabel: '商品名',
+      includeCodeInItem: true,
+      remarksHeader: '備考',
+    },
+    footerNote: '※納品時は、本注文書の右上に記載されている発注Noを納品書にご記載下さい。',
+  },
+  delivery: {
+    documentType: 'delivery',
+    title: ' 納品書 ',
+    leadText: '下記の通り納品いたします。',
+    documentNoLabel: '納品No.',
+    dateLabel: '納品日',
+    dateValueKey: 'deliveryDate',
+    partyRole: 'client',
+    showStaffSeal: true,
+    showApproverSeal: true,
+    tableConfig: {
+      itemLabel: '品名/案件',
+      remarksHeader: '備考',
+    },
+  },
+  orderConfirmation: {
+    documentType: 'orderConfirmation',
+    title: ' 請書（受注確認書） ',
+    leadText: '下記の通り承りましたので、受注内容をご確認ください。',
+    documentNoLabel: '請書No.',
+    dateLabel: '受注日',
+    dateValueKey: 'confirmationDate',
+    dueLabel: '発行日',
+    dueValueKey: 'issueDate',
+    partyRole: 'client',
+    showStaffSeal: true,
+    showApproverSeal: true,
+    largeTotalLabel: '受注金額',
+    summaryFields: [
+      { label: '受注日', valueKey: 'confirmationDate', formatterType: 'date' },
+      { label: '納期', valueKey: 'deliveryDate', formatterType: 'date' },
+      { label: '支払条件', valueKey: 'paymentTerms', formatterType: 'paymentTerms' },
+    ],
+    tableConfig: {
+      itemLabel: '項目',
+      remarksHeader: '備考',
+    },
+  },
+};

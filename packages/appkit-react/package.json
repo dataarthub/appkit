@@ -1,0 +1,479 @@
+{
+  "name": "@alneas/appkit-react",
+  "version": "0.1.0",
+  "description": "Unified React 19 business UI toolkit: accessible primitives, schema-driven forms, data tables, and AI chat interfaces",
+  "type": "module",
+  "license": "MIT",
+  "author": "ALNEAS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dataarthub/appkit.git",
+    "directory": "packages/appkit-react"
+  },
+  "packageManager": "bun@1.4.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "docs",
+    "llms.txt",
+    "llms-full.txt",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./ui": {
+      "import": {
+        "types": "./dist/ui/index.d.ts",
+        "default": "./dist/ui/index.js"
+      },
+      "require": {
+        "types": "./dist/ui/index.d.cts",
+        "default": "./dist/ui/index.cjs"
+      }
+    },
+    "./tools": {
+      "import": {
+        "types": "./dist/tools/index.d.ts",
+        "default": "./dist/tools/index.js"
+      },
+      "require": {
+        "types": "./dist/tools/index.d.cts",
+        "default": "./dist/tools/index.cjs"
+      }
+    },
+    "./ai": {
+      "import": {
+        "types": "./dist/ai/index.d.ts",
+        "default": "./dist/ai/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/index.d.cts",
+        "default": "./dist/ai/index.cjs"
+      }
+    },
+    "./styles": "./dist/styles.css",
+    "./ui/theme": {
+      "import": {
+        "types": "./dist/ui/theme.d.ts",
+        "default": "./dist/ui/theme.js"
+      },
+      "require": {
+        "types": "./dist/ui/theme.d.cts",
+        "default": "./dist/ui/theme.cjs"
+      }
+    },
+    "./ui/utils": {
+      "import": {
+        "types": "./dist/ui/utils.d.ts",
+        "default": "./dist/ui/utils.js"
+      },
+      "require": {
+        "types": "./dist/ui/utils.d.cts",
+        "default": "./dist/ui/utils.cjs"
+      }
+    },
+    "./ui/hooks": {
+      "import": {
+        "types": "./dist/ui/hooks.d.ts",
+        "default": "./dist/ui/hooks.js"
+      },
+      "require": {
+        "types": "./dist/ui/hooks.d.cts",
+        "default": "./dist/ui/hooks.cjs"
+      }
+    },
+    "./tools/core": {
+      "import": {
+        "types": "./dist/tools/core.d.ts",
+        "default": "./dist/tools/core.js"
+      },
+      "require": {
+        "types": "./dist/tools/core.d.cts",
+        "default": "./dist/tools/core.cjs"
+      }
+    },
+    "./tools/ui": {
+      "import": {
+        "types": "./dist/tools/ui.d.ts",
+        "default": "./dist/tools/ui.js"
+      },
+      "require": {
+        "types": "./dist/tools/ui.d.cts",
+        "default": "./dist/tools/ui.cjs"
+      }
+    },
+    "./tools/form": {
+      "import": {
+        "types": "./dist/tools/form.d.ts",
+        "default": "./dist/tools/form.js"
+      },
+      "require": {
+        "types": "./dist/tools/form.d.cts",
+        "default": "./dist/tools/form.cjs"
+      }
+    },
+    "./tools/data-table": {
+      "import": {
+        "types": "./dist/tools/data-table.d.ts",
+        "default": "./dist/tools/data-table.js"
+      },
+      "require": {
+        "types": "./dist/tools/data-table.d.cts",
+        "default": "./dist/tools/data-table.cjs"
+      }
+    },
+    "./tools/filter": {
+      "import": {
+        "types": "./dist/tools/filter.d.ts",
+        "default": "./dist/tools/filter.js"
+      },
+      "require": {
+        "types": "./dist/tools/filter.d.cts",
+        "default": "./dist/tools/filter.cjs"
+      }
+    },
+    "./tools/pane": {
+      "import": {
+        "types": "./dist/tools/pane.d.ts",
+        "default": "./dist/tools/pane.js"
+      },
+      "require": {
+        "types": "./dist/tools/pane.d.cts",
+        "default": "./dist/tools/pane.cjs"
+      }
+    },
+    "./tools/workflow": {
+      "import": {
+        "types": "./dist/tools/workflow.d.ts",
+        "default": "./dist/tools/workflow.js"
+      },
+      "require": {
+        "types": "./dist/tools/workflow.d.cts",
+        "default": "./dist/tools/workflow.cjs"
+      }
+    },
+    "./tools/sidebar": {
+      "import": {
+        "types": "./dist/tools/sidebar.d.ts",
+        "default": "./dist/tools/sidebar.js"
+      },
+      "require": {
+        "types": "./dist/tools/sidebar.d.cts",
+        "default": "./dist/tools/sidebar.cjs"
+      }
+    },
+    "./tools/header": {
+      "import": {
+        "types": "./dist/tools/header.d.ts",
+        "default": "./dist/tools/header.js"
+      },
+      "require": {
+        "types": "./dist/tools/header.d.cts",
+        "default": "./dist/tools/header.cjs"
+      }
+    },
+    "./tools/splash": {
+      "import": {
+        "types": "./dist/tools/splash.d.ts",
+        "default": "./dist/tools/splash.js"
+      },
+      "require": {
+        "types": "./dist/tools/splash.d.cts",
+        "default": "./dist/tools/splash.cjs"
+      }
+    },
+    "./tools/priority-queue": {
+      "import": {
+        "types": "./dist/tools/priority-queue.d.ts",
+        "default": "./dist/tools/priority-queue.js"
+      },
+      "require": {
+        "types": "./dist/tools/priority-queue.d.cts",
+        "default": "./dist/tools/priority-queue.cjs"
+      }
+    },
+    "./tools/editable-table": {
+      "import": {
+        "types": "./dist/tools/editable-table.d.ts",
+        "default": "./dist/tools/editable-table.js"
+      },
+      "require": {
+        "types": "./dist/tools/editable-table.d.cts",
+        "default": "./dist/tools/editable-table.cjs"
+      }
+    },
+    "./tools/error": {
+      "import": {
+        "types": "./dist/tools/error.d.ts",
+        "default": "./dist/tools/error.js"
+      },
+      "require": {
+        "types": "./dist/tools/error.d.cts",
+        "default": "./dist/tools/error.cjs"
+      }
+    },
+    "./tools/i18n": {
+      "import": {
+        "types": "./dist/tools/i18n.d.ts",
+        "default": "./dist/tools/i18n.js"
+      },
+      "require": {
+        "types": "./dist/tools/i18n.d.cts",
+        "default": "./dist/tools/i18n.cjs"
+      }
+    },
+    "./tools/data-access/react": {
+      "import": {
+        "types": "./dist/tools/data-access-react.d.ts",
+        "default": "./dist/tools/data-access-react.js"
+      },
+      "require": {
+        "types": "./dist/tools/data-access-react.d.cts",
+        "default": "./dist/tools/data-access-react.cjs"
+      }
+    },
+    "./tools/theme": {
+      "import": {
+        "types": "./dist/tools/theme.d.ts",
+        "default": "./dist/tools/theme.js"
+      },
+      "require": {
+        "types": "./dist/tools/theme.d.cts",
+        "default": "./dist/tools/theme.cjs"
+      }
+    },
+    "./tools/kanban": {
+      "import": {
+        "types": "./dist/tools/kanban.d.ts",
+        "default": "./dist/tools/kanban.js"
+      },
+      "require": {
+        "types": "./dist/tools/kanban.d.cts",
+        "default": "./dist/tools/kanban.cjs"
+      }
+    },
+    "./tools/calendar": {
+      "import": {
+        "types": "./dist/tools/calendar.d.ts",
+        "default": "./dist/tools/calendar.js"
+      },
+      "require": {
+        "types": "./dist/tools/calendar.d.cts",
+        "default": "./dist/tools/calendar.cjs"
+      }
+    },
+    "./tools/chart": {
+      "import": {
+        "types": "./dist/tools/chart.d.ts",
+        "default": "./dist/tools/chart.js"
+      },
+      "require": {
+        "types": "./dist/tools/chart.d.cts",
+        "default": "./dist/tools/chart.cjs"
+      }
+    },
+    "./tools/barcode": {
+      "import": {
+        "types": "./dist/tools/barcode.d.ts",
+        "default": "./dist/tools/barcode.js"
+      },
+      "require": {
+        "types": "./dist/tools/barcode.d.cts",
+        "default": "./dist/tools/barcode.cjs"
+      }
+    },
+    "./tools/file-browser": {
+      "import": {
+        "types": "./dist/tools/file-browser.d.ts",
+        "default": "./dist/tools/file-browser.js"
+      },
+      "require": {
+        "types": "./dist/tools/file-browser.d.cts",
+        "default": "./dist/tools/file-browser.cjs"
+      }
+    },
+    "./tools/auth": {
+      "import": {
+        "types": "./dist/tools/auth.d.ts",
+        "default": "./dist/tools/auth.js"
+      },
+      "require": {
+        "types": "./dist/tools/auth.d.cts",
+        "default": "./dist/tools/auth.cjs"
+      }
+    },
+    "./tools/gantt": {
+      "import": {
+        "types": "./dist/tools/gantt.d.ts",
+        "default": "./dist/tools/gantt.js"
+      },
+      "require": {
+        "types": "./dist/tools/gantt.d.cts",
+        "default": "./dist/tools/gantt.cjs"
+      }
+    },
+    "./ai/generative-ui": {
+      "import": {
+        "types": "./dist/ai/generative-ui/index.d.ts",
+        "default": "./dist/ai/generative-ui/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/generative-ui/index.d.cts",
+        "default": "./dist/ai/generative-ui/index.cjs"
+      }
+    },
+    "./ai/proposal": {
+      "import": {
+        "types": "./dist/ai/proposal/index.d.ts",
+        "default": "./dist/ai/proposal/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/proposal/index.d.cts",
+        "default": "./dist/ai/proposal/index.cjs"
+      }
+    },
+    "./ai/action": {
+      "import": {
+        "types": "./dist/ai/action/index.d.ts",
+        "default": "./dist/ai/action/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/index.d.cts",
+        "default": "./dist/ai/action/index.cjs"
+      }
+    },
+    "./ai/ai-chat": {
+      "import": {
+        "types": "./dist/ai/ai-chat/index.d.ts",
+        "default": "./dist/ai/ai-chat/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/ai-chat/index.d.cts",
+        "default": "./dist/ai/ai-chat/index.cjs"
+      }
+    },
+    "./ui/styles": "./dist/styles.css",
+    "./tools/styles": "./dist/styles.css",
+    "./ai-instructions": "./dist/consumer-ai/SKILL.md",
+    "./package-context.json": "./dist/consumer-ai/package-context.json"
+  },
+  "scripts": {
+    "build": "bun run generate:i18n && vite build && bun scripts/prepare-package.mjs && bun x --no-install tailwindcss -i src/styles.css -o dist/styles.css --minify && node ../../scripts/generate-docs.mjs --package appkit-react && node ../../scripts/generate-notices.mjs",
+    "test": "node ../../scripts/test-unit.mjs",
+    "typecheck": "tsc --noEmit",
+    "generate:i18n": "node scripts/generate-i18n.mjs"
+  },
+  "dependencies": {
+    "@alneas/appkit-core": "0.1.0",
+    "@base-ui/react": "^1.9.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@hookform/resolvers": "^5.9.2",
+    "@tanstack/react-query": "5.104.4",
+    "@tanstack/react-table": "9.3.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk-base": "^1.0.0",
+    "date-fns": "^4.4.0",
+    "input-otp": "^1.5.0",
+    "lucide-react": "^1.59.0",
+    "react-day-picker": "^10.0.2",
+    "react-hook-form": "^7.90.0",
+    "react-resizable-panels": "^4.14.6",
+    "tailwind-merge": "^3.7.0",
+    "vaul-base": "^1.0.0",
+    "zustand": "^5.0.15",
+    "tw-animate-css": "^1.4.0",
+    "zod": "^4.2.1",
+    "@tanstack/query-core": "5.104.4",
+    "@tanstack/table-core": "9.3.1"
+  },
+  "peerDependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "recharts": "^3.6.0",
+    "jsbarcode": "^3.12.1",
+    "react-qr-code": "^2.0.18",
+    "@yudiel/react-qr-scanner": "^2.5.0",
+    "ai": "^7.0.105",
+    "@types/json-schema": "^7.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "bun-types": "^1.4.3",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "typescript": "6.0.3",
+    "vite": "^8.3.0",
+    "vite-plugin-dts": "^5.1.0",
+    "@base-ui/react": "^1.8.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vitest": "4.1.12",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "jsdom": "^26.1.0",
+    "tailwindcss": "^4.3.3",
+    "@tailwindcss/cli": "^4.3.3",
+    "react-hook-form": "^7.69.0",
+    "@tanstack/react-query": "5.104.4",
+    "recharts": "^3.6.0",
+    "jsbarcode": "^3.12.1",
+    "react-qr-code": "^2.0.18",
+    "@yudiel/react-qr-scanner": "^2.5.0",
+    "@types/jsbarcode": "^3.11.4",
+    "ai": "7.0.105",
+    "@types/json-schema": "7.0.15",
+    "tw-animate-css": "^1.4.0",
+    "@inlang/paraglide-js": "2.25.3",
+    "@inlang/plugin-message-format": "4.4.4"
+  },
+  "peerDependenciesMeta": {
+    "recharts": {
+      "optional": true
+    },
+    "jsbarcode": {
+      "optional": true
+    },
+    "react-qr-code": {
+      "optional": true
+    },
+    "@yudiel/react-qr-scanner": {
+      "optional": true
+    },
+    "ai": {
+      "optional": true
+    },
+    "@types/json-schema": {
+      "optional": true
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/dataarthub/appkit/issues"
+  }
+}

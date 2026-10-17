@@ -1,0 +1,13 @@
+# @alneas/appkit-core
+
+Install @alneas/appkit-core; import its explicit feature subpaths.
+
+- [README.md](README.md)
+- [docs/ai.md](docs/ai.md)
+- [docs/data.md](docs/data.md)
+- [docs/exports.md](docs/exports.md)
+- [docs/graph.md](docs/graph.md)
+- [docs/index.md](docs/index.md)
+- [docs/japan.md](docs/japan.md)
+- [docs/storage.md](docs/storage.md)
+- [docs/us.md](docs/us.md)

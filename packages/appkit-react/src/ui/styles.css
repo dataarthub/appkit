@@ -1,0 +1,8 @@
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tw-animate-css';
+@import './vendor/shadcn-tailwind.css';
+@import './theme.css';
+@import './tokens.css';
+@source './**/*.{ts,tsx,js}';

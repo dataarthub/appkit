@@ -1,0 +1,127 @@
+{
+  "$schema": "https://docs-d1x.pages.dev/schemas/docs-manifest.v1.json",
+  "projectId": "tools",
+  "displayName": "Appkit",
+  "category": "developer-tools",
+  "documents": [
+    {
+      "title": "Appkit",
+      "slug": "index",
+      "source": "docs/index.md",
+      "archetype": "explanation",
+      "visibility": "public"
+    },
+    {
+      "title": "Validate AI proposals before applying changes",
+      "slug": "appkit-core/ai",
+      "source": "packages/appkit-core/docs/ai.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
+      "title": "Align schemas and record operations",
+      "slug": "appkit-core/data",
+      "source": "packages/appkit-core/docs/data.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
+      "title": "Public exports and optional peers",
+      "slug": "appkit-core/exports",
+      "source": "packages/appkit-core/docs/exports.md",
+      "archetype": "reference",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
+      "title": "Calculate dependency plans",
+      "slug": "appkit-core/graph",
+      "source": "packages/appkit-core/docs/graph.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
+      "title": "Appkit Core",
+      "slug": "appkit-core/index",
+      "source": "packages/appkit-core/docs/index.md",
+      "archetype": "explanation",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
+      "title": "Apply Japanese regional defaults",
+      "slug": "appkit-core/japan",
+      "source": "packages/appkit-core/docs/japan.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
+      "title": "Store files behind explicit adapters",
+      "slug": "appkit-core/storage",
+      "source": "packages/appkit-core/docs/storage.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
+      "title": "Format US business data",
+      "slug": "appkit-core/us",
+      "source": "packages/appkit-core/docs/us.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
+      "title": "Review AI proposals in React",
+      "slug": "appkit-react/ai",
+      "source": "packages/appkit-react/docs/ai.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-react"
+    },
+    {
+      "title": "Public exports and optional peers",
+      "slug": "appkit-react/exports",
+      "source": "packages/appkit-react/docs/exports.md",
+      "archetype": "reference",
+      "visibility": "public",
+      "package": "@alneas/appkit-react"
+    },
+    {
+      "title": "Appkit React",
+      "slug": "appkit-react/index",
+      "source": "packages/appkit-react/docs/index.md",
+      "archetype": "explanation",
+      "visibility": "public",
+      "package": "@alneas/appkit-react"
+    },
+    {
+      "title": "Save a schema-driven request form",
+      "slug": "appkit-react/request-form",
+      "source": "packages/appkit-react/docs/request-form.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-react"
+    },
+    {
+      "title": "Build schema forms and record tables",
+      "slug": "appkit-react/tools",
+      "source": "packages/appkit-react/docs/tools.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-react"
+    },
+    {
+      "title": "Compose React UI and shared providers",
+      "slug": "appkit-react/ui",
+      "source": "packages/appkit-react/docs/ui.md",
+      "archetype": "how-to",
+      "visibility": "public",
+      "package": "@alneas/appkit-react"
+    }
+  ]
+}
