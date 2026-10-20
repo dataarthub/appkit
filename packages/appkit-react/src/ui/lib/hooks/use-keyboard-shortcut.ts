@@ -1,42 +1,72 @@
 import { useEffect } from 'react';
 
 /**
- * キーボードショートカットの定義
- * Keyboard shortcut configuration
+ * A case-insensitive key match and handler for useKeyboardShortcuts.
+ *
+ * @see useKeyboardShortcuts for registration and cleanup.
  */
 export interface KeyboardShortcut {
-  /** キー名（e.g. 's', 'Enter', 'Escape'） */
+    /**
+     * KeyboardEvent.key value, compared case-insensitively.
+     */
   key: string;
-  /** Ctrl/Cmd キーが必要か（Mac では Cmd も許容） */
+    /**
+     * When true accept Ctrl or Meta; false excludes both; omission ignores this modifier.
+     */
   ctrlKey?: boolean;
-  /** Meta (Cmd) キーが必要か */
+    /**
+     * Require exact Meta state when provided; omission ignores Meta.
+     */
   metaKey?: boolean;
-  /** Shift キーが必要か */
+    /**
+     * Require exact Shift state when provided; omission ignores Shift.
+     */
   shiftKey?: boolean;
-  /** Alt キーが必要か */
+    /**
+     * Require exact Alt state when provided; omission ignores Alt.
+     */
   altKey?: boolean;
-  /** ショートカットが押された時のハンドラ */
+    /**
+     * Callback receiving the original keydown event after a match; only the first matching shortcut runs.
+     *
+     * @param e - Original matched keydown event.
+     *
+     * @returns No value after the handler completes.
+     */
   handler: (e: KeyboardEvent) => void;
-  /** 説明（ヘルプ表示用） */
+    /**
+     * Optional application help text; not read by the hook.
+     */
   description?: string;
-  /** preventDefault を呼ぶか（デフォルト: true） */
+    /**
+     * Prevent the matched event default unless explicitly false; defaults to true.
+     */
   preventDefault?: boolean;
 }
 
 /**
- * キーボードショートカットを登録するフック。
+ * Registers ordered keyboard shortcuts on the browser window.
  *
- * `ctrlKey: true` の場合、Windows/Linux では Ctrl、Mac では Cmd (metaKey) の両方にマッチします。
+ * @param shortcuts - Match definitions; the first matching definition receives the original event.
  *
- * @param shortcuts - ショートカット定義の配列
- * @param enabled - ショートカットの有効/無効（デフォルト: true）
+ * @param enabled - Enable the listener; defaults to true.
+ *
+ * @returns No value; effect cleanup removes the listener on unmount or input changes.
+ *
+ * @remarks Omitted modifiers are ignored. ctrlKey:true accepts Ctrl or Meta on every
+ * platform. Events in inputs, composition and repeats are not filtered. Handlers run
+ * synchronously and their exceptions propagate through the browser event dispatch.
+ * No providers or styles are required; keep the definitions stable to avoid resubscription.
  *
  * @example
  * ```tsx
- * useKeyboardShortcuts([
- *   { key: 's', ctrlKey: true, handler: () => save(), description: '保存' },
- *   { key: 'Escape', handler: () => close(), description: '閉じる' },
- * ]);
+ * import { useMemo } from 'react';
+ * import { useKeyboardShortcuts } from '@alneas/appkit-react/ui/hooks';
+ * export function SaveShortcut({ save }: { save: () => void }) {
+ *   const shortcuts = useMemo(() => [{ key: 's', ctrlKey: true, handler: save }], [save]);
+ *   useKeyboardShortcuts(shortcuts);
+ *   return null;
+ * }
  * ```
  */
 export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled: boolean = true) {

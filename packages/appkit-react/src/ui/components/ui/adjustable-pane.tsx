@@ -4,49 +4,67 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resi
 import { cn } from '../../lib/utils';
 
 /**
- * AdjustablePane のプロパティ
- * Properties for the AdjustablePane component
+ * Controlled pane visibility, percentage size bounds and content for AdjustablePane.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see AdjustablePane
  */
 export type AdjustablePaneProps = {
-  /** ペインの表示位置 / Side to display the pane */
+  /**
+   * Pane placement; defaults to right. bottom selects vertical resizing.
+   */
   side?: 'right' | 'bottom';
-  /** ペインの開閉状態 / Whether the pane is open */
+  /**
+   * Controlled visibility; the host updates this value in response to close/open requests.
+   */
   open: boolean;
-  /** ペインを閉じる時のコールバック / Callback when closing the pane */
+  /**
+   * Called by the close button; the host must set open=false. Omitted hides the close button.
+   * @returns No value; complete the host callback action.
+   */
   onClose?: () => void;
-  /** 初期サイズ（パーセンテージ） / Initial size in percentage */
+  /**
+   * Initial pane share in percent (default 30); later changes reset local size before clamping.
+   */
   initialSize?: number;
-  /** 最小サイズ（パーセンテージ） / Minimum size in percentage */
+  /**
+   * Minimum pane share in percent (default 20). Supply bounds in a consistent 0–100 range; the wrapper does not validate them.
+   */
   minSize?: number;
-  /** 最大サイズ（パーセンテージ） / Maximum size in percentage */
+  /**
+   * Maximum pane share in percent (default 60). Supply a value at least minSize.
+   */
   maxSize?: number;
-  /** コンテナのクラス名 / Container className */
+  /**
+   * Additional classes merged with wrapper styling; see the component for the targeted element.
+   */
   className?: string;
-  /** ペイン内部のクラス名 / Pane content className */
+  /**
+   * Additional classes on the scrollable pane content container.
+   */
   paneClassName?: string;
-  /** ペイン内のコンテンツ / Content rendered inside the pane */
+  /**
+   * Content rendered in the wrapper's child region.
+   */
   children?: React.ReactNode;
-  /** メインエリアのコンテンツ / Content rendered in the main area */
+  /**
+   * Content rendered in the remaining main panel.
+   */
   main?: React.ReactNode;
 };
 
 /**
- * リサイズ可能なサイドペイン / ボトムペインコンポーネント。
- * マウスドラッグでサイズを調整でき、右側または下側に配置可能。
- *
- * A resizable side/bottom pane component with drag-to-resize,
- * close button, and configurable min/max sizes.
- *
+ * Divides a container between main content and a mouse-resizable right or bottom pane.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: side='right', initialSize=30, minSize=20, maxSize=60.
+ * @returns The rendered AdjustablePane composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Give the host a nonzero width and height. open is controlled; onClose requests closure without changing it. Sizes are percentages clamped between minSize/maxSize. Changing initialSize resets local size. Drag listeners attach to window and are removed on mouseup; unmount during a drag does not install separate cleanup. This wrapper implements mouse resizing; it does not add keyboard resizing.
  * @example
  * ```tsx
- * <AdjustablePane
- *   open={isOpen}
- *   onClose={() => setIsOpen(false)}
- *   initialSize={35}
- *   main={<MainContent />}
- * >
- *   <PaneContent />
- * </AdjustablePane>
+ * import { AdjustablePane } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AdjustablePane open side="right" main={<p>Main content</p>}>Details</AdjustablePane>);
+ * }
  * ```
  */
 export function AdjustablePane({

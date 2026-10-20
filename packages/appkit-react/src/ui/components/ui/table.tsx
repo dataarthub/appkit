@@ -3,8 +3,19 @@ import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 /**
- * Table Component
- * テーブルコンポーネント
+ * Wraps a native table in a horizontal overflow container.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered Table composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use valid native table nesting. Table className/props/ref target the table, not its outer overflow div. These wrappers do not sort, paginate or manage selection; data-state=selected affects only row styling. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Table><TableCaption>Documents</TableCaption><TableHeader><TableRow><TableHead scope="col">Title</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Draft</TableCell></TableRow></TableBody><TableFooter><TableRow><TableCell>1 document</TableCell></TableRow></TableFooter></Table>);
+ * }
+ * ```
  */
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
@@ -20,6 +31,21 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
 );
 Table.displayName = 'Table';
 
+/**
+ * Renders the native table header section with row borders.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered TableHeader composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use valid native table nesting. Table className/props/ref target the table, not its outer overflow div. These wrappers do not sort, paginate or manage selection; data-state=selected affects only row styling. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Table><TableCaption>Documents</TableCaption><TableHeader><TableRow><TableHead scope="col">Title</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Draft</TableCell></TableRow></TableBody><TableFooter><TableRow><TableCell>1 document</TableCell></TableRow></TableFooter></Table>);
+ * }
+ * ```
+ */
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -33,6 +59,21 @@ const TableHeader = React.forwardRef<
 ));
 TableHeader.displayName = 'TableHeader';
 
+/**
+ * Renders the native table body section.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered TableBody composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use valid native table nesting. Table className/props/ref target the table, not its outer overflow div. These wrappers do not sort, paginate or manage selection; data-state=selected affects only row styling. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Table><TableCaption>Documents</TableCaption><TableHeader><TableRow><TableHead scope="col">Title</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Draft</TableCell></TableRow></TableBody><TableFooter><TableRow><TableCell>1 document</TableCell></TableRow></TableFooter></Table>);
+ * }
+ * ```
+ */
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -46,6 +87,21 @@ const TableBody = React.forwardRef<
 ));
 TableBody.displayName = 'TableBody';
 
+/**
+ * Renders the native table footer section with muted styling.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered TableFooter composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use valid native table nesting. Table className/props/ref target the table, not its outer overflow div. These wrappers do not sort, paginate or manage selection; data-state=selected affects only row styling. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Table><TableCaption>Documents</TableCaption><TableHeader><TableRow><TableHead scope="col">Title</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Draft</TableCell></TableRow></TableBody><TableFooter><TableRow><TableCell>1 document</TableCell></TableRow></TableFooter></Table>);
+ * }
+ * ```
+ */
 const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -59,6 +115,21 @@ const TableFooter = React.forwardRef<
 ));
 TableFooter.displayName = 'TableFooter';
 
+/**
+ * Renders a native table row with hover and optional selected-state styling.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered TableRow composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use valid native table nesting. Table className/props/ref target the table, not its outer overflow div. These wrappers do not sort, paginate or manage selection; data-state=selected affects only row styling. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Table><TableCaption>Documents</TableCaption><TableHeader><TableRow><TableHead scope="col">Title</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Draft</TableCell></TableRow></TableBody><TableFooter><TableRow><TableCell>1 document</TableCell></TableRow></TableFooter></Table>);
+ * }
+ * ```
+ */
 const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
   ({ className, ...props }, ref) => (
     <tr
@@ -74,6 +145,21 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
 );
 TableRow.displayName = 'TableRow';
 
+/**
+ * Renders a native table heading cell.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered TableHead composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use valid native table nesting. Table className/props/ref target the table, not its outer overflow div. These wrappers do not sort, paginate or manage selection; data-state=selected affects only row styling. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Table><TableCaption>Documents</TableCaption><TableHeader><TableRow><TableHead scope="col">Title</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Draft</TableCell></TableRow></TableBody><TableFooter><TableRow><TableCell>1 document</TableCell></TableRow></TableFooter></Table>);
+ * }
+ * ```
+ */
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
@@ -90,6 +176,21 @@ const TableHead = React.forwardRef<
 ));
 TableHead.displayName = 'TableHead';
 
+/**
+ * Renders a native table data cell.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered TableCell composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use valid native table nesting. Table className/props/ref target the table, not its outer overflow div. These wrappers do not sort, paginate or manage selection; data-state=selected affects only row styling. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Table><TableCaption>Documents</TableCaption><TableHeader><TableRow><TableHead scope="col">Title</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Draft</TableCell></TableRow></TableBody><TableFooter><TableRow><TableCell>1 document</TableCell></TableRow></TableFooter></Table>);
+ * }
+ * ```
+ */
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
@@ -103,6 +204,21 @@ const TableCell = React.forwardRef<
 ));
 TableCell.displayName = 'TableCell';
 
+/**
+ * Renders the native table caption below the table content.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered TableCaption composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use valid native table nesting. Table className/props/ref target the table, not its outer overflow div. These wrappers do not sort, paginate or manage selection; data-state=selected affects only row styling. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Table><TableCaption>Documents</TableCaption><TableHeader><TableRow><TableHead scope="col">Title</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Draft</TableCell></TableRow></TableBody><TableFooter><TableRow><TableCell>1 document</TableCell></TableRow></TableFooter></Table>);
+ * }
+ * ```
+ */
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>

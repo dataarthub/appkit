@@ -23,7 +23,19 @@ import {
 } from './dropdown-menu';
 
 /**
- * メニューバーのルートコンポーネント。
+ * Coordinates popup menu state and focus behavior.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Menubar composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function Menubar({ className, ...props }: MenubarPrimitive.Props) {
   return (
@@ -36,28 +48,76 @@ function Menubar({ className, ...props }: MenubarPrimitive.Props) {
 }
 
 /**
- * メニューバー内の個々のメニューを管理するコンポーネント。
+ * Provides one dropdown-menu root within a menubar.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarMenu composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarMenu({ ...props }: React.ComponentProps<typeof DropdownMenu>) {
   return <DropdownMenu data-slot='menubar-menu' {...props} />;
 }
 
 /**
- * メニュー項目をグループ化するためのコンポーネント。
+ * Groups related menu actions.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarGroup({ ...props }: React.ComponentProps<typeof DropdownMenuGroup>) {
   return <DropdownMenuGroup data-slot='menubar-group' {...props} />;
 }
 
 /**
- * メニューバーのメニュー項目をポータル経由でレンダリングするためのコンポーネント。
+ * Mounts menu descendants in a separate DOM container.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarPortal composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarPortal({ ...props }: React.ComponentProps<typeof DropdownMenuPortal>) {
   return <DropdownMenuPortal data-slot='menubar-portal' {...props} />;
 }
 
 /**
- * メニューバーからメニューを展開するためのトリガーボタン。
+ * Renders the control or context target that opens a menu.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarTrigger({ className, ...props }: React.ComponentProps<typeof DropdownMenuTrigger>) {
   return (
@@ -73,7 +133,19 @@ function MenubarTrigger({ className, ...props }: React.ComponentProps<typeof Dro
 }
 
 /**
- * メニューバーのトリガーによって展開されるコンテンツのコンテナ。
+ * Portals the menu popup through its positioned container.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: align='start', alignOffset=-4, sideOffset=8.
+ * @returns The rendered MenubarContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarContent({
   className,
@@ -98,7 +170,19 @@ function MenubarContent({
 }
 
 /**
- * メニュー内の個々の通常のメニュー項目。
+ * Renders a menu action with optional destructive styling and inset spacing.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='default'.
+ * @returns The rendered MenubarItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarItem({
   className,
@@ -106,7 +190,13 @@ function MenubarItem({
   variant = 'default',
   ...props
 }: React.ComponentProps<typeof DropdownMenuItem> & {
+  /**
+   * Adds left inset spacing when true; omitted/false uses normal alignment.
+   */
   inset?: boolean;
+  /**
+   * Visual treatment from the declared variant union; changing it does not alter host action semantics.
+   */
   variant?: 'default' | 'destructive';
 }) {
   return (
@@ -128,7 +218,19 @@ function MenubarItem({
 }
 
 /**
- * チェックボックスの選択状態を持つメニュー項目。
+ * Renders a checked menu action with a checkmark indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarCheckboxItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarCheckboxItem({
   className,
@@ -157,14 +259,38 @@ function MenubarCheckboxItem({
 }
 
 /**
- * ラジオボタン形式のメニュー項目をグループ化するコンポーネント。
+ * Coordinates mutually exclusive menu choices.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarRadioGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarRadioGroup({ ...props }: React.ComponentProps<typeof DropdownMenuRadioGroup>) {
   return <DropdownMenuRadioGroup data-slot='menubar-radio-group' {...props} />;
 }
 
 /**
- * 単一選択（ラジオ）形式のメニュー項目。
+ * Renders one value in a menu radio group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarRadioItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarRadioItem({ className, children, ...props }: MenuPrimitive.RadioItem.Props) {
   return (
@@ -187,13 +313,31 @@ function MenubarRadioItem({ className, children, ...props }: MenuPrimitive.Radio
 }
 
 /**
- * メニュー内のヘッダーや見出しを定義するラベルコンポーネント。
+ * Renders the accessible label of a menu group with optional inset spacing.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarLabel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarLabel({
   className,
   inset,
   ...props
-}: React.ComponentProps<typeof DropdownMenuLabel> & { inset?: boolean }) {
+}: React.ComponentProps<typeof DropdownMenuLabel> & { /**
+ * Adds left inset spacing when true; omitted/false uses normal alignment.
+ */
+/**
+ * Adds left inset spacing when true; omitted/false uses normal alignment.
+ */
+inset?: boolean }) {
   return (
     <DropdownMenuLabel
       data-slot='menubar-label'
@@ -205,7 +349,19 @@ function MenubarLabel({
 }
 
 /**
- * メニュー項目を区切るためのセパレーター（区切り線）。
+ * Draws a divider between menu sections.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarSeparator({
   className,
@@ -221,7 +377,19 @@ function MenubarSeparator({
 }
 
 /**
- * メニューアイテムの右側に表示されるキーボードショートカット用のコンポーネント。
+ * Styles a shortcut hint without installing keyboard listeners.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarShortcut composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarShortcut({
   className,
@@ -240,20 +408,47 @@ function MenubarShortcut({
 }
 
 /**
- * サブメニュー（入れ子にされたメニュー）を定義するためのコンポーネント。
+ * Coordinates a submenu nested inside a parent menu.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarSub composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarSub({ ...props }: React.ComponentProps<typeof DropdownMenuSub>) {
   return <DropdownMenuSub data-slot='menubar-sub' {...props} />;
 }
 
 /**
- * サブメニューを展開するためのトリガー項目。
+ * Renders a submenu opener with a trailing chevron.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarSubTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarSubTrigger({
   className,
   inset,
   ...props
 }: React.ComponentProps<typeof DropdownMenuSubTrigger> & {
+  /**
+   * Adds left inset spacing when true; omitted/false uses normal alignment.
+   */
   inset?: boolean;
 }) {
   return (
@@ -270,7 +465,19 @@ function MenubarSubTrigger({
 }
 
 /**
- * サブメニューの中に表示されるコンテンツのコンテナ。
+ * Renders a positioned submenu popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MenubarSubContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place each trigger/content pair inside MenubarMenu under Menubar. Menubar uses the Base UI Menubar root and DropdownMenu wrappers for menus; these supply popup context. Items/labels/radio/submenu parts require the corresponding menu/group contexts. Shortcut text does not register handlers; actions belong to the host.
+ * @example
+ * ```tsx
+ * import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Menubar><MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Open</MenubarItem></MenubarContent></MenubarMenu></Menubar>);
+ * }
+ * ```
  */
 function MenubarSubContent({
   className,

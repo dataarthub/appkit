@@ -4,6 +4,21 @@ import { Toggle as TogglePrimitive } from '@base-ui/react/toggle';
 
 import { cn } from '../../lib/utils';
 
+/**
+ * Coordinates a collection of toggle values through Base UI group state.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToggleGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place distinct value-bearing items under ToggleGroup. The wrappers use Base UI ToggleGroup and Toggle directly; group selection behavior follows the upstream props. Unlike Toggle, these wrappers do not apply toggleVariants. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ToggleGroup, ToggleGroupItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ToggleGroup defaultValue={["bold"]} aria-label="Text style"><ToggleGroupItem value="bold" aria-label="Bold">B</ToggleGroupItem><ToggleGroupItem value="italic" aria-label="Italic">I</ToggleGroupItem></ToggleGroup>);
+ * }
+ * ```
+ */
 const ToggleGroup = React.forwardRef<
   HTMLDivElement,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive>
@@ -18,9 +33,27 @@ const ToggleGroup = React.forwardRef<
 ));
 ToggleGroup.displayName = 'ToggleGroup';
 
+/**
+ * Renders a value-bearing toggle inside its surrounding toggle group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToggleGroupItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place distinct value-bearing items under ToggleGroup. The wrappers use Base UI ToggleGroup and Toggle directly; group selection behavior follows the upstream props. Unlike Toggle, these wrappers do not apply toggleVariants. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ToggleGroup, ToggleGroupItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ToggleGroup defaultValue={["bold"]} aria-label="Text style"><ToggleGroupItem value="bold" aria-label="Bold">B</ToggleGroupItem><ToggleGroupItem value="italic" aria-label="Italic">I</ToggleGroupItem></ToggleGroup>);
+ * }
+ * ```
+ */
 const ToggleGroupItem = React.forwardRef<
   HTMLButtonElement,
   React.ComponentPropsWithoutRef<typeof TogglePrimitive> & {
+    /**
+     * Identity for this choice within the surrounding group; provide a distinct stable string.
+     */
     value: string;
   }
 >(({ className, children, ...props }, ref) => {

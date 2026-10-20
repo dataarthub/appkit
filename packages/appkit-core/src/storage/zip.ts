@@ -1,5 +1,23 @@
-/** A bounded, UTF-8 ZIP archive with stored (uncompressed) entries. @internal */
-export function zipStored(files: readonly { key: string; data: Uint8Array }[]): Uint8Array {
+/**
+ * Creates an in-memory ZIP archive using UTF-8 names and uncompressed entries.
+ *
+ * @param files - Entries in archive order; names must be unique relative slash paths without empty or dot segments, backslashes or NUL.
+ * @returns Newly allocated archive bytes; an empty input creates a valid empty ZIP.
+ * @throws Throws for unsafe/duplicate names, over 65535 entries, or sizes/offsets requiring ZIP64.
+ * @remarks All entry data and archive output are held in memory. No compression, filesystem writing or ZIP64 support is provided.
+ * @example
+ * ```typescript
+ * import { zipStored } from "@alneas/appkit-core/storage/zip";
+ *
+ * const archive = zipStored([{ key: "notes/readme.txt", data: new TextEncoder().encode("hello") }]);
+ * console.log(archive.byteLength);
+ * ```
+ */
+export function zipStored(files: readonly {
+  /** Unique relative archive entry name, encoded as UTF-8; traversal and absolute paths are rejected. */
+  key: string;
+  /** Uncompressed bytes copied into the archive for this entry. */
+  data: Uint8Array }[]): Uint8Array {
   if (files.length > 65535) throw new Error('ZIP64 is not supported');
   const chunks: Uint8Array[] = [], central: Uint8Array[] = [];
   const names = new Set<string>();

@@ -36,52 +36,27 @@ import { CalendarOptionsContext } from './calendar-context';
 import { calendarRange } from './calendar-layout';
 
 /**
- * リソースカレンダーコンポーネント
- *
- * 月・週・日・タイムライン・リソース表示に対応した多機能カレンダー。
- *
- * ## Features
- * - 6つのビューモード（month, week, day, timeline, resource, agenda）
- * - リソース別イベント表示
- * - 日付・時間枠の選択（クリック／キーボード）
- * - イベントクリック時の詳細表示
- * - 日本語/英語ローカライズ
- * - カスタムヘッダー/背景色
- *
- * ## AI/Automation Attributes
- * - `data-testid`: Container element
- * - `data-view`: Current view mode
- * - `data-event-count`: Number of events
- *
+ * Renders resource events in month, week, day, timeline, resource or agenda views.
+ * @param props - Event/resource arrays, view settings and interaction callbacks; see {@link ResourceCalendarProps}.
+ * @returns The calendar, navigation controls and optional selected-event dialog.
+ * @remarks Import Appkit CSS. Event data is supplied by the host; callbacks do not persist changes.
+ * resources defaults to an empty array, defaultDate to the mount-time current date and defaultView
+ * to week. view controls the displayed mode when supplied; date navigation remains local state.
+ * onRangeChange reports the visible date range after rendering. Locale comes from Appkit's
+ * Paraglide runtime (Japanese or English); Date values use the runtime's date/time conventions.
+ * The root does not expose data-testid, data-view or data-event-count and does not spread arbitrary attributes.
  * @example
  * ```tsx
  * import { ResourceCalendar } from '@alneas/appkit-react/tools/calendar';
+ * import '@alneas/appkit-react/styles';
  *
- * const events = [
- *   {
- *     id: '1',
- *     title: '会議',
- *     start: new Date('2024-01-15 10:00'),
- *     end: new Date('2024-01-15 11:00'),
- *     resourceId: 'room-a',
- *   },
- * ];
- *
- * const resources = [
- *   { id: 'room-a', title: '会議室A' },
- *   { id: 'room-b', title: '会議室B' },
- * ];
- *
- * <ResourceCalendar
- *   events={events}
- *   resources={resources}
- *   defaultView="week"
- *   onEventClick={(event) => console.log(event)}
- * />
+ * export function RoomCalendar() {
+ *   return <ResourceCalendar defaultDate={new Date(2026, 0, 15)} defaultView="week"
+ *     resources={[{ id: 'room-a', title: 'Room A' }]}
+ *     events={[{ id: 'meeting', title: 'Planning', resourceId: 'room-a',
+ *       start: new Date(2026, 0, 15, 10), end: new Date(2026, 0, 15, 11) }]} />;
+ * }
  * ```
- *
- * @param props - {@link ResourceCalendarProps}
- * @returns リソースカレンダーコンポーネント
  */
 export function ResourceCalendar({
   events,

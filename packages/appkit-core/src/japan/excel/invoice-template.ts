@@ -11,70 +11,123 @@ import type { ExcelCellData, ExcelCellStyle, ExcelWorkbookData } from "../../dat
 
 /**
  * Line item for invoices and quotations.
+ *
+ * @see {@link createInvoiceExcelWorkbook} for a complete invoice workbook model example.
  */
 export interface InvoiceExcelLineItem {
+
   /** Item name / description */
   name: string;
+
   /** Specification / details / description */
   specification?: string;
-  /** Quantity */
+
+  /** Number of units multiplied by unitPrice when amount is absent. */
   quantity: number;
+
   /** Unit (e.g., "式", "個", "人月") */
   unit?: string;
+
   /** Unit price (JPY) */
   unitPrice: number;
+
   /** Amount (JPY) (defaults to quantity * unitPrice when omitted) */
   amount?: number;
-  /** Remarks */
+
+  /** Optional per-line explanatory text placed in the remarks column. */
   remarks?: string;
 }
 
 /**
  * Parameters for generating invoice/quotation Excel workbooks.
+ *
+ * @see {@link createInvoiceExcelWorkbook} for input and renderer-neutral workbook setup.
  */
 export interface InvoiceExcelParams {
+
   /** Document title (e.g., "御 請 求 書", "御 見 積 書") */
   title?: string;
+
   /** Document number (e.g., "INV-2026-0042") */
   documentNo: string;
+
   /** Issue date (e.g., "2026年3月31日") */
   issueDate: string;
+
   /** Payment due date / expiration date (e.g., "2026年4月30日") */
   dueDate?: string;
 
+
   /** Recipient (client information) */
   client: {
+
+    /** Company name displayed in this party block. */
     companyName: string;
+
+    /** Optional recipient department text. */
     department?: string;
+
+    /** Optional recipient contact name. */
     contactPerson?: string;
+
+    /** Optional recipient honorific; omitted uses the standard Japanese organization honorific. */
     honorific?: string; // e.g. "御中", "様" (default: "御中")
   };
 
+
   /** Issuer (own company information) */
   issuer: {
+
+    /** Company name displayed in this party block. */
     companyName: string;
+
+    /** Optional issuer postal-code text. */
     postalCode?: string;
+
+    /** Optional issuer address text. */
     address?: string;
+
+    /** Optional issuer telephone contact text. */
     tel?: string;
+
+    /** Optional issuer email contact text. */
     email?: string;
+
+    /** Optional registration identifier printed verbatim; no registry lookup is performed. */
     registrationNumber?: string; // Qualified invoice issuer registration number (Invoice No. T...)
+
+    /** Optional issuer representative display name. */
     representative?: string;
   };
+
 
   /** Line item list */
   items: InvoiceExcelLineItem[];
 
+
   /** Tax rate (default: 0.10) */
   taxRate?: number;
 
+
   /** Destination bank account information for payment transfers */
   bankInfo?: {
+
+    /** Destination bank display name. */
     bankName: string;
+
+    /** Destination bank branch display name. */
     branchName: string;
+
+    /** Optional account-kind label; omitted uses the Japanese ordinary-deposit label. */
     accountType?: string; // e.g. "普通"
+
+    /** Destination account number printed as text. */
     accountNumber: string;
+
+    /** Destination account holder display name. */
     accountHolder: string;
   };
+
 
   /** Remarks / notes */
   notes?: string[];
@@ -88,18 +141,14 @@ export interface InvoiceExcelParams {
  *
  * @example
  * ```typescript
- * const wbData = createInvoiceExcelWorkbook({
- *   title: '御 請 求 書',
- *   documentNo: 'INV-2026-001',
- *   issueDate: '2026-03-31',
- *   client: { companyName: '株式会社サンプル' },
- *   issuer: { companyName: '自社名', registrationNumber: 'T1234567890123' },
- *   items: [
- *     { name: 'Webサイト開発支援', quantity: 1, unit: '式', unitPrice: 500000 }
- *   ]
- * });
+ * import { createInvoiceExcelWorkbook } from '@alneas/appkit-core/japan/excel/invoice-template';
  *
- * await adapter.download(wbData, 'invoice_INV-2026-001.xlsx');
+ * const workbook = createInvoiceExcelWorkbook({
+ *   documentNo: 'INV-001', issueDate: '2026-10-20',
+ *   client: { companyName: 'Example Client' }, issuer: { companyName: 'Example Studio' },
+ *   items: [{ name: 'Design', quantity: 2, unitPrice: 1000 }],
+ * });
+ * console.log(workbook); // Data model; the host chooses an XLSX exporter.
  * ```
  */
 export function createInvoiceExcelWorkbook(params: InvoiceExcelParams): ExcelWorkbookData {

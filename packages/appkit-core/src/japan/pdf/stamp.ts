@@ -1,39 +1,39 @@
 /**
- * @fileoverview Stamp seal (imprint) utility for PDFs.
- *
- * This module provides functionality to generate a Data URL for a fallback stamp seal
- * (circular seal + text) when no saved stamp image is available.
- * Returns a PNG if Canvas is available in the runtime environment, or an SVG otherwise.
- */
-
-/**
  * Name ordering rule during name parsing.
  *
  * - `auto`: Automatically infer based on character script and delimiters
  * - `family-first`: Family name first (uses the first token as the family name)
  * - `given-first`: Given name first (uses the last token as the family name)
+ *
+ * @see {@link createFallbackSealDataUrl} for a complete seal-generation example.
  */
 export type SealNameOrder = 'auto' | 'family-first' | 'given-first';
 
 /**
  * Options for determining the stamp label (text on the seal face).
+ *
+ * @see {@link createFallbackSealDataUrl} for a complete seal-generation example.
  */
 export interface SealLabelOptions {
+
   /**
    * Explicit text to use on the seal face.
    * When specified, takes precedence over name parsing.
    */
   sealLabel?: string;
+
   /**
    * Explicit family name.
    * Used when `sealLabel` is not specified.
    */
   familyName?: string;
+
   /**
    * Ordering rule when inferring family name from `fullName`.
    * Defaults to `auto`.
    */
   nameOrder?: SealNameOrder;
+
   /**
    * Maximum character count for the seal face text.
    * Defaults to `3`.
@@ -43,52 +43,60 @@ export interface SealLabelOptions {
 
 /**
  * Options for generating fallback seal SVG or Data URL.
+ *
+ * @see {@link createFallbackSealDataUrl} for a complete seal-generation example.
  */
 export interface FallbackSealOptions extends SealLabelOptions {
+
   /**
    * Overall dimension (square).
    * Applied when `width` / `height` are not specified.
    * Defaults to `256`.
    */
   size?: number;
-  /**
-   * SVG width.
-   */
+
+  /** SVG width. */
   width?: number;
-  /**
-   * SVG height.
-   */
+
+  /** SVG height. */
   height?: number;
+
   /**
    * Circle stroke color.
    * Defaults to `#c62828`.
    */
   circleColor?: string;
+
   /**
    * Text color.
    * Defaults to `#c62828`.
    */
   textColor?: string;
+
   /**
    * Circle stroke width.
    * Defaults to `8`.
    */
   strokeWidth?: number;
+
   /**
    * Font family for text.
    * Defaults to `sans-serif`.
    */
   fontFamily?: string;
+
   /**
    * Font weight for text.
    * Defaults to `700`.
    */
   fontWeight?: string | number;
+
   /**
    * Background color to use.
    * Transparent when omitted.
    */
   backgroundColor?: string;
+
   /**
    * Output image format.
    *
@@ -232,14 +240,16 @@ function clampSealLabel(value: string, maxChars: number): string {
  * - Otherwise: use first token
  *
  * @param fullName Full name (optional)
- * @param options Label resolution options
+ * @param options Label resolution options; defaults to {}.
  * @returns Stamp label (`""` if empty)
  *
+ * @remarks Omitted options default to {}; label parsing uses auto name order and up to three characters. PNG output requires a usable DOM Canvas and returns null when unavailable or generation fails.
+ *
  * @example
- * ```ts
- * resolveSealLabel("山田 太郎") // => "山田"
- * resolveSealLabel("John Smith") // => "Smith"
- * resolveSealLabel("TANAKA", { maxChars: 2 }) // => "TA"
+ * ```typescript
+ * import { resolveSealLabel } from '@alneas/appkit-core/japan/pdf/stamp';
+ *
+ * console.log(resolveSealLabel('山田 太郎', { familyName: '山田' }));
  * ```
  */
 export function resolveSealLabel(fullName?: string, options: SealLabelOptions = {}): string {
@@ -286,12 +296,16 @@ export function resolveSealLabel(fullName?: string, options: SealLabelOptions = 
  * Output is a simple red circular seal with vertically stacked characters.
  *
  * @param fullName Full name (optional)
- * @param options Generation options
+ * @param options Generation options; defaults to {}.
  * @returns SVG string, or `null` if the seal face label cannot be resolved
  *
+ * @remarks Omitted options default to {}; label parsing uses auto name order and up to three characters. PNG output requires a usable DOM Canvas and returns null when unavailable or generation fails.
+ *
  * @example
- * ```ts
- * const svg = createFallbackSealSvg("山田 太郎");
+ * ```typescript
+ * import { createFallbackSealSvg } from '@alneas/appkit-core/japan/pdf/stamp';
+ *
+ * console.log(createFallbackSealSvg('山田 太郎', { familyName: '山田' }));
  * ```
  */
 export function createFallbackSealSvg(
@@ -362,8 +376,17 @@ export function createFallbackSealSvg(
  * Returns `null` in environments where the Canvas API is unavailable.
  *
  * @param fullName Full name (optional)
- * @param options Generation options
+ * @param options Generation options; defaults to {}.
  * @returns PNG Data URL, or `null` if generation fails
+ *
+ * @remarks Omitted options default to {}; label parsing uses auto name order and up to three characters. PNG output requires a usable DOM Canvas and returns null when unavailable or generation fails.
+ *
+ * @example
+ * ```typescript
+ * import { createFallbackSealPngDataUrl } from '@alneas/appkit-core/japan/pdf/stamp';
+ *
+ * console.log(createFallbackSealPngDataUrl('山田 太郎', { familyName: '山田' }));
+ * ```
  */
 export function createFallbackSealPngDataUrl(
   fullName?: string,
@@ -445,12 +468,16 @@ export function createFallbackSealPngDataUrl(
  * - `svg`: SVG only
  *
  * @param fullName Full name (optional)
- * @param options Generation options
+ * @param options Generation options; defaults to {}.
  * @returns Data URL, or `null` if the seal face label cannot be resolved
  *
+ * @remarks Omitted options default to {}; label parsing uses auto name order and up to three characters. PNG output requires a usable DOM Canvas and returns null when unavailable or generation fails.
+ *
  * @example
- * ```ts
- * const dataUrl = createFallbackSealDataUrl("John Smith", { nameOrder: "given-first" });
+ * ```typescript
+ * import { createFallbackSealDataUrl } from '@alneas/appkit-core/japan/pdf/stamp';
+ *
+ * console.log(createFallbackSealDataUrl('山田 太郎', { familyName: '山田' }));
  * ```
  */
 export function createFallbackSealDataUrl(

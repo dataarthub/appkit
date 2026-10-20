@@ -12,33 +12,139 @@ import {
   type ReviewDecisions,
 } from "@alneas/appkit-core/ai";
 
-/** Multi-record review. Each item must have a unique validated immutable proposal. */
+/**
+ * Host inputs for reviewing unique immutable proposals across multiple records.
+ *
+ * @typeParam TRecord - Record shape; defaults to a string-keyed record.
+ *
+ * @see useProposalBatchReview for usage.
+ */
 export interface UseProposalBatchReviewOptions<TRecord extends Record<string, any> = Record<string, any>> {
   /** Change for a new review session, including an intentional replay of the same proposals. */
   batchId: string;
+  /**
+   * Validated proposals and latest records/versions; proposal IDs must be unique.
+   */
   items: readonly ProposalBatchItem<TRecord>[];
+  /**
+   * Optional synchronous validator passed to Core batch preparation; thrown errors become invalid_candidate issues.
+   */
   validateCandidate?: ProposalBatchValidator<TRecord>;
-  /** Called sequentially. Resolve only when this row is applied; reject to stop the batch. */
+    /**
+     * Sequential host callback receiving one prepared payload and cooperative abort/progress context.
+     *
+     * @param payload - Validated candidate and decisions for one proposal.
+     *
+     * @param context - Abort signal and fractional-progress reporting for this row.
+     *
+     * @returns No value after the host confirms application; reject to stop later rows.
+     */
   onApply?: (payload: ApplyProposalPayload<TRecord>, context: ExecutionContext) => void | Promise<void>;
 }
 
-/** Headless controller shared by batch lists and custom application layouts. */
+/**
+ * Batch selection/decision state and explicit execution controls.
+ *
+ * @typeParam TRecord - Shared record shape; defaults to a string-keyed record.
+ *
+ * @see useProposalBatchReview for usage.
+ */
 export interface UseProposalBatchReviewReturn<TRecord extends Record<string, any> = Record<string, any>> {
+  /**
+   * Current selected proposal IDs; applied IDs are excluded from preparation.
+   */
   selectedIds: ReadonlySet<string>;
+  /**
+   * Host-confirmed successes in this review session.
+   */
   appliedIds: ReadonlySet<string>;
+  /**
+   * Per-proposal field decisions; absent choices remain pending.
+   */
   decisions: ReadonlyMap<string, ReviewDecisions<TRecord>>;
+  /**
+   * Core batch preflight result for current selection and latest input props.
+   */
   preparation: PreparedProposalBatch<TRecord>;
+  /**
+   * Whether a handler exists, preparation passes and state is not submitting.
+   */
   canApply: boolean;
+  /**
+   * Whether the displayed batch is currently running.
+   */
   isSubmitting: boolean;
+  /**
+   * Current row being applied, or null outside active row work.
+   */
   activeProposalId: string | null;
+  /**
+   * Generic current-session batch failure message, or null; raw host exceptions are not exposed.
+   */
   error: string | null;
+  /**
+   * Read-only execution history for this batch session.
+   */
   history: readonly ExecutionRecord[];
+  /**
+   * Select or deselect an editable known proposal.
+   *
+   * @param id - Proposal identifier.
+   *
+   * @param selected - Desired selection state.
+   *
+   * @returns No value; unknown/applied/busy proposals are ignored.
+   */
   setSelected(id: string, selected: boolean): void;
+  /**
+   * Change selection for the current items when idle.
+   *
+   * @param selected - True selects all current IDs; false retains only applied IDs in the selection set.
+   *
+   * @returns No value; calls while execution is busy are ignored.
+   */
   selectAll(selected: boolean): void;
+  /**
+   * Change one existing proposed field while editable.
+   *
+   * @param id - Proposal identifier.
+   *
+   * @param field - Field present in that proposal.
+   *
+   * @param decision - Pending, accepted or rejected choice.
+   *
+   * @returns No value; invalid IDs/fields and busy/applied proposals are ignored.
+   */
   setDecision(id: string, field: FieldKey<TRecord>, decision: FieldDecision): void;
+  /**
+   * Change every proposed field choice for one editable proposal.
+   *
+   * @param id - Proposal identifier.
+   *
+   * @param decision - Choice applied to all its changes.
+   *
+   * @returns No value; unknown/applied/busy proposals are ignored.
+   */
   decideAll(id: string, decision: FieldDecision): void;
+  /**
+   * Preflight the selection, then apply rows sequentially with latest-record rechecks.
+   *
+   * @returns True only for current-session complete success; false when blocked, failed, cancelled or superseded.
+   *
+   * @remarks Confirmed successes are retained and skipped on retry; unconfirmed backend effects may still exist.
+   */
   apply(): Promise<boolean>;
+  /**
+   * Request cooperative cancellation of current execution.
+   *
+   * @returns No value; does not roll back previously applied rows or force host work to stop.
+   */
   cancel(): void;
+  /**
+   * Clear settled execution history using the session policy.
+   *
+   * @returns No value; does not clear review choices or confirmed applied IDs.
+   */
   clearHistory(): void;
 }
 
@@ -67,10 +173,30 @@ function initial<TRecord extends Record<string, any>>(key: string): ReviewState<
 }
 
 /**
- * Reviews multiple records without implicit field acceptance. Preflights the entire
- * selection, then rechecks each latest committed record immediately before applying it.
- * Stops on first failure or cancellation; confirmed successes are never retried within
- * this session.
+ * Reviews a batch with explicit field decisions and sequential host application.
+ *
+ * @typeParam TRecord - Record shape; defaults to a string-keyed record.
+ *
+ * @param options - Batch identity, unique immutable proposals/latest records, validation and optional host apply callback.
+ *
+ * @returns Selection/decision controls, preflight state, bounded execution history and cooperative cancellation.
+ *
+ * @remarks Requires React; no context/styles. Changing batchId or serialized proposal
+ * content starts a new session; unmount/session changes request cancellation. Each row
+ * is rechecked against latest committed host inputs before apply. Stops at the first
+ * failure/cancellation; successes remain excluded from retries. Cancellation cannot
+ * undo host effects, so persist idempotently and enforce concurrency/authorization in
+ * the backend. A row that changed the backend before rejecting has an uncertain outcome.
+ *
+ * @example
+ * ```tsx
+ * import { useProposalBatchReview, type UseProposalBatchReviewOptions } from '@alneas/appkit-react/ai/proposal';
+ * type RecordData = { title: string };
+ * export function Batch({ options }: { options: UseProposalBatchReviewOptions<RecordData> }) {
+ *   const review = useProposalBatchReview(options);
+ *   return <button disabled={!review.canApply} onClick={() => { void review.apply(); }}>Apply selected records</button>;
+ * }
+ * ```
  */
 export function useProposalBatchReview<TRecord extends Record<string, any> = Record<string, any>>(
   options: UseProposalBatchReviewOptions<TRecord>

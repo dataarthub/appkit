@@ -15,17 +15,59 @@ import {
 } from '../../components/ui/input-group';
 
 // Re-export or alias Root
+/**
+ * Coordinates searchable selection using the Base UI Combobox root.
+ * @typeParam Value - Selection value represented by an item and emitted by selection callbacks; inferred from the root props.
+ * @typeParam Multiple - Whether selection uses an array; extends boolean | undefined and defaults to false.
+ * @typeParam Item - Root collection item shape, defaulting to Value; may differ when explicit item-to-value conversion is configured.
+ * @param props - Inherited primitive configuration, children and controlled/default state; the upstream prop type remains authoritative.
+ * @returns The rendered Combobox composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
+ */
 const Combobox = ComboboxPrimitive.Root;
 
 /**
- * コントロール内に現在選択されている値を表示するコンポーネント。
+ * Renders the current combobox selection using its root context.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxValue composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
   return <ComboboxPrimitive.Value data-slot='combobox-value' {...props} />;
 }
 
 /**
- * コボボックスのドロップダウンメニューを展開するためのトリガーボタン。
+ * Renders the control that toggles the combobox popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxTrigger({ className, children, ...props }: ComboboxPrimitive.Trigger.Props) {
   return (
@@ -56,7 +98,19 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
 }
 
 /**
- * ユーザーが検索クエリを入力するためのテキスト入力フィールド。
+ * Combines a search input with optional trigger and clear controls.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: disabled=false, showTrigger=true, showClear=false.
+ * @returns The rendered ComboboxInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option. className targets the outer InputGroup; children are appended inside that group. disabled defaults to false.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxInput({
   className,
@@ -66,7 +120,13 @@ function ComboboxInput({
   showClear = false,
   ...props
 }: ComboboxPrimitive.Input.Props & {
+  /**
+   * Includes the popup toggle beside the combobox input; defaults to true.
+   */
   showTrigger?: boolean;
+  /**
+   * Includes the clear-selection control beside the combobox input; defaults to false.
+   */
   showClear?: boolean;
 }) {
   return (
@@ -91,7 +151,19 @@ function ComboboxInput({
 }
 
 /**
- * コボボックスのドロップダウンポップアップを表示するコンテナ。
+ * Portals and positions the combobox popup relative to its input or explicit anchor.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: side='bottom', sideOffset=6, align='start', alignOffset=0.
+ * @returns The rendered ComboboxContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxContent({
   className,
@@ -131,7 +203,19 @@ function ComboboxContent({
 }
 
 /**
- * 選択肢のリストを表示するためのコンテナコンポーネント。
+ * Renders the scrollable collection of combobox results.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxList composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
   return (
@@ -147,7 +231,19 @@ function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
 }
 
 /**
- * リスト内の個々の選択肢アイテム。
+ * Renders one selectable result with a built-in selected indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxItem({ className, children, ...props }: ComboboxPrimitive.Item.Props) {
   return (
@@ -172,7 +268,19 @@ function ComboboxItem({ className, children, ...props }: ComboboxPrimitive.Item.
 }
 
 /**
- * 複数の選択肢アイテムを関連するグループにまとめるためのコンポーネント。
+ * Groups related combobox results.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxGroup({ className, ...props }: ComboboxPrimitive.Group.Props) {
   return (
@@ -181,7 +289,19 @@ function ComboboxGroup({ className, ...props }: ComboboxPrimitive.Group.Props) {
 }
 
 /**
- * グループのヘッダーやタイトルを表示するラベル。
+ * Labels the surrounding combobox result group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxLabel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxLabel({ className, ...props }: ComboboxPrimitive.GroupLabel.Props) {
   return (
@@ -194,14 +314,38 @@ function ComboboxLabel({ className, ...props }: ComboboxPrimitive.GroupLabel.Pro
 }
 
 /**
- * 動的なアイテムのコレクションを表示するためのヘルパーコンポーネント。
+ * Renders results from the root collection using Base UI collection semantics.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxCollection composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxCollection({ ...props }: ComboboxPrimitive.Collection.Props) {
   return <ComboboxPrimitive.Collection data-slot='combobox-collection' {...props} />;
 }
 
 /**
- * 検索結果が空の時に表示されるメッセージコンポーネント。
+ * Displays an empty-results message in the combobox popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxEmpty composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxEmpty({ className, ...props }: ComboboxPrimitive.Empty.Props) {
   return (
@@ -217,7 +361,19 @@ function ComboboxEmpty({ className, ...props }: ComboboxPrimitive.Empty.Props) {
 }
 
 /**
- * グループやアイテム同士を区切るためのセパレーター（区切り線）。
+ * Draws a separator between result groups.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxSeparator({ className, ...props }: ComboboxPrimitive.Separator.Props) {
   return (
@@ -230,7 +386,19 @@ function ComboboxSeparator({ className, ...props }: ComboboxPrimitive.Separator.
 }
 
 /**
- * 複数選択時に選択された値をチップス（タグ）として表示するコンテナ。
+ * Lays out the selected chips for a multiple-selection combobox.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxChips composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxChips({
   className,
@@ -249,7 +417,19 @@ function ComboboxChips({
 }
 
 /**
- * 選択された値を表す個々のチップ（タグ）コンポーネント。
+ * Renders one selected value with an optional remove control.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: showRemove=true.
+ * @returns The rendered ComboboxChip composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxChip({
   className,
@@ -257,6 +437,9 @@ function ComboboxChip({
   showRemove = true,
   ...props
 }: ComboboxPrimitive.Chip.Props & {
+  /**
+   * Includes a remove button in a selected chip; defaults to true.
+   */
   showRemove?: boolean;
 }) {
   return (
@@ -283,7 +466,19 @@ function ComboboxChip({
 }
 
 /**
- * チップスモード用のテキスト入力フィールド。
+ * Renders the search input within a multiple-selection chip container.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ComboboxChipsInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All interactive parts require Combobox context. Base UI owns generic value inference, selection and collection filtering; the wrapper does not fetch results. Input showTrigger defaults to true and showClear to false; Chip showRemove defaults to true. Content accepts an anchor for chip-based layouts; chips require the root multiple option.
+ * @example
+ * ```tsx
+ * import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Combobox items={["Apple", "Pear"]}><ComboboxInput aria-label="Fruit" /><ComboboxContent><ComboboxEmpty>No results</ComboboxEmpty><ComboboxList>{(item: string) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}</ComboboxList></ComboboxContent></Combobox>);
+ * }
+ * ```
  */
 function ComboboxChipsInput({ className, ...props }: ComboboxPrimitive.Input.Props) {
   return (

@@ -1,7 +1,19 @@
 import { cn } from '../../lib/utils';
 
 /**
- * キーボードショートカットのキー（例: Ctrl, Enter）を表示するためのコンポーネント。
+ * Displays the name of a keyboard key without registering a shortcut.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered Kbd composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These components only render hints; the host owns keyboard event handling. KbdGroup is typed with div props but renders kbd, so avoid relying on div-specific ref or DOM behavior.
+ * @example
+ * ```tsx
+ * import { Kbd, KbdGroup } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<KbdGroup><Kbd>Ctrl</Kbd><span>+</span><Kbd>K</Kbd></KbdGroup>);
+ * }
+ * ```
  */
 function Kbd({ className, ...props }: React.ComponentProps<'kbd'>) {
   return (
@@ -17,7 +29,19 @@ function Kbd({ className, ...props }: React.ComponentProps<'kbd'>) {
 }
 
 /**
- * 複数のショートカットキーの組み合わせを表示するグループコンポーネント。
+ * Arranges multiple visual keycaps inside a kbd element.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered KbdGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These components only render hints; the host owns keyboard event handling. KbdGroup is typed with div props but renders kbd, so avoid relying on div-specific ref or DOM behavior.
+ * @example
+ * ```tsx
+ * import { Kbd, KbdGroup } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<KbdGroup><Kbd>Ctrl</Kbd><span>+</span><Kbd>K</Kbd></KbdGroup>);
+ * }
+ * ```
  */
 function KbdGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (

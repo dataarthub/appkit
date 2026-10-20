@@ -7,13 +7,38 @@ import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 /**
- * Select Component
- * セレクトコンポーネント
+ * Coordinates a Base UI single or multiple selection popup.
+ * @typeParam Value - Option value shape inferred from root props and selection callbacks.
+ * @typeParam Multiple - Whether selection uses an array; extends boolean | undefined and defaults to false.
+ * @param props - Inherited primitive configuration, children and controlled/default state; the upstream prop type remains authoritative.
+ * @returns The rendered Select composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 const Select = SelectPrimitive.Root;
 
 /**
- * 選択肢をグループ化するためのコンポーネント。
+ * Groups related select options.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SelectGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
@@ -26,13 +51,31 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
 }
 
 /**
- * トリガー内に現在選択されている値やプレースホルダーを表示するコンポーネント。
+ * Displays the current selection or an upstream placeholder inside a trigger.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SelectValue composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 function SelectValue({
   className,
   children,
   ...props
-}: SelectPrimitive.Value.Props & { placeholder?: string }) {
+}: SelectPrimitive.Value.Props & { /**
+ * Text displayed while no value is selected/entered; omitted means no placeholder.
+ */
+/**
+ * Text displayed while no value is selected/entered; omitted means no placeholder.
+ */
+placeholder?: string }) {
   return (
     <SelectPrimitive.Value
       data-slot='select-value'
@@ -44,11 +87,37 @@ function SelectValue({
   );
 }
 
+/**
+ * Base UI trigger props with Appkit sizing and test selector.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SelectTrigger
+ */
 interface SelectTriggerProps extends SelectPrimitive.Trigger.Props {
+  /**
+   * Visual size preset; defaults to default unless the owning component states otherwise.
+   */
   size?: 'sm' | 'default';
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
+/**
+ * Renders the select opener with a trailing chevron and optional test ID.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: size='default'.
+ * @returns The rendered SelectTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
+ */
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   SelectTriggerProps
@@ -75,7 +144,19 @@ const SelectTrigger = React.forwardRef<
 SelectTrigger.displayName = 'SelectTrigger';
 
 /**
- * 選択肢のリストを格納するドロップダウンポップアップコンテナ。
+ * Portals the positioned option popup with a list and scroll controls.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: side='bottom', sideOffset=4, align='center', alignOffset=0, alignItemWithTrigger=true.
+ * @returns The rendered SelectContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 function SelectContent({
   className,
@@ -119,7 +200,19 @@ function SelectContent({
 }
 
 /**
- * グループのタイトルや見出しを表すラベルコンポーネント。
+ * Provides the label for a select option group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SelectLabel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 function SelectLabel({ className, ...props }: SelectPrimitive.GroupLabel.Props) {
   return (
@@ -131,12 +224,32 @@ function SelectLabel({ className, ...props }: SelectPrimitive.GroupLabel.Props) 
   );
 }
 
+/**
+ * Base UI option props with a stable selector for the option element.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SelectItem
+ */
 interface SelectItemProps extends SelectPrimitive.Item.Props {
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
 /**
- * ドロップダウンリスト内の個々の選択肢アイテム。
+ * Renders an option with selected-state checkmark and optional test ID.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SelectItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 function SelectItem({ className, children, testId, ...props }: SelectItemProps) {
   return (
@@ -164,7 +277,19 @@ function SelectItem({ className, children, testId, ...props }: SelectItemProps) 
 }
 
 /**
- * アイテムやグループを区切るためのセパレーター（区切り線）。
+ * Draws a noninteractive divider between option groups.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SelectSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 function SelectSeparator({ className, ...props }: SelectPrimitive.Separator.Props) {
   return (
@@ -177,7 +302,19 @@ function SelectSeparator({ className, ...props }: SelectPrimitive.Separator.Prop
 }
 
 /**
- * リストが長い場合に、上方向にスクロールするためのインジケーターボタン。
+ * Renders the upstream upward-scroll control with an up chevron.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SelectScrollUpButton composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.  children are replaced by the fixed scroll chevron.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 function SelectScrollUpButton({
   className,
@@ -200,7 +337,19 @@ function SelectScrollUpButton({
 }
 
 /**
- * リストが長い場合に、下方向にスクロールするためのインジケーターボタン。
+ * Renders the upstream downward-scroll control with a down chevron.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SelectScrollDownButton composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback.  children are replaced by the fixed scroll chevron.
+ * @example
+ * ```tsx
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
+ * ```
  */
 function SelectScrollDownButton({
   className,
@@ -221,59 +370,78 @@ function SelectScrollDownButton({
 }
 
 /**
- * セレクトボックスの選択肢を表すインターフェースです。
+ * Display content, string value and disabled state for a SelectInput option.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SelectInput
  */
 export interface SelectOption {
-  /** 表示されるラベルテキストまたは要素 */
+  /**
+   * Visible React content for this option.
+   */
   label: React.ReactNode;
-  /** 選択時に使用される値 */
+  /**
+   * Unique string identity passed to selection callbacks.
+   */
   value: string;
-  /** 選択肢を無効化するかどうか */
+  /**
+   * Prevents option selection when true; omitted means enabled.
+   */
   disabled?: boolean;
 }
 
 /**
- * SelectInputコンポーネントのプロパティです。
+ * Base UI root props with option data and trigger presentation/accessibility settings.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SelectInput
  */
 export interface SelectInputProps extends React.ComponentProps<typeof SelectPrimitive.Root> {
-  /** Accessible name applied to the interactive trigger. */
+  /**
+   * Accessible name applied to the interactive trigger.
+   */
   'aria-label'?: string;
-  /** ID of the label for the interactive trigger. */
+  /**
+   * Space-separated element IDs that label the interactive trigger.
+   */
   'aria-labelledby'?: string;
-  /** 選択肢の配列 */
+  /**
+   * Options in popup order; labels are also resolved for controlled values.
+   */
   options: SelectOption[];
-  /** 未選択時に表示されるプレースホルダーテキスト */
+  /**
+   * Text displayed while no value is selected/entered; omitted means no placeholder.
+   */
   placeholder?: string;
-  /** 追加のCSSクラス名 */
+  /**
+   * Additional classes on the interactive SelectTrigger.
+   */
   className?: string;
-  /** テスト用のID */
+  /**
+   * data-testid on the SelectTrigger; no per-option IDs are synthesized.
+   */
   testId?: string;
-  /** コンポーネントのサイズ */
+  /**
+   * Trigger size; defaults to default.
+   */
   size?: 'default' | 'sm';
-  /** 左側に表示するカスタムアイコン要素 */
+  /**
+   * Optional content before SelectValue inside the trigger.
+   */
   icon?: React.ReactNode;
 }
 
 /**
- * シンプルで使いやすいセレクトボックスラッパーコンポーネントです。
- *
- * 内部で `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectItem` などの
- * 複雑な構造を隠蔽し、`options` を渡すだけで完結するように設計されています。
- * 単一の検索機能を持たないシンプルなドロップダウンが必要な場合に最適です。
- *
- * `React.forwardRef` に対応しているため、`react-hook-form` の `Controller` と直接組み合わせて使用できます。
- *
+ * Builds a complete select from an options array and forwards its ref to the trigger.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: size='default'.
+ * @returns The rendered SelectInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compound parts require Select context; GroupLabel belongs in a Group. Content supplies portal, positioner, List and scroll arrows. SelectInput className/testId/size and accessible labels target the trigger; remaining root props target Select. size defaults to default. If both value and defaultValue are absent, SelectInput passes controlled null; use defaultValue for upstream uncontrolled state. Controlled values are matched to option labels by String(value), with string/number fallback. The ref prop forwards to the rendered control or container declared by the component ref type.
  * @example
  * ```tsx
- * <SelectInput
- *     value={sortBy}
- *     onValueChange={setSortBy}
- *     options={[
- *         { label: "日付順", value: "date" },
- *         { label: "名前順", value: "name" }
- *     ]}
- *     placeholder="並び替え..."
- * />
+ * import { SelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<SelectInput aria-label="Sort order" defaultValue="date" options={[{ value: "date", label: "Date" }, { value: "name", label: "Name" }]} placeholder="Choose order" />);
+ * }
  * ```
  */
 const SelectInput = React.forwardRef<

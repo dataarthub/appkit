@@ -2,7 +2,22 @@ import { AIChatError } from '../errors/index';
 import type { AIChatAdapter, AIChatEvent, AIChatHTTPOptions, AIChatRequest, AIChatMessage, AIChatPart } from './types';
 import { finishReason, httpConfiguration, jsonObject, jsonValue, object, readAIEvents, snapshotRequest } from './stream';
 
-/** Maps common history to AI SDK UIMessage wire data, preserving tool results. @internal */
+/**
+ * Maps common history to AI SDK UIMessage wire data, preserving tool results.
+ *
+ * @internal
+ *
+ * @param messages - Provider-neutral history with matching assistant tool calls for every tool result.
+ * @returns New AI SDK UIMessage-style wire objects; standalone tool results are folded into their original assistant calls.
+ * @throws Throws invalid tool-role parts, unmatched tool results or duplicate results for one call.
+ *
+ * @example
+ * ```typescript
+ * import { toSDKMessages } from '@alneas/appkit-core/ai/ai-chat/ai-sdk';
+ *
+ * console.log(toSDKMessages([{ id: 'message-1', role: 'user', parts: [{ type: 'text', text: 'hello' }] }]));
+ * ```
+ */
 export function toSDKMessages(messages: readonly AIChatMessage[]) {
   // Accept the same standalone tool-result history as Chat Completions. Fold it
   // into its original assistant call without mutating application-owned history.
@@ -30,10 +45,40 @@ export function toSDKMessages(messages: readonly AIChatMessage[]) {
         parts.push({ type: 'dynamic-tool', toolCallId: part.callId, toolName: part.name, input: part.input, state: result ? result.isError ? 'output-error' : 'output-available' : 'input-available', ...(result ? result.isError ? { errorText: 'Tool execution failed' } : { output: result.output } : {}) });
       } else if (!message.parts.some(value => value.type === 'tool-call' && value.callId === part.callId)) throw new AIChatError('AI_INVALID_TOOL_CALL', 'Tool result requires its original call');
     }
-    return { id: message.id, role: message.role, parts, ...(message.metadata !== undefined ? { metadata: message.metadata } : {}) };
+    return {
+      /** Nonempty identifier used to correlate this object with its owning application/session. */
+      id: message.id,
+      /** Conversation role; tool-role messages may contain only tool-result parts. */
+      role: message.role,
+      /** Ordered AI SDK wire parts for this message. */
+      parts, ...(message.metadata !== undefined ? {
+        /** Optional application-owned metadata; disclosure decisions belong to the host. */
+        metadata: message.metadata } : {}) };
   });
 }
-/** Parses the AI SDK UI Message Stream protocol without importing an SDK. @internal */
+/**
+ * Parses the AI SDK UI Message Stream protocol without importing an SDK.
+ *
+ * @internal
+ *
+ * @param response - Successful host Response with an available unread SSE body.
+ * @param max - Maximum decoded UTF-16 character count across the response; caller supplies a positive bound.
+ * @param signal - Optional signal checked around each read; abort cancels the body reader.
+ * @returns An async generator of normalized chat events, ending with an explicit finish event.
+ * @throws Iteration rejects malformed events, configured size excess, reader/abort failures or EOF without an explicit finish.
+ * @remarks The reader is cancelled and released on completion/early return. These parsers do not execute tools or provide transport retries.
+ *
+ * @example
+ * ```typescript
+ * import { parseAISDKEvents } from '@alneas/appkit-core/ai/ai-chat/ai-sdk';
+ *
+ * export async function consume(response: Response, signal?: AbortSignal) {
+ *   for await (const event of parseAISDKEvents(response, 1000000, signal)) {
+ *     console.log(event);
+ *   }
+ * }
+ * ```
+ */
 export async function* parseAISDKEvents(response: Response, max: number, signal?: AbortSignal): AsyncGenerator<AIChatEvent> {
   let finished: Extract<AIChatEvent, { type: 'finish' }> | undefined;
   const tools = new Map<string, string>();
@@ -63,12 +108,23 @@ export async function* parseAISDKEvents(response: Response, max: number, signal?
 }
 
 /**
- * HTTP adapter for an application endpoint serving AI SDK UI Message Streams.
- * Posts UIMessage history, submit-message trigger and optional explicit tools/parameters.
- * The endpoint owns its SDK model/provider and consumes those extra fields if supported.
- * No provider SDK dependency, tool execution or automatic retry is introduced. Text,
- * structured data parts, tool calls/results, metadata and explicit finish are normalized.
- * This is the UI stream protocol adapter, not a streamText/model SDK instance adapter.
+ * Creates an HTTP transport for a host endpoint serving AI SDK UI Message Streams.
+ *
+ * @internal
+ *
+ * @param options - Real host endpoint, headers, optional fetch implementation and decoded-character limit.
+ * @returns A frozen adapter; network I/O starts only when its stream is iterated.
+ * @throws Throws missing endpoint or invalid response-character limits during construction.
+ *
+ * @example
+ * ```typescript
+ * import { createAISDKChatAdapter, type AIChatHTTPOptions } from '@alneas/appkit-core/ai/ai-chat';
+ *
+ * // Use a host-controlled proxy/configuration; do not embed privileged server credentials in browsers.
+ * export function createAdapter(options: AIChatHTTPOptions) {
+ *   return createAISDKChatAdapter(options);
+ * }
+ * ```
  */
 export function createAISDKChatAdapter(options: AIChatHTTPOptions): AIChatAdapter {
   const http = httpConfiguration(options);

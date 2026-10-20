@@ -16,17 +16,23 @@ const widthToSpan: Record<FieldWidth, string> = {
   full: 'col-span-full',
 };
 
+/**
+ * Supported maximum column counts for {@link FormGrid}; smaller screens use fewer columns.
+ */
 export type GridColumns = 1 | 2 | 3;
 
+/**
+ * Grid layout options and native div attributes for {@link FormGrid}.
+ */
 export interface FormGridProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
-   * グリッドの列数
-   * @default 2
+   * Maximum columns: 1 always; 2 from md; 3 from lg (two from md).
+   * @defaultValue 2
    */
   columns?: GridColumns;
   /**
-   * グリッド間のギャップサイズ
-   * @default "md"
+   * Responsive gap preset: sm uses gap-3, md uses gap-4/md:gap-6, lg uses gap-6/md:gap-8.
+   * @defaultValue "md"
    */
   gap?: 'sm' | 'md' | 'lg';
 }
@@ -44,21 +50,24 @@ const columnClasses = {
 };
 
 /**
- * レスポンシブなフォームグリッドコンテナ
- *
- * モバイルでは1列、タブレット/デスクトップでは複数列のレイアウトを提供します。
- * フィールド幅ヒントに基づいて適切なスパンを適用します。
- *
+ * Renders a responsive form layout with configurable column and gap presets.
+ * @param props - Grid settings and native div attributes, including children; see {@link FormGridProps}.
+ * @returns A div containing the supplied children; fields and labels are owned by the caller.
+ * @remarks The ref prop forwards to the rendered div. Import Appkit CSS. Pair controls with explicit labels; Input and Textarea do not accept a label prop.
  * @example
  * ```tsx
- * <FormGrid columns={2} gap="md">
- *   <FormGridItem width="short">
- *     <Input label="郵便番号" />
- *   </FormGridItem>
- *   <FormGridItem width="full">
- *     <Textarea label="備考" />
- *   </FormGridItem>
- * </FormGrid>
+ * import { FormGrid, FormGridItem } from '@alneas/appkit-react/tools/form';
+ * import { Input, Textarea } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function AddressFields() {
+ *   return <FormGrid columns={2} gap="md">
+ *     <FormGridItem width="short"><label htmlFor="postal-code">Postal code</label>
+ *       <Input id="postal-code" /></FormGridItem>
+ *     <FormGridItem width="full"><label htmlFor="notes">Notes</label>
+ *       <Textarea id="notes" /></FormGridItem>
+ *   </FormGrid>;
+ * }
  * ```
  */
 export const FormGrid = React.forwardRef<HTMLDivElement, FormGridProps>(
@@ -76,18 +85,31 @@ export const FormGrid = React.forwardRef<HTMLDivElement, FormGridProps>(
 );
 FormGrid.displayName = 'FormGrid';
 
+/**
+ * Width hints and native div attributes for {@link FormGridItem}.
+ */
 export interface FormGridItemProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
-   * フィールドの幅ヒント
-   * @default "medium"
+   * Span hint: short/medium use one column, long spans two from md, full spans all columns.
+   * @defaultValue "medium"
    */
   width?: FieldWidth;
 }
 
 /**
- * FormGrid内の個別アイテム
- *
- * フィールドの幅に応じて適切なグリッドスパンを適用します。
+ * Applies a field-width span hint to one child of {@link FormGrid}.
+ * @param props - Width (default medium), children and native div attributes; see {@link FormGridItemProps}.
+ * @returns A div with responsive span classes wrapping the supplied children.
+ * @remarks The ref prop forwards to the rendered div. Import Appkit CSS. A long item can create implicit columns in a one-column grid at md;
+ * choose width hints consistent with the parent grid. See the FormGrid example for labeled controls.
+ * @example
+ * ```tsx
+ * import { FormGrid, FormGridItem } from '@alneas/appkit-react/tools/form';
+ * import '@alneas/appkit-react/styles';
+ * export function FullWidthContent() {
+ *   return <FormGrid><FormGridItem width="full">Additional details</FormGridItem></FormGrid>;
+ * }
+ * ```
  */
 export const FormGridItem = React.forwardRef<HTMLDivElement, FormGridItemProps>(
   ({ className, width = 'medium', children, ...props }, ref) => {

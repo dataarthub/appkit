@@ -3,11 +3,40 @@ import type { AIChatAdapter, AIChatEvent, AIChatHTTPOptions, AIChatRequest, AICh
 import { parseAISDKEvents } from './ai-sdk';
 import { finishReason, httpConfiguration, jsonObject, object, readAIEvents, snapshotRequest } from './stream';
 
-/** OpenAI-compatible Chat Completions settings; select the endpoint/model explicitly. */
+/**
+ * OpenAI-compatible Chat Completions settings; select the endpoint/model explicitly.
+ *
+ * @see {@link streamAIChat} for canonical public-import usage and setup.
+ */
 export interface OpenAICompatibleChatOptions extends AIChatHTTPOptions {
+
+  /** Nonblank model identifier selected by the host for the configured endpoint. */
   readonly model: string;
-  /** Explicit application file upload integration. Images are sent directly as image_url. */
-  readonly uploadFile?: (file: Extract<AIChatPart, { type: 'file' }>, signal?: AbortSignal) => Promise<{ id: string; type: string }>;
+
+  /**
+   * Explicit application file upload integration. Images are sent directly as image_url.
+   *
+   * @param file - Non-image file part selected for explicit upload before the chat request.
+   * @param signal - Optional request cancellation signal that the host upload integration must honor.
+   * @returns Remote file identifier/type, resolved before the file reference is sent; errors abort the chat request.
+   *
+   * @example
+   * ```typescript
+   * import type { OpenAICompatibleChatOptions } from '@alneas/appkit-core/ai/ai-chat';
+   *
+   * export function withUpload(uploadFile: NonNullable<OpenAICompatibleChatOptions['uploadFile']>) {
+   *   return uploadFile; // Supply the host actual file integration, including cleanup policy.
+   * }
+   * ```
+   */
+  readonly uploadFile?: (file: Extract<AIChatPart, {
+    /** Discriminant selecting the file variant. */
+    type: 'file' }>, signal?: AbortSignal) => Promise<{
+    /** Nonempty remote file identifier returned by the upload integration. */
+    id: string;
+    /** Discriminant selecting the named component/record variant. */
+    type: string }>;
+
   /** Preserve legacy endpoints that answer with AI SDK UI Message Streams. Default false. */
   readonly acceptAISDKStream?: boolean;
 }
@@ -20,6 +49,20 @@ export interface OpenAICompatibleChatOptions extends AIChatHTTPOptions {
  * model/schema support remains explicit through parameters; capabilities are transport-level.
  *
  * @see https://developers.openai.com/api/docs/guides/function-calling
+ *
+ * @param options - Real host endpoint/model, optional headers/fetch/file-upload integration and stream limit.
+ * @returns A frozen Chat Completions transport; creating it sends no request.
+ * @throws Throws missing endpoint/model or invalid response limits; stream iteration propagates HTTP/stream/tool/upload errors.
+ *
+ * @example
+ * ```typescript
+ * import { createOpenAICompatibleChatAdapter, type OpenAICompatibleChatOptions } from '@alneas/appkit-core/ai/ai-chat';
+ *
+ * // Use a host-controlled proxy/configuration; do not embed privileged server credentials in browsers.
+ * export function createAdapter(options: OpenAICompatibleChatOptions) {
+ *   return createOpenAICompatibleChatAdapter(options);
+ * }
+ * ```
  */
 export function createOpenAICompatibleChatAdapter(options: OpenAICompatibleChatOptions): AIChatAdapter {
   const http = httpConfiguration(options); const { model, uploadFile, acceptAISDKStream = false } = options;
@@ -79,7 +122,22 @@ export function createOpenAICompatibleChatAdapter(options: OpenAICompatibleChatO
   });
 }
 
-/** Explicit multipart upload adapter for the legacy chat file endpoint. Accepts base64 data URLs only. */
+/**
+ * Explicit multipart upload adapter for the legacy chat file endpoint. Accepts base64 data URLs only.
+ *
+ * @param options - Host file-upload endpoint, headers and optional fetch implementation; maxResponseChars is not used by uploads.
+ * @returns A callback accepting a base64 data-URL file part and optional signal; POSTs multipart form data and resolves the server file ID/type.
+ * @remarks The callback rejects invalid/non-base64 input, aborts, HTTP failures or responses missing an ID. It does not upload remote URLs, delete remote files or enforce an upload-size limit.
+ *
+ * @example
+ * ```typescript
+ * import { createAIFileUpload, type AIChatHTTPOptions } from '@alneas/appkit-core/ai/ai-chat';
+ *
+ * export function createUploader(options: AIChatHTTPOptions) {
+ *   return createAIFileUpload(options); // The host invokes this with an actual selected file.
+ * }
+ * ```
+ */
 export function createAIFileUpload(options: AIChatHTTPOptions): NonNullable<OpenAICompatibleChatOptions['uploadFile']> {
   const { api, fetch: fetcher } = options; const headers = { ...options.headers };
   return async (file, signal) => {

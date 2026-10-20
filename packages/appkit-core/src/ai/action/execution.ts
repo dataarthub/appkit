@@ -1,39 +1,199 @@
-/** Finite progress values; message is explicitly supplied public UI text, never raw input. */
+/**
+ * Finite progress values; message is explicitly supplied public UI text, never raw input.
+ *
+ * @see {@link createExecutionSession} for canonical public-import usage and setup.
+ */
 export interface ExecutionProgress {
+
+  /** Finite nonnegative completed-work units; invalid progress reports are ignored. */
   readonly completed: number;
+
+  /** Optional finite total work units, at least completed; omission leaves total unknown. */
   readonly total?: number;
+
+  /** Optional public progress text, at most 500 characters; do not include raw secrets or inputs. */
   readonly message?: string;
 }
-/** Cooperative execution context. Cancellation does not roll back completed effects. */
+/**
+ * Cooperative execution context. Cancellation does not roll back completed effects.
+ *
+ * @see {@link createExecutionSession} for canonical public-import usage and setup.
+ */
 export interface ExecutionContext {
+
+  /** Abort signal for cooperative cancellation; cancellation does not roll back completed side effects. */
   readonly signal: AbortSignal;
+
+  /**
+   * Publishes a validated progress snapshot while this operation remains active.
+   *
+   * @param progress - Finite completed/optional total units and bounded public text; invalid reports are ignored.
+   * @returns No value; publishes valid progress only while this execution is active.
+   *
+   * @example
+   * ```typescript
+   * import type { ExecutionContext } from '@alneas/appkit-core/ai/action';
+   *
+   * export function report(context: ExecutionContext) {
+   *   context.reportProgress({ completed: 1, total: 2 });
+   * }
+   * ```
+   */
   readonly reportProgress: (progress: ExecutionProgress) => void;
 }
-/** Summary-only, in-memory history. Payloads, outputs and raw exceptions are not retained. */
+/**
+ * Summary-only, in-memory history. Payloads, outputs and raw exceptions are not retained.
+ *
+ * @see {@link createExecutionSession} for canonical public-import usage and setup.
+ */
 export interface ExecutionRecord {
+
+  /** Monotonically increasing in-memory execution ID, never reused within this session. */
   readonly id: number;
+
+  /** Nonblank execution label, at most 200 characters, stored in transient history. */
   readonly label: string;
+
+  /** Execution lifecycle state; cancellation can remain pending until the handler settles. */
   readonly status: 'running' | 'cancelling' | 'succeeded' | 'failed' | 'cancelled';
+
+  /** Execution start timestamp in milliseconds since the Unix epoch. */
   readonly startedAt: number;
+
+  /** Optional completion timestamp in milliseconds since the Unix epoch. */
   readonly finishedAt?: number;
+
+  /** Whether cancellation was requested, even if the handler ultimately succeeded. */
   readonly cancelRequested: boolean;
+
+  /** Most recently accepted progress snapshot; absent before the first valid report. */
   readonly progress?: ExecutionProgress;
 }
-/** Raw values/errors are returned only to the initiating application, never stored in history. */
-export type ExecutionOutcome<T> = { readonly status: 'succeeded'; readonly value: T }
-  | { readonly status: 'failed'; readonly error: unknown }
-  | { readonly status: 'cancelled' };
-/** Single-flight execution with bounded immutable snapshots for external-store subscriptions. */
+/**
+ * Raw values/errors are returned only to the initiating application, never stored in history.
+ *
+ * @typeParam T - Operation result or context value type; unknown where a default is provided.
+ * @see {@link createExecutionSession} for canonical public-import usage and setup.
+ */
+export type ExecutionOutcome<T> = {
+  /** Execution lifecycle state; cancellation can remain pending until the handler settles. */
+  readonly status: 'succeeded';
+  /** Operation/context value returned to the initiating application. */
+  readonly value: T }
+  | {
+  /** Execution lifecycle state; cancellation can remain pending until the handler settles. */
+  readonly status: 'failed';
+  /** Original thrown or rejected value, returned unchanged to the initiating host; inspect and sanitize before display. */
+  readonly error: unknown }
+  | {
+  /** Execution lifecycle state; cancellation can remain pending until the handler settles. */
+  readonly status: 'cancelled' };
+/**
+ * Single-flight execution with bounded immutable snapshots for external-store subscriptions.
+ *
+ * @see {@link createExecutionSession} for canonical public-import usage and setup.
+ */
 export interface ExecutionSession {
+
+  /**
+   * Reads the current stable immutable execution-history snapshot.
+   *
+   * @returns The same frozen array until the session state changes; initially empty.
+   *
+   * @example
+   * ```typescript
+   * import type { ExecutionSession } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(session: ExecutionSession) {
+   *   return session.getSnapshot();
+   * }
+   * ```
+   */
   getSnapshot(): readonly ExecutionRecord[];
+
+  /**
+   * Subscribes to execution-history changes.
+   *
+   * @param listener - Zero-argument synchronous notification callback; return value is ignored and observer errors are caught.
+   * @returns An unsubscribe callback; call it when the observer is disposed.
+   *
+   * @example
+   * ```typescript
+   * import type { ExecutionSession } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(session: ExecutionSession) {
+   *   return session.subscribe(() => console.log(session.getSnapshot()));
+   * }
+   * ```
+   */
   subscribe(listener: () => void): () => void;
-  /** Throws if another operation is still running, or the session is closed. */
+
+  /**
+   * Runs one operation while retaining the single-flight lock until it settles.
+   *
+   * @typeParam T - Value returned or resolved by the supplied work callback.
+   * @param label - Nonblank public label of at most 200 characters.
+   * @param work - Called once with signal/progress context; returns T or a promise of T. Throw/rejection becomes a failed/cancelled outcome.
+   * @returns The operation outcome; cancellation followed by successful work still produces succeeded.
+   * @throws Rejects a closed/busy session, invalid label or missing work callback.
+   *
+   * @example
+   * ```typescript
+   * import type { ExecutionSession } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(session: ExecutionSession) {
+   *   return session.run('Sum values', () => 1 + 2);
+   * }
+   * ```
+   */
   run<T>(label: string, work: (context: ExecutionContext) => T | Promise<T>): Promise<ExecutionOutcome<T>>;
-  /** Requests abortion without releasing the lock until work actually settles. */
+
+  /**
+   * Requests cooperative cancellation of the active operation.
+   *
+   * @returns No value; marks an active operation cancelling and aborts its signal. It does not release the lock or roll back effects.
+   *
+   * @example
+   * ```typescript
+   * import type { ExecutionSession } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(session: ExecutionSession) {
+   *   return session.cancel();
+   * }
+   * ```
+   */
   cancel(): void;
-  /** Clears completed history while retaining an active record. IDs are never reused. */
+
+  /**
+   * Clears completed history while retaining an active execution record.
+   *
+   * @returns No value; publishes the filtered history snapshot without reusing IDs.
+   *
+   * @example
+   * ```typescript
+   * import type { ExecutionSession } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(session: ExecutionSession) {
+   *   return session.clearHistory();
+   * }
+   * ```
+   */
   clearHistory(): void;
-  /** Prevents new work and requests cancellation of existing work. */
+
+  /**
+   * Prevents new work and requests cancellation of active work.
+   *
+   * @returns No value; future run calls reject, while active work retains the lock until settlement.
+   *
+   * @example
+   * ```typescript
+   * import type { ExecutionSession } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(session: ExecutionSession) {
+   *   return session.close();
+   * }
+   * ```
+   */
   close(): void;
 }
 
@@ -49,19 +209,30 @@ export interface ExecutionSession {
  * It is transient UI state, not an audit log or durable deduplication. Applications must
  * handle server authorization, idempotency and uncertain commit outcomes themselves.
  *
+ * @param options - Optional historyLimit configuration; defaults to {} and historyLimit 50.
+ * @returns A single-flight in-memory session; the host must close it when no longer needed.
+ * @throws Throws when historyLimit is not an integer from 1 to 1000.
+ *
  * @example
- * ```ts
- * import { createExecutionSession } from "./";
+ * ```typescript
+ * import { createExecutionSession } from '@alneas/appkit-core/ai/action';
+ *
  * const session = createExecutionSession();
- * const result = await session.run('Import', async ({ signal, reportProgress }) => {
- *   reportProgress({ completed: 0, total: 1 });
- *   const response = await fetch('/import', { method: 'POST', signal });
- *   if (!response.ok) throw new Error('Import failed');
- *   reportProgress({ completed: 1, total: 1 });
- * });
+ * try {
+ *   const outcome = await session.run('Sum values', ({ signal, reportProgress }) => {
+ *     signal.throwIfAborted();
+ *     reportProgress({ completed: 1, total: 1, message: 'Calculated locally' });
+ *     return [1, 2, 3].reduce((sum, value) => sum + value, 0);
+ *   });
+ *   console.log(outcome, session.getSnapshot());
+ * } finally {
+ *   session.close();
+ * }
  * ```
  */
-export function createExecutionSession(options: { readonly historyLimit?: number } = {}): ExecutionSession {
+export function createExecutionSession(options: {
+  /** Maximum in-memory history records retained, integer 1–1000; defaults to 50. */
+  readonly historyLimit?: number } = {}): ExecutionSession {
   const limit = options.historyLimit ?? 50;
   if (!Number.isInteger(limit) || limit < 1 || limit > 1000) throw new Error('historyLimit must be between 1 and 1000');
   let records: readonly ExecutionRecord[] = Object.freeze([]);

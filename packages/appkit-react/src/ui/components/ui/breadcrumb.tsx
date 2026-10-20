@@ -6,7 +6,19 @@ import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 /**
- * パンくずリスト全体のナビゲーションコンテナ。
+ * Renders a breadcrumb navigation landmark labeled breadcrumb by default.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Breadcrumb composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns destinations and any overflow menu. Link uses Base UI render composition; custom render elements must accept merged anchor props. Separator and Ellipsis are hidden from assistive technology.
+ * @example
+ * ```tsx
+ * import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>Project</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>);
+ * }
+ * ```
  */
 function Breadcrumb({ className, ...props }: React.ComponentProps<'nav'>) {
   return (
@@ -15,7 +27,19 @@ function Breadcrumb({ className, ...props }: React.ComponentProps<'nav'>) {
 }
 
 /**
- * パンくずリスト項目を並べるためのリストコンテナ。
+ * Renders an ordered list of breadcrumb levels.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered BreadcrumbList composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns destinations and any overflow menu. Link uses Base UI render composition; custom render elements must accept merged anchor props. Separator and Ellipsis are hidden from assistive technology.
+ * @example
+ * ```tsx
+ * import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>Project</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>);
+ * }
+ * ```
  */
 function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
   return (
@@ -31,7 +55,19 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
 }
 
 /**
- * 各階層を構成するパンくずリストの項目（リスト要素）。
+ * Renders one list item in a breadcrumb trail.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered BreadcrumbItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns destinations and any overflow menu. Link uses Base UI render composition; custom render elements must accept merged anchor props. Separator and Ellipsis are hidden from assistive technology.
+ * @example
+ * ```tsx
+ * import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>Project</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>);
+ * }
+ * ```
  */
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
   return (
@@ -44,7 +80,19 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
 }
 
 /**
- * 遷移可能な上位階層へのリンクコンポーネント。
+ * Renders a breadcrumb anchor or a caller-supplied useRender element.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered BreadcrumbLink composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns destinations and any overflow menu. Link uses Base UI render composition; custom render elements must accept merged anchor props. Separator and Ellipsis are hidden from assistive technology.
+ * @example
+ * ```tsx
+ * import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>Project</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>);
+ * }
+ * ```
  */
 function BreadcrumbLink({ className, render, ...props }: useRender.ComponentProps<'a'>) {
   return useRender({
@@ -63,7 +111,19 @@ function BreadcrumbLink({ className, render, ...props }: useRender.ComponentProp
 }
 
 /**
- * 現在のページを表すテキストコンポーネント（非リンクの最終階層）。
+ * Marks the current breadcrumb as an aria-current page link without navigation.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered BreadcrumbPage composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns destinations and any overflow menu. Link uses Base UI render composition; custom render elements must accept merged anchor props. Separator and Ellipsis are hidden from assistive technology.
+ * @example
+ * ```tsx
+ * import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>Project</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>);
+ * }
+ * ```
  */
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   return (
@@ -79,7 +139,19 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
 }
 
 /**
- * 項目間を区切るためのセパレーター（通常は右矢印などのアイコン）。
+ * Renders a presentation-only separator, defaulting to a right chevron.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered BreadcrumbSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns destinations and any overflow menu. Link uses Base UI render composition; custom render elements must accept merged anchor props. Separator and Ellipsis are hidden from assistive technology.
+ * @example
+ * ```tsx
+ * import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>Project</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>);
+ * }
+ * ```
  */
 function BreadcrumbSeparator({ children, className, ...props }: React.ComponentProps<'li'>) {
   return (
@@ -96,7 +168,19 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
 }
 
 /**
- * 長いパンくずリストの一部を省略して三点リーダーなどで表示するためのコンポーネント。
+ * Renders a presentation-only overflow marker without expanding hidden items.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered BreadcrumbEllipsis composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns destinations and any overflow menu. Link uses Base UI render composition; custom render elements must accept merged anchor props. Separator and Ellipsis are hidden from assistive technology.  children are replaced by the overflow icon and hidden More text.
+ * @example
+ * ```tsx
+ * import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>Project</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>);
+ * }
+ * ```
  */
 function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
   return (

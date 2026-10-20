@@ -5,21 +5,57 @@ import { PreviewCard as PreviewCardPrimitive } from '@base-ui/react/preview-card
 import { cn } from '../../lib/utils';
 
 /**
- * マウスホバーで詳細情報を表示するホバーカードのルートコンポーネント。
+ * Coordinates a preview card shown for its trigger.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered HoverCard composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Trigger and Content require HoverCard context. Content supplies its portal and positioner; Base UI PreviewCard owns timing, open state and interaction behavior.
+ * @example
+ * ```tsx
+ * import { HoverCard, HoverCardTrigger, HoverCardContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<HoverCard><HoverCardTrigger href="/profile">Profile</HoverCardTrigger><HoverCardContent>Profile details</HoverCardContent></HoverCard>);
+ * }
+ * ```
  */
 function HoverCard({ ...props }: PreviewCardPrimitive.Root.Props) {
   return <PreviewCardPrimitive.Root data-slot='hover-card' {...props} />;
 }
 
 /**
- * ホバーカードを表示するためのトリガー要素（ホバー対象）。
+ * Renders the interactive target associated with a preview card.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered HoverCardTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Trigger and Content require HoverCard context. Content supplies its portal and positioner; Base UI PreviewCard owns timing, open state and interaction behavior.
+ * @example
+ * ```tsx
+ * import { HoverCard, HoverCardTrigger, HoverCardContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<HoverCard><HoverCardTrigger href="/profile">Profile</HoverCardTrigger><HoverCardContent>Profile details</HoverCardContent></HoverCard>);
+ * }
+ * ```
  */
 function HoverCardTrigger({ ...props }: PreviewCardPrimitive.Trigger.Props) {
   return <PreviewCardPrimitive.Trigger data-slot='hover-card-trigger' {...props} />;
 }
 
 /**
- * ホバー時に表示される詳細情報のコンテンツコンテナ。
+ * Portals and positions the preview popup relative to its trigger.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: side='bottom', sideOffset=4, align='center', alignOffset=4.
+ * @returns The rendered HoverCardContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Trigger and Content require HoverCard context. Content supplies its portal and positioner; Base UI PreviewCard owns timing, open state and interaction behavior.
+ * @example
+ * ```tsx
+ * import { HoverCard, HoverCardTrigger, HoverCardContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<HoverCard><HoverCardTrigger href="/profile">Profile</HoverCardTrigger><HoverCardContent>Profile details</HoverCardContent></HoverCard>);
+ * }
+ * ```
  */
 function HoverCardContent({
   className,

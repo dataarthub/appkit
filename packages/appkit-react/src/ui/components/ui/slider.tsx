@@ -6,15 +6,21 @@ import { Slider as SliderPrimitive } from '@base-ui/react/slider';
 import { cn } from '../../lib/utils';
 
 /**
- * スライダーコンポーネント
- *
- * 値を範囲から選択するスライダー。
- *
+ * Renders a Base UI slider with one thumb per scalar or array value.
+ * @param props - Base UI root props; min/max default to 0/100. Use defaultValue for
+ * uncontrolled input, or value with onValueChange for controlled input. className is
+ * applied to the control and aria-label/aria-labelledby are forwarded to every thumb.
+ * @returns The slider root, styled track, indicator and thumb elements.
+ * @remarks Requires React, @base-ui/react and @alneas/appkit-react/styles; no Appkit
+ * context provider is required. The ref prop forwards to the root div. With no value/defaultValue, one thumb starts at min.
+ * Range arrays determine thumb count; provide accessible labels for the intended control.
  * @example
  * ```tsx
- * import { Slider } from "../..";
- *
- * <Slider value={[50]} max={100} step={1} />
+ * import '@alneas/appkit-react/styles';
+ * import { Slider } from '@alneas/appkit-react/ui';
+ * export function VolumeControl() {
+ *   return <Slider aria-label="Volume" defaultValue={[50]} max={100} step={1} />;
+ * }
  * ```
  */
 const Slider = React.forwardRef<HTMLDivElement, SliderPrimitive.Root.Props>(

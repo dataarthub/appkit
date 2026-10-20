@@ -40,6 +40,21 @@ function isStrictEqual(a: unknown, b: unknown): boolean {
  * @param proposal Change proposal
  * @param decisions Per-field decision map
  * @returns Newly constructed candidate record
+ *
+ * @example
+ * ```typescript
+ * import { buildCandidateRecord, type RecordProposal } from '@alneas/appkit-core/ai/proposal';
+ *
+ * type Row = { name: string };
+ * const proposal: RecordProposal<Row> = {
+ *   id: 'proposal-1', targetId: 'row-1', baseVersion: 1,
+ *   changes: [{ field: 'name', before: 'Old', after: 'New' }],
+ *   createdAt: '2026-10-20T00:00:00Z',
+ * };
+ * const current = { name: 'Old' };
+ * const decisions = { name: 'accepted' } as const;
+ * console.log(buildCandidateRecord(current, proposal, decisions));
+ * ```
  */
 export function buildCandidateRecord<
   TRecord extends Record<string, any> = Record<string, any>,
@@ -72,6 +87,21 @@ export function buildCandidateRecord<
  * @param proposal Change proposal
  * @param decisions Per-field decision map
  * @returns Consistency check result
+ *
+ * @example
+ * ```typescript
+ * import { verifyCurrentState, type RecordProposal } from '@alneas/appkit-core/ai/proposal';
+ *
+ * type Row = { name: string };
+ * const proposal: RecordProposal<Row> = {
+ *   id: 'proposal-1', targetId: 'row-1', baseVersion: 1,
+ *   changes: [{ field: 'name', before: 'Old', after: 'New' }],
+ *   createdAt: '2026-10-20T00:00:00Z',
+ * };
+ * const current = { name: 'Old' };
+ * const decisions = { name: 'accepted' } as const;
+ * console.log(verifyCurrentState(current, 1, proposal, decisions));
+ * ```
  */
 export function verifyCurrentState<
   TRecord extends Record<string, any> = Record<string, any>,
@@ -132,6 +162,21 @@ export function verifyCurrentState<
  * @param proposal Proposal
  * @param decisions Review decision map
  * @returns Review status
+ *
+ * @example
+ * ```typescript
+ * import { computeReviewStatus, type RecordProposal } from '@alneas/appkit-core/ai/proposal';
+ *
+ * type Row = { name: string };
+ * const proposal: RecordProposal<Row> = {
+ *   id: 'proposal-1', targetId: 'row-1', baseVersion: 1,
+ *   changes: [{ field: 'name', before: 'Old', after: 'New' }],
+ *   createdAt: '2026-10-20T00:00:00Z',
+ * };
+ * const current = { name: 'Old' };
+ * const decisions = { name: 'accepted' } as const;
+ * console.log(computeReviewStatus(proposal, decisions));
+ * ```
  */
 export function computeReviewStatus<
   TRecord extends Record<string, any> = Record<string, any>,
@@ -171,13 +216,38 @@ export function computeReviewStatus<
  * @template TRecord Record type
  * @param params Evaluation parameters
  * @returns true if applicable
+ *
+ * @remarks candidateValidation is optional; absence skips whole-record validation. This evaluates supplied consistency data and does not re-read or write storage.
+ *
+ * @example
+ * ```typescript
+ * import { canApplyProposal, type RecordProposal } from '@alneas/appkit-core/ai/proposal';
+ *
+ * type Row = { name: string };
+ * const proposal: RecordProposal<Row> = {
+ *   id: 'proposal-1', targetId: 'row-1', baseVersion: 1,
+ *   changes: [{ field: 'name', before: 'Old', after: 'New' }],
+ *   createdAt: '2026-10-20T00:00:00Z',
+ * };
+ * const current = { name: 'Old' };
+ * const decisions = { name: 'accepted' } as const;
+ * console.log(canApplyProposal({ proposal, decisions, consistency: { ok: true } }));
+ * ```
  */
 export function canApplyProposal<
   TRecord extends Record<string, any> = Record<string, any>,
 >(params: {
+
+  /** Previously validated immutable field-change proposal to review. */
   readonly proposal: RecordProposal<TRecord>;
+
+  /** Per-field accepted/rejected/pending choices; missing decisions are pending. */
   readonly decisions: ReviewDecisions<TRecord>;
+
+  /** Previously computed version/before-value consistency result; this helper does not refresh storage. */
   readonly consistency: ConsistencyCheckResult<TRecord>;
+
+  /** Optional whole-candidate validation result; invalid blocks application, omission skips this check. */
   readonly candidateValidation?: CandidateValidationResult;
 }): boolean {
   const { proposal, decisions, consistency, candidateValidation } = params;
@@ -206,12 +276,35 @@ export function canApplyProposal<
  * @template TRecord Record type
  * @param params Build parameters
  * @returns Apply payload
+ *
+ * @remarks This composes a shallow frozen candidate and frozen accepted-field/change arrays only; it does not verify consistency, validate eligibility or persist anything.
+ *
+ * @example
+ * ```typescript
+ * import { buildApplyPayload, type RecordProposal } from '@alneas/appkit-core/ai/proposal';
+ *
+ * type Row = { name: string };
+ * const proposal: RecordProposal<Row> = {
+ *   id: 'proposal-1', targetId: 'row-1', baseVersion: 1,
+ *   changes: [{ field: 'name', before: 'Old', after: 'New' }],
+ *   createdAt: '2026-10-20T00:00:00Z',
+ * };
+ * const current = { name: 'Old' };
+ * const decisions = { name: 'accepted' } as const;
+ * console.log(buildApplyPayload({ proposal, decisions, candidateRecord: { name: "New" } }));
+ * ```
  */
 export function buildApplyPayload<
   TRecord extends Record<string, any> = Record<string, any>,
 >(params: {
+
+  /** Previously validated immutable field-change proposal to review. */
   readonly proposal: RecordProposal<TRecord>;
+
+  /** Shallow copy of the source with accepted field changes applied; host owns persistence. */
   readonly candidateRecord: TRecord;
+
+  /** Per-field accepted/rejected/pending choices; missing decisions are pending. */
   readonly decisions: ReviewDecisions<TRecord>;
 }): ApplyProposalPayload<TRecord> {
   const { proposal, candidateRecord, decisions } = params;

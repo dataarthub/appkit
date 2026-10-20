@@ -5,20 +5,31 @@ import { CheckIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 /**
- * Checkbox component props
- * チェックボックスコンポーネントのプロップス
+ * Base UI checkbox-root props plus an optional stable test selector.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see Checkbox
  */
 export interface CheckboxProps extends CheckboxPrimitive.Root.Props {
   /**
-   * AI/E2E Test用の安定ID / Stable test identifier for AI and E2E tests
-   * @example testId="agree-terms" → data-testid="agree-terms"
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
    */
   testId?: string;
 }
 
 /**
- * Checkbox Component
- * チェックボックスコンポーネント
+ * Renders a checkable Base UI control with a built-in checkmark indicator and optional test ID.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Checkbox composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use a visible associated label or aria-label. testId maps to data-testid; remaining Base UI Root props are forwarded. Selection state is controlled by checked/onCheckedChange or upstream defaultChecked behavior. The ref prop forwards to the rendered control or container declared by the component ref type.  children are replaced by the built-in indicator/checkmark.
+ * @example
+ * ```tsx
+ * import { Checkbox } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Checkbox defaultChecked testId="agree" aria-label="Agree to terms" />);
+ * }
+ * ```
  */
 const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
   ({ className, testId, ...props }, ref) => (

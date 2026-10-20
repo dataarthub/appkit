@@ -1,23 +1,37 @@
 /**
- * Utilities for consuming line-delimited agent event output.
+ * JSONL completion event shape inspected for agent_message text.
  *
- * The parser is deliberately tolerant of non-JSON lines and returns the
- * original output when no completed agent message can be recovered.
+ * @see {@link extractAgentMessageText} for canonical public-import usage and setup.
  */
 
 export interface AgentMessageEvent {
+
+  /** Discriminant selecting the item.completed variant. */
   readonly type: 'item.completed';
+
+  /** Optional completed event payload; only agent_message items with string text are extracted. */
   readonly item?: {
+
+    /** Discriminant selecting the named component/record variant. */
     readonly type?: string;
+
+    /** Text payload preserved without interpreting it as executable code. */
     readonly text?: unknown;
   };
 }
 
 /**
- * Extracts completed agent-message text from JSONL output.
+ * Extracts completed agent-message strings from tolerant JSONL output.
  *
- * This matches the event shape emitted by the airevenue Codex runner while
- * remaining provider-neutral at the package boundary.
+ * @param output - Full line-delimited event/log text; non-JSON and irrelevant lines are ignored.
+ * @returns Completed agent messages joined with blank lines, or the original output if none has nonempty text.
+ *
+ * @example
+ * ```typescript
+ * import { extractAgentMessageText } from '@alneas/appkit-core/ai';
+ *
+ * console.log(extractAgentMessageText(JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: 'hello' } })));
+ * ```
  */
 export function extractAgentMessageText(output: string): string {
   const messages: string[] = [];

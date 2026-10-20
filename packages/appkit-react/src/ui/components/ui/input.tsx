@@ -5,25 +5,33 @@ import { normalizeNumericInput, getNextNumericValue } from '../../lib/ime-utils'
 import { cn } from '../../lib/utils';
 
 /**
- * Input component props
- * テキスト入力コンポーネントのプロップス
+ * Base UI input props with a stable selector; numeric wrapper behavior is documented on Input.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see Input
  */
 export interface InputProps extends React.ComponentProps<typeof InputPrimitive> {
   /**
-   * AI/E2E Test用の安定ID / Stable test identifier for AI and E2E tests
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
    */
   testId?: string;
 }
 
 /**
- * Input Component
- * テキスト入力コンポーネント
+ * Renders a Base UI input with optional test ID and IME-aware numeric normalization.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Input composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. No label prop is supported; use an associated Label or accessible name. type=number renders type=text, defaults inputMode to numeric and pattern to [0-9\.\-]*, normalizes fullwidth/nonnumeric input on change, and invokes the supplied onChange with the modified event. ArrowUp/ArrowDown derive the next value from props.value and step (default 1); min/max are not clamped by this wrapper. Numeric stepping requires a controlled value/onChange for reliable updates. Children are discarded. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { Input, Label } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
  *
- * `type="number"` が指定された場合、以下の高度な挙動が自動的に適用されます：
- * - IMEの強制切り替え防止 (`type="text"` としてレンダリング)
- * - 全角数字から半角数字への自動変換および非数値文字の自動削除（コピペにも対応）
- * - キーボードの上下キー (\`ArrowUp\`/\`ArrowDown\`) による数値の増減
- * - モバイルでの数字キーボード表示 (\`inputMode="numeric"\`, \`pattern="[0-9\\.\\-]*"\`)
+ * export function Example() {
+ *   const [quantity, setQuantity] = useState("1");
+ *   return (<><Label htmlFor="quantity">Quantity</Label><Input id="quantity" type="number" value={quantity} onChange={event => setQuantity(event.target.value)} /></>);
+ * }
+ * ```
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, testId, ...props }, ref) => {

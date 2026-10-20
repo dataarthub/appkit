@@ -38,7 +38,16 @@ function bufferToHex(buffer: ArrayBuffer | Uint8Array): string {
 }
 
 /**
- * Computes pure SHA-256 digest synchronously.
+ * Computes a SHA-256 digest synchronously without a native crypto dependency.
+ *
+ * @param data - Bytes to hash; string input is UTF-8 encoded.
+ * @returns A new 32-byte digest.
+ * @example
+ * ```typescript
+ * import { sha256Bytes } from '@alneas/appkit-core/storage/crypto';
+ *
+ * console.log(sha256Bytes("hello"));
+ * ```
  */
 export function sha256Bytes(data: Uint8Array | ArrayBuffer | string): Uint8Array {
   const bytes = toUint8Array(data);
@@ -112,14 +121,33 @@ export function sha256Bytes(data: Uint8Array | ArrayBuffer | string): Uint8Array
 }
 
 /**
- * Computes SHA-256 hex string synchronously.
+ * Computes a lowercase hexadecimal SHA-256 digest synchronously.
+ *
+ * @param data - Bytes to hash; string input is UTF-8 encoded.
+ * @returns The 64-character lowercase hexadecimal digest.
+ * @example
+ * ```typescript
+ * import { sha256Hex } from '@alneas/appkit-core/storage/crypto';
+ *
+ * console.log(sha256Hex("hello"));
+ * ```
  */
 export function sha256Hex(data: Uint8Array | ArrayBuffer | string): string {
   return bufferToHex(sha256Bytes(data));
 }
 
 /**
- * Computes pure HMAC-SHA256 signature synchronously.
+ * Signs bytes using HMAC with SHA-256 synchronously.
+ *
+ * @param key - Secret signing bytes; strings use UTF-8.
+ * @param data - Message bytes; strings use UTF-8.
+ * @returns A new 32-byte authentication code.
+ * @example
+ * ```typescript
+ * import { hmacSha256 } from '@alneas/appkit-core/storage/crypto';
+ *
+ * console.log(hmacSha256("example-key", "hello"));
+ * ```
  */
 export function hmacSha256(
   key: Uint8Array | ArrayBuffer | string,
@@ -157,7 +185,17 @@ export function hmacSha256(
 }
 
 /**
- * Computes HMAC-SHA256 signature returning hex string synchronously.
+ * Signs bytes using HMAC-SHA256 and returns lowercase hexadecimal.
+ *
+ * @param key - Secret signing bytes; strings use UTF-8.
+ * @param data - Message bytes; strings use UTF-8.
+ * @returns The 64-character lowercase hexadecimal authentication code.
+ * @example
+ * ```typescript
+ * import { hmacSha256Hex } from '@alneas/appkit-core/storage/crypto';
+ *
+ * console.log(hmacSha256Hex("example-key", "hello"));
+ * ```
  */
 export function hmacSha256Hex(
   key: Uint8Array | ArrayBuffer | string,
@@ -166,10 +204,31 @@ export function hmacSha256Hex(
   return bufferToHex(hmacSha256(key, data));
 }
 
+/**
+ * Aliases the synchronous lowercase hexadecimal SHA-256 helper.
+ *
+ * @param data - Bytes to hash; strings use UTF-8.
+ * @returns The 64-character digest.
+ * @example
+ * ```typescript
+ * import { sha256HexSync } from '@alneas/appkit-core/storage/crypto';
+ *
+ * console.log(sha256HexSync("hello"));
+ * ```
+ */
 export const sha256HexSync = sha256Hex;
 
 /**
- * Encodes a UTF-8 string to base64 using Web standards (works in Browser, Workers, Node).
+ * Encodes UTF-8 text as standard Base64.
+ *
+ * @param str - Unicode text to encode.
+ * @returns Base64 text representing the UTF-8 bytes.
+ * @example
+ * ```typescript
+ * import { base64EncodeUtf8 } from '@alneas/appkit-core/storage/crypto';
+ *
+ * console.log(base64EncodeUtf8("hello 日本語"));
+ * ```
  */
 export function base64EncodeUtf8(str: string): string {
   const bytes = new TextEncoder().encode(str);
@@ -181,7 +240,17 @@ export function base64EncodeUtf8(str: string): string {
 }
 
 /**
- * Decodes a base64 string to a UTF-8 string using Web standards.
+ * Decodes standard Base64 bytes into UTF-8 text.
+ *
+ * @param base64 - Standard Base64 encoding to decode.
+ * @returns Decoded text; malformed UTF-8 uses replacement characters.
+ * @throws Throws when atob rejects malformed Base64.
+ * @example
+ * ```typescript
+ * import { base64DecodeUtf8 } from '@alneas/appkit-core/storage/crypto';
+ *
+ * console.log(base64DecodeUtf8("aGVsbG8="));
+ * ```
  */
 export function base64DecodeUtf8(base64: string): string {
   const binary = atob(base64);

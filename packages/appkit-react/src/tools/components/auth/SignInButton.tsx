@@ -8,28 +8,27 @@ import * as m from '../../paraglide/messages.js';
 import { useIsClient } from '../../lib/hooks/use-is-client';
 
 /**
- * ログイン用のダイアログを表示するサインインボタンコンポーネント。
+ * Opens a login dialog or tabbed login/registration dialog for signed-out users.
  *
- * @param props - コンポーネントのプロパティ
- * @param props.mode - 表示モード。`'login'` はログインのみ、`'combined'` はログイン/登録のタブ切り替え
- * @param props.registerFields - 登録フォームの既存フィールドカスタマイズ（mode='combined' 時）
- * @param props.extraFields - 登録フォームの追加フィールド（mode='combined' 時）
+ * @param props - Dialog mode and optional registration field configuration.
+ *
+ * @returns Sign-in button/dialog after client mount; null during SSR or when a user exists.
+ *
+ * @throws Error without AuthProvider.
+ *
+ * @remarks Requires AuthProvider inside QueryClientProvider and Appkit styles. Defaults
+ * to login mode with a Google OAuth button (shown only if adapter support exists).
+ * Combined mode provides login/register tabs; successful email login/registration closes
+ * the dialog. Each opening resets the selected tab to login.
  *
  * @example
  * ```tsx
- * // ログインのみ（デフォルト）
- * <SignInButton />
- *
- * // ログイン・新規登録の切り替えタブ付き
- * <SignInButton mode="combined" />
- *
- * // 登録フォームに電話番号を追加
- * <SignInButton
- *   mode="combined"
- *   extraFields={[
- *     { name: 'phone', label: 'Phone', type: 'tel' },
- *   ]}
- * />
+ * import '@alneas/appkit-react/styles';
+ * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ * import { AuthProvider, SignInButton, type AuthAdapter } from '@alneas/appkit-react/tools/auth';
+ * export function FormExample({ adapter, queryClient }: { adapter: AuthAdapter; queryClient: QueryClient }) {
+ *   return <QueryClientProvider client={queryClient}><AuthProvider adapter={adapter}><SignInButton mode="combined" /></AuthProvider></QueryClientProvider>;
+ * }
  * ```
  */
 export function SignInButton({
@@ -37,8 +36,17 @@ export function SignInButton({
   registerFields,
   extraFields,
 }: {
+  /**
+   * Dialog contents: login by default, combined adds registration tabs.
+   */
   mode?: 'login' | 'combined';
+  /**
+   * Built-in registration input overrides, used only in combined mode.
+   */
   registerFields?: RegisterFieldConfig;
+  /**
+   * Additional locally validated registration inputs, used only in combined mode; not saved by RegisterForm.
+   */
   extraFields?: RegisterExtraField[];
 }) {
   const { user } = useAuth();

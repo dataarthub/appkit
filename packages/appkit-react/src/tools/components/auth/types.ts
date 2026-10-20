@@ -1,109 +1,202 @@
 import { z } from 'zod';
 
+/**
+ * Zod schema for Appkit display-user records with a required ID and valid email.
+ *
+ * @remarks Optional metadata accepts arbitrary values; this schema does not establish
+ * session validity or authorization. See AuthProvider for session verification.
+ *
+ * @example
+ * ```ts
+ * import { UserSchema } from '@alneas/appkit-react/tools/auth';
+ * const user = UserSchema.parse({ id: 'display-1', email: 'reader@example.com' });
+ * ```
+ */
 export const UserSchema = z.object({
-  /** ユーザーの一意識別子 */
+  /**
+   * Stable display user identifier.
+   */
   id: z.string(),
-  /** メールアドレス */
+  /**
+   * Required valid email address.
+   */
   email: z.string().email(),
-  /** 表示名 */
+  /**
+   * Optional display name.
+   */
   name: z.string().optional(),
-  /** アバター画像URL */
+  /**
+   * Optional avatar URL; not validated as a URL by this schema.
+   */
   avatarUrl: z.string().optional(),
-  /** ユーザーロール (例: "admin", "user") */
+  /**
+   * Optional host role string used for display.
+   */
   role: z.string().optional(),
-  /** メールアドレスが認証済みかどうか（Firebase 等で利用） */
+  /**
+   * Optional host assertion of email verification.
+   */
   emailVerified: z.boolean().optional(),
-  /** 認証プロバイダー固有のメタデータ */
+  /**
+   * Optional string-keyed metadata; arbitrary values are accepted.
+   */
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
-/** ユーザー情報の定義 */
+/**
+ * Display-user shape inferred from UserSchema; exclude credentials from optimistic storage.
+ *
+ * @see AuthProvider for consumption.
+ */
 export type User = z.infer<typeof UserSchema>;
 
-/** 組み込み OAuth プロバイダー */
+/**
+ * Common OAuth identifiers; actual support depends on the host adapter/backend.
+ *
+ * @see AuthAdapter.loginWithProvider.
+ */
 export type BuiltInOAuthProvider = 'google' | 'line' | 'apple' | 'github';
 
 /**
- * OAuth プロバイダー
+ * OAuth identifier supporting both common names and host-defined custom provider names.
  *
- * 組み込みプロバイダー (`google`, `line`, `apple`, `github`) に加え、
- * Supabase Dashboard で設定したカスタム OIDC プロバイダー名も指定可能です。
- *
- * @example
- * ```tsx
- * // 組み込みプロバイダー
- * await loginWithProvider('google');
- *
- * // カスタム OIDC プロバイダー（Supabase Dashboard で設定した名前）
- * await loginWithProvider('line-oidc');
- * ```
+ * @see AuthAdapter.loginWithProvider.
  */
 export type OAuthProvider = BuiltInOAuthProvider | (string & {});
 
+/**
+ * Optional OAuth redirect, scopes and provider query parameters interpreted by the host adapter.
+ *
+ * @see AuthAdapter.loginWithProvider.
+ */
 export interface OAuthLoginOptions {
+  /**
+   * Post-authentication destination interpreted by the adapter.
+   */
   redirectTo?: string;
+  /**
+   * Optional requested provider scopes; adapter support varies.
+   */
   scopes?: string[];
+  /**
+   * Additional provider query parameters; host validation is required.
+   */
   queryParams?: Record<string, string>;
 }
 
 /**
- * 認証アダプターのインターフェース
- * Firebase, Supabase, Mock などの認証プロバイダーを抽象化します。
+ * Host authentication contract consumed by AuthProvider.
+ *
+ * @remarks Implementations own network access, credentials, session validation and backend
+ * authorization. Optional methods are exposed only when supplied. Methods may reject with
+ * backend/transport errors; AuthProvider tracks login/register/logout/OAuth errors.
+ *
+ * @see AuthProvider for a complete host-adapter example.
  */
 export interface AuthAdapter {
   /**
-   * Optional non-secret namespace for this backend/tenant's optimistic session storage.
-   * Defaults to runtime adapter identity (no cross-reload reuse). Never infer it from cached
-   * profiles or credentials. Provider instances always have separate session query keys.
+   * Optional non-secret backend/tenant namespace for optimistic display cache reuse; omission uses runtime adapter identity.
    */
   readonly cacheScope?: string;
-  /** ログイン */
+  /**
+   * Sign in with email/password.
+   *
+   * @param email - Account email.
+   *
+   * @param password - Account password.
+   *
+   * @returns Signed-in user after adapter completion.
+   */
   login: (email: string, password: string) => Promise<User>;
-  /** 新規登録 */
-  register: (email: string, password: string, data?: { name?: string }) => Promise<User>;
-  /** ログアウト */
+  /**
+   * Create an account through the host backend.
+   *
+   * @param email - New account email.
+   *
+   * @param password - New account password.
+   *
+   * @param data - Optional name passed by the bundled registration form.
+   *
+   * @returns Registered user.
+   */
+  register: (email: string, password: string, data?: {
+    /** Optional display name. */
+    name?: string;
+  }) => Promise<User>;
+  /**
+   * End the host session.
+   *
+   * @returns No value after sign-out completion.
+   */
   logout: () => Promise<void>;
-  /** パスワードリセットメール送信 */
+  /**
+   * Request a password reset.
+   *
+   * @param email - Account email.
+   *
+   * @returns No value after the host accepts the request; email delivery is host-owned.
+   */
   resetPassword: (email: string) => Promise<void>;
-  /** メールアドレス変更 */
+  /**
+   * Request an account email change.
+   *
+   * @param email - New account email.
+   *
+   * @returns No value after host completion.
+   */
   updateEmail: (email: string) => Promise<void>;
-  /** パスワード変更 */
+  /**
+   * Request an account password change.
+   *
+   * @param password - New password.
+   *
+   * @returns No value after host completion.
+   */
   updatePassword: (password: string) => Promise<void>;
   /**
-   * 再認証（パスワード変更・メール変更前に必要）
+   * Optional confirmation of current credentials.
    *
-   * Firebase などのプロバイダーではセキュリティ上、メールアドレスや
-   * パスワードの変更前に現在のパスワードで再認証する必要があります。
-   * アダプターが対応していない場合は undefined になります。
+   * @param password - Current account password.
    *
-   * @param password - 現在のパスワード
+   * @returns No value after host confirmation.
    */
   reauthenticate?: (password: string) => Promise<void>;
   /**
-   * メールアドレス確認メールを送信
+   * Optional verification-email request.
    *
-   * 新規登録後やメールアドレス変更後に、確認用メールを送信します。
-   * アダプターが対応していない場合は undefined になります。
+   * @returns No value after request completion; delivery is host-owned.
    */
   sendVerificationEmail?: () => Promise<void>;
   /**
-   * 認証トークンを取得
+   * Optional host token lookup.
    *
-   * API 呼び出し時の Authorization ヘッダーに使用するトークンを返します。
-   * Firebase の場合は ID Token、Supabase の場合は access_token を返します。
-   * アダプターが対応していない場合は undefined になります。
-   *
-   * @returns トークン文字列、または未認証の場合は null
+   * @returns Token string or null when unavailable; token type is adapter-specific.
    */
   getToken?: () => Promise<string | null>;
-  /** 現在のユーザーを取得 */
-  getCurrentUser: () => Promise<User | null>;
-
   /**
-   * 認証状態の変更を監視
+   * Read the current host session user.
+   *
+   * @returns User or null for no session; adapter-specific error handling may reject.
    */
+  getCurrentUser: () => Promise<User | null>;
+  /**
+   * Subscribe to host user-state changes.
+   *
+   * @param callback - Receives each observed user or null; timing and initial invocation are adapter-specific.
+   *
+   * @returns Cleanup that stops future observation subject to in-flight adapter work.
+   */
+
   onAuthStateChanged: (callback: (user: User | null) => void) => () => void;
-  /** OAuth サインイン (Google/LINE など) */
+  /**
+   * Optional OAuth sign-in operation.
+   *
+   * @param provider - Host-configured provider identifier.
+   *
+   * @param options - Optional redirect, scopes and query parameters.
+   *
+   * @returns User when available, or null for a redirect-only/incomplete sign-in.
+   */
   loginWithProvider?: (
     provider: OAuthProvider,
     options?: OAuthLoginOptions,
@@ -111,57 +204,94 @@ export interface AuthAdapter {
 }
 
 /**
- * ユーザープロファイルの基本型
- * id は認証ユーザーの uid と同一
+ * Persisted profile keyed by the authentication user ID.
+ *
+ * @see UserProfileProvider for adapter usage.
  */
 export interface BaseProfile {
+  /**
+   * Authentication user ID used as the profile key.
+   */
   id: string;
+  /**
+   * Profile email stored by the host.
+   */
   email: string;
+  /**
+   * Optional host creation timestamp; no format validation is performed.
+   */
   created_at?: Date | string;
+  /**
+   * Optional update timestamp; UserProfileProvider updates use an ISO string.
+   */
   updated_at?: Date | string;
 }
 
 /**
- * プロファイルアダプターのインターフェース
- * データベースとの同期を抽象化します。
+ * Host persistence contract for authenticated profile records.
  *
- * @template T プロファイルの型 (BaseProfile を継承)
+ * @typeParam T - Persisted record extending BaseProfile; defaults to BaseProfile.
+ *
+ * @remarks No concrete profile backend is bundled. The host must enforce authorization
+ * and decide persistence/transaction behavior; operations may reject with backend errors.
+ *
+ * @see UserProfileProvider for setup.
  */
 export interface ProfileAdapter<T extends BaseProfile = BaseProfile> {
-  /** テーブル/コレクション名 */
+  /**
+   * Collection name used in detail/list query keys.
+   */
   tableName: string;
-
   /**
-   * 新規ユーザー作成時にプロファイルを作成
-   * @param uid 認証ユーザーID
-   * @param authUser 認証ユーザー情報
-   * @param additionalData 追加データ
+   * Create a profile for an authenticated user.
+   *
+   * @param uid - Authentication user ID.
+   *
+   * @param authUser - Authenticated display user.
+   *
+   * @param additionalData - Optional default profile fields supplied by UserProfileProvider.
+   *
+   * @returns Created persisted profile.
    */
+
   create: (uid: string, authUser: User, additionalData?: Partial<T>) => Promise<T>;
-
   /**
-   * ログイン時にプロファイルを取得
-   * @param uid 認証ユーザーID
+   * Read a profile by authentication user ID.
+   *
+   * @param uid - Profile/user identifier.
+   *
+   * @returns Profile or null when absent.
    */
+
   get: (uid: string) => Promise<T | null>;
-
   /**
-   * プロファイルを更新
-   * @param uid 認証ユーザーID
-   * @param updates 更新データ
+   * Persist partial profile updates.
+   *
+   * @param uid - Profile identifier.
+   *
+   * @param updates - Partial fields to persist.
+   *
+   * @returns Updated persisted record.
    */
+
   update: (uid: string, updates: Partial<T>) => Promise<T>;
-
   /**
-   * プロファイルを削除
-   * @param uid 認証ユーザーID
+   * Delete a persisted profile.
+   *
+   * @param uid - Profile identifier.
+   *
+   * @returns No value after deletion completes.
    */
+
   delete: (uid: string) => Promise<void>;
-
   /**
-   * プロファイルの存在確認
-   * @param uid 認証ユーザーID
+   * Optional existence check.
+   *
+   * @param uid - Profile/user identifier.
+   *
+   * @returns Whether the host record exists.
    */
+
   exists?: (uid: string) => Promise<boolean>;
 }
 
@@ -169,62 +299,128 @@ export interface ProfileAdapter<T extends BaseProfile = BaseProfile> {
 // Invitation System
 // =====================================================
 
-/** 招待種別 */
+/**
+ * Target category for a host-managed invitation.
+ *
+ * @see InvitationAdapter.create.
+ */
 export type InvitationType = 'organization' | 'project' | 'team';
 
-/** 招待ステータス */
+/**
+ * Host invitation lifecycle state; the type does not perform transitions or expiry checks.
+ *
+ * @see InvitationAdapter.
+ */
 export type InvitationState = 'pending' | 'accepted' | 'declined' | 'expired' | 'cancelled';
 
 /**
- * 招待情報の定義
+ * Host-managed invitation record with target, recipient and response metadata.
+ *
+ * @see InvitationAdapter.getByToken.
  */
 export interface Invitation {
+  /**
+   * Host invitation identifier.
+   */
   id: string;
-  /** 招待種別 */
+  /**
+   * Invited resource category.
+   */
   type: InvitationType;
-  /** 対象ID (organization_id, project_id, team_id) */
+  /**
+   * Host resource identifier.
+   */
   targetId: string;
-  /** 対象名 (表示用) */
+  /**
+   * Optional target display name.
+   */
   targetName?: string;
-  /** 招待先メールアドレス */
+  /**
+   * Recipient email address.
+   */
   inviteeEmail: string;
-  /** 招待先ユーザーID (既存ユーザーの場合) */
+  /**
+   * Recipient user identifier when already known.
+   */
   inviteeUserId?: string;
-  /** 付与する役割 */
+  /**
+   * Role to grant after host acceptance.
+   */
   role: string;
-  /** ステータス */
+  /**
+   * Current host-managed lifecycle state.
+   */
   state: InvitationState;
-  /** 招待トークン (リンク用) */
+  /**
+   * Invitation-link token; validate and protect it in host code.
+   */
   token: string;
-  /** 有効期限 */
+  /**
+   * Host expiration timestamp as Date or string.
+   */
   expiresAt: Date | string;
-  /** 招待者ID */
+  /**
+   * Inviting user identifier.
+   */
   invitedBy: string;
-  /** 招待者名 (表示用) */
+  /**
+   * Optional inviting user display name.
+   */
   invitedByName?: string;
-  /** 作成日時 */
+  /**
+   * Host creation timestamp.
+   */
   createdAt: Date | string;
-  /** 応答日時 */
+  /**
+   * Optional host acceptance/decline timestamp.
+   */
   respondedAt?: Date | string;
 }
 
 /**
- * 招待作成パラメータ
+ * Inputs for host invitation creation; no bundled implementation imposes defaults.
+ *
+ * @see InvitationAdapter.create.
  */
 export interface CreateInvitationParams {
+  /**
+   * Invited resource category.
+   */
   type: InvitationType;
+  /**
+   * Target resource identifier.
+   */
   targetId: string;
+  /**
+   * Recipient email address.
+   */
   inviteeEmail: string;
+  /**
+   * Role requested for the recipient.
+   */
   role: string;
-  /** 有効期限 (時間, デフォルト: 168 = 7日) */
+  /**
+   * Optional lifetime in hours; this interface does not enforce a seven-day or other default.
+   */
   expirationHours?: number;
-  /** メッセージ */
+  /**
+   * Optional host-delivered message.
+   */
   message?: string;
 }
 
 /**
- * 招待承諾時のコールバック
- * organization_members, project_members, team_members への追加処理を実装
+ * Host callback for adding an accepted user to the invited resource.
+ *
+ * @param invitation - Invitation being accepted.
+ *
+ * @param userId - Accepting user identifier.
+ *
+ * @returns No value after host membership work completes.
+ *
+ * @remarks Invocation order and rollback on rejection depend on the host adapter.
+ *
+ * @see InvitationAdapter.accept.
  */
 export type OnInvitationAcceptedCallback = (
   invitation: Invitation,
@@ -232,71 +428,114 @@ export type OnInvitationAcceptedCallback = (
 ) => Promise<void>;
 
 /**
- * 招待アダプターのインターフェース
- * 組織/プロジェクト/チームへの招待・承認フローを抽象化します。
+ * Host contract for invitation persistence and lifecycle operations.
+ *
+ * @remarks No implementation is bundled here. Host code owns expiry, token validation,
+ * permissions, delivery and transaction semantics. Any operation may reject on backend
+ * failure; optional cleanup is undefined when unsupported.
+ *
+ * @example
+ * ```ts
+ * import type { InvitationAdapter } from '@alneas/appkit-react/tools/auth';
+ * export async function inspectInvitation(adapter: InvitationAdapter, token: string) {
+ *   return adapter.getByToken(token);
+ * }
+ * ```
  */
 export interface InvitationAdapter {
-  /** テーブル/コレクション名 */
+  /**
+   * Host collection name for invitations.
+   */
   tableName: string;
-
   /**
-   * 招待を作成
-   * @param params 招待パラメータ
-   * @param invitedBy 招待者のユーザーID
+   * Create and optionally deliver an invitation through the host.
+   *
+   * @param params - Recipient, target, role and optional lifetime/message.
+   *
+   * @param invitedBy - Inviting user identifier.
+   *
+   * @returns Created invitation.
    */
+
   create: (params: CreateInvitationParams, invitedBy: string) => Promise<Invitation>;
-
   /**
-   * トークンで招待を取得
-   * @param token 招待トークン
+   * Find an invitation by host token.
+   *
+   * @param token - Invitation-link token.
+   *
+   * @returns Matching invitation or null.
    */
+
   getByToken: (token: string) => Promise<Invitation | null>;
-
   /**
-   * 招待を承諾
-   * @param token 招待トークン
-   * @param userId 承諾するユーザーID
-   * @param onAccepted メンバー追加処理のコールバック
+   * Accept an invitation and optionally perform membership work.
+   *
+   * @param token - Invitation-link token.
+   *
+   * @param userId - Accepting user identifier.
+   *
+   * @param onAccepted - Optional async host membership callback; host implementation defines ordering and rollback.
+   *
+   * @returns No value after host acceptance completes.
    */
+
   accept: (
     token: string,
     userId: string,
     onAccepted?: OnInvitationAcceptedCallback,
   ) => Promise<void>;
-
   /**
-   * 招待を拒否
-   * @param token 招待トークン
+   * Decline a host invitation.
+   *
+   * @param token - Invitation-link token.
+   *
+   * @returns No value after host completion.
    */
+
   decline: (token: string) => Promise<void>;
-
   /**
-   * ユーザーの保留中の招待を取得
-   * @param email ユーザーのメールアドレス
+   * List pending invitations for a recipient.
+   *
+   * @param email - Recipient email.
+   *
+   * @returns Invitation array, possibly empty.
    */
+
   listPendingForUser: (email: string) => Promise<Invitation[]>;
-
   /**
-   * 対象の保留中の招待を取得
-   * @param type 招待種別
-   * @param targetId 対象ID
+   * List pending invitations for a resource.
+   *
+   * @param type - Resource category.
+   *
+   * @param targetId - Resource identifier.
+   *
+   * @returns Invitation array, possibly empty.
    */
+
   listPendingForTarget: (type: InvitationType, targetId: string) => Promise<Invitation[]>;
-
   /**
-   * 招待をキャンセル
-   * @param invitationId 招待ID
+   * Cancel a host invitation.
+   *
+   * @param invitationId - Invitation identifier.
+   *
+   * @returns No value after cancellation completes.
    */
+
   cancel: (invitationId: string) => Promise<void>;
-
   /**
-   * 招待を再送信 (トークン再生成 + 期限延長)
-   * @param invitationId 招待ID
+   * Request host invitation reissue/delivery.
+   *
+   * @param invitationId - Invitation identifier.
+   *
+   * @returns Updated invitation; token/expiry policy is host-owned.
    */
+
   resend: (invitationId: string) => Promise<Invitation>;
-
   /**
-   * 期限切れ招待をクリーンアップ
+   * Optional host expiry cleanup.
+   *
+   * @returns Count of invitations affected by the host cleanup policy.
    */
+
   cleanupExpired?: () => Promise<number>;
 }

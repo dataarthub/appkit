@@ -7,13 +7,28 @@ import { cn } from '../../lib/utils';
 import { Minus } from 'lucide-react';
 
 /**
- * ワンタイムパスワード（OTP）入力のためのルートコンポーネント。
+ * Coordinates a single OTP input and its visual character slots.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered InputOTP composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. InputOTPSlot reads input-otp context and its index must be within maxLength. Missing context/out-of-range slots render no character. containerClassName styles the outer OTP container, className the input. spellCheck defaults to false but remaining props can override it. The host owns verification and expiry.
+ * @example
+ * ```tsx
+ * import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputOTP maxLength={4} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={2} /><InputOTPSlot index={3} /></InputOTPGroup></InputOTP>);
+ * }
+ * ```
  */
 function InputOTP({
   className,
   containerClassName,
   ...props
 }: React.ComponentProps<typeof OTPInput> & {
+  /**
+   * Additional classes applied to the outer input-otp container rather than its input.
+   */
   containerClassName?: string;
 }) {
   return (
@@ -31,7 +46,19 @@ function InputOTP({
 }
 
 /**
- * OTPの入力スロットをグループ化するためのコンテナ。
+ * Lays out adjacent OTP slots as a visually joined group.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered InputOTPGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. InputOTPSlot reads input-otp context and its index must be within maxLength. Missing context/out-of-range slots render no character. containerClassName styles the outer OTP container, className the input. spellCheck defaults to false but remaining props can override it. The host owns verification and expiry.
+ * @example
+ * ```tsx
+ * import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputOTP maxLength={4} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={2} /><InputOTPSlot index={3} /></InputOTPGroup></InputOTP>);
+ * }
+ * ```
  */
 function InputOTPGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -47,13 +74,28 @@ function InputOTPGroup({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * OTP入力用の1桁分を表す個々のスロット（入力枠）。
+ * Displays one zero-based slot from the surrounding OTP input context.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered InputOTPSlot composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. InputOTPSlot reads input-otp context and its index must be within maxLength. Missing context/out-of-range slots render no character. containerClassName styles the outer OTP container, className the input. spellCheck defaults to false but remaining props can override it. The host owns verification and expiry.
+ * @example
+ * ```tsx
+ * import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputOTP maxLength={4} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={2} /><InputOTPSlot index={3} /></InputOTPGroup></InputOTP>);
+ * }
+ * ```
  */
 function InputOTPSlot({
   index,
   className,
   ...props
 }: React.ComponentProps<'div'> & {
+  /**
+   * Zero-based index into the surrounding OTP context slots; choose an index smaller than maxLength.
+   */
   index: number;
 }) {
   const inputOTPContext = React.useContext(OTPInputContext);
@@ -80,7 +122,19 @@ function InputOTPSlot({
 }
 
 /**
- * OTPスロットのグループ同士を区切るためのセパレーター。
+ * Renders a visual separator between OTP slot groups.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered InputOTPSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. InputOTPSlot reads input-otp context and its index must be within maxLength. Missing context/out-of-range slots render no character. containerClassName styles the outer OTP container, className the input. spellCheck defaults to false but remaining props can override it. The host owns verification and expiry.  children are replaced by the fixed minus icon.
+ * @example
+ * ```tsx
+ * import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputOTP maxLength={4} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={2} /><InputOTPSlot index={3} /></InputOTPGroup></InputOTP>);
+ * }
+ * ```
  */
 function InputOTPSeparator({ ...props }: React.ComponentProps<'div'>) {
   return (

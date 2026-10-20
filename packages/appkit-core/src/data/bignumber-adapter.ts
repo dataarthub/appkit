@@ -1,22 +1,77 @@
 import type { DataAccessAdapter, Filter, OperationResult, QueryOptions } from './types';
 
+/**
+ * Selects configured read values as BigNumber-like instances or fixed-point strings. This does not change unconfigured fields.
+ * @see {@link BigNumberDataAccessAdapterConfig.decodeMode}.
+ */
 export type DecimalDecodeMode = 'bignumber' | 'string';
-/** BigNumber.js rounding modes: 0 (away from zero) through 8 (half floor). */
+/**
+ * BigNumber.js-compatible rounding modes 0 through 8. The supplied numeric constructor must interpret these values consistently.
+ * @see {@link DecimalFieldConfig.roundingMode}.
+ */
 export type DecimalRoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
+/**
+ * Minimal decimal-instance operations used by the wrapper; supply a compatible exact-decimal implementation.
+ * @see {@link BigNumberDataAccessAdapter} for construction.
+ */
 export interface BigNumberLike {
+  /**
+   * Rounds to a decimal scale before write serialization.
+   * @param decimalPlaces - Requested fractional digit count from field.scale.
+   * @param roundingMode - Field/adapter rounding mode.
+   * @returns Decimal instance whose toFixed serializes the rounded value; mutation behavior belongs to the supplied library.
+   */
   decimalPlaces: (decimalPlaces: number, roundingMode?: DecimalRoundingMode) => BigNumberLike;
+  /**
+   * Checks newly constructed decimal values before conversion.
+   * @returns True when the instance represents a finite decimal according to the supplied library.
+   */
   isFinite: () => boolean;
+  /**
+   * Serializes a decimal to fixed-point text.
+   * @param decimalPlaces - Optional fractional scale; absence requests the full fixed-point representation.
+   * @returns Fixed-point decimal text with library-defined rounding when a scale is supplied.
+   */
   toFixed: (decimalPlaces?: number) => string;
 }
 
+/**
+ * Structural exact-decimal constructor and instance predicate. Existing values accepted by isBigNumber pass through without a new finite-value check.
+ * @see {@link BigNumberDataAccessAdapter} for usage.
+ */
 export interface BigNumberConstructorLike {
-  /** Existing instances pass through isBigNumber; only strings/numbers are constructed. */
+  /**
+   * Constructs a decimal from input text or a JavaScript number. Numbers may already have lost precision before construction.
+   * @param value - Decimal input; the wrapper checks isFinite on newly constructed results.
+   * @returns A compatible decimal instance.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * import type { BigNumberConstructorLike } from '@alneas/appkit-core/data/bignumber-adapter';
+   * import type { DataAccessAdapter } from '@alneas/appkit-core/data';
+   * export function decimalAdapter(base: DataAccessAdapter, BigNumber: BigNumberConstructorLike) {
+   *   return new BigNumberDataAccessAdapter({ base, BigNumber, fields: { amount: { scale: 2 } }, decodeMode: 'string' });
+   * }
+   * ```
+   */
   new (value: string | number): BigNumberLike;
+  /**
+   * Recognizes existing decimal instances.
+   * @param value - Value encountered during configured-field conversion.
+   * @returns True when value can be used directly as a BigNumberLike; no additional finite check follows this branch.
+   */
   isBigNumber: (value: unknown) => value is BigNumberLike;
+  /**
+   * Optional half-up mode constant; the wrapper falls back to numeric mode 4 when absent.
+   */
   ROUND_HALF_UP?: DecimalRoundingMode;
 }
 
+/**
+ * Per-path write scale, write rounding and read representation. Null/undefined values are preserved; scale/range validation belongs to the numeric library.
+ * @see {@link BigNumberDataAccessAdapterConfig.fields}.
+ */
 export interface DecimalFieldConfig {
   /**
    * Decimal scale for DB serialization.
@@ -24,7 +79,7 @@ export interface DecimalFieldConfig {
    */
   scale?: number;
   /**
-   * Rounding mode for serialization. Defaults to `BigNumber.ROUND_HALF_UP`.
+   * Write rounding override, falling back to the adapter setting. Scaled read-side string conversion calls toFixed(scale) without this override and uses the supplied library default.
    */
   roundingMode?: DecimalRoundingMode;
   /**
@@ -34,6 +89,18 @@ export interface DecimalFieldConfig {
   decodeMode?: DecimalDecodeMode;
 }
 
+/**
+ * Host adapter, compatible decimal constructor and configured decimal paths. The wrapper does not change backend storage types or schema.
+ * @example
+ * ```ts
+ * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+ * import type { BigNumberConstructorLike } from '@alneas/appkit-core/data/bignumber-adapter';
+ * import type { DataAccessAdapter } from '@alneas/appkit-core/data';
+ * export function decimalAdapter(base: DataAccessAdapter, BigNumber: BigNumberConstructorLike) {
+ *   return new BigNumberDataAccessAdapter({ base, BigNumber, fields: { amount: { scale: 2 } }, decodeMode: 'string' });
+ * }
+ * ```
+ */
 export interface BigNumberDataAccessAdapterConfig {
   /**
    * Wrapped adapter (Supabase/Mongo/Convex/Oracle ORDS etc.)
@@ -58,13 +125,11 @@ export interface BigNumberDataAccessAdapterConfig {
    */
   decodeMode?: DecimalDecodeMode;
   /**
-   * Default rounding mode for DB serialization.
-   * @default BigNumber.ROUND_HALF_UP
+   * Default write rounding mode; falls back to BigNumber.ROUND_HALF_UP, then 4. Read-side string rounding uses the library default.
    */
   roundingMode?: DecimalRoundingMode;
   /**
-   * When true, invalid decimal inputs throw errors.
-   * @default true
+   * Defaults to true. Rejects configured non-null inputs that are neither recognized instances nor finite string/number conversions. False preserves unsupported/non-finite newly parsed inputs; exceptions thrown by the supplied library still propagate. Existing recognized instances are not checked for finiteness.
    */
   strict?: boolean;
 }
@@ -125,13 +190,17 @@ function matchesPath(configTokens: string[], targetTokens: string[]): boolean {
 }
 
 /**
- * DataAccessAdapter wrapper for exact decimal handling with BigNumber.js.
- *
- * This adapter converts configured decimal fields:
- * - write side: `BigNumber | string | number` -> DB-safe decimal string
- * - read side: DB value -> `BigNumber` (default) or string
- *
- * Use this when the DB stores values as DECIMAL/NUMERIC(precision, scale).
+ * Wraps a host adapter to encode configured decimal paths as fixed-point strings and decode returned rows as decimal instances or strings. Dot paths and array wildcards are supported; the first matching configured path wins. Input JavaScript numbers may already have lost precision.
+ * @remarks Null/undefined pass through; unconfigured values are preserved. Traversed objects/arrays are rebuilt, but untouched values can retain references. Backend capabilities and authorization remain with base. Optional methods are exposed but reject when the base capability is absent; replacements retain the base adapter's semantics. Conversion after a successful write can still reject without rollback.
+ * @example
+ * ```ts
+ * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+ * import type { BigNumberConstructorLike } from '@alneas/appkit-core/data/bignumber-adapter';
+ * import type { DataAccessAdapter } from '@alneas/appkit-core/data';
+ * export function decimalAdapter(base: DataAccessAdapter, BigNumber: BigNumberConstructorLike) {
+ *   return new BigNumberDataAccessAdapter({ base, BigNumber, fields: { amount: { scale: 2 } }, decodeMode: 'string' });
+ * }
+ * ```
  */
 export class BigNumberDataAccessAdapter implements DataAccessAdapter {
   private readonly BigNumber: BigNumberConstructorLike;
@@ -142,8 +211,17 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
   private readonly fields: CompiledFieldConfig[];
 
   /**
-   * Creates a new instance of BigNumberDataAccessAdapter.
-   * @param config Adapter configuration
+   * Compiles configured paths and stores the supplied adapter/numeric implementation without issuing backend operations.
+   * @param config - Required base, BigNumber and field rules. decodeMode defaults to bignumber, strict to true, and write rounding to the supplied half-up mode or 4.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * import type { BigNumberConstructorLike } from '@alneas/appkit-core/data/bignumber-adapter';
+   * import type { DataAccessAdapter } from '@alneas/appkit-core/data';
+   * export function decimalAdapter(base: DataAccessAdapter, BigNumber: BigNumberConstructorLike) {
+   *   return new BigNumberDataAccessAdapter({ base, BigNumber, fields: { amount: { scale: 2 } }, decodeMode: 'string' });
+   * }
+   * ```
    */
   constructor(config: BigNumberDataAccessAdapterConfig) {
     this.BigNumber = config.BigNumber;
@@ -439,6 +517,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param filter Filter criteria
    * @param options Query options
    * @returns Decoded document array
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function findInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.find('invoices', { amount: { $gte: '10.00' } });
+   * }
+   * ```
    */
   async find<T = unknown>(
     collection: string,
@@ -455,6 +542,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param id Document ID
    * @param options Query options
    * @returns Decoded document, or null if not found
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function findOneInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.findOne('invoices', 'invoice-1');
+   * }
+   * ```
    */
   async findOne<T = unknown>(
     collection: string,
@@ -471,6 +567,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Data to create
    * @param options Query options
    * @returns Decoded created document
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function createInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.create('invoices', { amount: '12.50' });
+   * }
+   * ```
    */
   async create<T = unknown>(
     collection: string,
@@ -488,6 +593,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Data to update
    * @param options Query options
    * @returns Decoded updated document
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function updateInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.update('invoices', 'invoice-1', { amount: '12.50' });
+   * }
+   * ```
    */
   async update<T = unknown>(
     collection: string,
@@ -505,6 +619,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param id Document ID to delete
    * @param options Query options
    * @returns Decoded deleted document
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function deleteInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.delete('invoices', 'invoice-1');
+   * }
+   * ```
    */
   async delete<T = unknown>(collection: string, id: string, options?: QueryOptions): Promise<T> {
     const deleted = await this.base.delete<T>(collection, id, options);
@@ -517,18 +640,35 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param filter Filter criteria
    * @param options Query options
    * @returns Number of matching documents
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function countInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.count('invoices', { amount: { $gte: '10.00' } });
+   * }
+   * ```
    */
   async count(collection: string, filter?: Filter, options?: QueryOptions): Promise<number> {
     return this.base.count(collection, this.encodeFilter(filter), options);
   }
 
   /**
-   * Completely replaces the document with the specified ID. Decimal fields are encoded.
+   * Delegates replacement to base.replace after encoding decimal fields. Whole-record versus partial-update behavior depends on that base adapter.
    * @param collection Collection name
    * @param id Document ID to replace
    * @param data Replacement data content
    * @param options Query options
    * @returns Decoded replaced document
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function replaceInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.replace('invoices', 'invoice-1', { amount: '12.50' });
+   * }
+   * ```
    */
   async replace<T = unknown>(
     collection: string,
@@ -549,6 +689,16 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param pipeline Aggregation pipeline definition
    * @param options Query options
    * @returns Decoded aggregation result array
+   * @remarks Only known $match, $set/$addFields, nested $facet pipelines and $lookup.pipeline stages are encoded. Other stages are forwarded; result decoding still uses the original configured paths, so renamed/projected paths are not inferred.
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function aggregateInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.aggregate('invoices', [{ $match: { amount: { $gte: '10.00' } } }]);
+   * }
+   * ```
    */
   async aggregate<T = unknown>(
     collection: string,
@@ -569,6 +719,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Array of data objects to create
    * @param options Query options
    * @returns Decoded array of created documents
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function createManyInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.createMany('invoices', [{ amount: '12.50' }]);
+   * }
+   * ```
    */
   async createMany<T = unknown>(
     collection: string,
@@ -593,6 +752,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Data to update
    * @param options Query options
    * @returns Decoded array of updated documents
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function updateManyInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.updateMany('invoices', { status: 'open' }, { amount: '12.50' });
+   * }
+   * ```
    */
   async updateMany<T = unknown>(
     collection: string,
@@ -618,6 +786,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param filter Filter criteria
    * @param options Query options
    * @returns Decoded array of deleted documents
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function deleteManyInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.deleteMany('invoices', { status: 'archived' });
+   * }
+   * ```
    */
   async deleteMany<T = unknown>(
     collection: string,
@@ -641,6 +818,14 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Data to insert
    * @param options Query options
    * @returns Operation result
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function insertOneInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.insertOne('invoices', { amount: '12.50' });
+   * }
+   * ```
    */
   async insertOne(
     collection: string,
@@ -660,6 +845,14 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Data to update
    * @param options Query options
    * @returns Operation result
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function updateOneInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.updateOne('invoices', { id: 'invoice-1' }, { amount: '12.50' });
+   * }
+   * ```
    */
   async updateOne(
     collection: string,
@@ -685,6 +878,14 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Replacement data content
    * @param options Query options
    * @returns Operation result
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function replaceOneInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.replaceOne('invoices', { id: 'invoice-1' }, { amount: '12.50' });
+   * }
+   * ```
    */
   async replaceOne(
     collection: string,
@@ -709,6 +910,14 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param filter Filter criteria
    * @param options Query options
    * @returns Operation result
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function deleteOneInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.deleteOne('invoices', { id: 'invoice-1' });
+   * }
+   * ```
    */
   async deleteOne(
     collection: string,
@@ -728,6 +937,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Update data
    * @param options Query options
    * @returns Document data, or null if not found
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function findOneAndUpdateInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.findOneAndUpdate('invoices', { id: 'invoice-1' }, { amount: '12.50' });
+   * }
+   * ```
    */
   async findOneAndUpdate<T = unknown>(
     collection: string,
@@ -754,6 +972,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param data Replacement data content
    * @param options Query options
    * @returns Document data, or null if not found
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function findOneAndReplaceInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.findOneAndReplace('invoices', { id: 'invoice-1' }, { amount: '12.50' });
+   * }
+   * ```
    */
   async findOneAndReplace<T = unknown>(
     collection: string,
@@ -781,6 +1008,15 @@ export class BigNumberDataAccessAdapter implements DataAccessAdapter {
    * @param filter Filter criteria
    * @param options Query options
    * @returns Deleted document data, or null if not found
+   * @typeParam T - Expected decoded result shape; defaults to unknown. The wrapper trusts this type and does not infer changed decimal property types.
+   * @throws Rejects on configured decimal conversion/library errors, base operation rejection, or an unavailable optional base capability. A decode failure after a write does not undo the write.
+   * @example
+   * ```ts
+   * import { BigNumberDataAccessAdapter } from '@alneas/appkit-core/data/bignumber-adapter';
+   * export async function findOneAndDeleteInvoices(adapter: BigNumberDataAccessAdapter) {
+   *   return adapter.findOneAndDelete('invoices', { id: 'invoice-1' });
+   * }
+   * ```
    */
   async findOneAndDelete<T = unknown>(
     collection: string,

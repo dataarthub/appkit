@@ -22,6 +22,17 @@ function part(value: unknown): value is AIChatPart {
  * Nested values are recursively frozen JSON, bounded at depth 64, 10,000 values and
  * 1,000,000 serialized UTF-16 code units for the entire history. No trimming/truncation.
  * The returned outer array is new; message/part snapshots remain immutable.
+ *
+ * @param messages - Already-parsed provider-neutral history with explicit roles/parts/IDs.
+ * @returns A new outer array containing detached recursively frozen message/part JSON snapshots.
+ * @throws Throws malformed message/part shapes, non-JSON values or snapshot size/depth/node limits.
+ *
+ * @example
+ * ```typescript
+ * import { normalizeAIChatMessages } from '@alneas/appkit-core/ai';
+ *
+ * console.log(normalizeAIChatMessages([{ id: 'message-1', role: 'user', parts: [{ type: 'text', text: 'hello' }] }]));
+ * ```
  */
 export function normalizeAIChatMessages(messages: readonly AIChatMessage[]): AIChatMessage[] {
   const snapshot = jsonSnapshot(messages);
@@ -32,7 +43,20 @@ export function normalizeAIChatMessages(messages: readonly AIChatMessage[]): AIC
     return value as unknown as AIChatMessage;
   });
 }
-/** Validates and snapshots an adapter event; it performs no tool authorization or execution. */
+/**
+ * Validates and snapshots an adapter event; it performs no tool authorization or execution.
+ *
+ * @param event - Already-assembled provider-neutral event to validate and detach.
+ * @returns A recursively frozen JSON event snapshot without executing any tool.
+ * @throws Throws unsupported event shapes, non-JSON values or snapshot size/depth/node limits.
+ *
+ * @example
+ * ```typescript
+ * import { normalizeAIChatEvent } from '@alneas/appkit-core/ai';
+ *
+ * console.log(normalizeAIChatEvent({ type: 'text-delta', text: 'hello' }));
+ * ```
+ */
 export function normalizeAIChatEvent(event: AIChatEvent): AIChatEvent {
   const value = jsonSnapshot(event);
   if (!object(value)) throw new AIChatError('AI_INVALID_STREAM', 'Invalid AI stream event');

@@ -6,8 +6,19 @@ import { CircleIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 /**
- * RadioGroup Component
- * ラジオグループコンポーネント
+ * Coordinates a grid of mutually exclusive radio choices.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered RadioGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items require RadioGroup context and distinct values. Supply labels or accessible names for each item. The wrapper delegates controlled/default selection and keyboard behavior to Base UI. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { RadioGroup, RadioGroupItem, Label } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<RadioGroup defaultValue="email" aria-label="Contact method"><div><RadioGroupItem id="email" value="email" /><Label htmlFor="email">Email</Label></div><div><RadioGroupItem id="phone" value="phone" /><Label htmlFor="phone">Phone</Label></div></RadioGroup>);
+ * }
+ * ```
  */
 const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupPrimitive.Props>(
   ({ className, ...props }, ref) => {
@@ -23,6 +34,21 @@ const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupPrimitive.Props>(
 );
 RadioGroup.displayName = 'RadioGroup';
 
+/**
+ * Renders one radio choice with a built-in circular checked indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered RadioGroupItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items require RadioGroup context and distinct values. Supply labels or accessible names for each item. The wrapper delegates controlled/default selection and keyboard behavior to Base UI. The ref prop forwards to the rendered control or container declared by the component ref type.  children are replaced by the built-in checked indicator.
+ * @example
+ * ```tsx
+ * import { RadioGroup, RadioGroupItem, Label } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<RadioGroup defaultValue="email" aria-label="Contact method"><div><RadioGroupItem id="email" value="email" /><Label htmlFor="email">Email</Label></div><div><RadioGroupItem id="phone" value="phone" /><Label htmlFor="phone">Phone</Label></div></RadioGroup>);
+ * }
+ * ```
+ */
 const RadioGroupItem = React.forwardRef<HTMLButtonElement, RadioPrimitive.Root.Props>(
   ({ className, ...props }, ref) => {
     return (

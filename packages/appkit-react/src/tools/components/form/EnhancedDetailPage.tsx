@@ -15,74 +15,79 @@ import type { RelatedFieldConfig } from '../ui/form';
 type DetailMode = 'view' | 'edit';
 type GroupDisplay = 'heading' | 'card' | 'dropdown';
 
+/**
+ * Form values, schema and presentation settings for {@link EnhancedDetailPage}.
+ * @typeParam TFieldValues - React Hook Form field-value shape supplied to onSubmit.
+ */
 interface EnhancedDetailPageProps<TFieldValues extends FieldValues> {
   /** Opt into whole-record schema validation. */
   validation?: SchemaFormValidationOptions;
   /** JSON Schema definition with vendor extensions (x-ui, x-db, x-zod) */
   schema: JSONSchema;
-  /** 表示モード */
+  /** View renders details; edit renders form inputs. */
   mode: DetailMode;
-  /** 現在の値 */
+  /** Initial values and later reset values; later updates preserve dirty fields. */
   values?: Partial<TFieldValues>;
-  /** 送信ボタンのラベル */
+  /** Submit action wording; defaults to update. */
   submitLabel?: 'create' | 'update';
-  /** フォーム送信時のハンドラ */
+  /** Called with form values after configured validation on submit; the host performs persistence. */
   onSubmit?: (values: TFieldValues) => void | Promise<void>;
-  /** キャンセル時のハンドラ */
+  /** Called by the cancel action; the host handles navigation or rollback. */
   onCancel?: () => void;
-  /** 削除時のハンドラ */
+  /** Called by the delete action; the host performs deletion. */
   onDelete?: () => void;
-  /** 編集モード切り替えハンドラ */
+  /** Called by the edit action; the host updates mode. */
   onEdit?: () => void;
-  /** 編集ボタンを表示 */
+  /** Shows the view-mode edit action when true; defaults to false. */
   showEditButton?: boolean;
-  /** グループ表示スタイル */
+  /** Group presentation forwarded to SchemaDetailPage; omitted uses its default. */
   groupDisplay?: GroupDisplay;
-  /** リレーションデータ */
+  /** Related-field display and selection configuration forwarded to SchemaDetailPage. */
   relations?: Record<string, RelatedFieldConfig>;
 
   // 新しいレイアウトオプション
 
   /**
-   * 中央揃えコンテナレイアウトを使用
-   * @default true
+   * Wrap content in a centered FormContainer.
+   * @defaultValue true
    */
   containerLayout?: boolean;
   /**
-   * コンテナの最大幅
-   * @default "4xl"
+   * Maximum width preset when containerLayout is enabled.
+   * @defaultValue "4xl"
    */
   maxWidth?: FormContainerWidth;
   /**
-   * スティッキーアクションバーを有効化
-   * @default false
+   * Use the sticky FormActionBar and hide ordinary generated actions.
+   * @defaultValue false
    */
   stickyActions?: boolean;
   /**
-   * プログレッシブディスクロージャー (advanced フィールドを折りたたみ)
-   * @default true
+   * Separate fields marked x-ui.advanced into a section initially collapsed.
+   * @defaultValue true
    */
   progressiveDisclosure?: boolean;
   /**
-   * 保存状態インジケーター
+   * Host-supplied save indicator; defaults to idle and does not track persistence automatically.
    */
   saveStatus?: SaveStatus;
   /**
-   * レスポンシブグリッドを使用 (field.width を考慮)
-   * @default true
+   * Use SchemaDetailPage groupLayout full and columnMinWidth 300; false uses column layout.
+   * @defaultValue true
    */
   useGrid?: boolean;
   /**
-   * グリッドの列数
-   * @default 2
+   * Reserved compatibility option; currently ignored. Changing it does not set columns.
+   * Use useGrid to select the supported layout behavior.
    */
   gridColumns?: 1 | 2 | 3;
 
   /**
-   * カスタムフォームコンテンツ (schema による自動生成を上書き)
+   * Replace generated content. The caller supplies its own form, submission wiring and providers.
    */
   children?: React.ReactNode;
 
+  /** Additional classes on the outer container. */
   className?: string;
 }
 
@@ -112,26 +117,26 @@ const separateAdvancedFields = (
 };
 
 /**
- * デスクトップ最適化された詳細/編集ページコンポーネント
- *
- * UXベストプラクティスに基づく拡張レイアウト機能:
- * - 中央揃えの読みやすいコンテナ幅
- * - レスポンシブグリッドレイアウト (モバイル1列、デスクトップ2列)
- * - プログレッシブディスクロージャー (advanced フィールドの折りたたみ)
- * - スティッキーアクションバー
- * - 保存状態インジケーター
- *
+ * Renders schema-driven view/edit content with an optional container, advanced fields and action bar.
+ * @typeParam TFieldValues - React Hook Form value shape passed to the submit callback.
+ * @param props - Schema, host-owned values/actions and layout settings; see EnhancedDetailPageProps.
+ * @returns The detail content inside a centered container or plain div.
+ * @remarks Import Appkit CSS. Generated edit content supplies its own React Hook Form provider
+ * and form element; validation is opt-in via validation. Later values updates preserve dirty fields.
+ * The host owns persistence, saveStatus, mode changes and errors from async onSubmit.
+ * Custom children replace generated content and must supply their own form/provider wiring.
+ * gridColumns is ignored; useGrid selects SchemaDetailPage layout and a 300px column minimum,
+ * without guaranteeing an exact number of columns. No fixed two-column default is implemented.
  * @example
  * ```tsx
- * <EnhancedDetailPage
- *   schema={userSchema}
- *   mode="edit"
- *   values={userData}
- *   onSubmit={handleSave}
- *   containerLayout
- *   stickyActions
- *   progressiveDisclosure
- * />
+ * import { EnhancedDetailPage } from '@alneas/appkit-react/tools/form';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function UserDetails() {
+ *   return <EnhancedDetailPage<{ name: string }> mode="view"
+ *     schema={{ type: 'object', properties: { name: { type: 'string', title: 'Name' } } }}
+ *     values={{ name: 'Ada' }} />;
+ * }
  * ```
  */
 export function EnhancedDetailPage<TFieldValues extends FieldValues>({

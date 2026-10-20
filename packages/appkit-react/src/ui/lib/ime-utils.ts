@@ -1,7 +1,15 @@
 /**
- * 全角文字（数字、記号）を半角に変換します。
- * @param str - 変換対象の文字列
- * @returns 半角変換後の文字列
+ * Converts full-width ASCII punctuation/letters/digits and ideographic spaces to ASCII.
+ *
+ * @param str - Input text; other Unicode characters are retained.
+ *
+ * @returns Converted text without mutating the input.
+ *
+ * @example
+ * ```ts
+ * import { toHalfWidth } from '@alneas/appkit-react/ui/utils';
+ * const text = toHalfWidth('１２３　Ａ'); // '123 A'
+ * ```
  */
 export function toHalfWidth(str: string): string {
   return str
@@ -12,10 +20,17 @@ export function toHalfWidth(str: string): string {
 }
 
 /**
- * 数値入力フィールド用に、全角を半角に変換し、不正な文字を除去します。
- * 0-9, '.', '-' 以外の文字を除去します。
- * @param val - 正規化対象の文字列
- * @returns 正規化後の文字列
+ * Converts full-width ASCII and removes characters other than digits, dots and hyphens.
+ *
+ * @param val - Raw numeric input text; empty input remains empty.
+ *
+ * @returns Filtered text; repeated signs/dots are retained, so this is not numeric validation.
+ *
+ * @example
+ * ```ts
+ * import { normalizeNumericInput } from '@alneas/appkit-react/ui/utils';
+ * const text = normalizeNumericInput('￥１２.３'); // '12.3'
+ * ```
  */
 export function normalizeNumericInput(val: string): string {
   if (!val) return '';
@@ -24,12 +39,24 @@ export function normalizeNumericInput(val: string): string {
 }
 
 /**
- * 上下キーによる数値増減の計算を行います。
- * 浮動小数点の計算誤差を考慮した結果を返します。
- * @param current - 現在の数値（文字列または数値）
- * @param direction - 増減の方向 ('up' | 'down')
- * @param step - 増減のステップ量
- * @returns 次の数値
+ * Adds or subtracts a step and rounds using the step's decimal spelling.
+ *
+ * @param current - Number or parseFloat-compatible text; missing, empty or NaN input uses zero.
+ *
+ * @param direction - Up adds step; down subtracts it.
+ *
+ * @param step - Delta magnitude, default 1; decimal precision is derived from String(step).
+ *
+ * @returns Next number rounded with toFixed; no min/max clamp is applied.
+ *
+ * @remarks Exponential step spellings have no decimal digits in this calculation; this
+ * helper is not arbitrary-precision arithmetic.
+ *
+ * @example
+ * ```ts
+ * import { getNextNumericValue } from '@alneas/appkit-react/ui/utils';
+ * const next = getNextNumericValue('1.2', 'up', 0.1); // 1.3
+ * ```
  */
 export function getNextNumericValue(
   current: string | number | null | undefined,

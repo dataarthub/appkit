@@ -4,7 +4,11 @@ import { castValuesBySchema, type SchemaCastOptions } from "@alneas/appkit-core/
 import { getLocale } from '../../paraglide/runtime.js';
 export { createAjvValidator, type AjvValidatorOptions };
 
-/** Options for schema forms. Legacy empty-string omission is retained unless preserve is selected. */
+/**
+ * JSON Schema validation/casting settings for React Hook Form.
+ * @remarks Legacy top-level empty-string omission is default; preserve opts into ordinary schema validation.
+ * @see createAjvResolver for usage.
+ */
 export interface SchemaFormValidationOptions extends AjvValidatorOptions {
   /** Preserve empty strings for ordinary JSON Schema validation, or omit top-level empty strings (legacy default). */
   emptyStrings?: 'preserve' | 'omit';
@@ -13,15 +17,22 @@ export interface SchemaFormValidationOptions extends AjvValidatorOptions {
 }
 
 /**
- * Ajvを使用した React Hook Form 用の resolver を作成します。
- * このresolverは、アプリケーションの現在の言語設定（Paraglide）と自動的に連動します。
- *
+ * Creates an asynchronous React Hook Form resolver using Core Ajv validation.
+ * @typeParam T - Form values shape; defaults to FieldValues.
+ * @param schema - JSON Schema accepted by Core validation.
+ * @param options - Ajv options plus optional numeric casting and empty-string handling; defaults to {}.
+ * @returns Resolver accepting values and optional ignored context/options, resolving normalized
+ * values with no errors on success or empty values plus nested field errors on failure.
+ * @throws Resolver rejects if schema compilation, casting or validator execution throws.
+ * @remarks Optional cast runs first without mutating input. Unless emptyStrings is preserve,
+ * top-level empty strings become undefined; nested empty strings are retained. Locale
+ * uses options.locale, otherwise browser Paraglide locale, otherwise ja on the server.
+ * Unsafe error-path keys map to a root error. No provider or CSS is required to create it.
  * @example
+ * ```ts
  * import { createAjvResolver } from '@alneas/appkit-react/tools/form';
- * const resolver = createAjvResolver({ type: 'object', properties: { hours: { type: 'number' } } }, { emptyStrings: 'preserve', cast: { numericMode: 'strict' } });
- * @param schema - バリデーションに使用する JSON Schema。
- * @param options - バリデーションオプション。localeを省略すると現在の言語設定が使用されます。
- * @returns React Hook Form の resolver プロパティに渡せる関数。
+ * const resolver = createAjvResolver<{ hours: number }>({ type: 'object', properties: { hours: { type: 'number' } } }, { emptyStrings: 'preserve', cast: { numericMode: 'strict' } });
+ * ```
  */
 export function createAjvResolver<T extends FieldValues = FieldValues>(schema: object, options: SchemaFormValidationOptions = {}): (values: T, context?: unknown, resolverOptions?: unknown) => Promise<ResolverResult<T>> {
   const validator = createAjvValidator(options);

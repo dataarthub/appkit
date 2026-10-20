@@ -3,31 +3,38 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
 /**
- * QRコード生成器のプロップス
+ * Host inputs and presentation settings for QRCodeGenerator.
+ * @see QRCodeGenerator
  */
 interface QRCodeGeneratorProps {
-  /** エンコードする値（URL、テキスト等） */
+  /**
+   * Text passed unchanged to the encoder; format/value validity is determined by the optional encoding library.
+   */
   value: string;
-  /** カードのタイトル */
+  /**
+   * Card heading.
+   * @defaultValue Scan to Check In
+   */
   title?: string;
-  /** カードの説明 */
+  /**
+   * Optional supporting card text; omitted means no description.
+   */
   description?: string;
 }
 
 /**
- * QRコード生成コンポーネント
- *
- * URLやテキストからQRコードを生成して表示します。
- *
+ * Loads react-qr-code on the client and renders a fixed-size QR code inside a card.
+ * @param props - Encoded value and optional card heading/description; see QRCodeGeneratorProps. Wrapper defaults: title='Scan to Check In'.
+ * @returns The rendered QRCodeGenerator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Import Appkit CSS and install the optional react-qr-code peer. The client effect loads the QR component; SSR and initial render show Loading QR.... The inner QR size is 200 with a 256 viewBox and responsive styling. Dynamic-import rejection is not caught or displayed by this wrapper. There is no download/export API or callback.
  * @example
  * ```tsx
  * import { QRCodeGenerator } from '@alneas/appkit-react/tools/barcode';
+ * import '@alneas/appkit-react/styles';
  *
- * <QRCodeGenerator
- *   value="https://example.com"
- *   title="サイトにアクセス"
- *   description="スキャンしてサイトを開く"
- * />
+ * export function Example() {
+ *   return (<QRCodeGenerator value="https://example.com/document" title="Open document" />);
+ * }
  * ```
  */
 export const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({

@@ -50,6 +50,17 @@ function formatAmount(a: EdiAmount | undefined, formatter: (n: number) => string
  * @param doc - Source EDI document
  * @param currencyFormatter - Currency formatter (default: ¥ notation)
  * @returns BusinessDocumentData (pdfmake compatible)
+ *
+ * @example
+ * ```typescript
+ * import { ediToBusinessDocumentData } from '@alneas/appkit-core/japan/edi/to-business-document';
+ *
+ * export function convert(doc: Parameters<typeof ediToBusinessDocumentData>[0]) {
+ *   return ediToBusinessDocumentData(doc);
+ * }
+ * ```
+ * @throws Propagates currencyFormatter callback errors.
+ * @remarks The synchronous currencyFormatter callback receives each monetary number selected for display and must return text; no PDF binary is generated.
  */
 export function ediToBusinessDocumentData(
   doc: EdiDocument,

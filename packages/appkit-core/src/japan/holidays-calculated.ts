@@ -1,9 +1,37 @@
-/** Civil date for the rule-based Japanese calendar; month is zero-based. */
-export interface CalculatedJapaneseCalendarDate { year: number; month: number; day: number }
-/** Optional announced equinox days; defaults are approximate planning predictions. */
-export interface JapaneseEquinoxDays { vernal: number; autumnal: number }
-/** A date in the current-rule planning calendar, not a declaration of an official future holiday. */
-export interface CalculatedJapaneseHoliday { date: string; name: string; kind: 'national' | 'substitute' | 'citizens' }
+/**
+ * Civil date for the rule-based Japanese calendar; month is zero-based.
+ *
+ * @see {@link getCalculatedJapaneseHolidays} for a calculated-calendar example.
+ */
+export interface CalculatedJapaneseCalendarDate {
+  /** Gregorian civil year; calculated mode accepts 2022–2099. */
+  year: number;
+  /** Zero-based civil month (January 0 through December 11). */
+  month: number;
+  /** One-based day within the selected civil month. */
+  day: number }
+/**
+ * Optional announced equinox days; defaults are approximate planning predictions.
+ *
+ * @see {@link getCalculatedJapaneseHolidays} for a complete calculated-calendar example.
+ */
+export interface JapaneseEquinoxDays {
+  /** March day-of-month of the vernal equinox; an integer from 19 to 24. */
+  vernal: number;
+  /** September day-of-month of the autumnal equinox; an integer from 19 to 24. */
+  autumnal: number }
+/**
+ * A date in the current-rule planning calendar, not a declaration of an official future holiday.
+ *
+ * @see {@link getCalculatedJapaneseHolidays} for a complete calculated-calendar example.
+ */
+export interface CalculatedJapaneseHoliday {
+  /** Civil holiday date formatted YYYY-MM-DD without a timezone. */
+  date: string;
+  /** Japanese display name for the computed holiday. */
+  name: string;
+  /** Whether the occurrence is a national holiday, Sunday substitute or intervening citizens holiday. */
+  kind: 'national' | 'substitute' | 'citizens' }
 const DAY = 86400000;
 const iso = (time: number): string => new Date(time).toISOString().slice(0, 10);
 function checkYear(year: number): void {
@@ -21,6 +49,8 @@ function checkYear(year: number): void {
  * @example
  * import { getCalculatedJapaneseHolidays } from '@alneas/appkit-core/japan/holidays/calculated';
  * getCalculatedJapaneseHolidays(2026).some(day => day.date === '2026-09-22'); // true
+ *
+ * @throws RangeError for years outside 2022–2099 or equinox days outside the integer range 19–24.
  */
 export function getCalculatedJapaneseHolidays(year: number, equinoxDays?: JapaneseEquinoxDays): CalculatedJapaneseHoliday[] {
   checkYear(year);

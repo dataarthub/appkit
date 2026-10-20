@@ -4,39 +4,67 @@ import { useAuth } from './useAuth';
 import { ProfileAdapter, BaseProfile } from './types';
 import { ProfileContext } from './useUserProfile';
 
+/**
+ * Configuration for UserProfileProvider; see its provider example.
+ *
+ * @typeParam T - Application profile extending BaseProfile with its persisted fields.
+ *
+ * @see UserProfileProvider for the canonical usage example.
+ */
 export interface UserProfileProviderProps<T extends BaseProfile> {
+  /** Descendants that consume the profile context. */
   children: React.ReactNode;
-  /** プロファイルアダプター */
+  /** Host-supplied persistence operations and collection name. */
   adapter: ProfileAdapter<T>;
-  /** 新規ユーザー作成時の追加データ */
+  /** Additional fields passed to adapter.create when a profile is missing. */
   defaultProfileData?: Partial<T>;
-  /** プロファイルが見つからない場合に自動作成 */
+  /** Create a missing profile after authentication; defaults to true. */
   createIfNotExists?: boolean;
 }
 
 /**
- * ユーザープロファイルプロバイダー
+ * Loads and manages the authenticated user's profile through a host adapter.
  *
- * 認証ユーザーに紐づくプロファイルデータを管理します。
- * AuthProvider の内側で使用してください。
+ *
+ * @typeParam T - Persisted profile shape extending BaseProfile.
+ *
+ * @param props - Children, host persistence adapter and optional creation settings.
+ *
+ * @returns Profile context around the children; query and mutation errors are exposed in context.
+ *
+ * @remarks Requires outer QueryClientProvider and AuthProvider. Queries use
+ * [adapter.tableName, 'detail', user.id]. Creation defaults to enabled; adapter.create
+ * receives defaultProfileData. Updates add updated_at and refresh the detail cache;
+ * updates/deletes invalidate collection list queries. Mutations reject if no profile
+ * exists or the adapter fails. Query errors remain in context. No CSS is required.
+ * The host implements ProfileAdapter and enforces access in its backend.
  *
  * @example
  * ```tsx
- * interface MyProfile extends BaseProfile {
- *   name: string;
- *   role: 'admin' | 'user';
- *   organizationId?: string;
+ * import type { ReactNode } from 'react';
+ * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ * import {
+ *   AuthProvider, UserProfileProvider,
+ *   type AuthAdapter, type BaseProfile, type ProfileAdapter,
+ * } from '@alneas/appkit-react/tools/auth';
+ * interface MyProfile extends BaseProfile { name: string; }
+ * // Supply real host adapters; Appkit does not provide a Supabase profile factory.
+ * export function ProfileRoot({ authAdapter, profileAdapter, queryClient, children }: {
+ *   authAdapter: AuthAdapter;
+ *   profileAdapter: ProfileAdapter<MyProfile>;
+ *   queryClient: QueryClient;
+ *   children: ReactNode;
+ * }) {
+ *   return (
+ *     <QueryClientProvider client={queryClient}>
+ *       <AuthProvider adapter={authAdapter}>
+ *         <UserProfileProvider adapter={profileAdapter} createIfNotExists>
+ *           {children}
+ *         </UserProfileProvider>
+ *       </AuthProvider>
+ *     </QueryClientProvider>
+ *   );
  * }
- *
- * const profileAdapter = createSupabaseProfileAdapter<MyProfile>(supabase, {
- *   tableName: 'profiles',
- * });
- *
- * <AuthProvider adapter={authAdapter}>
- *   <UserProfileProvider adapter={profileAdapter} createIfNotExists>
- *     <App />
- *   </UserProfileProvider>
- * </AuthProvider>
  * ```
  */
 export function UserProfileProvider<T extends BaseProfile>({

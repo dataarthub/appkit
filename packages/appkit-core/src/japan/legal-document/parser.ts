@@ -49,7 +49,9 @@ function parseYamlFrontmatter(yamlText: string): Partial<LegalDocumentMetadata> 
   }
 }
 
-/** @internal */
+/**
+ * @internal
+ */
 function isIndented(line: string): boolean {
   return line.startsWith('\u3000') || line.startsWith('\t') || line.startsWith('  ');
 }
@@ -90,7 +92,24 @@ function parseArticleBody(lines: string[]): ArticleItem[] {
   return items.filter((i) => i.text !== '');
 }
 
-/** Parses Japanese legal documents formatted in Markdown and returns structured data. */
+/**
+ * Parses Japanese legal documents formatted in Markdown and returns structured data.
+ *
+ * @param markdown - Japanese article-style Markdown with optional leading YAML frontmatter.
+ * @returns A new structured document; absent/invalid frontmatter falls back to title 無題, type contract and no parties.
+ * @remarks This is a format parser, not legal validation. Article headers use 第<number>条（title） syntax; unsupported Markdown is treated as prose.
+ *
+ * @example
+ * ```typescript
+ * import { parseLegalDocument } from '@alneas/appkit-core/japan/legal-document/parser';
+ *
+ * const parsed = parseLegalDocument([
+ *   '---', 'title: Sample agreement', 'documentType: contract', '---',
+ *   '第1条（目的）', '  The parties agree to the following terms.',
+ * ].join('\n'));
+ * console.log(parsed.metadata.title, parsed.blocks);
+ * ```
+ */
 export function parseLegalDocument(markdown: string): ParsedDocument {
   const fm = detectFrontmatter(markdown);
   const fmMeta = fm ? parseYamlFrontmatter(fm.yaml) : {};

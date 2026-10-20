@@ -3,12 +3,29 @@ import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 /**
- * Card Component
- * カードコンポーネント
+ * Renders a bordered card surface with default or compact spacing.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: size='default'.
+ * @returns The rendered Card composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place the slots inside Card; put CardAction inside CardHeader. size defaults to default, with sm using tighter spacing. Slots are div elements; the host supplies semantic headings where required. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Card><CardHeader><CardTitle>Draft</CardTitle><CardDescription>Ready for review</CardDescription><CardAction><button type="button">Open</button></CardAction></CardHeader><CardContent>Document content</CardContent><CardFooter>Updated today</CardFooter></Card>);
+ * }
+ * ```
  */
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<'div'> & { size?: 'default' | 'sm' }
+  React.ComponentProps<'div'> & { /**
+ * Visual size preset; defaults to default unless the owning component states otherwise.
+ */
+  /**
+   * Visual size preset; defaults to default unless the owning component states otherwise.
+   */
+  size?: 'default' | 'sm' }
 >(({ className, size = 'default', ...props }, ref) => (
   <div
     ref={ref}
@@ -23,6 +40,21 @@ const Card = React.forwardRef<
 ));
 Card.displayName = 'Card';
 
+/**
+ * Lays out a card heading and optional trailing action.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CardHeader composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place the slots inside Card; put CardAction inside CardHeader. size defaults to default, with sm using tighter spacing. Slots are div elements; the host supplies semantic headings where required. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Card><CardHeader><CardTitle>Draft</CardTitle><CardDescription>Ready for review</CardDescription><CardAction><button type="button">Open</button></CardAction></CardHeader><CardContent>Document content</CardContent><CardFooter>Updated today</CardFooter></Card>);
+ * }
+ * ```
+ */
 const CardHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -38,6 +70,21 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>
 );
 CardHeader.displayName = 'CardHeader';
 
+/**
+ * Styles the card title without imposing a heading level.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CardTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place the slots inside Card; put CardAction inside CardHeader. size defaults to default, with sm using tighter spacing. Slots are div elements; the host supplies semantic headings where required. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Card><CardHeader><CardTitle>Draft</CardTitle><CardDescription>Ready for review</CardDescription><CardAction><button type="button">Open</button></CardAction></CardHeader><CardContent>Document content</CardContent><CardFooter>Updated today</CardFooter></Card>);
+ * }
+ * ```
+ */
 const CardTitle = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -53,6 +100,21 @@ const CardTitle = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 );
 CardTitle.displayName = 'CardTitle';
 
+/**
+ * Styles supporting card text with muted coloring.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CardDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place the slots inside Card; put CardAction inside CardHeader. size defaults to default, with sm using tighter spacing. Slots are div elements; the host supplies semantic headings where required. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Card><CardHeader><CardTitle>Draft</CardTitle><CardDescription>Ready for review</CardDescription><CardAction><button type="button">Open</button></CardAction></CardHeader><CardContent>Document content</CardContent><CardFooter>Updated today</CardFooter></Card>);
+ * }
+ * ```
+ */
 const CardDescription = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -65,6 +127,21 @@ const CardDescription = React.forwardRef<HTMLDivElement, React.ComponentProps<'d
 );
 CardDescription.displayName = 'CardDescription';
 
+/**
+ * Positions an action in the header grid trailing column.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CardAction composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place the slots inside Card; put CardAction inside CardHeader. size defaults to default, with sm using tighter spacing. Slots are div elements; the host supplies semantic headings where required. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Card><CardHeader><CardTitle>Draft</CardTitle><CardDescription>Ready for review</CardDescription><CardAction><button type="button">Open</button></CardAction></CardHeader><CardContent>Document content</CardContent><CardFooter>Updated today</CardFooter></Card>);
+ * }
+ * ```
+ */
 const CardAction = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -77,6 +154,21 @@ const CardAction = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>
 );
 CardAction.displayName = 'CardAction';
 
+/**
+ * Adds consistent horizontal padding around card content.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CardContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place the slots inside Card; put CardAction inside CardHeader. size defaults to default, with sm using tighter spacing. Slots are div elements; the host supplies semantic headings where required. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Card><CardHeader><CardTitle>Draft</CardTitle><CardDescription>Ready for review</CardDescription><CardAction><button type="button">Open</button></CardAction></CardHeader><CardContent>Document content</CardContent><CardFooter>Updated today</CardFooter></Card>);
+ * }
+ * ```
+ */
 const CardContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -89,6 +181,21 @@ const CardContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>
 );
 CardContent.displayName = 'CardContent';
 
+/**
+ * Renders a shaded footer with a top border inside a card.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CardFooter composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place the slots inside Card; put CardAction inside CardHeader. size defaults to default, with sm using tighter spacing. Slots are div elements; the host supplies semantic headings where required. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Card><CardHeader><CardTitle>Draft</CardTitle><CardDescription>Ready for review</CardDescription><CardAction><button type="button">Open</button></CardAction></CardHeader><CardContent>Document content</CardContent><CardFooter>Updated today</CardFooter></Card>);
+ * }
+ * ```
+ */
 const CardFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div

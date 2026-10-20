@@ -2,21 +2,66 @@ import holidays from '@holiday-jp/holiday_jp';
 import { createCalculatedJapaneseHolidayCalendar } from './holidays-calculated';
 import type { JapaneseEquinoxDays } from './holidays-calculated';
 
-/** Civil date for the Japanese holiday dataset; month is zero-based, as in Date. */
-export interface JapaneseCalendarDate { year: number; month: number; day: number }
+/**
+ * Civil date for the Japanese holiday dataset; month is zero-based, as in Date.
+ *
+ * @see {@link japaneseHolidayCalendar} for dataset usage.
+ */
+export interface JapaneseCalendarDate {
+  /** Gregorian civil year; calculated mode accepts 2022–2099. */
+  year: number;
+  /** Zero-based civil month (January 0 through December 11). */
+  month: number;
+  /** One-based day within the selected civil month. */
+  day: number }
 
-/** Dataset lookup only; timezone-to-civil-date conversion belongs to the caller. */
+/**
+ * Dataset lookup only; timezone-to-civil-date conversion belongs to the caller.
+ *
+ * @param __0 - Civil date with a zero-based month; Date normalizes out-of-range components.
+ * @returns Whether the installed holiday-jp dataset identifies the constructed civil date as a holiday.
+ *
+ * @example
+ * ```typescript
+ * import { japaneseHolidayCalendar } from '@alneas/appkit-core/japan/holidays';
+ *
+ * console.log(japaneseHolidayCalendar({ year: 2026, month: 0, day: 1 }));
+ * ```
+ */
 export function japaneseHolidayCalendar({ year, month, day }: JapaneseCalendarDate): boolean {
   return holidays.isHoliday(new Date(year, month, day));
 }
 
-/** Select a Japanese holiday source. holiday-jp remains the recommended default. */
+/**
+ * Select a Japanese holiday source. holiday-jp remains the recommended default.
+ *
+ * @see {@link createJapaneseHolidayCalendar} for source and override configuration.
+ */
 export interface JapaneseHolidayCalendarOptions {
+
+  /** Holiday source; defaults to holiday-jp. Calculated mode is limited to 2022–2099 and approximate equinox defaults. */
   source?: 'holiday-jp' | 'calculated';
-  /** Used only by calculated mode. Provide announced equinox dates when needed. */
+
+  /**
+   * Used only by calculated mode. Provide announced equinox dates when needed.
+   *
+   * @param year - Gregorian calculated-calendar year, 2022–2099, requested on first lookup for that year.
+   * @returns Announced March and September day-of-month values; callback errors propagate to calendar callers.
+   *
+   * @example
+   * ```typescript
+   * import type { JapaneseHolidayCalendarOptions } from '@alneas/appkit-core/japan/holidays';
+   *
+   * export function calculatedOptions(equinoxDays: NonNullable<JapaneseHolidayCalendarOptions['equinoxDays']>) {
+   *   return { source: 'calculated', equinoxDays } satisfies JapaneseHolidayCalendarOptions;
+   * }
+   * ```
+   */
   equinoxDays?: (year: number) => JapaneseEquinoxDays;
+
   /** Exact YYYY-MM-DD closures; no automatic substitute/sandwich calculation is applied to overrides. */
   additionalHolidays?: readonly string[];
+
   /** Exact dates removed after additions; exclusions always win. */
   excludedDates?: readonly string[];
 }

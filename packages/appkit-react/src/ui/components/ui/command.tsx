@@ -19,7 +19,19 @@ import {
 import { InputGroup, InputGroupAddon } from '../../components/ui/input-group';
 
 /**
- * コマンドパレット/コマンドメニューのルートコンポーネント。
+ * Coordinates a searchable command list using cmdk-base.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered Command composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
   return (
@@ -35,7 +47,19 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
 }
 
 /**
- * ダイアログ（モーダル）内にコマンドメニューを表示するためのコンポーネント。
+ * Wraps caller-provided command content in a dialog with hidden labeling.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: title='Command Palette', description='Search for a command to run...', showCloseButton=false.
+ * @returns The rendered CommandDialog composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function CommandDialog({
   title = 'Command Palette',
@@ -45,10 +69,25 @@ function CommandDialog({
   showCloseButton = false,
   ...props
 }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
+  /**
+   * Optional section heading rendered before its content.
+   */
   title?: string;
+  /**
+   * Supporting text displayed by the owning component.
+   */
   description?: string;
+  /**
+   * Additional classes merged with wrapper styling; see the component for the targeted element.
+   */
   className?: string;
+  /**
+   * Controls whether the wrapper inserts its own close button; see the component for its default.
+   */
   showCloseButton?: boolean;
+  /**
+   * Content rendered in the wrapper's child region.
+   */
   children: React.ReactNode;
 }) {
   return (
@@ -68,7 +107,19 @@ function CommandDialog({
 }
 
 /**
- * コマンドメニュー用のキーワード入力フィールド。
+ * Renders the command search field with a search icon.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CommandInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function CommandInput({
   className,
@@ -94,7 +145,19 @@ function CommandInput({
 }
 
 /**
- * フィルタリングされたコマンドのリストを表示するコンテナ。
+ * Renders the scrollable filtered command collection.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CommandList composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function CommandList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
   return (
@@ -110,7 +173,19 @@ function CommandList({ className, ...props }: React.ComponentProps<typeof Comman
 }
 
 /**
- * 検索条件に一致する結果が見つからない場合に表示されるコンポーネント。
+ * Renders a message when cmdk-base reports no matching commands.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CommandEmpty composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function CommandEmpty({
   className,
@@ -126,7 +201,19 @@ function CommandEmpty({
 }
 
 /**
- * コマンド項目を論理的なグループにまとめるためのコンポーネント。
+ * Groups commands under optional cmdk-base heading content.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CommandGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function CommandGroup({
   className,
@@ -145,7 +232,19 @@ function CommandGroup({
 }
 
 /**
- * コマンドグループや項目同士を区切るためのセパレーター。
+ * Draws a divider between command sections.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CommandSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function CommandSeparator({
   className,
@@ -161,7 +260,19 @@ function CommandSeparator({
 }
 
 /**
- * コマンドリスト内の個々の選択可能なアイテム。
+ * Renders an actionable command whose selection is handled by the host.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CommandItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function CommandItem({
   className,
@@ -184,7 +295,19 @@ function CommandItem({
 }
 
 /**
- * コマンドアイテムの右側に表示されるショートカットキー案内テキスト。
+ * Styles shortcut text without registering a keyboard handler.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered CommandShortcut composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Input/List/Group/Item require Command context. CommandDialog supplies Dialog but does not insert Command: include a Command root as its child. title defaults to Command Palette, description to Search for a command to run..., and showCloseButton to false. The host owns command effects and shortcut registration.
+ * @example
+ * ```tsx
+ * import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Command><CommandInput placeholder="Search commands" /><CommandList><CommandEmpty>No results</CommandEmpty><CommandGroup heading="Actions"><CommandItem onSelect={() => console.log("Open requested")}>Open<CommandShortcut>Enter</CommandShortcut></CommandItem></CommandGroup><CommandSeparator /></CommandList></Command>);
+ * }
+ * ```
  */
 function CommandShortcut({ className, ...props }: React.ComponentProps<'span'>) {
   return (

@@ -2,11 +2,21 @@ import type { BusinessDocumentTemplate } from "../../data/pdf";
 
 /**
  * Default template definition presets for Japanese business documents.
+ *
+ * @example
+ * ```typescript
+ * import { japaneseDocumentPresets } from '@alneas/appkit-core/japan/pdf';
+ *
+ * const template = { ...japaneseDocumentPresets.invoice, title: 'Invoice' };
+ * console.log(template.documentType); // The host renders the template with its document data.
+ * ```
  */
 export const japaneseDocumentPresets: Record<
   'quote' | 'invoice' | 'creditNote' | 'order' | 'delivery' | 'orderConfirmation',
   BusinessDocumentTemplate
 > = {
+
+  /** Quotation layout with Japanese summary fields and approval seals. */
   quote: {
     documentType: 'quote',
     title: ' 御見積書 ',
@@ -30,6 +40,8 @@ export const japaneseDocumentPresets: Record<
       remarksHeader: '備考',
     },
   },
+
+  /** Invoice layout with legacy summary/table settings and bank-account display. */
   invoice: {
     documentType: 'invoice',
     title: ' 請求書 ',
@@ -51,6 +63,8 @@ export const japaneseDocumentPresets: Record<
     showPaymentMethod: true,
     showFooterText: '以上、ご請求申し上げます。',
   },
+
+  /** Returned-invoice layout with the original invoice reference. */
   creditNote: {
     documentType: 'creditNote',
     title: ' 返還インボイス（貸方票） ',
@@ -73,6 +87,8 @@ export const japaneseDocumentPresets: Record<
     },
     showFooterText: '上記の通り返還いたします。',
   },
+
+  /** Purchase-order layout addressed to the supplier. */
   order: {
     documentType: 'order',
     title: ' 発注書 ',
@@ -92,6 +108,8 @@ export const japaneseDocumentPresets: Record<
     },
     footerNote: '※納品時は、本注文書の右上に記載されている発注Noを納品書にご記載下さい。',
   },
+
+  /** Delivery-note layout addressed to the client. */
   delivery: {
     documentType: 'delivery',
     title: ' 納品書 ',
@@ -107,6 +125,8 @@ export const japaneseDocumentPresets: Record<
       remarksHeader: '備考',
     },
   },
+
+  /** Order-confirmation layout with delivery/payment summary fields. */
   orderConfirmation: {
     documentType: 'orderConfirmation',
     title: ' 請書（受注確認書） ',

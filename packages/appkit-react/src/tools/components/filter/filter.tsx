@@ -23,42 +23,31 @@ import { FieldFactory } from '../ui/field';
 // =============================================================================
 
 /**
- * Filter Component
- * フィルターUIコンポーネント
- *
- * Schema-based filter UI with type inference.
- * スキーマからフィールド型を推論し、適切なフィルター入力を自動選択します。
- * MongoDBスタイルのフィルターオブジェクトを生成し、useFindと連携できます。
- *
- * ## AI/Automation Features
- * - `data-testid`: Container, apply/reset buttons
- * - Pattern: `{testId}`, `{testId}-apply`, `{testId}-reset`
- * - Filter inputs auto-generate testId from field name
- *
- * @example Basic usage with testId
+ * Renders schema-derived filter inputs and emits a MongoDB-style filter object.
+ * @param props - Field specifications, optional collection schema, labels and change callback; see {@link FilterProps}.
+ * @returns A responsive filter grid with apply/reset buttons when autoApply is false.
+ * @remarks Import Appkit CSS. This component creates local filter state; the host must apply the
+ * emitted filter to its own data query. autoApply defaults to true; false defers onChange
+ * until Apply or Reset. Reset emits an empty filter in manual mode. layout is currently ignored.
+ * With testId, the root uses data-testid=testId and field wrappers use `${testId}-${field}`.
+ * Manual apply/reset buttons use `${testId}-apply` and `${testId}-reset`; they are absent in auto mode.
+ * @example
  * ```tsx
- * <Filter
- *   testId="user-filter"
- *   schema={userSchema}
- *   fields={['name', 'age', 'status']}
- *   showPlaceholderOnAll={true}
- *   onChange={(filter) => setQueryFilter(filter)}
- * />
- * // Container: data-testid="user-filter"
- * // Apply button: data-testid="user-filter-apply"
- * // Reset button: data-testid="user-filter-reset"
- * // Filter inputs auto-generate testId from field name
+ * import { useState } from 'react';
+ * import { SchemaFilter, type CollectionSchema, type FilterResult } from '@alneas/appkit-react/tools/filter';
+ * import '@alneas/appkit-react/styles';
  *
- * @example Customizing filter widths
- * ```tsx
- * <Filter
- *   schema={userSchema}
- *   fields={[
- *     { field: 'name', className: 'min-w-[300px]' }, // Specific field
- *     'status'
- *   ]}
- *   inputClassName="min-w-[200px]" // Global default for this instance
- * />
+ * const schema: CollectionSchema = {
+ *   name: { type: 'string', label: 'Name' },
+ *   status: { type: 'enum', enum: ['active', 'inactive'], label: 'Status' },
+ * };
+ * export function UserFilter() {
+ *   const [filter, setFilter] = useState<FilterResult>({});
+ *   return <><SchemaFilter testId="user-filter" schema={schema} autoApply={false}
+ *     fields={[{ field: 'name', className: 'min-w-[300px]' }, 'status']}
+ *     inputClassName="min-w-[200px]" onChange={setFilter} />
+ *     <pre>{JSON.stringify(filter)}</pre></>;
+ * }
  * ```
  */
 export function SchemaFilter({

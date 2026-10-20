@@ -2,16 +2,25 @@ import { createContext, useContext } from 'react';
 import type { DataAccessAdapter } from './types';
 
 /**
- * DataAccess アダプターを React コンポーネントツリー全体で共有するための Context です。
+ * Nullable React context carrying the host data-access adapter.
+ * @see DataAccessProvider for setup and useDataAccess for consumption.
  */
 export const DataAccessContext = createContext<DataAccessAdapter | null>(null);
 
 /**
- * 現在の DataAccess アダプターを取得するためのカスタムフックです。
- * DataAccessProvider の内側で使用する必要があります。
- *
- * @returns 現在設定されている DataAccessAdapter インスタンス
- * @throws DataAccessProvider の外側で使用された場合にエラーを投げます
+ * Reads the host data-access adapter from the nearest DataAccessProvider.
+ * @returns Supplied adapter; no network request is made by this hook.
+ * @throws Error when rendered outside DataAccessProvider.
+ * @remarks No CSS or QueryClientProvider is needed for this hook alone; query hooks
+ * add their own TanStack provider requirement. Backend access remains host-owned.
+ * @example
+ * ```tsx
+ * import type { ComponentProps } from 'react';
+ * import { DataAccessProvider, useDataAccess } from '@alneas/appkit-react/tools/data-access/react';
+ * type DataAccessAdapter = ComponentProps<typeof DataAccessProvider>['adapter'];
+ * function CollectionHint() { const adapter = useDataAccess(); return <span>{adapter ? 'Data adapter available' : 'Unavailable'}</span>; }
+ * export function DataRoot({ adapter }: { adapter: DataAccessAdapter }) { return <DataAccessProvider adapter={adapter}><CollectionHint /></DataAccessProvider>; }
+ * ```
  */
 export const useDataAccess = () => {
   const context = useContext(DataAccessContext);

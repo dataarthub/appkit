@@ -7,6 +7,12 @@ const alertVariants = cva(
   "grid gap-0.5 rounded-lg border px-2.5 py-2 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
   {
     variants: {
+      /**
+       * Visual treatment selected by the consumer; these values change CSS classes only.
+       * Accepted values: default, destructive.
+       * @defaultValue 'default'
+       * @see alertVariants
+       */
       variant: {
         default: 'bg-card text-card-foreground',
         destructive:
@@ -20,7 +26,19 @@ const alertVariants = cva(
 );
 
 /**
- * 警告や通知などのメッセージを表示するアラートコンテナ。
+ * Renders a styled alert region with default or destructive coloring.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered Alert composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose the child slots inside Alert. This is presentational markup; dismissal and persistence belong to the host. variant defaults to default through the class-variance configuration.
+ * @example
+ * ```tsx
+ * import { Alert, AlertTitle, AlertDescription, AlertAction } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Alert><AlertTitle>Saved locally</AlertTitle><AlertDescription>Your draft is ready.</AlertDescription><AlertAction><button type="button">Review</button></AlertAction></Alert>);
+ * }
+ * ```
  */
 function Alert({
   className,
@@ -38,7 +56,19 @@ function Alert({
 }
 
 /**
- * アラートのタイトル（見出し）。
+ * Styles a short heading inside an alert.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered AlertTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose the child slots inside Alert. This is presentational markup; dismissal and persistence belong to the host. variant defaults to default through the class-variance configuration.
+ * @example
+ * ```tsx
+ * import { Alert, AlertTitle, AlertDescription, AlertAction } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Alert><AlertTitle>Saved locally</AlertTitle><AlertDescription>Your draft is ready.</AlertDescription><AlertAction><button type="button">Review</button></AlertAction></Alert>);
+ * }
+ * ```
  */
 function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -54,7 +84,19 @@ function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * アラートの本文（詳細説明）。
+ * Styles explanatory content inside an alert.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose the child slots inside Alert. This is presentational markup; dismissal and persistence belong to the host. variant defaults to default through the class-variance configuration.
+ * @example
+ * ```tsx
+ * import { Alert, AlertTitle, AlertDescription, AlertAction } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Alert><AlertTitle>Saved locally</AlertTitle><AlertDescription>Your draft is ready.</AlertDescription><AlertAction><button type="button">Review</button></AlertAction></Alert>);
+ * }
+ * ```
  */
 function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -70,7 +112,19 @@ function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) 
 }
 
 /**
- * アラート内に配置されるアクション要素（ボタンなど）。
+ * Positions host-provided action content at the upper right of an alert.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered AlertAction composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose the child slots inside Alert. This is presentational markup; dismissal and persistence belong to the host. variant defaults to default through the class-variance configuration.
+ * @example
+ * ```tsx
+ * import { Alert, AlertTitle, AlertDescription, AlertAction } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Alert><AlertTitle>Saved locally</AlertTitle><AlertDescription>Your draft is ready.</AlertDescription><AlertAction><button type="button">Review</button></AlertAction></Alert>);
+ * }
+ * ```
  */
 function AlertAction({ className, ...props }: React.ComponentProps<'div'>) {
   return (

@@ -6,12 +6,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog';
 import { Label } from './label';
 import { Combobox as ComboboxPrimitive } from '@base-ui/react/combobox';
 import { cn } from '../../lib/utils';
-/** A value and its display text; independent of records or schemas. */
+/**
+ * A stringifiable selection value and its display/search metadata.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SearchableSelectInput
+ */
 export interface SearchableSelectOption {
+  /**
+   * Selection identity; comparisons/deduplication use String(value), so numeric/string equivalents collide.
+   */
   value: string | number;
+  /**
+   * Main visible/searchable text; local label matching is case-insensitive.
+   */
   label: string;
+  /**
+   * Optional description searched by default and shown in result metadata; also a code/display fallback.
+   */
   description?: string;
+  /**
+   * Optional named display field; name display falls back to label.
+   */
   name?: string;
+  /**
+   * Optional exact code-lookup key; code display falls back to description.
+   */
   code?: string;
 }
 
@@ -20,16 +39,32 @@ export interface SearchableSelectOption {
 const EMPTY_OPTIONS: SearchableSelectOption[] = [];
 
 /**
- * 候補ゼロ時の新規作成入力です。
+ * Trimmed fields submitted to the host option-creation callback.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SearchableSelectInput
  */
 export interface SearchableSelectCreateInput {
-  /** 新規レコードID */
+  /**
+   * Trimmed manual code, or an empty string in sequence_code mode; no local ID is generated.
+   */
   id?: string;
-  /** 新規レコード名称 */
+  /**
+   * Trimmed name; empty names prevent built-in creation submission.
+   */
   name: string;
 }
 
+/**
+ * Controls creation UI: manual_code asks for ID/name, sequence_code asks for name and passes an empty ID, disabled hides creation.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SearchableSelectInput
+ */
 export type SearchableSelectCreateMode = 'manual_code' | 'sequence_code' | 'disabled';
+/**
+ * Selects primary/secondary display text; none suppresses that display and missing name/code use documented fallbacks.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SearchableSelectInput
+ */
 export type SearchableSelectDisplayField =
   | 'label'
   | 'description'
@@ -37,100 +72,201 @@ export type SearchableSelectDisplayField =
   | 'code'
   | 'value'
   | 'none';
+/**
+ * Positions secondary selected-option text to the right or below the main input.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SearchableSelectInput
+ */
 export type SearchableSelectDisplayPosition = 'right' | 'below';
 
 /**
- * 候補ゼロ時に親コンポーネントへ通知する「新規作成リクエスト」です。
+ * Host-owned creation request emitted instead of opening the built-in dialog.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SearchableSelectInput
  */
 export interface SearchableSelectCreateRequest {
-  /** ユーザーが入力していた検索文字列 */
+  /**
+   * Text requested for creation: the main-input prompt trims and rejects empty text;
+   * split-code lookup passes unmatched nonempty raw text, including whitespace, unchanged.
+   */
   query: string;
-  /** コード採番モード */
+  /**
+   * Current creation mode; disabled prevents the creation prompt.
+   */
   mode: SearchableSelectCreateMode;
 }
 
 /**
- * SearchableSelectInput のプロパティです。
+ * Controlled selection, search/creation callbacks and rendering settings for SearchableSelectInput.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SearchableSelectInput
  */
 export interface SearchableSelectInputProps {
-  /** 現在の選択値（ID等）。null/undefined は未選択 */
+  /**
+   * Controlled selected identity; null/undefined means unselected. Display uses String(value).
+   */
   value?: string | number | null;
-  /** 値が変更された際に呼ばれるコールバック */
+  /**
+   * Called with a string identity on selection, raw typing when allowCustomValue=true, or an empty string on clear; the host must update value.
+   * @param value - Next string identity or raw input; empty string represents clearing.
+   * @returns No value; complete the host callback action.
+   */
   onValueChange: (value: string) => void;
-  /** 同期的に利用可能な候補一覧（ローカルフィルタ対象） */
+  /**
+   * Local candidates; defaults to a stable empty array. Known choices accumulate by string value; this is not a replacement cache.
+   */
   options?: SearchableSelectOption[];
-  /** 非同期検索関数 */
+  /**
+   * Optional async search callback receiving the typed query (or exact code). No AbortSignal is supplied; the host owns authorization, data access and error handling.
+   * @param query - Typed query or exact code supplied by the search flow.
+   * @returns A promise resolving actual candidate options; the host handles operational errors.
+   */
   onSearch?: (query: string) => Promise<SearchableSelectOption[]>;
-  /** 新規作成関数 */
+  /**
+   * Creates and returns one actual option from trimmed ID/name input; the host owns persistence, uniqueness and authorization. Rejection is not rendered as error UI.
+   * @param input - Trimmed creation fields with the ID/name contract defined by SearchableSelectCreateInput.
+   * @returns A promise resolving the actual created option after host persistence.
+   */
   onCreateOption?: (input: SearchableSelectCreateInput) => Promise<SearchableSelectOption>;
-  /** 候補ゼロ時の「新規作成」選択を親へ通知 */
+  /**
+   * Receives query/mode when creation is requested and takes precedence over the internal create dialog; the host owns the resulting flow.
+   * @param request - Creation query and active mode; main-input prompts trim the query,
+   * while split-code lookup preserves raw text, including whitespace.
+   * @returns No value; complete the host callback action.
+   */
   onCreateRequested?: (request: SearchableSelectCreateRequest) => void;
-  /** デバウンス時間（ms） */
+  /**
+   * Remote-search debounce delay in milliseconds; defaults to 300. This is not network cancellation.
+   */
   debounceMs?: number;
-  /** 検索を開始する最小入力文字数 */
+  /**
+   * Minimum trimmed query length for remote search and create prompts; defaults to 1.
+   */
   minSearchLength?: number;
-  /** 値（ID）による部分一致フィルタを有効にするか */
+  /**
+   * Enables case-insensitive value substring filtering; defaults to true.
+   */
   matchByValue?: boolean;
-  /** ラベル（名称）による部分一致フィルタを有効にするか */
+  /**
+   * Enables case-insensitive label substring filtering; defaults to true.
+   */
   matchByLabel?: boolean;
-  /** 補足説明（コード等）による部分一致フィルタを有効にするか */
+  /**
+   * Enables case-insensitive description substring filtering; defaults to true. It does not search name/code fields directly.
+   */
   matchByDescription?: boolean;
-  /** 候補リストにID（value）を表示するか */
+  /**
+   * Displays String(value) in result metadata when no description is present and it differs from label; defaults to true.
+   */
   showValueInList?: boolean;
-  /** 候補一覧に無い任意の値入力を許可するか */
+  /**
+   * Emits raw typed text through onValueChange and accepts unmatched code lookup text; defaults to true.
+   */
   allowCustomValue?: boolean;
-  /** プレースホルダーテキスト */
+  /**
+   * Text displayed while no value is selected/entered; omitted means no placeholder.
+   */
   placeholder?: string;
-  /** 入力を無効化するか */
+  /**
+   * Disables the control/option when true; omission delegates to the underlying native/primitive default.
+   */
   disabled?: boolean;
-  /** 読み取り専用にするか */
+  /**
+   * Prevents editing and opening this search popup when true; the host still owns the selected value.
+   */
   readOnly?: boolean;
-  /** 追加CSSクラス名 */
+  /**
+   * Additional classes on the main name/input and selected-label overlay; not on the code input or outer container.
+   */
   className?: string;
-  /** blur イベント通知コールバック */
+  /**
+   * Called when the main input blurs; popup closure is scheduled after 120ms. Separate code-input blur does not invoke this callback.
+   * @returns No value; complete the host callback action.
+   */
   onBlur?: () => void;
-  /** 候補ゼロ時に表示するメッセージ */
+  /**
+   * Message shown when there are no filtered results.
+   * @defaultValue 候補なし
+   */
   noOptionsMessage?: string;
-  /** 新規作成ダイアログのタイトル */
+  /**
+   * Title of the built-in option-creation dialog.
+   * @defaultValue 候補がありません。新規作成しますか？
+   */
   createDialogTitle?: string;
-  /** 新規作成フォームのIDラベル */
+  /**
+   * Label of the built-in manual-code field.
+   * @defaultValue コード
+   */
   createIdLabel?: string;
-  /** 新規作成フォームの名称ラベル */
+  /**
+   * Label of the built-in creation-name field.
+   * @defaultValue 名称
+   */
   createNameLabel?: string;
-  /** 新規作成時のコード採番モード */
+  /**
+   * Creation mode; defaults to manual_code. disabled hides creation; sequence_code passes an empty ID to the host without generating a sequence.
+   */
   createMode?: SearchableSelectCreateMode;
-  /** 入力要素への ref */
+  /**
+   * Callback or mutable ref assigned to the main input, not the optional split code input; React clears it on unmount.
+   */
   inputRef?: React.Ref<HTMLInputElement>;
-  /** ドロップダウンにインライン表示する候補の最大件数 */
+  /**
+   * Maximum displayed result count, used by Array.slice; defaults to 10. Supply a nonnegative integer; no validation/clamping is added.
+   */
   maxInlineResults?: number;
-  /** 検索結果が maxInlineResults を超えた際に表示するメッセージ */
+  /**
+   * Overflow hint; the first {count} token is replaced with the full filtered result count.
+   * @defaultValue さらに絞り込んでください
+   */
   tooManyMessage?: string;
-  /** 検索結果が厳密に1件のみの場合に、自動的にその候補を選択するか */
+  /**
+   * Selects one eligible result while focused and not composing/deleting; defaults to false. Selection may move focus to the next table-cell input or blur.
+   */
   autoSelectSingle?: boolean;
-  /** ダブルクリック時に呼ばれるコールバック */
+  /**
+   * Called on main-input double-click, F2 or the detail-search button when editable; the wrapper closes the popup first.
+   * @returns No value; complete the host callback action.
+   */
   onDoubleClick?: () => void;
-  /** 選択確定後にコード(ID)を表示する方法 */
+  /**
+   * Legacy secondary display: true/right places description-or-value on the right, below places it below; defaults to false. Explicit display fields take precedence.
+   */
   showIdInInput?: boolean | 'right' | 'below';
-  /** 選択済み表示の主表示フィールド */
+  /**
+   * Explicit primary selected-option field; none suppresses the selected overlay text. Missing/unresolved fields can fall back to label.
+   */
   primaryDisplayField?: SearchableSelectDisplayField;
-  /** 選択済み表示の副表示フィールド */
+  /**
+   * Explicit secondary selected-option field; none hides it. Duplicate primary/secondary text is suppressed.
+   */
   secondaryDisplayField?: SearchableSelectDisplayField;
-  /** 副表示の配置位置 */
+  /**
+   * Placement of explicit secondary text; defaults to right.
+   */
   secondaryDisplayPosition?: SearchableSelectDisplayPosition;
-  /** 値をクリアするコールバック */
+  /**
+   * Called instead of onValueChange('') when Escape is pressed with the popup already closed; the host must clear value.
+   * @returns No value; complete the host callback action.
+   */
   onClear?: () => void;
-  /** 選択確定後に2行目に表示する内容 */
+  /**
+   * Static text or renderer for a known selected option below the input; a truthy result takes precedence over computed below text.
+   */
   belowContent?: string | ((option: SearchableSelectOption) => string);
   /**
-   * コード（値）入力と名称入力を別々のインプットとして分離して表示するレイアウト。
-   * - 'horizontal': 横並び（左側にコード、右側に名称）
-   * - 'vertical': 縦並び（上がコード、下が名称）
-   * - undefined: 従来の単一インプット
+   * Adds a code input: horizontal places code left/name right, vertical places code above name; omitted uses a single input.
    */
   splitLayout?: 'horizontal' | 'vertical';
-  /** コード（値）入力欄のプレースホルダー */
+  /**
+   * Split code-input placeholder; the default is also used for an empty string.
+   * @defaultValue コード
+   */
   codePlaceholder?: string;
-  /** 名称入力欄のプレースホルダー */
+  /**
+   * Split name-input placeholder; falls back to placeholder when missing or empty.
+   */
   namePlaceholder?: string;
 }
 
@@ -147,7 +283,21 @@ function uniqByValue(options: SearchableSelectOption[]): SearchableSelectOption[
 }
 
 /**
- * 入力されたテキストに基づいて候補を検索（ローカルまたは非同期）して選択できる、インクリメンタルサーチ対応のセレクトボックス。
+ * Combines controlled string selection, local/remote search and optional host-owned option creation.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: options=EMPTY_OPTIONS, debounceMs=300, minSearchLength=1, matchByValue=true, matchByLabel=true, allowCustomValue=true, noOptionsMessage='候補なし', createDialogTitle='候補がありません。新規作成しますか？', createIdLabel='コード', createNameLabel='名称', createMode='manual_code', maxInlineResults=10, tooManyMessage='さらに絞り込んでください', autoSelectSingle=false, showIdInInput=false, secondaryDisplayPosition='right', matchByDescription=true, showValueInList=true.
+ * @returns The rendered SearchableSelectInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. No external combobox/dialog provider is required. The host must update value from onValueChange; numeric option values are emitted as strings and clearing emits an empty string. onSearch is debounced but receives no AbortSignal; cleanup cancels pending timers, not in-flight requests. Request IDs suppress older responses only when a newer eligible search starts. Refinements reuse up to 10 previous remote results without another fetch. Search/create rejections have no rendered error state or catch in their async handlers; handle operational failures in the host callbacks. Code-lookup search errors are caught and logged. onCreateRequested takes precedence over the built-in create dialog; neither path fabricates persistence or authorization. Known options accumulate by string value; updates containing only new labels for existing value lists may not refresh displayed labels. Applying an option may focus the next table-cell input or blur the input. Explicit display fields override showIdInInput; splitLayout adds a separate code input. See SearchableSelectInputProps for defaults and callback contracts.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { SearchableSelectInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [value, setValue] = useState("");
+ *   return (<label>Assignee<SearchableSelectInput value={value} onValueChange={setValue} options={[{ value: "ada", label: "Ada" }, { value: "grace", label: "Grace" }]} allowCustomValue={false} createMode="disabled" placeholder="Choose an assignee" /></label>);
+ * }
+ * ```
  */
 export function SearchableSelectInput({
   value,

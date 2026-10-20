@@ -7,7 +7,19 @@ import { cn } from '../../lib/utils';
 import { tabsListVariants } from './tabs-variants';
 
 /**
- * タブによる画面表示の切り替えを行うためのルートコンポーネント。
+ * Coordinates selection and orientation for a set of tabbed panels.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: orientation='horizontal'.
+ * @returns The rendered Tabs composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. List/Trigger/Content require Tabs context. Match trigger and panel value strings. orientation defaults to horizontal; TabsList variant defaults to default. Base UI owns activation, keyboard navigation and controlled/default selection.
+ * @example
+ * ```tsx
+ * import { Tabs, TabsList, TabsTrigger, TabsContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Tabs defaultValue="overview"><TabsList aria-label="Project sections"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList><TabsContent value="overview">Project overview</TabsContent><TabsContent value="activity">Recent activity</TabsContent></Tabs>);
+ * }
+ * ```
  */
 function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive.Root.Props) {
   return (
@@ -21,8 +33,19 @@ function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive
 }
 
 /**
- * TabsList component
- * @param {string} variant - Visual style of the tabs. Options: "default" | "line" | "primary"
+ * Renders the tab strip with default, line or primary visual treatment.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='default'.
+ * @returns The rendered TabsList composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. List/Trigger/Content require Tabs context. Match trigger and panel value strings. orientation defaults to horizontal; TabsList variant defaults to default. Base UI owns activation, keyboard navigation and controlled/default selection.
+ * @example
+ * ```tsx
+ * import { Tabs, TabsList, TabsTrigger, TabsContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Tabs defaultValue="overview"><TabsList aria-label="Project sections"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList><TabsContent value="overview">Project overview</TabsContent><TabsContent value="activity">Recent activity</TabsContent></Tabs>);
+ * }
+ * ```
  */
 function TabsList({
   className,
@@ -40,7 +63,19 @@ function TabsList({
 }
 
 /**
- * 各タブを選択・アクティブにするためのトリガーボタン。
+ * Renders a tab that selects its corresponding panel value.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered TabsTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. List/Trigger/Content require Tabs context. Match trigger and panel value strings. orientation defaults to horizontal; TabsList variant defaults to default. Base UI owns activation, keyboard navigation and controlled/default selection.
+ * @example
+ * ```tsx
+ * import { Tabs, TabsList, TabsTrigger, TabsContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Tabs defaultValue="overview"><TabsList aria-label="Project sections"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList><TabsContent value="overview">Project overview</TabsContent><TabsContent value="activity">Recent activity</TabsContent></Tabs>);
+ * }
+ * ```
  */
 function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   return (
@@ -60,7 +95,19 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
 }
 
 /**
- * アクティブなタブに対応するコンテンツを表示するパネル領域。
+ * Renders the panel associated with one tab value.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered TabsContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. List/Trigger/Content require Tabs context. Match trigger and panel value strings. orientation defaults to horizontal; TabsList variant defaults to default. Base UI owns activation, keyboard navigation and controlled/default selection.
+ * @example
+ * ```tsx
+ * import { Tabs, TabsList, TabsTrigger, TabsContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Tabs defaultValue="overview"><TabsList aria-label="Project sections"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList><TabsContent value="overview">Project overview</TabsContent><TabsContent value="activity">Recent activity</TabsContent></Tabs>);
+ * }
+ * ```
  */
 function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   return (

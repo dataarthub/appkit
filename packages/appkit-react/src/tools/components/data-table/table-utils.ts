@@ -77,20 +77,16 @@ export type TableHeadBase = {
 };
 
 /**
- * createColumnsFromHeads のオプション
- * Options for createColumnsFromHeads
- *
- * @typedef {Object} CreateColumnsOptions
- * @property {string} [locale] - ロケール / Locale for date formatting
- * @property {string} [timezone] - タイムゾーン / Timezone for date formatting
- * @property {string} [arraySeparator] - 配列の結合文字 / Separator for joining array values
+ * Compatibility options for {@link createColumnsFromHeads}.
+ * @remarks Only arraySeparator is currently consumed; locale and timezone do not affect generated cells.
+ * @see createColumnsFromHeads
  */
 export type CreateColumnsOptions = {
-  /** ロケール（日付フォーマット用） / Locale for date formatting */
+  /** Reserved compatibility option; currently ignored by createColumnsFromHeads. No locale default is applied here. */
   locale?: string;
-  /** タイムゾーン（日付フォーマット用） / Timezone for date formatting */
+  /** Reserved compatibility option; currently ignored by createColumnsFromHeads. No timezone default is applied here. */
   timezone?: string;
-  /** 配列の結合文字 / Separator for joining array values */
+  /** Separator for joining array values; defaults to " / ". */
   arraySeparator?: string;
 };
 
@@ -107,9 +103,12 @@ export type CreateColumnsOptions = {
  * @returns {unknown} 指定パスの値、存在しない場合はundefined / The value at the path
  *
  * @example
- * const obj = { user: { profile: { name: "John" } } };
- * getNestedValue(obj, "user.profile.name"); // "John"
- * getNestedValue(obj, "user.email"); // undefined
+ * ```ts
+ * import { getNestedValue } from '@alneas/appkit-react/tools/data-table';
+ * const obj = { user: { profile: { name: 'John' } } };
+ * getNestedValue(obj, 'user.profile.name'); // 'John'
+ * getNestedValue(obj, 'user.email'); // undefined
+ * ```
  */
 export const getNestedValue = (obj: KV, path: string): unknown => {
   return path.split('.').reduce<unknown>((current, key) => {
@@ -137,8 +136,12 @@ export const getNestedValue = (obj: KV, path: string): unknown => {
  * Each generator returns a function that takes a row and returns a formatted string.
  *
  * @example
+ * ```ts
+ * import { cellGenerators } from '@alneas/appkit-react/tools/data-table';
+ * const rowData = { createdAt: new Date(2026, 0, 15) };
  * const dateCell = cellGenerators.Date('createdAt');
- * const formatted = dateCell(rowData); // "2024/01/15"
+ * const formatted = dateCell(rowData);
+ * ```
  */
 export const cellGenerators = {
   /**
@@ -210,7 +213,11 @@ export const cellGenerators = {
    * @returns {(row: KV) => string} セルレンダラー関数 / Cell renderer function
    *
    * @example
-   * const statusCell = cellGenerators.Option('status', { 0: '未処理', 1: '完了' });
+   * ```ts
+   * import { cellGenerators } from '@alneas/appkit-react/tools/data-table';
+   * const statusCell = cellGenerators.Option('status', { 0: 'Pending', 1: 'Complete' });
+   * const label = statusCell({ status: 1 }); // 'Complete'
+   * ```
    */
   Option:
     (field: string, options?: Record<string | number, string>) =>
@@ -374,25 +381,25 @@ export const trimmedSort: SortingFn<KV> = (
 // =============================================================================
 
 /**
- * 宣言的なヘッダー定義からTanStack Tableのカラム定義を生成する
- * Creates TanStack Table column definitions from a declarative TableHeadBase array.
- *
- * デフォルト動作:
- * - 論理的な`type`を`cellGenerators`にマッピング
- * - Optionセル用の`options`マッピングを使用
- * - TimeString型には`timeSort`を適用
- * - その他の型には`trimmedSort`を適用
- *
- * @param {TableHeadBase[]} heads - ヘッダー定義の配列 / Array of header definitions
- * @param {CreateColumnsOptions} [options] - オプション設定 / Optional configuration
- * @returns {ColumnDef<KV>[]} TanStack Tableのカラム定義配列 / Array of column definitions
- *
+ * Creates table column definitions from declarative headers and built-in cell generators.
+ * @param heads - Header definitions in display order; field selects a row path and id can
+ * override the source path. Cell type defaults to String and sorting is enabled unless explicitly false.
+ * @param options - Array formatting options; see {@link CreateColumnsOptions}. arraySeparator
+ * defaults to " / "; locale and timezone are accepted but ignored by this function.
+ * @returns A newly allocated column-definition array; each definition closes over its header configuration.
+ * @remarks Date/Time cells receive only the field name and use their cell-generator defaults;
+ * passing locale/timezone here does not change them. Custom head.cell receives the original row.
+ * The generated JSX uses Appkit UI components; import Appkit CSS in the rendering host.
  * @example
+ * ```tsx
+ * import { createColumnsFromHeads } from '@alneas/appkit-react/tools/data-table';
+ * import '@alneas/appkit-react/styles';
  * const columns = createColumnsFromHeads([
- *   { field: 'name', text: '氏名' },
- *   { field: 'birthday', text: '生年月日', type: 'Date' },
- *   { field: 'status', text: '状態', type: 'Option', options: { 0: '未処理', 1: '完了' } },
- * ]);
+ *   { field: 'name', text: 'Name' },
+ *   { field: 'birthday', text: 'Birthday', type: 'Date' },
+ *   { field: 'status', text: 'Status', type: 'Option', options: { 0: 'Pending', 1: 'Done' } },
+ * ], { arraySeparator: ', ' });
+ * ```
  */
 export const createColumnsFromHeads = (
   heads: TableHeadBase[],
@@ -485,9 +492,12 @@ export const createColumnsFromHeads = (
  * @returns {string} 結合された文字列、空の場合は空文字列 / Joined string or empty string
  *
  * @example
- * joinValues(['a', 'b', 'c']); // "a / b / c"
- * joinValues(['a', 'b'], ', '); // "a, b"
- * joinValues(); // ""
+ * ```ts
+ * import { joinValues } from '@alneas/appkit-react/tools/data-table';
+ * joinValues(['a', 'b', 'c']); // 'a / b / c'
+ * joinValues(['a', 'b'], ', '); // 'a, b'
+ * joinValues(); // ''
+ * ```
  */
 export const joinValues = (value?: string[], separator = ' / '): string =>
   value && value.length ? value.join(separator) : '';

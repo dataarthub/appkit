@@ -7,8 +7,19 @@ import { cn } from '../../lib/utils';
 import { Label } from './label';
 
 /**
- * RadioCardGroup Component
- * カードスタイルのラジオグループコンポーネント
+ * Coordinates mutually exclusive choices displayed as cards.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered RadioCardGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place card items under RadioCardGroup with distinct value strings. label and detail are optional React nodes rendered inside the radio control; children are appended below them. Base UI owns selection and focus; the host owns persistence. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { RadioCardGroup, RadioCardItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<RadioCardGroup defaultValue="basic" aria-label="Plan"><RadioCardItem value="basic" label="Basic" detail="For personal use" /><RadioCardItem value="team" label="Team" /></RadioCardGroup>);
+ * }
+ * ```
  */
 const RadioCardGroup = React.forwardRef<HTMLDivElement, RadioGroupPrimitive.Props>(
   ({ className, ...props }, ref) => {
@@ -25,13 +36,30 @@ const RadioCardGroup = React.forwardRef<HTMLDivElement, RadioGroupPrimitive.Prop
 RadioCardGroup.displayName = 'RadioCardGroup';
 
 /**
- * RadioCardItem Component
- * カードスタイルのラジオアイテムコンポーネント
+ * Renders one card choice with label/detail content and a checked indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered RadioCardItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place card items under RadioCardGroup with distinct value strings. label and detail are optional React nodes rendered inside the radio control; children are appended below them. Base UI owns selection and focus; the host owns persistence. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { RadioCardGroup, RadioCardItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<RadioCardGroup defaultValue="basic" aria-label="Plan"><RadioCardItem value="basic" label="Basic" detail="For personal use" /><RadioCardItem value="team" label="Team" /></RadioCardGroup>);
+ * }
+ * ```
  */
 const RadioCardItem = React.forwardRef<
   HTMLButtonElement,
   RadioPrimitive.Root.Props & {
+    /**
+     * Visible control/option text or content; does not perform persistence or validation.
+     */
     label?: React.ReactNode;
+    /**
+     * Optional supporting content below the radio-card label.
+     */
     detail?: React.ReactNode;
   }
 >(({ className, children, label, detail, ...props }, ref) => {

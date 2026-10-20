@@ -1,14 +1,7 @@
 /**
- * @fileoverview Storage Abstraction Type Definitions
- *
- * Defines unified interfaces for file storage operations.
- * Supports local filesystem and cloud storage (Cloudflare R2, S3-compatible).
- *
- * @module lib/storage/types
- */
-
-/**
  * Binary data representation (compatible with Browser, Edge, and Node.js runtimes).
+ *
+ * @see {@link StorageAdapter.upload} for an upload example. Adapter upload signatures support their declared subset; ArrayBuffer must be wrapped in Uint8Array first.
  */
 export type BinaryData = Uint8Array | ArrayBuffer | Blob | ReadableStream | string;
 
@@ -21,25 +14,29 @@ export type BinaryData = Uint8Array | ArrayBuffer | Blob | ReadableStream | stri
  *
  * @example
  * ```typescript
- * const object: StorageObject = {
- *   key: 'invoices/2026/INV-001.pdf',
- *   size: 102400,
- *   contentType: 'application/pdf',
- *   lastModified: new Date('2026-01-12'),
- * };
+ * import type { StorageObject } from "@alneas/appkit-core/storage";
+ *
+ * const object: StorageObject = { key: "notes.txt", size: 5, contentType: "text/plain" };
+ * console.log(object.key);
  * ```
  */
 export interface StorageObject {
+
   /** Unique object key (path). */
   key: string;
+
   /** File size in bytes. */
   size?: number;
+
   /** MIME type. */
   contentType?: string;
+
   /** Last modified timestamp. */
   lastModified?: Date;
+
   /** ETag for caching and versioning. */
   etag?: string;
+
   /** Custom metadata key-value pairs. */
   metadata?: Record<string, string>;
 }
@@ -49,25 +46,41 @@ export interface StorageObject {
 // =============================================================================
 
 /**
- * Options for uploading files.
+ * Upload settings interpreted by the selected storage adapter.
+ *
+ * @remarks
+ * Access control belongs to the host filesystem/server or remote bucket policy.
+ * The supplied adapters ignore `public`; uploading does not configure access.
+ * Local storage infers a MIME type from the key extension when contentType is
+ * omitted. S3, R2 and OCI forward only an explicitly supplied contentType.
  *
  * @example
  * ```typescript
- * await storage.upload('docs/report.pdf', buffer, {
- *   contentType: 'application/pdf',
- *   metadata: { author: 'Taro Yamada' },
- *   cacheControl: 'max-age=3600',
- * });
+ * import type { StorageAdapter, StorageUploadOptions } from '@alneas/appkit-core/storage';
+ *
+ * // The host supplies an adapter configured for its storage and access policy.
+ * export async function uploadReport(storage: StorageAdapter, report: Uint8Array) {
+ *   const options: StorageUploadOptions = {
+ *     contentType: 'application/pdf',
+ *     metadata: { author: 'Taro Yamada' },
+ *     cacheControl: 'max-age=3600',
+ *   };
+ *   return storage.upload('docs/report.pdf', report, options);
+ * }
  * ```
  */
 export interface StorageUploadOptions {
-  /** MIME type (auto-detected if omitted). */
+
+  /** MIME type to send. Only LocalStorageAdapter infers it from the extension when omitted. */
   contentType?: string;
-  /** Custom metadata to attach. */
+
+  /** Custom metadata forwarded by remote adapters; ignored by LocalStorageAdapter. */
   metadata?: Record<string, string>;
-  /** Cache-Control header value. */
+
+  /** Cache-Control value forwarded by remote adapters; ignored by LocalStorageAdapter. */
   cacheControl?: string;
-  /** Whether the object should be publicly accessible (default: false). */
+
+  /** Reserved access hint, ignored by all supplied adapters; neither true nor false changes access policy. */
   public?: boolean;
 }
 
@@ -76,23 +89,21 @@ export interface StorageUploadOptions {
  *
  * @example
  * ```typescript
- * // Signed URL (valid for 1 hour)
- * const url = await storage.getUrl('private/doc.pdf', {
- *   expiresIn: 3600,
- *   signed: true,
- * });
+ * import type { StorageAdapter } from '@alneas/appkit-core/storage';
  *
- * // Download URL
- * const downloadUrl = await storage.getUrl('file.pdf', {
- *   downloadFilename: 'invoice.pdf',
- * });
+ * export async function example(storage: StorageAdapter) {
+ *   return storage.getUrl("notes.txt", { signed: true, expiresIn: 300 });
+ * }
  * ```
  */
 export interface StorageURLOptions {
+
   /** Expiration time for signed URLs in seconds. */
   expiresIn?: number;
+
   /** Filename for forced download attachment. */
   downloadFilename?: string;
+
   /** Whether to generate a signed URL (default: true for private objects). */
   signed?: boolean;
 }
@@ -102,45 +113,69 @@ export interface StorageURLOptions {
  *
  * @example
  * ```typescript
- * const result = await storage.list({
- *   prefix: 'invoices/2026/',
- *   delimiter: '/',
- *   limit: 100,
- * });
+ * import type { StorageAdapter, StorageListOptions } from '@alneas/appkit-core/storage';
+ *
+ * export async function listInvoiceDirectory(storage: StorageAdapter) {
+ *   const options: StorageListOptions = {
+ *     prefix: 'invoices/2026/', delimiter: '/', limit: 100,
+ *   };
+ *   return storage.list(options);
+ * }
  * ```
  */
 export interface StorageListOptions {
+
   /** Prefix to filter objects by. */
   prefix?: string;
+
   /** Delimiter character (e.g. '/' for hierarchical directory listing). */
   delimiter?: string;
-  /** Maximum number of objects to return. */
+
+  /** Provider listing limit; local storage counts objects and prefixes together (default 1000). */
   limit?: number;
-  /** Continuation token for pagination. */
+
+  /** Provider continuation token; ignored by LocalStorageAdapter. */
   cursor?: string;
-  /** Whether to include object metadata. */
+
+  /** Provider metadata request; local storage ignores this and always includes file metadata. */
   includeMetadata?: boolean;
 }
 
 /**
- * Result of a list operation.
+ * Objects and provider-specific continuation information returned by a listing.
+ *
+ * @remarks
+ * LocalStorageAdapter never supplies nextCursor. Its hasMore means the combined
+ * object/prefix count reached the limit, even when no additional entry exists.
+ * Local listings cannot continue beyond that limit with cursor.
  *
  * @example
  * ```typescript
- * const { objects, prefixes, hasMore, nextCursor } = await storage.list();
- * if (hasMore) {
- *   const nextPage = await storage.list({ cursor: nextCursor });
+ * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+ *
+ * export async function listInvoices(storage: StorageAdapter) {
+ *   const options = { prefix: 'invoices/', limit: 100 };
+ *   const first = await storage.list(options);
+ *   // Continue only when the adapter actually supplies a cursor.
+ *   const next = first.hasMore && first.nextCursor !== undefined
+ *     ? await storage.list({ ...options, cursor: first.nextCursor })
+ *     : undefined;
+ *   return { first, next };
  * }
  * ```
  */
 export interface StorageListResult {
+
   /** Array of storage objects. */
   objects: StorageObject[];
+
   /** Array of common prefixes (subdirectories). */
   prefixes?: string[];
-  /** Cursor for the next page, or undefined if no more pages. */
+
+  /** Provider continuation token, if supported and returned; absence alone does not guarantee completeness. */
   nextCursor?: string;
-  /** Whether there are more results available. */
+
+  /** Provider continuation indicator; local storage reports only whether the listing limit was reached. */
   hasMore: boolean;
 }
 
@@ -160,42 +195,35 @@ export interface StorageListResult {
  *
  * @example
  * ```typescript
- * // Development environment
- * const storage = new LocalStorageAdapter({
- *   baseDir: './uploads',
- * });
+ * import type { StorageAdapter } from '@alneas/appkit-core/storage';
  *
- * // Production environment
- * const storage = new R2StorageAdapter({
- *   accountId: 'xxx',
- *   bucket: 'my-bucket',
- *   accessKeyId: 'xxx',
- *   secretAccessKey: 'xxx',
- * });
- *
- * // Common API
- * await storage.upload('invoices/inv-001.pdf', pdfBuffer);
- * const url = await storage.getUrl('invoices/inv-001.pdf', { expiresIn: 3600 });
- * const { objects } = await storage.list({ prefix: 'invoices/' });
+ * export async function example(storage: StorageAdapter) {
+ *   return storage.upload("notes.txt", "hello", { contentType: "text/plain" });
+ * }
  * ```
  */
 export interface StorageAdapter {
+
   /**
    * Uploads a file to storage.
    *
    * @param key - Object key (path)
    * @param data - File data (Uint8Array, Blob, ReadableStream, or string)
-   * @param options - Upload options
-   * @returns Metadata of the uploaded object
+   * @param options - Adapter-specific settings; see {@link StorageUploadOptions} for MIME and access-policy limits.
+   * @returns Metadata reported by the selected adapter for the uploaded object.
+   * @throws Rejects when the selected adapter rejects the upload.
+   * @remarks The host configures persistence and access control. The public option
+   * does not change access policy in any supplied adapter.
    *
    * @example
    * ```typescript
-   * const result = await storage.upload(
-   *   'invoices/2026/inv-001.pdf',
-   *   pdfBuffer,
-   *   { contentType: 'application/pdf' }
-   * );
-   * console.log(result.key, result.size);
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function saveInvoice(storage: StorageAdapter, pdfBuffer: Uint8Array) {
+   *   return storage.upload('invoices/2026/inv-001.pdf', pdfBuffer, {
+   *     contentType: 'application/pdf',
+   *   });
+   * }
    * ```
    */
   upload(
@@ -203,6 +231,7 @@ export interface StorageAdapter {
     data: Uint8Array | Blob | ReadableStream | string,
     options?: StorageUploadOptions,
   ): Promise<StorageObject>;
+
 
   /**
    * Downloads a file from storage.
@@ -212,13 +241,15 @@ export interface StorageAdapter {
    *
    * @example
    * ```typescript
-   * const data = await storage.download('invoices/inv-001.pdf');
-   * if (data) {
-   *   fs.writeFileSync('local-copy.pdf', data);
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.download("reports/note.txt");
    * }
    * ```
    */
   download(key: string): Promise<Uint8Array | null>;
+
 
   /**
    * Retrieves a URL to access the object.
@@ -229,22 +260,51 @@ export interface StorageAdapter {
    *
    * @example
    * ```typescript
-   * // Signed URL (valid for 1 hour)
-   * const signedUrl = await storage.getUrl('private/doc.pdf', {
-   *   expiresIn: 3600,
-   * });
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
    *
-   * // Public URL
-   * const publicUrl = await storage.getUrl('public/logo.png', {
-   *   signed: false,
-   * });
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.getUrl("reports/note.txt", { expiresIn: 300 });
+   * }
    * ```
    */
   getUrl(key: string, options?: StorageURLOptions): Promise<string>;
-  /** Optional direct-upload capability for remote storage adapters. */
+
+  /**
+   * Signs a URL for a direct HTTP PUT upload.
+   *
+   * @param key - Destination object key.
+   * @param options - Optional expiry in seconds, defaulting to the configured value or 3600; valid range 1–604800.
+   * @returns A signed PUT URL; no object is uploaded by this call.
+   * @throws Rejects when the supplied adapter rejects the operation.
+   * @example
+   * ```typescript
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.getUploadUrl?.("reports/note.txt", { expiresIn: 300 });
+   * }
+   * ```
+   */
   getUploadUrl?(key: string, options?: Pick<StorageURLOptions, 'expiresIn'>): Promise<string>;
-  /** Optional explicit signed-download capability. */
+
+  /**
+   * Signs a URL for an HTTP GET download.
+   *
+   * @param key - Object key to retrieve.
+   * @param options - Optional expiry in seconds (1–604800) and download filename; signing is always performed.
+   * @returns A signed GET URL; no object is fetched by this call.
+   * @throws Rejects when the supplied adapter rejects the operation.
+   * @example
+   * ```typescript
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.getDownloadUrl?.("reports/note.txt", { expiresIn: 300 });
+   * }
+   * ```
+   */
   getDownloadUrl?(key: string, options?: StorageURLOptions): Promise<string>;
+
 
   /**
    * Deletes an object from storage.
@@ -254,11 +314,15 @@ export interface StorageAdapter {
    *
    * @example
    * ```typescript
-   * const deleted = await storage.delete('temp/old-file.txt');
-   * console.log(deleted ? 'Deleted' : 'Not found');
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.delete("reports/note.txt");
+   * }
    * ```
    */
   delete(key: string): Promise<boolean>;
+
 
   /**
    * Checks whether an object exists in storage.
@@ -268,12 +332,15 @@ export interface StorageAdapter {
    *
    * @example
    * ```typescript
-   * if (await storage.exists('config.json')) {
-   *   const data = await storage.download('config.json');
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.exists("reports/note.txt");
    * }
    * ```
    */
   exists(key: string): Promise<boolean>;
+
 
   /**
    * Retrieves object metadata without downloading the content.
@@ -283,40 +350,35 @@ export interface StorageAdapter {
    *
    * @example
    * ```typescript
-   * const meta = await storage.head('invoices/inv-001.pdf');
-   * if (meta) {
-   *   console.log(`Size: ${meta.size} bytes`);
-   *   console.log(`Last modified: ${meta.lastModified}`);
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.head("reports/note.txt");
    * }
    * ```
    */
   head(key: string): Promise<StorageObject | null>;
 
+
   /**
    * Lists objects in storage.
    *
-   * @param options - List options (prefix, delimiter, limit, cursor)
-   * @returns Paginated list result
-   *
+   * @param options - Provider-specific filters and limits; omitted options use adapter defaults.
+   * @returns Objects, optional prefixes and provider-specific continuation information; see {@link StorageListResult}.
+   * @throws Rejects when the selected adapter rejects the listing request.
+   * @remarks LocalStorageAdapter ignores cursor and never supplies nextCursor. Its
+   * hasMore reports reaching the limit, so it cannot drive a pagination loop.
    * @example
    * ```typescript
-   * // Filter by prefix
-   * const result = await storage.list({
-   *   prefix: 'invoices/2026/',
-   *   limit: 50,
-   * });
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
    *
-   * for (const obj of result.objects) {
-   *   console.log(obj.key, obj.size);
-   * }
-   *
-   * // Retrieve next page
-   * if (result.hasMore) {
-   *   const nextPage = await storage.list({ cursor: result.nextCursor });
+   * export async function firstInvoicePage(storage: StorageAdapter) {
+   *   return storage.list({ prefix: 'invoices/2026/', limit: 50 });
    * }
    * ```
    */
   list(options?: StorageListOptions): Promise<StorageListResult>;
+
 
   /**
    * Copies an object to a new key.
@@ -327,10 +389,15 @@ export interface StorageAdapter {
    *
    * @example
    * ```typescript
-   * await storage.copy('templates/invoice.pdf', 'invoices/inv-001.pdf');
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.copy?.("reports/note.txt", "archive/note.txt");
+   * }
    * ```
    */
   copy?(sourceKey: string, destinationKey: string): Promise<StorageObject>;
+
 
   /**
    * Moves an object to a new key (copy + delete).
@@ -341,7 +408,11 @@ export interface StorageAdapter {
    *
    * @example
    * ```typescript
-   * await storage.move('temp/upload.pdf', 'invoices/inv-001.pdf');
+   * import type { StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: StorageAdapter) {
+   *   return storage.move?.("reports/note.txt", "archive/note.txt");
+   * }
    * ```
    */
   move?(sourceKey: string, destinationKey: string): Promise<StorageObject>;
@@ -356,15 +427,19 @@ export interface StorageAdapter {
  *
  * @example
  * ```typescript
- * const config: LocalStorageConfig = {
- *   baseDir: './uploads',
- *   baseUrl: 'http://localhost:3000/files',
- * };
+ * import type { LocalStorageConfig } from "@alneas/appkit-core/storage";
+ *
+ * // The host provides real credentials/endpoint or its application-owned local directory.
+ * export function inspectConfig(config: LocalStorageConfig) {
+ *   return config.baseDir;
+ * }
  * ```
  */
 export interface LocalStorageConfig {
+
   /** Base directory for storage. */
   baseDir: string;
+
   /** Base URL for generating public URLs (optional). */
   baseUrl?: string;
 }
@@ -374,31 +449,37 @@ export interface LocalStorageConfig {
  *
  * @example
  * ```typescript
- * const config: R2StorageConfig = {
- *   accountId: process.env.R2_ACCOUNT_ID!,
- *   bucket: 'my-bucket',
- *   accessKeyId: process.env.R2_ACCESS_KEY_ID!,
- *   secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
- *   publicUrl: 'https://pub-xxx.r2.dev',
- *   defaultExpiresIn: 3600,
- * };
+ * import type { R2StorageConfig } from "@alneas/appkit-core/storage";
+ *
+ * // The host provides real credentials/endpoint or its application-owned local directory.
+ * export function inspectConfig(config: R2StorageConfig) {
+ *   return config.bucket;
+ * }
  * ```
  */
 export interface R2StorageConfig {
+
   /** Signing region for a custom S3-compatible endpoint; defaults to R2 auto. */
   region?: string;
+
   /** Cloudflare account ID. */
   accountId: string;
+
   /** R2 bucket name. */
   bucket: string;
-  /** Access key ID. */
+
+  /** Host-supplied credential identifier included in signed remote requests. */
   accessKeyId: string;
-  /** Secret access key. */
+
+  /** Host-supplied signing secret; keep it outside untrusted client code. */
   secretAccessKey: string;
+
   /** Custom endpoint URL (optional, auto-derived from accountId). */
   endpoint?: string;
+
   /** Public bucket URL for unsigned access (optional). */
   publicUrl?: string;
+
   /** Default expiration time for signed URLs in seconds (default: 3600). */
   defaultExpiresIn?: number;
 }
@@ -415,33 +496,40 @@ export interface R2StorageConfig {
  *
  * @example
  * ```typescript
- * const config: S3StorageConfig = {
- *   region: 'ap-northeast-1',
- *   bucket: 'my-compliance-bucket',
- *   accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
- *   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
- *   objectLockEnabled: true,
- *   defaultRetentionDays: 2555, // 7 years
- * };
+ * import type { S3StorageConfig } from "@alneas/appkit-core/storage";
+ *
+ * // The host provides real credentials/endpoint or its application-owned local directory.
+ * export function inspectConfig(config: S3StorageConfig) {
+ *   return config.bucket;
+ * }
  * ```
  */
 export interface S3StorageConfig {
+
   /** AWS region. */
   region: string;
+
   /** S3 bucket name. */
   bucket: string;
-  /** Access key ID. */
+
+  /** Host-supplied credential identifier included in signed remote requests. */
   accessKeyId: string;
-  /** Secret access key. */
+
+  /** Host-supplied signing secret; keep it outside untrusted client code. */
   secretAccessKey: string;
+
   /** Custom endpoint URL (optional, e.g. LocalStack). */
   endpoint?: string;
+
   /** Whether Object Lock is enabled (default: false). */
   objectLockEnabled?: boolean;
+
   /** Object Lock retention mode (default: COMPLIANCE). */
   objectLockMode?: 'GOVERNANCE' | 'COMPLIANCE';
+
   /** Default retention period in days (default: 2555 days = 7 years). */
   defaultRetentionDays?: number;
+
   /** Default expiration time for signed URLs in seconds (default: 3600). */
   defaultExpiresIn?: number;
 }
@@ -454,39 +542,47 @@ export interface S3StorageConfig {
  *
  * @example
  * ```typescript
- * const config: OCIStorageConfig = {
- *   namespace: 'your-tenancy-namespace',
- *   region: 'ap-tokyo-1',
- *   bucket: 'my-compliance-bucket',
- *   accessKeyId: process.env.OCI_ACCESS_KEY_ID!,
- *   secretAccessKey: process.env.OCI_SECRET_ACCESS_KEY!,
- *   objectLockEnabled: true,
- * };
+ * import type { OCIStorageConfig } from "@alneas/appkit-core/storage";
+ *
+ * // The host provides real credentials/endpoint or its application-owned local directory.
+ * export function inspectConfig(config: OCIStorageConfig) {
+ *   return config.bucket;
+ * }
  * ```
  */
 export interface OCIStorageConfig {
+
   /** OCI tenancy namespace. */
   namespace: string;
+
   /** OCI region (e.g. ap-tokyo-1). */
   region: string;
+
   /** Bucket name. */
   bucket: string;
-  /** Access key ID (Customer Secret Key). */
+
+  /** Host-supplied credential identifier included in signed remote requests. */
   accessKeyId: string;
-  /** Secret access key (Customer Secret Key). */
+
+  /** Host-supplied signing secret; keep it outside untrusted client code. */
   secretAccessKey: string;
+
   /** Custom endpoint URL (optional). */
   endpoint?: string;
+
   /** Whether Object Lock is enabled (default: false). */
   objectLockEnabled?: boolean;
+
   /**
    * Object Lock retention mode (default: GOVERNANCE).
    * - COMPLIANCE: No user (including administrators) can delete objects during retention. Risk of retained data post-cancellation.
    * - GOVERNANCE: Users with administrative privileges can delete objects. Requires internal administration rules for legal compliance.
    */
   objectLockMode?: 'GOVERNANCE' | 'COMPLIANCE';
+
   /** Default retention period in days (default: 2555 days = 7 years). */
   defaultRetentionDays?: number;
+
   /** Default expiration time for signed URLs in seconds (default: 3600). */
   defaultExpiresIn?: number;
 }

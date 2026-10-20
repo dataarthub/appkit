@@ -2,10 +2,33 @@ import * as React from 'react';
 
 import { cn } from '../../lib/utils';
 
+/**
+ * Native textarea attributes plus a stable selector; labels are supplied separately.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see Textarea
+ */
 export interface TextareaProps extends React.ComponentProps<'textarea'> {
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
+/**
+ * Renders a native multiline text input with Appkit styling and optional test ID.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered Textarea composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. testId maps to data-testid. Native textarea value/defaultValue/onChange semantics apply; this wrapper adds no debouncing or validation. No label prop is supported: use Label/htmlFor or an accessible name. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Textarea, Label } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><Label htmlFor="notes">Notes</Label><Textarea id="notes" testId="notes" rows={4} /></>);
+ * }
+ * ```
+ */
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, testId, ...props }, ref) => {
     return (

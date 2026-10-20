@@ -7,7 +7,19 @@ import { cn } from '../../lib/utils';
 import { navigationMenuTriggerStyle } from './navigation-menu-variants';
 
 /**
- * ナビゲーションメニューのルートコンポーネント。
+ * Coordinates navigation items and appends a shared popup positioner.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NavigationMenu composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose List/Item/Trigger/Content under NavigationMenu. The root already appends NavigationMenuPositioner; adding another creates another popup composition. Content is routed through the shared viewport by Base UI. The host supplies destinations and authorization; the Indicator export wraps Icon rather than computing active-item geometry.
+ * @example
+ * ```tsx
+ * import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Project</NavigationMenuTrigger><NavigationMenuContent><NavigationMenuLink href="/overview">Overview</NavigationMenuLink></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>);
+ * }
+ * ```
  */
 function NavigationMenu({ className, children, ...props }: NavigationMenuPrimitive.Root.Props) {
   return (
@@ -26,7 +38,19 @@ function NavigationMenu({ className, children, ...props }: NavigationMenuPrimiti
 }
 
 /**
- * ナビゲーションアイテムを横並びにするためのリストコンテナ。
+ * Lays out top-level navigation items in a horizontal list.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NavigationMenuList composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose List/Item/Trigger/Content under NavigationMenu. The root already appends NavigationMenuPositioner; adding another creates another popup composition. Content is routed through the shared viewport by Base UI. The host supplies destinations and authorization; the Indicator export wraps Icon rather than computing active-item geometry.
+ * @example
+ * ```tsx
+ * import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Project</NavigationMenuTrigger><NavigationMenuContent><NavigationMenuLink href="/overview">Overview</NavigationMenuLink></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>);
+ * }
+ * ```
  */
 function NavigationMenuList({ className, ...props }: NavigationMenuPrimitive.List.Props) {
   return (
@@ -39,7 +63,19 @@ function NavigationMenuList({ className, ...props }: NavigationMenuPrimitive.Lis
 }
 
 /**
- * ナビゲーションメニュー内の個々の項目。
+ * Associates a navigation trigger/link with its content.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NavigationMenuItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose List/Item/Trigger/Content under NavigationMenu. The root already appends NavigationMenuPositioner; adding another creates another popup composition. Content is routed through the shared viewport by Base UI. The host supplies destinations and authorization; the Indicator export wraps Icon rather than computing active-item geometry.
+ * @example
+ * ```tsx
+ * import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Project</NavigationMenuTrigger><NavigationMenuContent><NavigationMenuLink href="/overview">Overview</NavigationMenuLink></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>);
+ * }
+ * ```
  */
 function NavigationMenuItem({ className, ...props }: NavigationMenuPrimitive.Item.Props) {
   return (
@@ -52,7 +88,19 @@ function NavigationMenuItem({ className, ...props }: NavigationMenuPrimitive.Ite
 }
 
 /**
- * サブメニューを展開するためのトリガーボタン。
+ * Renders a navigation popup opener with a chevron.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NavigationMenuTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose List/Item/Trigger/Content under NavigationMenu. The root already appends NavigationMenuPositioner; adding another creates another popup composition. Content is routed through the shared viewport by Base UI. The host supplies destinations and authorization; the Indicator export wraps Icon rather than computing active-item geometry.
+ * @example
+ * ```tsx
+ * import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Project</NavigationMenuTrigger><NavigationMenuContent><NavigationMenuLink href="/overview">Overview</NavigationMenuLink></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>);
+ * }
+ * ```
  */
 function NavigationMenuTrigger({
   className,
@@ -75,7 +123,19 @@ function NavigationMenuTrigger({
 }
 
 /**
- * トリガーによって展開されるサブメニューのコンテンツコンテナ。
+ * Renders the content associated with its navigation item.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NavigationMenuContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose List/Item/Trigger/Content under NavigationMenu. The root already appends NavigationMenuPositioner; adding another creates another popup composition. Content is routed through the shared viewport by Base UI. The host supplies destinations and authorization; the Indicator export wraps Icon rather than computing active-item geometry.
+ * @example
+ * ```tsx
+ * import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Project</NavigationMenuTrigger><NavigationMenuContent><NavigationMenuLink href="/overview">Overview</NavigationMenuLink></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>);
+ * }
+ * ```
  */
 function NavigationMenuContent({ className, ...props }: NavigationMenuPrimitive.Content.Props) {
   return (
@@ -91,7 +151,19 @@ function NavigationMenuContent({ className, ...props }: NavigationMenuPrimitive.
 }
 
 /**
- * サブメニューのポップアップ位置を制御するポジショナーコンポーネント。
+ * Portals the shared navigation popup and viewport with configurable alignment.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: side='bottom', sideOffset=8, align='start', alignOffset=0.
+ * @returns The rendered NavigationMenuPositioner composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose List/Item/Trigger/Content under NavigationMenu. The root already appends NavigationMenuPositioner; adding another creates another popup composition. Content is routed through the shared viewport by Base UI. The host supplies destinations and authorization; the Indicator export wraps Icon rather than computing active-item geometry.  children are replaced by the shared popup/viewport composition.
+ * @example
+ * ```tsx
+ * import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Project</NavigationMenuTrigger><NavigationMenuContent><NavigationMenuLink href="/overview">Overview</NavigationMenuLink></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>);
+ * }
+ * ```
  */
 function NavigationMenuPositioner({
   className,
@@ -123,7 +195,19 @@ function NavigationMenuPositioner({
 }
 
 /**
- * ナビゲーション用のリンクコンポーネント。
+ * Renders an accessible navigation link inside the menu.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NavigationMenuLink composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose List/Item/Trigger/Content under NavigationMenu. The root already appends NavigationMenuPositioner; adding another creates another popup composition. Content is routed through the shared viewport by Base UI. The host supplies destinations and authorization; the Indicator export wraps Icon rather than computing active-item geometry.
+ * @example
+ * ```tsx
+ * import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Project</NavigationMenuTrigger><NavigationMenuContent><NavigationMenuLink href="/overview">Overview</NavigationMenuLink></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>);
+ * }
+ * ```
  */
 function NavigationMenuLink({ className, ...props }: NavigationMenuPrimitive.Link.Props) {
   return (
@@ -139,7 +223,19 @@ function NavigationMenuLink({ className, ...props }: NavigationMenuPrimitive.Lin
 }
 
 /**
- * 現在アクティブな項目を指し示すインジケーター。
+ * Renders a diamond-shaped decoration through the Base UI navigation icon primitive.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NavigationMenuIndicator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose List/Item/Trigger/Content under NavigationMenu. The root already appends NavigationMenuPositioner; adding another creates another popup composition. Content is routed through the shared viewport by Base UI. The host supplies destinations and authorization; the Indicator export wraps Icon rather than computing active-item geometry.  children are replaced by the diamond-shaped marker.
+ * @example
+ * ```tsx
+ * import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Project</NavigationMenuTrigger><NavigationMenuContent><NavigationMenuLink href="/overview">Overview</NavigationMenuLink></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>);
+ * }
+ * ```
  */
 function NavigationMenuIndicator({ className, ...props }: NavigationMenuPrimitive.Icon.Props) {
   return (

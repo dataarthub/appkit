@@ -1,11 +1,4 @@
-/**
- * レスポンシブデータリストコンポーネント
- *
- * shadcn/ui パターンに準拠:
- * - テーマトークン使用 (bg-card, text-muted-foreground など)
- * - testId prop 対応
- * - data-slot 属性
- */
+/** Responsive record presentation and touch interaction wrappers; the host owns data loading and actions. */
 
 import * as React from 'react';
 import { cn } from '../../lib/utils';
@@ -14,30 +7,101 @@ import { cn } from '../../lib/utils';
 // DataList - Table on desktop, Cards on mobile
 // ============================================================================
 
+/**
+ * One desktop-table/mobile-card column and optional row renderer.
+ * @typeParam T - Complete row shape used by record keys, renderers and callbacks.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see DataList
+ */
 export interface DataListColumn<T> {
+  /**
+   * Row property or dot-separated lookup path used for default rendering and column keys.
+   */
   key: keyof T | string;
+  /**
+   * Column heading, also used as a mobile card label unless mobileLabel=false.
+   */
   header: string;
+  /**
+   * Custom renderer receiving the complete row; may run for both desktop and mobile markup.
+   * @param item - Complete row supplied by the renderer/click handler.
+   * @returns Content rendered for this row/option.
+   */
   render?: (item: T) => React.ReactNode;
+  /**
+   * Additional classes merged with wrapper styling; see the component for the targeted element.
+   */
   className?: string;
-  /** Hide this column on mobile */
+  /**
+   * Hides this column only in mobile cards; omitted/false keeps it visible.
+   */
   mobileHidden?: boolean;
-  /** Show label on mobile card (default: true) */
+  /**
+   * Shows the column header beside the mobile value unless explicitly false.
+   */
   mobileLabel?: boolean;
 }
 
+/**
+ * Records, stable row keys and responsive rendering behavior for DataList.
+ * @typeParam T - Complete row shape used by record keys, renderers and callbacks.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see DataList
+ */
 export interface DataListProps<T> {
+  /**
+   * Rows in display order; an empty array renders only emptyMessage.
+   */
   data: T[];
+  /**
+   * Column definitions in display order; reused for desktop and mobile markup.
+   */
   columns: DataListColumn<T>[];
+  /**
+   * Row field whose String(value) supplies React keys; provide unique stable values.
+   */
   keyField: keyof T;
+  /**
+   * Called with the row on desktop-row or mobile-card click; adds pointer styling but no keyboard activation.
+   * @param item - Complete row supplied by the renderer/click handler.
+   * @returns No value; complete the host callback action.
+   */
   onRowClick?: (item: T) => void;
+  /**
+   * Text shown when data is empty.
+   * @defaultValue データがありません
+   */
   emptyMessage?: string;
+  /**
+   * Additional classes merged with wrapper styling; see the component for the targeted element.
+   */
   className?: string;
+  /**
+   * Additional classes on each mobile card.
+   */
   mobileCardClassName?: string;
+  /**
+   * Root data-testid for nonempty data; the empty state uses `${testId}-empty`.
+   */
   testId?: string;
 }
 
 /**
- * PCサイズではテーブル形式、モバイルサイズではカード形式でデータを表示するレスポンシブなデータリストコンポーネント。
+ * Renders the same records as a desktop table and mobile cards using responsive visibility classes.
+ * @typeParam T - Record shape used by data, column render callbacks and row-click callbacks; must extend Record<string, unknown>.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: emptyMessage='データがありません'.
+ * @returns The rendered DataList composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. DataList mounts both desktop/mobile representations; CSS switches visibility at md, so custom render callbacks may execute for both. It does not virtualize or add keyboard row activation. keyField must give stable unique stringifiable keys. ResponsiveGrid creates dynamic Tailwind classes: the host CSS must include the requested classes. Touch helpers do not add mouse/keyboard equivalents or persistence.
+ * @example
+ * ```tsx
+ * import type { ComponentProps } from 'react';
+ * import { DataList, ResponsiveGrid, SwipeableItem, PullToRefresh } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example({ refresh }: { refresh: () => Promise<void> }) {
+ *   return (<PullToRefresh onRefresh={async () => { await refresh(); }}><ResponsiveGrid><SwipeableItem onSwipeLeft={() => console.log("Left swipe")}><DataList data={[{ id: "one", title: "Draft" }]} keyField="id" columns={[{ key: "title", header: "Title" }]} /></SwipeableItem></ResponsiveGrid></PullToRefresh>);
+ * }
+ * ```
  */
 function DataList<T extends Record<string, unknown>>({
   data,
@@ -151,14 +215,40 @@ function DataList<T extends Record<string, unknown>>({
 // ResponsiveGrid
 // ============================================================================
 
+/**
+ * Native div attributes and dynamically constructed breakpoint column classes.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see ResponsiveGrid
+ */
 export interface ResponsiveGridProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Breakpoint column counts; defaults to { default: 1, md: 2, lg: 3 }. A supplied object replaces the default, with no merging. Requested dynamic utility classes must exist in host CSS.
+   */
   cols?: {
+    /**
+     * Column count below the sm breakpoint; if omitted in a supplied cols object, no base column class is added.
+     */
     default?: number;
+    /**
+     * Column count from the sm breakpoint; a requested utility class must exist in the host CSS.
+     */
     sm?: number;
+    /**
+     * Column count from the md breakpoint; a requested utility class must exist in the host CSS.
+     */
     md?: number;
+    /**
+     * Column count from the lg breakpoint; a requested utility class must exist in the host CSS.
+     */
     lg?: number;
+    /**
+     * Column count from the xl breakpoint; a requested utility class must exist in the host CSS.
+     */
     xl?: number;
   };
+  /**
+   * Gap preset: none=gap-0, sm=gap-2, default=gap-4, lg=gap-6; defaults to default.
+   */
   gap?: 'none' | 'sm' | 'default' | 'lg';
 }
 
@@ -170,7 +260,20 @@ const gapClasses = {
 };
 
 /**
- * デバイスの画面幅に合わせてカラム数を切り替えることができるレスポンシブグリッドレイアウト。
+ * Builds grid-column utility classes for caller-selected breakpoints.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: cols={ default: 1, md: 2, lg: 3 }, gap='default'.
+ * @returns The rendered ResponsiveGrid composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. DataList mounts both desktop/mobile representations; CSS switches visibility at md, so custom render callbacks may execute for both. It does not virtualize or add keyboard row activation. keyField must give stable unique stringifiable keys. ResponsiveGrid creates dynamic Tailwind classes: the host CSS must include the requested classes. Touch helpers do not add mouse/keyboard equivalents or persistence. cols defaults to { default: 1, md: 2, lg: 3 }; supplying cols replaces that object without merging omitted breakpoints.
+ * @example
+ * ```tsx
+ * import type { ComponentProps } from 'react';
+ * import { DataList, ResponsiveGrid, SwipeableItem, PullToRefresh } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example({ refresh }: { refresh: () => Promise<void> }) {
+ *   return (<PullToRefresh onRefresh={async () => { await refresh(); }}><ResponsiveGrid><SwipeableItem onSwipeLeft={() => console.log("Left swipe")}><DataList data={[{ id: "one", title: "Draft" }]} keyField="id" columns={[{ key: "title", header: "Title" }]} /></SwipeableItem></ResponsiveGrid></PullToRefresh>);
+ * }
+ * ```
  */
 function ResponsiveGrid({
   children,
@@ -205,16 +308,51 @@ function ResponsiveGrid({
 // SwipeableItem
 // ============================================================================
 
+/**
+ * Native outer div attributes and touch-swipe action configuration.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SwipeableItem
+ */
 export interface SwipeableItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Called at touch end when left displacement exceeds threshold; the wrapper then resets translation.
+   * @returns No value; complete the host callback action.
+   */
   onSwipeLeft?: () => void;
+  /**
+   * Called at touch end when right displacement exceeds threshold; the wrapper then resets translation.
+   * @returns No value; complete the host callback action.
+   */
   onSwipeRight?: () => void;
+  /**
+   * Background content revealed by a leftward swipe.
+   */
   leftAction?: React.ReactNode;
+  /**
+   * Background content revealed by a rightward swipe.
+   */
   rightAction?: React.ReactNode;
+  /**
+   * Strict activation threshold in CSS pixels; defaults to 50. Translation is capped at ±100, so thresholds >=100 never activate.
+   */
   threshold?: number;
 }
 
 /**
- * タッチデバイスなどで左右スワイプ操作によるアクション（削除や編集など）を実行できるコンポーネント。
+ * Reveals side actions during a horizontal touch swipe and notifies the host after a threshold.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: threshold=50.
+ * @returns The rendered SwipeableItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. DataList mounts both desktop/mobile representations; CSS switches visibility at md, so custom render callbacks may execute for both. It does not virtualize or add keyboard row activation. keyField must give stable unique stringifiable keys. ResponsiveGrid creates dynamic Tailwind classes: the host CSS must include the requested classes. Touch helpers do not add mouse/keyboard equivalents or persistence. threshold defaults to 50 CSS pixels; displacement is clamped to ±100px and resets after touch end. leftAction appears during a left swipe, rightAction during a right swipe. Callbacks run only when displacement strictly exceeds the threshold.
+ * @example
+ * ```tsx
+ * import type { ComponentProps } from 'react';
+ * import { DataList, ResponsiveGrid, SwipeableItem, PullToRefresh } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example({ refresh }: { refresh: () => Promise<void> }) {
+ *   return (<PullToRefresh onRefresh={async () => { await refresh(); }}><ResponsiveGrid><SwipeableItem onSwipeLeft={() => console.log("Left swipe")}><DataList data={[{ id: "one", title: "Draft" }]} keyField="id" columns={[{ key: "title", header: "Title" }]} /></SwipeableItem></ResponsiveGrid></PullToRefresh>);
+ * }
+ * ```
  */
 function SwipeableItem({
   children,
@@ -289,13 +427,38 @@ function SwipeableItem({
 // PullToRefresh
 // ============================================================================
 
+/**
+ * Native outer div attributes and asynchronous downward-pull refresh configuration.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see PullToRefresh
+ */
 export interface PullToRefreshProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Called and awaited after an eligible downward pull; the host performs refresh and handles errors. Rejection leaves the local refreshing state set.
+   * @returns A promise resolving when host refresh work completes; rejection is not caught by the wrapper.
+   */
   onRefresh: () => Promise<void>;
+  /**
+   * Visual pull distance in CSS pixels required for refresh; defaults to 80. Visual distance is half touch displacement capped at 100; values >100 cannot activate.
+   */
   pullThreshold?: number;
 }
 
 /**
- * モバイル端末などで画面上部を下に引っ張ってデータを更新する（Pull to Refresh）機能を実装するコンポーネント。
+ * Tracks downward touch motion and requests an asynchronous refresh after a threshold.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: pullThreshold=80.
+ * @returns The rendered PullToRefresh composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. DataList mounts both desktop/mobile representations; CSS switches visibility at md, so custom render callbacks may execute for both. It does not virtualize or add keyboard row activation. keyField must give stable unique stringifiable keys. ResponsiveGrid creates dynamic Tailwind classes: the host CSS must include the requested classes. Touch helpers do not add mouse/keyboard equivalents or persistence. A pull starts only when window.scrollY is zero. Visual distance is half the pointer displacement, capped at 100 CSS pixels; pullThreshold defaults to 80. Refresh is awaited, but there is no concurrency guard or finally cleanup: rejection leaves refreshing/pull state set. Handle errors inside onRefresh when recovery is needed. Native touch handlers supplied in props override the wrapper handlers.
+ * @example
+ * ```tsx
+ * import type { ComponentProps } from 'react';
+ * import { DataList, ResponsiveGrid, SwipeableItem, PullToRefresh } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example({ refresh }: { refresh: () => Promise<void> }) {
+ *   return (<PullToRefresh onRefresh={async () => { await refresh(); }}><ResponsiveGrid><SwipeableItem onSwipeLeft={() => console.log("Left swipe")}><DataList data={[{ id: "one", title: "Draft" }]} keyField="id" columns={[{ key: "title", header: "Title" }]} /></SwipeableItem></ResponsiveGrid></PullToRefresh>);
+ * }
+ * ```
  */
 function PullToRefresh({
   children,

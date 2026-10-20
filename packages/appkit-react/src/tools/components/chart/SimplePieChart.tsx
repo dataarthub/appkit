@@ -11,43 +11,49 @@ import {
 } from '../ui/chart';
 
 /**
- * シンプルな円グラフのプロップス
+ * Input data, keys and presentation options for the chart wrapper.
+ * @see SimplePieChart
  */
 interface SimplePieChartProps {
-  /** グラフデータ配列 */
+  /**
+   * Already-loaded records in plot order; required numeric values and category keys must be present.
+   */
   data: Array<Record<string, unknown>>;
-  /** 値として使用するデータキー */
+  /**
+   * Record key containing the numeric metric.
+   */
   dataKey: string;
-  /** ラベルとして使用するデータキー */
+  /**
+   * Record key used for slice labels; see the specific chart for any differing series-name behavior.
+   */
   nameKey: string;
-  /** カードのタイトル */
+  /**
+   * Visible card heading.
+   */
   title: string;
-  /** カードの説明（オプション） */
+  /**
+   * Optional supporting card text; omitted means no description.
+   */
   description?: string;
-  /** チャート設定 */
+  /**
+   * Optional ChartConfig replacing the generated config; keys should match plotted series. The wrapper does not merge missing entries.
+   */
   config?: ChartConfig;
 }
 
 /**
- * シンプルな円グラフ
- *
- * 割合や構成比を視覚化するためのドーナツ型円グラフ。
- *
+ * Renders a donut chart with a fixed inner radius and legend.
+ * @param props - Loaded chart data, series/axis keys and card/presentation settings; see SimplePieChartProps.
+ * @returns The rendered SimplePieChart composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Import Appkit CSS and install the optional recharts peer. The wrapper supplies ChartContainer context; no external query or chart provider is required. The host supplies already-loaded numeric data and a container with measurable dimensions. config replaces the generated series config rather than merging it. Series configuration emits --color-KEY variables; provide valid CSS colors when overriding defaults. This component does not fetch, aggregate or persist data. The donut uses innerRadius=60 and strokeWidth=5 in Recharts units. The plot is aspect-square with max-height 250px; there is no height prop. Per-slice colors should be supplied as row fill values; the default series config does not assign each slice a distinct fill.
  * @example
  * ```tsx
  * import { SimplePieChart } from '@alneas/appkit-react/tools/chart';
+ * import '@alneas/appkit-react/styles';
  *
- * const data = [
- *   { category: '製品A', value: 300, fill: 'var(--color-chart-1)' },
- *   { category: '製品B', value: 200, fill: 'var(--color-chart-2)' },
- * ];
- *
- * <SimplePieChart
- *   data={data}
- *   dataKey="value"
- *   nameKey="category"
- *   title="製品別売上"
- * />
+ * export function Example() {
+ *   return (<SimplePieChart title="Monthly sales" data={[{ month: "January", sales: 100, x: 1, size: 60, fill: "#2563eb" }, { month: "February", sales: 150, x: 2, size: 90, fill: "#7c3aed" }]} dataKey="sales" nameKey="month" config={{ sales: { label: "Sales", color: "#2563eb" } }} />);
+ * }
  * ```
  */
 export function SimplePieChart({

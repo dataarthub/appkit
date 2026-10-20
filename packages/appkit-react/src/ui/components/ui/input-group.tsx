@@ -9,7 +9,19 @@ import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 
 /**
- * 入力フィールドとアイコン、ボタンなどのアドオン要素を一体化して表示するためのコンテナ。
+ * Visually combines an input with leading, trailing or stacked add-ons.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered InputGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose these slots as siblings inside InputGroup. Addon clicks focus the first input unless the target is inside a button; a caller onClick spread afterward replaces that handler. InputGroupInput uses native input props and provides no label prop. InputGroupButton defaults to type=button, variant=ghost, size=xs.
+ * @example
+ * ```tsx
+ * import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputGroup><InputGroupAddon><InputGroupText>@</InputGroupText></InputGroupAddon><InputGroupInput aria-label="Username" /><InputGroupAddon align="inline-end"><InputGroupButton>Check</InputGroupButton></InputGroupAddon></InputGroup>);
+ * }
+ * ```
  */
 function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -29,6 +41,12 @@ const inputGroupAddonVariants = cva(
   "text-muted-foreground h-auto gap-2 py-1.5 text-sm font-medium group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4 flex cursor-text items-center justify-center select-none",
   {
     variants: {
+      /**
+       * Add-on placement within an input group.
+       * Accepted values: 'inline-start', 'inline-end', 'block-start', 'block-end'.
+       * @defaultValue 'inline-start'
+       * @see inputGroupAddonVariants
+       */
       align: {
         'inline-start': 'pl-2 has-[>button]:ml-[-0.3rem] has-[>kbd]:ml-[-0.15rem] order-first',
         'inline-end': 'pr-2 has-[>button]:mr-[-0.3rem] has-[>kbd]:mr-[-0.15rem] order-last',
@@ -45,7 +63,19 @@ const inputGroupAddonVariants = cva(
 );
 
 /**
- * 入力グループの前後や上下に配置されるアドオン領域。
+ * Positions input add-on content and focuses the neighboring input when clicked.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: align='inline-start'.
+ * @returns The rendered InputGroupAddon composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose these slots as siblings inside InputGroup. Addon clicks focus the first input unless the target is inside a button; a caller onClick spread afterward replaces that handler. InputGroupInput uses native input props and provides no label prop. InputGroupButton defaults to type=button, variant=ghost, size=xs.
+ * @example
+ * ```tsx
+ * import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputGroup><InputGroupAddon><InputGroupText>@</InputGroupText></InputGroupAddon><InputGroupInput aria-label="Username" /><InputGroupAddon align="inline-end"><InputGroupButton>Check</InputGroupButton></InputGroupAddon></InputGroup>);
+ * }
+ * ```
  */
 function InputGroupAddon({
   className,
@@ -71,6 +101,12 @@ function InputGroupAddon({
 
 const inputGroupButtonVariants = cva('gap-2 text-sm shadow-none flex items-center', {
   variants: {
+    /**
+     * Control size preset selected by the consumer; sizes are class-based rather than numeric dimensions.
+     * Accepted values: xs, sm, 'icon-xs', 'icon-sm'.
+     * @defaultValue 'xs'
+     * @see inputGroupButtonVariants
+     */
     size: {
       xs: "h-6 gap-1 rounded-[calc(var(--radius)-3px)] px-1.5 [&>svg:not([class*='size-'])]:size-3.5",
       sm: '',
@@ -84,7 +120,19 @@ const inputGroupButtonVariants = cva('gap-2 text-sm shadow-none flex items-cente
 });
 
 /**
- * 入力グループ内に配置されるアクション用ボタン。
+ * Renders a compact action button inside an input group.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: type='button', variant='ghost', size='xs'.
+ * @returns The rendered InputGroupButton composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose these slots as siblings inside InputGroup. Addon clicks focus the first input unless the target is inside a button; a caller onClick spread afterward replaces that handler. InputGroupInput uses native input props and provides no label prop. InputGroupButton defaults to type=button, variant=ghost, size=xs.
+ * @example
+ * ```tsx
+ * import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputGroup><InputGroupAddon><InputGroupText>@</InputGroupText></InputGroupAddon><InputGroupInput aria-label="Username" /><InputGroupAddon align="inline-end"><InputGroupButton>Check</InputGroupButton></InputGroupAddon></InputGroup>);
+ * }
+ * ```
  */
 function InputGroupButton({
   className,
@@ -94,7 +142,13 @@ function InputGroupButton({
   ...props
 }: Omit<React.ComponentProps<typeof Button>, 'size' | 'type'> &
   VariantProps<typeof inputGroupButtonVariants> & {
+    /**
+     * Native button type; InputGroupButton defaults to button to avoid implicit form submission.
+     */
     type?: 'button' | 'submit' | 'reset';
+    /**
+     * Custom Base UI render element; it must accept forwarded/merged interaction props and refs. No asChild adapter is provided.
+     */
     render?: React.ReactElement;
   }) {
   return (
@@ -109,7 +163,19 @@ function InputGroupButton({
 }
 
 /**
- * 入力グループ内でテキストや記号を表示するためのコンポーネント。
+ * Styles static text or symbols inside an input group.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered InputGroupText composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose these slots as siblings inside InputGroup. Addon clicks focus the first input unless the target is inside a button; a caller onClick spread afterward replaces that handler. InputGroupInput uses native input props and provides no label prop. InputGroupButton defaults to type=button, variant=ghost, size=xs.
+ * @example
+ * ```tsx
+ * import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputGroup><InputGroupAddon><InputGroupText>@</InputGroupText></InputGroupAddon><InputGroupInput aria-label="Username" /><InputGroupAddon align="inline-end"><InputGroupButton>Check</InputGroupButton></InputGroupAddon></InputGroup>);
+ * }
+ * ```
  */
 function InputGroupText({ className, ...props }: React.ComponentProps<'span'>) {
   return (
@@ -124,7 +190,19 @@ function InputGroupText({ className, ...props }: React.ComponentProps<'span'>) {
 }
 
 /**
- * 入力グループ内で枠線や個別のスタイルを持たない状態で配置される入力フィールド。
+ * Renders an Appkit input with group-compatible borderless styling.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered InputGroupInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose these slots as siblings inside InputGroup. Addon clicks focus the first input unless the target is inside a button; a caller onClick spread afterward replaces that handler. InputGroupInput uses native input props and provides no label prop. InputGroupButton defaults to type=button, variant=ghost, size=xs.
+ * @example
+ * ```tsx
+ * import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputGroup><InputGroupAddon><InputGroupText>@</InputGroupText></InputGroupAddon><InputGroupInput aria-label="Username" /><InputGroupAddon align="inline-end"><InputGroupButton>Check</InputGroupButton></InputGroupAddon></InputGroup>);
+ * }
+ * ```
  */
 function InputGroupInput({ className, ...props }: React.ComponentProps<'input'>) {
   return (
@@ -140,7 +218,19 @@ function InputGroupInput({ className, ...props }: React.ComponentProps<'input'>)
 }
 
 /**
- * 入力グループ内で枠線や個別のスタイルを持たない状態で配置される複数行入力フィールド。
+ * Renders a textarea with group-compatible borderless styling.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered InputGroupTextarea composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose these slots as siblings inside InputGroup. Addon clicks focus the first input unless the target is inside a button; a caller onClick spread afterward replaces that handler. InputGroupInput uses native input props and provides no label prop. InputGroupButton defaults to type=button, variant=ghost, size=xs.
+ * @example
+ * ```tsx
+ * import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupInput } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<InputGroup><InputGroupAddon><InputGroupText>@</InputGroupText></InputGroupAddon><InputGroupInput aria-label="Username" /><InputGroupAddon align="inline-end"><InputGroupButton>Check</InputGroupButton></InputGroupAddon></InputGroup>);
+ * }
+ * ```
  */
 function InputGroupTextarea({ className, ...props }: React.ComponentProps<'textarea'>) {
   return (
