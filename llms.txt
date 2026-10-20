@@ -19,3 +19,4 @@ Choose Core for framework-independent schemas, storage, data, graphs, regional c
 - [AI security](packages/appkit-react/docs/ai.md)
 
 [Release requirements](RELEASING.md)
+[Agent evaluation procedure](docs/agent-evaluation.md)

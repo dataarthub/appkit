@@ -1,0 +1,34 @@
+{
+  "id": "tool-validation",
+  "allowedOutputPaths": [
+    "solution.ts"
+  ],
+  "allowedImports": [
+    "@alneas/appkit-core",
+    "@alneas/appkit-core/*"
+  ],
+  "requiredPeers": {},
+  "safetyAssertionIds": [
+    "invalid",
+    "unexposed",
+    "projection"
+  ],
+  "assertionIds": [
+    "invalid",
+    "unexposed",
+    "projection"
+  ],
+  "seedReferences": [],
+  "requiredIntegration": [
+    {
+      "symbols": [
+        "ActionRegistry"
+      ]
+    },
+    {
+      "symbols": [
+        "createActionToolBridge"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+import type {ActionToolBridge} from '@alneas/appkit-core/ai'; export declare function createToolScenario(onWrite: (args:{name:string})=>Promise<{name:string;secret:string}>): {bridge:ActionToolBridge;close():void};
