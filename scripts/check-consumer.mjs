@@ -18,10 +18,10 @@ for(const name of names){
  assert.equal(pkg.name,'@alneas/'+name);assert.equal(pkg.version,JSON.parse(readFileSync(path.join(dir,'package.json'))).version);assert.equal(pkg.publishConfig.access,'public');
  for(const spec of Object.values({...pkg.dependencies,...pkg.optionalDependencies,...pkg.peerDependencies}))assert(!/^(workspace:|file:|link:)/.test(spec),'Local production dependency');
  const entries=new Set(run('tar',['-tzf',file]).trim().split('\n'));
- for(const entry of entries)assert(!/\.env|node_modules|\.verification|\.(test|spec)\./.test(entry)&&/^package\/(dist\/|docs\/|consumer-ai\/(?:SKILL\.md|package-context\.json|api-index\.json)$|README.md$|LICENSE$|THIRD_PARTY_NOTICES.md$|package.json$|llms(?:-full)?\.txt$)/.test(entry),'Unexpected archive member '+entry);
+ for(const entry of entries)assert(!/\.env|node_modules|\.verification|\.(test|spec)\./.test(entry)&&/^package\/(dist\/|docs\/|consumer-ai\/(?:SKILL\.md|package-context\.json|api-index\.json)$|README.md$|CHANGELOG.md$|LICENSE$|THIRD_PARTY_NOTICES.md$|package.json$|llms(?:-full)?\.txt$)/.test(entry),'Unexpected archive member '+entry);
  function target(value){if(typeof value==='string')assert(entries.has('package/'+value.replace(/^\.\//,'')),'Missing packed export '+value);else Object.values(value).forEach(target);}
  Object.values(pkg.exports).forEach(target);
- for(const name of ['README.md','LICENSE','llms.txt','llms-full.txt','consumer-ai/SKILL.md','consumer-ai/package-context.json','consumer-ai/api-index.json',...(pkg.name==='@alneas/appkit-react'?['THIRD_PARTY_NOTICES.md']:[])])assert(entries.has('package/'+name),'Missing packed '+name);
+ for(const name of ['README.md','LICENSE',...(pkg.files?.includes('CHANGELOG.md')?['CHANGELOG.md']:[]),'llms.txt','llms-full.txt','consumer-ai/SKILL.md','consumer-ai/package-context.json','consumer-ai/api-index.json',...(pkg.name==='@alneas/appkit-react'?['THIRD_PARTY_NOTICES.md']:[])])assert(entries.has('package/'+name),'Missing packed '+name);
  for(const metadata of ['SKILL.md','package-context.json','api-index.json'])assert.equal(run('tar',['-xOf',file,'package/consumer-ai/'+metadata]),run('tar',['-xOf',file,'package/dist/consumer-ai/'+metadata]),'Metadata copy mismatch');
  records.packages[pkg.name]={version:pkg.version,file,sha256:createHash('sha256').update(readFileSync(file)).digest('hex'),integrity:info.integrity};
 }

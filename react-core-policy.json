@@ -1,4 +1,11 @@
 {
   "schemaVersion": 1,
-  "requirements": []
+  "requirements": [
+    {
+      "id": "ai-recovery-metadata",
+      "coreVersion": "0.2.0",
+      "reactVersion": "0.2.0",
+      "reason": "React 0.2.0 must adopt Core AI error codes, documentation URLs and recovery metadata described in its release notes; publishing Core alone does not deliver them to React consumers."
+    }
+  ]
 }
