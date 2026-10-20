@@ -2,6 +2,16 @@
   "name": "@alneas/appkit-react",
   "version": "0.1.0",
   "description": "Unified React 19 business UI toolkit: accessible primitives, schema-driven forms, data tables, and AI chat interfaces",
+  "keywords": [
+    "react",
+    "typescript",
+    "ui-components",
+    "forms",
+    "schema-driven-forms",
+    "data-table",
+    "ai-chat",
+    "accessibility"
+  ],
   "type": "module",
   "homepage": "https://tech-docs.alneas.com/appkit/appkit-react/",
   "license": "MIT",

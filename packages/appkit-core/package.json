@@ -2,6 +2,17 @@
   "name": "@alneas/appkit-core",
   "version": "0.1.0",
   "description": "Unified business logic backbone: schema validation, persistence adapters, dependency graphs, and Japanese/regional commercial presets",
+  "keywords": [
+    "typescript",
+    "schema-validation",
+    "json-schema",
+    "business-logic",
+    "storage",
+    "data-access",
+    "dependency-graph",
+    "workflow",
+    "ai-chat"
+  ],
   "type": "module",
   "homepage": "https://tech-docs.alneas.com/appkit/appkit-core/",
   "license": "MIT",
