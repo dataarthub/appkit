@@ -69,7 +69,7 @@ export function createAjvResolver<T extends FieldValues = FieldValues>(schema: o
       }
       const leaf = keys.at(-1)!;
       if (!Object.hasOwn(target, leaf)) Object.defineProperty(target, leaf, {
-        value: { message: error.message, type: error.keyword }, enumerable: true, configurable: true,
+        value: { message: error.message, type: error.keyword }, enumerable: true, configurable: true, writable: true,
       });
     });
 
