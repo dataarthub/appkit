@@ -1,0 +1,11 @@
+title = "Appkit secret detection"
+
+[extend]
+useDefault = true
+
+# Also reject realistic dummy provider tokens; tests should assemble canaries at runtime.
+[[rules]]
+id = "appkit-provider-token-prefix"
+description = "OpenAI or GitHub token-shaped data must not be committed"
+regex = '''\b(?:sk-(?:proj-|svcacct-)?|gh[pousr]_)[A-Za-z0-9_-]{20,}\b'''
+keywords = ["sk-", "ghp_", "gho_", "ghu_", "ghs_", "ghr_"]
