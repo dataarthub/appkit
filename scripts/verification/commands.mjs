@@ -24,7 +24,7 @@ if (!nodeCompatibility) {
   if (plan.compatibility) bun('check:react-core');
   if (plan.stories.length) {
     bun('storybook:prepare');
-    add('node','scripts/test-storybook.mjs','--plan',planFile);
+    add('node','scripts/verification/browser.mjs','--plan',planFile);
   }
 }
 return commands;

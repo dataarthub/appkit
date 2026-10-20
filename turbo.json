@@ -83,6 +83,39 @@
         "consumer-ai/package-context.json",
         "consumer-ai/api-index.json"
       ]
+    },
+    "@alneas/appkit-react#test:browser": {
+      "inputs": [
+        "src/**",
+        "stories/**",
+        ".storybook/**",
+        "public/**",
+        "messages/**",
+        "project.inlang/**",
+        "*.config.*",
+        "tsconfig*.json",
+        "scripts/**",
+        "dist/**",
+        "$TURBO_ROOT$/packages/appkit-core/src/**",
+        "$TURBO_ROOT$/packages/appkit-core/dist/**",
+        "$TURBO_ROOT$/packages/appkit-core/package.json",
+        "$TURBO_ROOT$/scripts/test-storybook.mjs",
+        "$TURBO_ROOT$/scripts/verification/browser.mjs",
+        "$TURBO_ROOT$/scripts/verification/story-selection.mjs",
+        "$TURBO_ROOT$/scripts/lib/**",
+        "$TURBO_ROOT$/bun.lock"
+      ],
+      "env": [
+        "APPKIT_STORY_FILES",
+        "CI",
+        "APPKIT_TASK_RUNTIME",
+        "APPKIT_CI_IMAGE",
+        "NODE_ENV",
+        "TZ",
+        "NODE_OPTIONS"
+      ],
+      "outputs": [],
+      "outputLogs": "new-only"
     }
   },
   "globalDependencies": [

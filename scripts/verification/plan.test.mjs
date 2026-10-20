@@ -44,3 +44,11 @@ test('inherited hook Git variables cannot redirect selection to another reposito
   assert.deepEqual(plan.changedFiles,['changed.md']);assert.equal(plan.full,false);
  } finally {for(const name of names) if(saved[name]===undefined) delete process.env[name];else process.env[name]=saved[name];}
 }));
+test('real Git metadata diff provides before/after contents for release fast path',()=>fixture(async({root,put,commit,git})=>{
+ put('packages/appkit-core/package.json','{"name":"@alneas/appkit-core","version":"0.2.0"}');
+ put('packages/appkit-react/stories/example.stories.tsx','export const Basic={};');
+ const baseline=commit();git(['update-ref','refs/remotes/origin/main',baseline]);
+ put('packages/appkit-core/package.json','{"name":"@alneas/appkit-core","version":"0.2.1"}');
+ const plan=await createPlan({directory:root});
+ assert.deepEqual(plan.stories,[]);assert.equal(plan.packages,false);assert.equal(plan.release,true);
+}));

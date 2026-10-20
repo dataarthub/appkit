@@ -1,6 +1,7 @@
 import {readFileSync, readdirSync, existsSync, statSync} from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import {isDeepStrictEqual} from 'node:util';
 
 function files(root, directory) {
   if (!existsSync(path.join(root, directory))) return [];
@@ -20,6 +21,27 @@ function proseOnly(change) {
     !/[@#](?:ts-|jsx|vite|vitest|__PURE__|__NO_SIDE_EFFECTS__)|<reference\b/.test(change.before + change.after) &&
     tokens(change.before) === tokens(change.after);
 }
+function metadataOnly(change) {
+  if (typeof change.before !== 'string' || typeof change.after !== 'string') return false;
+  const parse = text => {
+    const result = ts.parseConfigFileTextToJson(change.file, text);
+    if (result.error || !result.config || typeof result.config !== 'object') throw Error('Invalid metadata');
+    return result.config;
+  };
+  try {
+    const before = parse(change.before), after = parse(change.after);
+    if (change.file === 'bun.lock') {
+      // Only workspace version fields may differ; resolved packages and dependency
+      // constraints must be identical. A dependency update is never metadata-only.
+      for (const value of [before,after]) for (const key of ['packages/appkit-core','packages/appkit-react']) {
+        if (value.workspaces?.[key]) delete value.workspaces[key].version;
+      }
+    } else {
+      for (const value of [before,after]) delete value.version;
+    }
+    return isDeepStrictEqual(before, after);
+  } catch {return false;}
+}
 function affectedStories(root, stories, changed) {
   let uncertain = false;
   const graph = new Map();
@@ -27,7 +49,9 @@ function affectedStories(root, stories, changed) {
   // take the full-gate path; generated modules are opaque here, like dependencies.
   const generated = file => file.startsWith('packages/appkit-react/src/tools/paraglide/');
   function resolve(base) {
-    return [base, ...['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts', '.mjs', '.cjs', '.json', '/index.ts', '/index.tsx', '/index.js'].map(ext => base + ext)]
+    const sourceBase = base.replace(/\.(?:[cm]?js|jsx)$/, '');
+    const substituted = base.endsWith('.mjs') ? [sourceBase + '.mts'] : base.endsWith('.cjs') ? [sourceBase + '.cts'] : [];
+    return [base, ...substituted, ...['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts', '.mjs', '.cjs', '.json', '/index.ts', '/index.tsx', '/index.js'].map(ext => sourceBase + ext)]
       .find(candidate => existsSync(candidate) && statSync(candidate).isFile());
   }
   function dependencies(file) {
@@ -37,6 +61,8 @@ function affectedStories(root, stories, changed) {
     const ast = ts.createSourceFile(file, readFileSync(path.join(root, file), 'utf8'), ts.ScriptTarget.Latest, true);
     if (ast.parseDiagnostics.length) uncertain = true;
     function walk(node) {
+      // Explicit type-only declarations are erased; package typechecks cover them.
+      if ((ts.isImportDeclaration(node) && node.importClause?.isTypeOnly) || (ts.isExportDeclaration(node) && node.isTypeOnly)) return;
       let specifier;
       if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier) specifier = node.moduleSpecifier;
       if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) specifier = node.moduleReference.expression;
@@ -47,16 +73,18 @@ function affectedStories(root, stories, changed) {
       }
       if (specifier && ts.isStringLiteralLike(specifier)) {
         const name = specifier.text;
-        if (name.startsWith('.') || name.startsWith('@alneas/appkit-react')) {
+        if (name.startsWith('.') || /^@alneas\/appkit-(?:core|react)(?:\/|$)/.test(name)) {
           let resolved;
           if (name.startsWith('.')) resolved = resolve(path.resolve(root, path.dirname(file), name));
           else {
             try {
-              const manifest = JSON.parse(readFileSync(path.join(root, 'packages/appkit-react/package.json'), 'utf8'));
-              const key = '.' + name.slice('@alneas/appkit-react'.length);
+              const packageName = name.match(/^@alneas\/appkit-(?:core|react)/)[0];
+              const packageDirectory = 'packages/' + packageName.slice('@alneas/'.length);
+              const manifest = JSON.parse(readFileSync(path.join(root, packageDirectory, 'package.json'), 'utf8'));
+              const key = '.' + name.slice(packageName.length);
               const entry = manifest.exports[key]?.import?.default;
               if (typeof entry === 'string' && entry.startsWith('./dist/')) {
-                resolved = resolve(path.join(root, 'packages/appkit-react/src', entry.slice(7).replace(/\.js$/, '')));
+                resolved = resolve(path.join(root, packageDirectory, 'src', entry.slice(7).replace(/\.js$/, '')));
               }
             } catch { /* Unsupported export mapping: run all stories. */ }
           }
@@ -106,9 +134,20 @@ export function selectChecks({root, changes, full = false}) {
       plan.packages = plan.release = plan.docs = plan.compatibility = true;
       if (file.startsWith('packages/appkit-core/src/ai/')) plan.agent = true;
       browserChanges.add(file);
-      if (file.startsWith('packages/appkit-core/') || change.status === 'D') allStories = true;
+      if (change.status === 'D') allStories = true;
       continue;
     }
+    if ((/^packages\/appkit-(core|react)\/package.json$/.test(file) || file === 'bun.lock') && metadataOnly(change)) {
+      plan.release = plan.docs = true; continue;
+    }
+    if (/^packages\/appkit-(core|react)\/(?:consumer-ai\/(?:api-index|package-context)\.json)$/.test(file)) {
+      plan.docs = plan.agent = true; continue;
+    }
+    if (/^scripts\/verification\/(?:commands|plan|quality-runs|run|workflow).*\.(?:mjs)$/.test(file)) {tooling.add('verification'); continue;}
+    if (file === '.github/workflows/publish.yml') {tooling.add('publish'); continue;}
+    if (file === '.github/workflows/record-npm-deployments.yml') {tooling.add('deployments'); continue;}
+    if (file === 'react-core-policy.json' || /^scripts\/(?:check-react-core|react-core\/)/.test(file)) {plan.compatibility = true; tooling.add('react-core'); continue;}
+    if (/^scripts\/(?:check-release|check-consumer)\.mjs$/.test(file)) {plan.release = true; plan.packages = true; continue;}
     if (/^scripts\/record-npm-deployments/.test(file)) {tooling.add('deployments'); continue;}
     if (/^scripts\/publish\//.test(file)) {tooling.add('publish'); continue;}
     if (/^scripts\/(?:agent\/|agent-eval\/|test-agent-tooling)/.test(file)) {plan.agent = true; plan.packages = plan.docs = true; continue;}
