@@ -7,12 +7,16 @@ import {checkPolicy} from './react-core/policy.mjs';
 import {runMatrix, verifyInstalledCore} from './react-core/runner.mjs';
 import {fixtureManifest} from './react-core/fixture.mjs';
 
+const args = process.argv.slice(2);
+if (args.length > 1 || args.some(arg => arg !== '--release')) throw Error('Usage: check-react-core.mjs [--release]');
+const release = args[0] === '--release';
 const root = path.resolve(import.meta.dirname, '..');
 const json = file => JSON.parse(readFileSync(file, 'utf8'));
 const core = json(path.join(root, 'packages/appkit-core/package.json'));
 const react = json(path.join(root, 'packages/appkit-react/package.json'));
 const policy = json(path.join(root, 'react-core-policy.json'));
-const versions = checkPolicy({core, react, policy});
+const versions = checkPolicy({core, react, policy, release});
+if (versions.pendingRequirements.length) console.warn('Pending React Core adoption (React publication is blocked until adopted): ' + versions.pendingRequirements.join(', '));
 mkdirSync(path.join(root, '.verification/react-core'), {recursive: true});
 const evidence = mkdtempSync(path.join(root, '.verification/react-core/run-'));
 const temporary = mkdtempSync(path.join(tmpdir(), 'appkit-react-core-'));

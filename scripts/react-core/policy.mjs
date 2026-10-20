@@ -19,21 +19,27 @@ function compare(a, b) {
   }
   return 0;
 }
-export function checkPolicy({core, react, policy}) {
+export function checkPolicy({core, react, policy, release = false}) {
   version(core.version); version(react.version);
   const requiredCore = react.dependencies?.['@alneas/appkit-core'];
   version(requiredCore);
   if (policy?.schemaVersion !== 1 || !Array.isArray(policy.requirements)) throw Error('Invalid react-core-policy.json');
   const ids = new Set();
+  const pendingRequirements = [];
   for (const entry of policy.requirements) {
     if (!entry || typeof entry.id !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.id) || ids.has(entry.id) ||
         typeof entry.reason !== 'string' || !entry.reason.trim()) throw Error('Invalid or duplicate React impact requirement');
     ids.add(entry.id);
     version(entry.coreVersion);
+    if (entry.reactVersion !== undefined) version(entry.reactVersion);
     if (compare(core.version, entry.coreVersion) < 0) throw Error(`${entry.id}: Core version must first reach ${entry.coreVersion}`);
-    if (compare(requiredCore, entry.coreVersion) < 0) throw Error(`${entry.id}: React dependency must use Core ${entry.coreVersion} or newer. ${entry.reason}`);
+    if (compare(requiredCore, entry.coreVersion) < 0) {
+      if (!release && entry.reactVersion !== undefined && compare(react.version, entry.reactVersion) < 0) {
+        pendingRequirements.push(entry.id);
+      } else throw Error(`${entry.id}: React dependency must use Core ${entry.coreVersion} or newer. ${entry.reason}`);
+    }
   }
-  return {requiredCore, candidateCore: core.version};
+  return {requiredCore, candidateCore: core.version, pendingRequirements};
 }
 export function matrixVerdict({current, candidate}) {
   if (current === true && candidate === true) return {passed: true, reason: 'Both Core combinations passed.'};

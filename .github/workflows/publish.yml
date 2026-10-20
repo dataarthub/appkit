@@ -1,0 +1,113 @@
+name: Publish package release
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  # Serialize Core and React releases; do not cancel a publication in progress.
+  group: appkit-npm-publication
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: >-
+      github.repository == 'dataarthub/appkit' &&
+      github.event.release.draft == false &&
+      github.event.release.prerelease == false &&
+      (startsWith(github.event.release.tag_name, 'appkit-core-v') ||
+       startsWith(github.event.release.tag_name, 'appkit-react-v'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      sha: ${{ steps.select.outputs.sha }}
+      key: ${{ steps.select.outputs.key }}
+      environment: ${{ steps.select.outputs.environment }}
+      url: ${{ steps.select.outputs.url }}
+      integrity: ${{ steps.prepare.outputs.integrity }}
+      artifact: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Validate package tag, version and source commit
+        id: select
+        run: node scripts/publish/select.mjs
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - name: Install offline UBL validator
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes libxml2-utils
+      - name: Record runner identity
+        run: echo "APPKIT_CI_IMAGE=${ImageOS}-${ImageVersion}" >> "$GITHUB_ENV"
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - name: Verify source quality, build, types, tests and package contracts
+        run: |
+          bun run secrets:setup
+          bun run check:quality
+          bun run verify
+          bun run test:agent-tooling
+      - name: Verify React with declared and candidate Core
+        if: steps.select.outputs.key == 'react'
+        run: bun run check:react-core --release
+      - name: Verify exact packed archives in isolated consumers
+        env:
+          APPKIT_RELEASE_CONSUMER: 'true'
+        run: bun run test:consumer
+      - name: Select only the tested target package archive
+        id: prepare
+        run: node scripts/publish/prepare.mjs
+      - uses: actions/upload-artifact@v7
+        id: upload
+        with:
+          name: npm-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .verification/publish/package.tgz
+            .verification/publish/release.json
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+          # Only public package bytes and sanitized identity; never raw receipts.
+          include-hidden-files: true
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      deployments: write
+      id-token: write
+    environment:
+      name: ${{ needs.verify.outputs.environment }}
+      url: ${{ needs.verify.outputs.url }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.verify.outputs.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install pinned Trusted Publishing CLI
+        run: npm install --global npm@11.21.0 --ignore-scripts --no-audit --no-fund
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ needs.verify.outputs.artifact }}
+          path: .verification/publish
+          digest-mismatch: error
+      # Before 1.0.0: publish with beta, then point latest at the same version.
+      # At/after 1.0.0: require latest only; never overwrite a newer tag on retry.
+      # npm Trusted Publisher must allow both npm publish and npm dist-tag.
+      - name: Publish verified archive and confirm required npm dist-tags through OIDC
+        env:
+          APPKIT_NPM_PUBLISH: 'true'
+          VERIFIED_INTEGRITY: ${{ needs.verify.outputs.integrity }}
+        run: node scripts/publish/publish.mjs

@@ -26,6 +26,18 @@ github-docs. Each feature guide must show its exact published import subpath and
 required peers/providers/styles. Install package names, not subpaths. Keep JSDoc,
 examples and consumer instructions aligned. Read CONTRIBUTING.md and RELEASING.md.
 
+## Optional development skills
+
+When Superpowers is available in the agent's environment, use its relevant skills
+for planning, implementation, debugging, review and verification. Read the applicable
+skill instructions and explain which skills are being used. Follow the user's
+instructions and repository requirements when adapting the workflow. If Superpowers
+is unavailable, continue with the repository's documented workflow.
+
+Keep project decisions and useful plans in the appropriate repository documentation.
+Do not copy external skill instructions or templates into the repository unless
+needed; preserve the required attribution and license notices when doing so.
+
 ## Shared standards
 
 ### Documentation
@@ -36,6 +48,10 @@ examples and consumer instructions aligned. Read CONTRIBUTING.md and RELEASING.m
 For implementation and verification selection, read:
 - Policy: https://tech-docs.alneas.com/policies/development-policy.md
 - Skill: https://tech-docs.alneas.com/skills/developing-projects/SKILL.md
+
+For automated testing and verification setup (UI & non-UI):
+- UI, Storybook, Playwright & Kratos auth: https://tech-docs.alneas.com/skills/testing-ui-services/SKILL.md (Boilerplate: https://tech-docs.alneas.com/templates/testing/README.md)
+- Logic, Hono, Oracle DB & contracts: https://tech-docs.alneas.com/skills/testing-logic-services/SKILL.md (Boilerplate: https://tech-docs.alneas.com/templates/testing-logic/README.md)
 
 For release preparation, publication or partial-release recovery, read:
 - Policy: https://tech-docs.alneas.com/policies/release-policy.md

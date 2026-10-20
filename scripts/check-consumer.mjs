@@ -57,4 +57,8 @@ try {
  assert.deepEqual(sourceSelection(),records.sources,'Consumer checks changed selected source inputs');
  records.verified=true;records.completedAt=new Date().toISOString();records.checks={nodeMinimum:'24.0.0',hostNode:process.version,nativeEsm:true,commonJs:true,bun:true,nodeNextDeclarations:true,skipLibCheck:false,readmeAndFeatureExamples:index,requestFormSSR:true,css:true,optionalPeersOmitted:true};
  writeFileSync(path.join(artifacts,'archives.json'),JSON.stringify(records,null,2)+'\n');console.log('PASS: two-package archives and isolated consumers');
+ if(process.env.APPKIT_RELEASE_CONSUMER==='true'){
+  const handoff=path.join(root,'.verification/publish');mkdirSync(handoff,{recursive:true});
+  writeFileSync(path.join(handoff,'consumer.json'),JSON.stringify(records,null,2)+'\n');
+ }
 } finally {rmSync(fixture,{recursive:true,force:true});rmSync(coreOnly,{recursive:true,force:true});}

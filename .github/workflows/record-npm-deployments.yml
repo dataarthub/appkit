@@ -1,0 +1,31 @@
+name: Record existing npm publications
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published version tag (for example v0.1.0); does not publish npm packages
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: appkit-npm-deployment-records
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      # API ref is the selected tag's commit, not this workflow's current ref.
+      # Do not set job.environment here: that would create an unrelated deployment.
+      - name: Verify registry versions and record both package deployments
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: node scripts/record-npm-deployments.mjs --tag "$RELEASE_TAG" --apply
