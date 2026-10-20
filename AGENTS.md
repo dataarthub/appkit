@@ -26,8 +26,8 @@ github-docs. Each feature guide must show its exact published import subpath and
 required peers/providers/styles. Install package names, not subpaths. Keep JSDoc,
 examples and consumer instructions aligned. Read CONTRIBUTING.md and RELEASING.md.
 Follow the canonical policy and authoring skill:
-- https://docs-d1x.pages.dev/policies/documentation-policy.md
-- https://docs-d1x.pages.dev/skills/document-authoring/SKILL.md
+- https://tech-docs.alneas.com/policies/documentation-policy.md
+- https://tech-docs.alneas.com/skills/document-authoring/SKILL.md
 
 Generated exports references, AI metadata and indexes come from
 scripts/generate-docs.mjs. Edit their source manifests, guides and consumer skill,
@@ -36,3 +36,13 @@ frontmatter. docs.manifest.json selects approved Public documents only.
 Use .verification/tmp for normal fixtures and .verification/logs for receipts.
 Packed consumers use system temp to avoid ancestor node_modules resolution and
 must clean up in finally. Keep verification evidence ignored and out of manifests.
+
+### Project README verification
+
+- README target list: `readme-policy.json`
+- README validation: `bun run docs:readmes`
+- Portal README metadata is generated from its owning source; update and verify it through the project documentation commands.
+
+- Generated README/documentation freshness: `bun run docs:generated` (temporary regeneration; does not repair normal output).
+
+- Generated output configuration: `generated-policy.json`.

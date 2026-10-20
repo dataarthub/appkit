@@ -9,7 +9,10 @@ for(const file of files){
  assert(!file.includes('..')&&!path.isAbsolute(file),'Source must be contained');
  const text=readFileSync(path.join(root,file),'utf8');
  assert(!/\/Volumes\/|\/Users\/|file:\/\//.test(text),file+': local path');
- if(selected.has(file))assert(/^---\n/.test(text)&&/^title: /m.test(text)&&/^archetype: /m.test(text),file+': portal metadata');
+ if(selected.has(file)){
+  const front=/^---\n([\s\S]*?)\n---\n/.exec(text)?.[1];
+  assert(front&&['title','description','archetype','project','tags'].every(key=>new RegExp('^'+key+': .+','m').test(front))&&/^sidebar:\n  order: \d+/m.test(front),file+': portal metadata');
+ }
  if(file.includes('/docs/')&&!file.endsWith('/index.md'))assert(text.includes('## Public import'),file+': document the feature subpath');
  for(const match of text.matchAll(/@alneas\/[\w-]+(?:\/[\w./-]+)?/g)){
   const spec=match[0].replace(/[.]+$/,''),parts=spec.split('/'),name=parts.slice(0,2).join('/'),pkg=packages[name];
