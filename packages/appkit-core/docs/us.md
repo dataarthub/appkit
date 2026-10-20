@@ -1,8 +1,11 @@
 ---
 title: "Format US business data"
 description: "USD formatting, federal holiday policy and English document presets"
+sidebar:
+  order: 7
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "us"]
 ---
 
 # Format US business data

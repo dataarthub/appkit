@@ -1,8 +1,11 @@
 ---
 title: "Save a schema-driven request form"
 description: "Wire a schema to an application-owned adapter with retained input on failure."
+sidebar:
+  order: 3
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "request-form"]
 ---
 
 # Save a schema-driven request form

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "jobs": [
+    {
+      "name": "appkit-documentation",
+      "command": [
+        "node",
+        "scripts/generate-docs.mjs",
+        "--output-dir",
+        "{outputDir}"
+      ],
+      "outputs": [
+        "docs/index.md",
+        "docs/contributing.md",
+        "docs/releasing.md",
+        "docs.manifest.json",
+        "packages/appkit-core/docs/index.md",
+        "packages/appkit-core/docs/exports.md",
+        "packages/appkit-core/llms.txt",
+        "packages/appkit-core/llms-full.txt",
+        "packages/appkit-react/docs/index.md",
+        "packages/appkit-react/docs/exports.md",
+        "packages/appkit-react/llms.txt",
+        "packages/appkit-react/llms-full.txt",
+        "packages/appkit-core/dist/consumer-ai",
+        "packages/appkit-react/dist/consumer-ai",
+        "llms.txt",
+        "packages/appkit-core/consumer-ai/package-context.json",
+        "packages/appkit-core/consumer-ai/api-index.json",
+        "packages/appkit-react/consumer-ai/package-context.json",
+        "packages/appkit-react/consumer-ai/api-index.json",
+        "packages/appkit-core/docs/ai-errors.md"
+      ]
+    }
+  ]
+}

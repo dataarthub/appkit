@@ -12,6 +12,8 @@
         "!llms-full.txt",
         "!docs/exports.md",
         "!docs/index.md",
+        "!consumer-ai/package-context.json",
+        "!consumer-ai/api-index.json",
         "!docs/ai-errors.md"
       ],
       "outputs": [
@@ -20,6 +22,8 @@
         "llms-full.txt",
         "docs/exports.md",
         "docs/index.md",
+        "consumer-ai/package-context.json",
+        "consumer-ai/api-index.json",
         "docs/ai-errors.md"
       ]
     },
@@ -31,7 +35,9 @@
         "$TURBO_DEFAULT$",
         "!dist/**",
         "!llms.txt",
-        "!llms-full.txt"
+        "!llms-full.txt",
+        "!consumer-ai/package-context.json",
+        "!consumer-ai/api-index.json"
       ]
     },
     "test": {
@@ -44,7 +50,9 @@
         "!llms.txt",
         "!llms-full.txt",
         "$TURBO_ROOT$/scripts/test-unit.mjs",
-        "$TURBO_ROOT$/scripts/vitest.config.ts"
+        "$TURBO_ROOT$/scripts/vitest.config.ts",
+        "!consumer-ai/package-context.json",
+        "!consumer-ai/api-index.json"
       ]
     },
     "@alneas/appkit-react#build": {
@@ -60,7 +68,9 @@
         "!docs/index.md",
         "$TURBO_ROOT$/scripts/generate-notices.mjs",
         "!THIRD_PARTY_NOTICES.md",
-        "!src/tools/paraglide/**"
+        "!src/tools/paraglide/**",
+        "!consumer-ai/package-context.json",
+        "!consumer-ai/api-index.json"
       ],
       "outputs": [
         "dist/**",
@@ -69,13 +79,22 @@
         "docs/exports.md",
         "docs/index.md",
         "THIRD_PARTY_NOTICES.md",
-        "src/tools/paraglide/**"
+        "src/tools/paraglide/**",
+        "consumer-ai/package-context.json",
+        "consumer-ai/api-index.json"
       ]
     }
   },
   "globalDependencies": [
     "scripts/turbo.mjs",
     "scripts/generate-docs.mjs",
+    "agent-policy.json",
+    "scripts/agent/catalog-contract.mjs",
+    "scripts/agent/generate-catalog.mjs",
+    "scripts/build-agent-cli.mjs",
+    "scripts/agent/cli.mjs",
+    "scripts/agent/load-catalogs.mjs",
+    "scripts/agent/search.mjs",
     "scripts/agent/generate-error-guide.mjs"
   ],
   "globalEnv": [

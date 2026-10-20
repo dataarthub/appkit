@@ -1,6 +1,6 @@
 {
-  "$schema": "https://docs-d1x.pages.dev/schemas/docs-manifest.v1.json",
-  "projectId": "tools",
+  "$schema": "https://tech-docs.alneas.com/schemas/docs-manifest.v1.json",
+  "projectId": "appkit",
   "displayName": "Appkit",
   "category": "developer-tools",
   "documents": [
@@ -9,6 +9,20 @@
       "slug": "index",
       "source": "docs/index.md",
       "archetype": "explanation",
+      "visibility": "public"
+    },
+    {
+      "title": "Contributing",
+      "slug": "contributing",
+      "source": "docs/contributing.md",
+      "archetype": "reference",
+      "visibility": "public"
+    },
+    {
+      "title": "Releasing",
+      "slug": "releasing",
+      "source": "docs/releasing.md",
+      "archetype": "reference",
       "visibility": "public"
     },
     {
@@ -104,6 +118,14 @@
       "slug": "appkit-react/index",
       "source": "packages/appkit-react/docs/index.md",
       "archetype": "explanation",
+      "visibility": "public",
+      "package": "@alneas/appkit-react"
+    },
+    {
+      "title": "Migrate from app-core and react-tools",
+      "slug": "appkit-react/migration",
+      "source": "packages/appkit-react/docs/migration.md",
+      "archetype": "how-to",
       "visibility": "public",
       "package": "@alneas/appkit-react"
     },

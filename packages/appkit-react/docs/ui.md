@@ -1,8 +1,11 @@
 ---
 title: "Compose React UI and shared providers"
 description: "React 19 primitives, theme providers and hooks"
+sidebar:
+  order: 5
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "ui"]
 ---
 
 # Compose React UI and shared providers
