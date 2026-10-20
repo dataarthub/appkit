@@ -33,8 +33,10 @@
     "secrets:check": "node scripts/check-secrets.mjs",
     "secrets:staged": "node scripts/check-secrets.mjs --staged",
     "test:quality-tooling": "node --test scripts/quality-tooling.test.mjs",
-    "check:quality": "bun run secrets:check && bun run lint && bun run test:quality-tooling",
-    "verify:push": "bun run check:quality && bun run verify && bun run test:agent-tooling"
+    "test:react-core-tooling": "node --test scripts/react-core/*.test.mjs",
+    "check:react-core": "node scripts/check-react-core.mjs",
+    "check:quality": "bun run secrets:check && bun run lint && bun run test:quality-tooling && bun run test:react-core-tooling",
+    "verify:push": "bun run check:quality && bun run verify && bun run test:agent-tooling && bun run check:react-core"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

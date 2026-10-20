@@ -28,6 +28,66 @@ Use a manually dispatched workflow on a GitHub-hosted runner with Node 24+, npm 
 
 The existing 0.1.0 release has no provenance attestation. A later workflow does not retroactively attest it; use a new version for future provenance-backed releases. GitHub tags/Releases and npm publication are separate. Never dispatch npm publication from branch/tag pushes or overwrite an existing version; verify its registry integrity before resuming a partial publish.
 
+## React compatibility with independently versioned Core
+
+Keep React's Core dependency at an exact version. A newer Core release does not
+automatically update an already published React package. Run `bun run check:react-core`
+after building both packages; `bun run verify:push` and the Node 24 main-update CI
+job already include it. No additional PR or branch-push Action trigger is added.
+
+The gate always tests the same React sources and packed React archive in two
+separate system-temp consumers:
+
+- **current** installs the exact Core version declared by React from the public npm
+  registry, never from the workspace.
+- **candidate** installs the locally built Core archive and intentionally overrides
+  React's Core dependency for compatibility testing only. Package manifests in the
+  repository and the React archive are not rewritten.
+
+Each consumer checks source types, React unit tests, published ESM and CommonJS
+declaration types under NodeNext with `skipLibCheck: false`, native ESM/CommonJS loading, and the
+documented request-form SSR. It verifies that React resolves the selected Core,
+that its version and archive integrity match, and that no checkout symlink supplies
+the dependency. Both combinations must pass; a failed current lane with a passing
+candidate lane identifies a possible dependency update requirement. A failed
+candidate lane blocks adopting that Core. Installation or network errors also fail
+the gate and are reported separately in the local command logs.
+
+When a Core fix must reach React users even if both lanes pass, the Core change's
+author adds a permanent entry to `react-core-policy.json` in the same PR. For example:
+
+```json
+{
+  "schemaVersion": 1,
+  "requirements": [
+    {
+      "id": "approval-safety-fix",
+      "coreVersion": "0.1.1",
+      "reason": "React users must receive the approval safety fix."
+    }
+  ]
+}
+```
+
+This example is illustrative; the initial requirements list is empty. The version
+names the first Core release containing the required fix. CI fails if the Core
+candidate has not reached that version, or React's exact Core dependency is older.
+Update React's dependency and release version together when adopting the fix.
+Keep prior entries to preserve the dependency floor; do not delete a requirement
+merely to make CI pass. The marker records a maintainer's impact decision, not an
+automatic claim that tests can determine every fix's business or security impact.
+
+Because the current lane uses the registry, an unpublished new dependency fails
+until that Core version exists on npm. For a coordinated release, publish Core
+first, then run this gate with React's updated dependency before publishing React.
+The gate itself never publishes, changes versions or tags, runs live-model
+evaluation, or treats its logs as agent-evaluation evidence.
+
+This gate requires network access and adds two npm installations to pre-push/CI.
+Receipts and command logs are retained under ignored `.verification/react-core/`;
+the disposable consumers are removed on completion or failure. Run
+`bun run test:react-core-tooling` for the deterministic policy/isolation tests.
+
 ## Public package contents
 
 Both packages deliberately include sourcemaps with `sourcesContent` for debugging their MIT-licensed public sources. Inspect the packed `.map` files for private source content and local absolute paths, and review compressed archive size before release. Public sourcemaps are not a place for credentials or private sources. Any future change to this policy must be checked against the actual packed artifacts.
