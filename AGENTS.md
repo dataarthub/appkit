@@ -25,9 +25,25 @@ Canonical documentation is English; portal translation and deployment belong to
 github-docs. Each feature guide must show its exact published import subpath and
 required peers/providers/styles. Install package names, not subpaths. Keep JSDoc,
 examples and consumer instructions aligned. Read CONTRIBUTING.md and RELEASING.md.
-Follow the canonical policy and authoring skill:
-- https://tech-docs.alneas.com/policies/documentation-policy.md
-- https://tech-docs.alneas.com/skills/document-authoring/SKILL.md
+
+## Shared standards
+
+### Documentation
+- Policy: https://tech-docs.alneas.com/policies/documentation-policy.md
+- Skill: https://tech-docs.alneas.com/skills/document-authoring/SKILL.md
+
+### Development and release
+For implementation and verification selection, read:
+- Policy: https://tech-docs.alneas.com/policies/development-policy.md
+- Skill: https://tech-docs.alneas.com/skills/developing-projects/SKILL.md
+
+For release preparation, publication or partial-release recovery, read:
+- Policy: https://tech-docs.alneas.com/policies/release-policy.md
+- Skill: https://tech-docs.alneas.com/skills/preparing-releases/SKILL.md
+
+Keep local commands, architecture and release conditions in this repository's
+CONTRIBUTING.md, RELEASING.md and executable configuration. Preserve stronger
+local gates. Follow existing user authorization for Git and external writes.
 
 Generated exports references, AI metadata and indexes come from
 scripts/generate-docs.mjs. Edit their source manifests, guides and consumer skill,

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packageName": "@alneas/appkit-react",
   "packageVersion": "0.1.0",
-  "inputDigest": "813e4fb14c58adb564e58368fa1b31d5fe9cf99b68c7bfcda7e4cd4ea5c54b22",
+  "inputDigest": "12f326f4e530131bd73f99fcb8cc1b95d81cd41850b3ff96b6715f68b7aa80fe",
   "entries": [
     {
       "importPath": "@alneas/appkit-react",
