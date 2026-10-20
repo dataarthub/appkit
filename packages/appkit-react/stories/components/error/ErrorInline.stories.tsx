@@ -15,7 +15,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * 基本的なエラーメッセージの表示
+ * Display a basic error message.
  */
 export const Default: Story = {
   args: {
@@ -25,7 +25,7 @@ export const Default: Story = {
 };
 
 /**
- * 警告メッセージ
+ * Display a warning message.
  */
 export const Warning: Story = {
   args: {
@@ -35,7 +35,7 @@ export const Warning: Story = {
 };
 
 /**
- * 情報メッセージ
+ * Display an informational message.
  */
 export const Info: Story = {
   args: {
@@ -45,7 +45,7 @@ export const Info: Story = {
 };
 
 /**
- * AppError オブジェクトから表示
+ * Display an AppError instance.
  */
 export const WithAppError: Story = {
   args: {
@@ -56,7 +56,7 @@ export const WithAppError: Story = {
 };
 
 /**
- * i18n エラーコードから表示 (Firebase Auth)
+ * Display a localized Firebase Auth error code.
  */
 export const WithErrorCode: Story = {
   args: {
@@ -65,7 +65,7 @@ export const WithErrorCode: Story = {
 };
 
 /**
- * アイコンなし
+ * Display a message without an icon.
  */
 export const WithoutIcon: Story = {
   args: {
@@ -76,7 +76,7 @@ export const WithoutIcon: Story = {
 };
 
 /**
- * 致命的エラー
+ * Display a fatal error.
  */
 export const Critical: Story = {
   args: {

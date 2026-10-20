@@ -35,7 +35,7 @@ Core can be used without React. Neither package supplies a hosted backend; your 
 
 ## Quickstart
 
-For the form example, use Node.js 24+ and an existing React application with React and React DOM matching `^19.2.3`. Core-only applications can start with the [Core validation example](../packages/appkit-core/README.md#quickstart).
+For the form example, use Node.js 24+ and an existing React application with React and React DOM matching `^19.2.3`. Core-only applications can start with the [Core validation example](../packages/appkit-core/docs/index.md#quickstart).
 
 ```bash
 npm install @alneas/appkit-core @alneas/appkit-react react@^19.2.3 react-dom@^19.2.3 @tanstack/react-query@5.104.4

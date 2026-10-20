@@ -22,7 +22,7 @@ const schema: JSONSchema = {
   required: ['name'],
 };
 
-/** In-memory form submission shared by docs and Storybook. */
+/** In-memory form submission for isolated Storybook interaction. */
 export default function FormDemo() {
   const [client] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: false } } }),

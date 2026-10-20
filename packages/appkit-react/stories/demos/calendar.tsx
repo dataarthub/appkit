@@ -10,7 +10,7 @@ const events = [
     end: new Date(2026, 8, 16, 10),
   },
 ];
-/** Fixed-date event selection shared by docs and Storybook. */
+/** Fixed-date event selection for isolated Storybook interaction. */
 export default function CalendarDemo() {
   const [result, setResult] = useState('予定を選択 / Select an event');
   return (

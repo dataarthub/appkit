@@ -213,6 +213,9 @@ export const KanbanBoard = React.forwardRef<HTMLDivElement, KanbanBoardProps>(
           {/* カラム */}
           <div
             data-slot='kanban-columns'
+            role='region'
+            aria-label='Kanban columns'
+            tabIndex={0}
             className='flex h-full gap-4 p-4 overflow-x-auto items-start'
           >
             {columns.map((col) => (

@@ -96,10 +96,10 @@ export const FullFeatures: Story = {
     ...defaultArgs,
     actions: (
       <div className='flex items-center gap-2'>
-        <button className='p-2 hover:bg-white/10 rounded-full'>
+        <button aria-label='Search' className='p-2 hover:bg-white/10 rounded-full'>
           <Search className='w-4 h-4' />
         </button>
-        <button className='p-2 hover:bg-white/10 rounded-full'>
+        <button aria-label='Notifications' className='p-2 hover:bg-white/10 rounded-full'>
           <Bell className='w-4 h-4' />
         </button>
       </div>

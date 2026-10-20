@@ -22,6 +22,7 @@ export const Default: Story = {
 export const WithValue: Story = {
   args: {
     defaultValue: 'This is a pre-filled textarea with some initial content.',
+    'aria-label': 'Message',
   },
 };
 

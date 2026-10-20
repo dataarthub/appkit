@@ -84,7 +84,7 @@ export const ListView: Story = {
 };
 
 /**
- * DB管理 + UUIDストレージの例 (簡易Provider)
+ * Demonstrate database-indexed UUID storage with an in-memory provider.
  */
 export const VaultMode: Story = {
   args: {
@@ -134,7 +134,7 @@ export const VaultMode: Story = {
 };
 
 /**
- * data-access パッケージのアダプターを使用する例
+ * Demonstrate the public data-access adapter contract.
  */
 export const DataAccessMode: Story = {
   args: {

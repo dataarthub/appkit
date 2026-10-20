@@ -142,12 +142,9 @@ export function GanttTaskBar({
         }
         role={onClick || editing.available('move') ? 'button' : undefined}
         tabIndex={onClick || editing.available('move') ? 0 : undefined}
+        aria-label={width <= 50 ? task.title : undefined}
         aria-disabled={editingDisabled || undefined}
-        aria-label={
-          editing.allowed('move')
-            ? `${task.title}: move with Left/Right, Enter to edit, Escape to cancel drag`
-            : task.title
-        }
+        aria-description={editing.allowed('move') ? 'Move with Left/Right, Enter to edit, Escape to cancel drag' : undefined}
         onKeyDown={(event) => {
           move.onKeyDown(event);
           if (

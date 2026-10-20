@@ -22,6 +22,7 @@ const columns = [
     width: '300px',
     render: (row: any, _index: number, update: any) => (
       <Input
+        aria-label={`品名 ${_index + 1}`}
         value={row.item_name}
         onChange={(e) => update('item_name', e.target.value)}
         className='h-8'
@@ -36,6 +37,7 @@ const columns = [
     render: (row: any, _index: number, update: any) => (
       <Input
         type='number'
+        aria-label={`数量 ${_index + 1}`}
         value={row.quantity}
         onChange={(e) => update('quantity', Number(e.target.value))}
         className='h-8 text-right'
@@ -50,6 +52,7 @@ const columns = [
     render: (row: any, _index: number, update: any) => (
       <Input
         type='number'
+        aria-label={`単価 ${_index + 1}`}
         value={row.price}
         onChange={(e) => update('price', Number(e.target.value))}
         className='h-8 text-right'

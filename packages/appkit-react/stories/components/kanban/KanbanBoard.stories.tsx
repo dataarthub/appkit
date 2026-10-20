@@ -13,18 +13,22 @@ const meta = {
     docs: {
       description: {
         component: `
-カンバンボードコンポーネント。ドラッグ&ドロップによるタスク移動、ソート、WIP制限に対応。
+Display task columns with drag-and-drop movement, sorting and work-in-progress limits.
 
 ## Features
-- ドラッグ&ドロップによるタスク移動
-- Tabでカード選択、Space/Enterで移動開始・確定、左右矢印で列選択、Escapeで取消
-- readOnlyではドラッグ開始も無効。タッチは250ms長押し
-- カラムごとのWIP制限
-- ソート機能（優先度、期限、タイトル）
+- Drag-and-drop task movement
+- Tab to focus cards, Space/Enter to start or confirm movement, arrow keys to select columns, Escape to cancel
+- Read-only mode disables drag initiation; touch activation uses a 250 ms hold
+- Per-column work-in-progress limits
+- Priority, due-date and title sorting
 - 楽観的UIアップデート
-- カスタムカードレンダラー
+- Custom card rendering
 
-## Import
+## Required setup
+
+The application owns task state and status/order callbacks. These stories demonstrate local state and do not persist changes to a backend. Import @alneas/appkit-react/styles once in the host application; the Storybook preview supplies it here.
+
+## Public import
 \`\`\`tsx
 import { KanbanBoard, DEFAULT_KANBAN_COLUMNS } from '@alneas/appkit-react/tools/kanban';
 \`\`\`
@@ -52,7 +56,7 @@ const sampleTasks: KanbanTask[] = [
     priority: 'high',
     due_date: '2024-02-15',
     tags: ['design', 'ui'],
-    assignee: { name: 'John Doe', avatar: 'https://i.pravatar.cc/32?u=1' },
+    assignee: { name: 'John Doe', avatar: '/avatar.svg' },
   },
   {
     id: '2',
@@ -62,7 +66,7 @@ const sampleTasks: KanbanTask[] = [
     priority: 'medium',
     due_date: '2024-02-20',
     tags: ['backend'],
-    assignee: { name: 'Jane Smith', avatar: 'https://i.pravatar.cc/32?u=2' },
+    assignee: { name: 'Jane Smith', avatar: '/avatar.svg' },
   },
   {
     id: '3',
@@ -88,7 +92,7 @@ const sampleTasks: KanbanTask[] = [
     key: 'PROJ-105',
     status: 'done',
     priority: 'urgent',
-    assignee: { name: 'Bob Wilson', avatar: 'https://i.pravatar.cc/32?u=3' },
+    assignee: { name: 'Bob Wilson', avatar: '/avatar.svg' },
   },
 ];
 

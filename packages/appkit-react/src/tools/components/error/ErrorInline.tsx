@@ -30,7 +30,7 @@ export interface ErrorInlineProps {
 
 const severityConfig: Record<ErrorSeverity, { icon: React.ElementType; className: string }> = {
   info: { icon: Info, className: 'text-blue-600 dark:text-blue-400' },
-  warning: { icon: AlertTriangle, className: 'text-amber-600 dark:text-amber-400' },
+  warning: { icon: AlertTriangle, className: 'text-amber-800 dark:text-amber-400' },
   error: { icon: XCircle, className: 'text-destructive' },
   critical: { icon: AlertCircle, className: 'text-destructive' },
 };

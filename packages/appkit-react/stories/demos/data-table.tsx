@@ -4,7 +4,7 @@ const rows = [
   { id: 'a', name: '東京 / Tokyo', amount: 100 },
   { id: 'b', name: '大阪 / Osaka', amount: 200 },
 ];
-/** Read-only table shared by docs and Storybook. */
+/** Read-only table for isolated Storybook interaction. */
 export default function DataTableDemo() {
   return (
     <DataTable

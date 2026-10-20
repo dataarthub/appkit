@@ -38,6 +38,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
       isLeftSidebarCollapsed: _isLeftSidebarCollapsed = false,
       isRightPaneVisible = true,
       scrollable = true,
+      'aria-label': mainLabel = 'Main content',
       selectable = true,
       headerPosition = 'top',
       ...props
@@ -59,6 +60,8 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
 
     const MainContent = (
       <main
+        aria-label={mainLabel}
+        tabIndex={scrollable ? 0 : undefined}
         className={cn(
           'flex-1 min-w-0 flex flex-col',
           scrollable ? 'overflow-y-auto' : 'overflow-hidden',

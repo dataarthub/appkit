@@ -485,7 +485,7 @@ export function ResourceGridView({
                       tabIndex={0}
                       onKeyDown={(e) => activateOnKey(e, () => onEventClick?.(event))}
                       className={cn(
-                        'pointer-events-auto absolute z-10 select-none overflow-hidden rounded px-1 text-xs text-white shadow-sm hover:opacity-90',
+                        'pointer-events-auto absolute z-10 select-none overflow-hidden rounded px-1 text-xs text-white shadow-sm hover:brightness-95',
                         event.color || 'bg-primary text-primary-foreground',
                       )}
                       style={{
@@ -506,7 +506,7 @@ export function ResourceGridView({
                         <>
                           <div className='truncate font-semibold'>{event.title}</div>
                           {width > 40 && event.description && (
-                            <div className='truncate opacity-90'>{event.description}</div>
+                            <div className='truncate'>{event.description}</div>
                           )}
                         </>
                       )}

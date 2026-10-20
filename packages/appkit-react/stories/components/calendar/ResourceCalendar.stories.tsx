@@ -11,16 +11,20 @@ const meta = {
     docs: {
       description: {
         component: `
-リソースカレンダーコンポーネント。月・週・日・タイムライン・リソース表示に対応。
+Display events by date and resource in a controlled calendar.
 
 ## Features
-- 6つのビューモード（month, week, day, timeline, resource, agenda）
-- リソース別イベント表示
-- クリック・キーボードによる時間枠選択
-- イベントクリック時の詳細表示
-- 日本語/英語ローカライズ
+- Month, week, day, timeline, resource and agenda views
+- Events grouped by resource
+- Pointer and keyboard time-slot selection
+- Event selection callbacks
+- Japanese and English UI localization
 
-## Import
+## Required setup
+
+The application owns event data and selection callbacks. These stories use fixed sample dates and do not connect to a calendar service. Import @alneas/appkit-react/styles once in the host application; the Storybook preview supplies it here.
+
+## Public import
 \`\`\`tsx
 import { ResourceCalendar } from '@alneas/appkit-react/tools/calendar';
 \`\`\`
@@ -138,7 +142,7 @@ export const Empty: Story = {
   },
 };
 
-/** 日跨ぎ・同時刻・終日の予定を比較する回帰確認用の例。 */
+/** Compare overnight, concurrent and all-day events. */
 export const OverlappingAndOvernight: Story = {
   args: {
     defaultDate: new Date(2026, 8, 15),

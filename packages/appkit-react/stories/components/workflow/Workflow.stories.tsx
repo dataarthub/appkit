@@ -27,13 +27,13 @@ const statusInfoMap = {
     title: '承認待ち',
     description: '承認者による確認が行われています。',
     nextSteps: ['承認または却下を待つ'],
-    color: 'bg-amber-500',
+    color: 'bg-amber-800 text-white',
   },
   Approved: {
     title: '承認済み',
     description: 'このドキュメントは承認されました。発行手続きに進めます。',
     nextSteps: ['PDFを発行する'],
-    color: 'bg-emerald-500',
+    color: 'bg-emerald-700 text-white',
   },
 };
 

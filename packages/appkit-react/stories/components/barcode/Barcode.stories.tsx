@@ -9,14 +9,18 @@ const meta = {
     docs: {
       description: {
         component: `
-バーコード・QRコード生成コンポーネント。
+Generate barcodes and QR codes from supplied values.
 
 ## Features
-- CODE128, EAN13, UPC, CODE39などのバーコード形式に対応
-- URLやテキストからQRコードを生成
-- オプションpeer dependency: \`jsbarcode\`, \`react-qr-code\`
+- Barcode formats including CODE128, EAN13, UPC and CODE39
+- QR codes from URLs or text
+- Feature peers: \`jsbarcode\`, \`react-qr-code\`
 
-## Import
+## Required setup
+
+Install jsbarcode for barcodes and react-qr-code for QR codes. These generation stories do not require the optional camera scanner peer. Import @alneas/appkit-react/styles once in the host application; the Storybook preview supplies it here.
+
+## Public import
 \`\`\`tsx
 import { BarcodeGenerator, QRCodeGenerator } from '@alneas/appkit-react/tools/barcode';
 \`\`\`
@@ -33,7 +37,7 @@ export default meta;
 export const BarcodeDefault: StoryObj<typeof BarcodeGenerator> = {
   render: () => (
     <BarcodeGenerator
-      value="4901234567890"
+      value="4901234567894"
       format="EAN13"
       title="商品バーコード"
       description="EAN13形式"

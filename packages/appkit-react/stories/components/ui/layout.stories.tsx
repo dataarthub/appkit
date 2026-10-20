@@ -1,5 +1,6 @@
 import { SidebarProvider } from '../../../src/tools/components/sidebar/sidebar';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { Layout } from '../../../src/tools/components/ui/layout';
 import { Header } from '../../../src/tools/components/header/header';
 
@@ -11,6 +12,10 @@ const meta = {
     layout: 'fullscreen',
   },
   tags: ['autodocs'],
+  play: async ({ canvasElement }) => {
+    const main = within(canvasElement).getByRole('main', { name: 'Main content' });
+    await expect(main).toHaveAttribute('tabindex', '0');
+  },
   argTypes: {
     headerPosition: {
       control: 'radio',
@@ -63,7 +68,7 @@ const MainContent = (
 
 const RightPaneContent = (
   <div className='p-4'>
-    <h3 className='font-bold mb-2'>Details</h3>
+    <h2 className='font-bold mb-2'>Details</h2>
     <p>Some details here.</p>
   </div>
 );

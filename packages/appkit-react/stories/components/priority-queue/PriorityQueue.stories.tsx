@@ -11,15 +11,19 @@ const meta = {
     docs: {
       description: {
         component: `
-優先度キューコンポーネント。タスクの優先度スコアに基づいてソートされたリストを表示。
+Display tasks sorted by their priority scores.
 
 ## Features
-- 優先度スコアによる自動ソート
-- タスクの完了・スヌーズ機能
-- 優先度要因の手動調整
-- コンパクト表示モード
+- Automatic priority-score sorting
+- Completion and snooze callbacks
+- Manual priority-factor adjustments
+- Compact display mode
 
-## Import
+## Required setup
+
+The application supplies tasks and update callbacks. Completion, snooze and score edits here do not update a backend. Import @alneas/appkit-react/styles once in the host application; the Storybook preview supplies it here.
+
+## Public import
 \`\`\`tsx
 import { PriorityQueue, calculatePriorityScore } from '@alneas/appkit-react/tools/priority-queue';
 \`\`\`

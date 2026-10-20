@@ -65,7 +65,7 @@ function TransitionDemo({ type = 'wipe' }: { type?: string }) {
           <h2 style={{ fontFamily: 'Orbitron, sans-serif', letterSpacing: 2 }}>
             {page === 1 ? 'PAGE 01 // DASHBOARD' : 'PAGE 02 // ANALYTICS'}
           </h2>
-          <p style={{ fontFamily: 'monospace', fontSize: 12, opacity: 0.5 }}>Transition type: {type}</p>
+          <p style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--foreground)' }}>Transition type: {type}</p>
         </div>
       </ScreenTransition>
     </div>

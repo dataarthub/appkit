@@ -29,8 +29,8 @@ import { DEFAULT_SNOOZE_OPTIONS } from './types';
  */
 function getScoreColor(score: number): string {
   if (score >= 15) return 'text-destructive';
-  if (score >= 10) return 'text-orange-600 dark:text-orange-400';
-  if (score >= 5) return 'text-yellow-600 dark:text-yellow-400';
+  if (score >= 10) return 'text-orange-700 dark:text-orange-400';
+  if (score >= 5) return 'text-yellow-800 dark:text-yellow-400';
   return 'text-muted-foreground';
 }
 
@@ -183,6 +183,7 @@ export const PriorityCard = React.forwardRef<HTMLDivElement, PriorityCardProps>(
                   size='icon'
                   variant='ghost'
                   className='h-7 w-7'
+                  aria-label={`Complete ${task.title}`}
                   onClick={onComplete}
                   testId={testId ? `${testId}-complete` : undefined}
                 >
@@ -191,6 +192,7 @@ export const PriorityCard = React.forwardRef<HTMLDivElement, PriorityCardProps>(
 
                 <DropdownMenu>
                   <DropdownMenuTrigger
+                    aria-label={`Snooze ${task.title}`}
                     className='inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-7 w-7'
                     data-testid={testId ? `${testId}-snooze` : undefined}
                   >

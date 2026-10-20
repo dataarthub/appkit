@@ -15,14 +15,14 @@ const meta = {
     docs: {
       description: {
         component: `
-DBフェッチ/更新付きフォームラッパーコンポーネント。
+Render a schema-driven form and load or save records through the supplied data adapter.
 
 ## Features
-- useFindOne/useCreate/useUpdateを組み合わせたオールインワンフォーム
-- スキーマベースの自動フォーム生成
-- バリデーション（Ajv）
-- 楽観的UI更新
-- AI/E2Eテスト用データ属性
+- Record loading, creation and updates through data hooks
+- Schema-driven form fields
+- Ajv validation
+- Optimistic UI updates
+- Data attributes for automation
 
 ## AI/Automation Attributes
 - \`data-testid\`: Container element
@@ -30,7 +30,11 @@ DBフェッチ/更新付きフォームラッパーコンポーネント。
 - \`data-mode\`: create | edit
 - \`data-variant\`: detail | stepper
 
-## Import
+## Required setup
+
+Requires QueryClientProvider and DataAccessProvider. The story decorator supplies a disposable in-memory adapter; persistence and authorization remain application responsibilities. Import @alneas/appkit-react/styles once in the host application; the Storybook preview supplies it here.
+
+## Public import
 \`\`\`tsx
 import { FormView } from '@alneas/appkit-react/tools/form';
 \`\`\`
@@ -145,7 +149,7 @@ export const ReadOnly: Story = {
   parameters: {
     docs: {
       description: {
-        story: '読み取り専用モード（editモードでid指定、かつフィールドがreadOnly）',
+        story: 'Read-only fields while editing the record selected by id.',
       },
     },
   },
@@ -185,7 +189,7 @@ export const CustomLayoutWithCompound: StoryObj = {
           </FormCompound.Section>
 
           {/* 案件固有のカスタムUIを自由に挿入できるスロットの例 */}
-          <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 p-4 text-sm text-sky-300">
+          <div className="rounded-lg border border-border bg-muted p-4 text-sm text-foreground">
             💡 <strong>受託案件向け独自スロット:</strong> 外部SaaS（Slack / Teams）への通知設定や独自ウィジェットを自由に挟み込めます。
           </div>
 

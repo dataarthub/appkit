@@ -58,6 +58,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Settings2,
+  GripVertical,
   Plus,
   ChevronUp,
   ChevronDown,
@@ -105,7 +106,7 @@ function DataTableColumnHeader<TData extends object, TValue>({
   enableMultiSort = false,
   sortIndex,
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: header.column.id,
     disabled: !enableColumnOrdering,
   });
@@ -113,6 +114,7 @@ function DataTableColumnHeader<TData extends object, TValue>({
   const canSort = header.column.getCanSort();
   const sortDirection = header.column.getIsSorted();
   const isSorted = sortDirection !== false;
+  const SortLabel = canSort && typeof header.column.columnDef.header !== 'function' ? 'button' : 'span';
 
   const style: React.CSSProperties = enableColumnOrdering
     ? {
@@ -126,7 +128,7 @@ function DataTableColumnHeader<TData extends object, TValue>({
     : {};
 
   const handleSort = (e: React.MouseEvent) => {
-    if (!canSort) return;
+    if (!canSort || (e.target as HTMLElement).closest('button, input, select, [role=checkbox]')) return;
     if (enableMultiSort && e.shiftKey) {
       header.column.toggleSorting(undefined, true);
     } else {
@@ -138,18 +140,28 @@ function DataTableColumnHeader<TData extends object, TValue>({
     <TableHead
       ref={enableColumnOrdering ? setNodeRef : undefined}
       style={style}
-      {...(enableColumnOrdering ? { ...attributes, ...listeners } : {})}
+      aria-sort={canSort ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : undefined}
       className={cn(
         'bg-primary/10 text-primary font-bold border-b border-primary/20',
         canSort && 'cursor-pointer select-none hover:bg-primary/20 transition-colors',
       )}
       onClick={canSort ? handleSort : undefined}
     >
+      {enableColumnOrdering && !header.isPlaceholder && <button
+        type='button' ref={setActivatorNodeRef} {...attributes} {...listeners}
+        aria-label={`Reorder column ${header.column.id}`}
+        className='inline-flex h-6 w-6 items-center justify-center cursor-grab'
+      ><GripVertical className='h-3 w-3' aria-hidden='true' /></button>}
       {header.isPlaceholder ? null : (
         <span className='inline-flex items-center gap-1'>
-          <span className={cn(isSorted && 'font-semibold')}>
+          <SortLabel className={cn(isSorted && 'font-semibold')}
+            {...(SortLabel === 'button' ? { type: 'button' as const, onClick: (event: React.MouseEvent) => {
+              event.stopPropagation();
+              header.column.toggleSorting(undefined, enableMultiSort && event.shiftKey);
+            } } : {})}
+          >
             {flexRender(header.column.columnDef.header, header.getContext())}
-          </span>
+          </SortLabel>
           {/* Only show sort indicator when column is actively sorted */}
           {isSorted && (
             <span className='inline-flex items-center text-xs'>
@@ -679,6 +691,7 @@ export function DataTable<TData extends object, TValue>({
               <Button
                 type='button'
                 size='icon'
+                aria-label='Add row'
                 onClick={onAdd}
                 className='w-12 h-12 rounded-full shadow-lg'
               >
@@ -880,6 +893,7 @@ export function DataTablePagination<TData extends object>({
             variant='default'
             size='icon'
             className='hidden h-8 w-8 lg:flex hover:bg-primary/90'
+            aria-label={m.dataTable_goToFirstPage()}
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
@@ -890,6 +904,7 @@ export function DataTablePagination<TData extends object>({
             variant='default'
             size='icon'
             className='h-8 w-8 hover:bg-primary/90'
+            aria-label={m.dataTable_goToPreviousPage()}
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -900,6 +915,7 @@ export function DataTablePagination<TData extends object>({
             variant='default'
             size='icon'
             className='h-8 w-8 hover:bg-primary/90'
+            aria-label={m.dataTable_goToNextPage()}
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -910,6 +926,7 @@ export function DataTablePagination<TData extends object>({
             variant='default'
             size='icon'
             className='hidden h-8 w-8 lg:flex hover:bg-primary/90'
+            aria-label={m.dataTable_goToLastPage()}
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >
@@ -962,6 +979,7 @@ export function DataTablePaginationCompact<TData extends object>({
             variant='default'
             size='icon'
             className='h-8 w-8 hover:bg-primary/90'
+            aria-label={m.dataTable_goToFirstPage()}
             onClick={() => table.setPageIndex(0)}
             disabled={table.store.state.pagination.pageIndex === 0}
           >
@@ -971,6 +989,7 @@ export function DataTablePaginationCompact<TData extends object>({
             variant='default'
             size='icon'
             className='h-8 w-8 hover:bg-primary/90'
+            aria-label={m.dataTable_goToPreviousPage()}
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -983,6 +1002,7 @@ export function DataTablePaginationCompact<TData extends object>({
             variant='default'
             size='icon'
             className='h-8 w-8 hover:bg-primary/90'
+            aria-label={m.dataTable_goToNextPage()}
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -992,6 +1012,7 @@ export function DataTablePaginationCompact<TData extends object>({
             variant='default'
             size='icon'
             className='h-8 w-8 hover:bg-primary/90'
+            aria-label={m.dataTable_goToLastPage()}
             onClick={() => table.setPageIndex(totalPages - 1)}
             disabled={table.store.state.pagination.pageIndex === totalPages - 1}
           >

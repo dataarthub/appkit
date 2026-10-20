@@ -16,7 +16,7 @@ type Story = StoryObj<typeof meta>;
 export const WithImage: Story = {
   render: () => (
     <Avatar>
-      <AvatarImage src='https://github.com/shadcn.png' alt='@shadcn' />
+      <AvatarImage src='/avatar.svg' alt='@shadcn' />
       <AvatarFallback>CN</AvatarFallback>
     </Avatar>
   ),
@@ -43,7 +43,7 @@ export const Multiple: Story = {
   render: () => (
     <div className='flex gap-2'>
       <Avatar>
-        <AvatarImage src='https://github.com/shadcn.png' />
+        <AvatarImage src='/avatar.svg' />
         <AvatarFallback>CN</AvatarFallback>
       </Avatar>
       <Avatar>

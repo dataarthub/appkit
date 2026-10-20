@@ -52,7 +52,6 @@ export function KanbanDraggableCard({
       style={{ transition, transform: CSS.Transform.toString(transform) }}
       {...(!disabled ? attributes : {})}
       {...(!disabled ? listeners : {})}
-      aria-label={disabled ? undefined : task.title}
       data-task-id={task.id}
       {...props}
       className={cn(

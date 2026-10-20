@@ -18,7 +18,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * 通知コンポーネントのプレイグラウンド
+ * Interact with error notifications.
  */
 export const Playground: Story = {
   render: () => {
@@ -77,7 +77,7 @@ export const Playground: Story = {
 };
 
 /**
- * 右上に表示
+ * Place notifications at the top right.
  */
 export const TopRight: Story = {
   args: {
@@ -100,7 +100,7 @@ export const TopRight: Story = {
 };
 
 /**
- * 左上に表示
+ * Place notifications at the top left.
  */
 export const TopLeft: Story = {
   args: {

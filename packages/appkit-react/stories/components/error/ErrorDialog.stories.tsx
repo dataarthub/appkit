@@ -17,7 +17,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * 制御モード（手動で開閉）
+ * Control the open state explicitly.
  */
 export const Controlled: Story = {
   args: {
@@ -30,7 +30,7 @@ export const Controlled: Story = {
 };
 
 /**
- * セカンダリアクション付き
+ * Display a secondary action.
  */
 export const WithSecondaryAction: Story = {
   args: {
@@ -44,7 +44,7 @@ export const WithSecondaryAction: Story = {
 };
 
 /**
- * Store 経由での表示（プレイグラウンド）
+ * Display errors through the shared store.
  */
 export const Playground: Story = {
   render: () => {

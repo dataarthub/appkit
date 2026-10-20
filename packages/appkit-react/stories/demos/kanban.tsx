@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { KanbanBoard } from '../../src/tools/kanban';
 
-/** Controlled status changes shared by docs and Storybook. */
+/** Controlled status changes for isolated Storybook interaction. */
 export default function KanbanDemo() {
   const [tasks, setTasks] = useState([
     { id: 'one', title: 'デモを試す / Try the demo', status: 'todo' },

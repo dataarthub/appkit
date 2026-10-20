@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { DataAccessAdapter } from '@alneas/appkit-core/data';
 import { DataAccessProvider } from '../src/tools/data-access-react';
@@ -7,6 +7,10 @@ import { AuthProvider, MockAuthAdapter } from '../src/tools/auth';
 /** Fresh cache for each selected story; all adapters stay in memory. */
 export function StoryQueryProvider({ children }: { children: ReactNode }) {
   const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: false } } }));
+  useEffect(() => () => {
+    void client.cancelQueries();
+    client.clear();
+  }, [client]);
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 

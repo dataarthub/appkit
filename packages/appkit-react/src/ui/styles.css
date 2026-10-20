@@ -6,3 +6,14 @@
 @import './theme.css';
 @import './tokens.css';
 @source './**/*.{ts,tsx,js}';
+
+/* ThemeProvider selects the mode on the root, including manual OS overrides. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Focus sentinels redirect keyboard navigation; they have no painted or pointer
+   target area. Keep them focusable while avoiding a hidden 1px hit target. */
+[data-base-ui-focus-guard] {
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none;
+}

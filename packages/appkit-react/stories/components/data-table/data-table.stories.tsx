@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
   useTable,
   dataTableFeatures,
@@ -43,9 +44,9 @@ const paymentData: Payment[] = [
   { id: 'e5f6g7h8', amount: 50, status: 'failed', email: 'test@test.com' },
   ...Array.from({ length: 46 }).map((_, i) => ({
     id: `id-${i}`,
-    amount: Math.floor(Math.random() * 1000),
+    amount: (i * 137 + 75) % 1000,
     status: (['pending', 'processing', 'success', 'failed'] as const)[
-      Math.floor(Math.random() * 4)
+      i % 4
     ],
     email: `user${i}@example.com`,
   })),
@@ -173,6 +174,52 @@ export const Default: Story = {
     columns: paymentColumns as ColumnDef<object, unknown>[],
     data: paymentData as object[],
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const table = canvas.getByRole('table');
+    const tableQueries = within(table);
+    const statusSort = tableQueries.getByRole('button', { name: 'Status' });
+    const statusHeader = statusSort.closest('th')!;
+    const emailSort = tableQueries.getByRole('button', { name: 'Email' });
+    const emailHeader = emailSort.closest('th')!;
+    const rowValues = (column: HTMLElement) => {
+      const columnIndex = tableQueries.getAllByRole('columnheader').indexOf(column);
+      return tableQueries.getAllByRole('row').slice(1).map(row =>
+        within(row).getAllByRole('cell')[columnIndex].textContent,
+      );
+    };
+    for (const header of tableQueries.getAllByRole('columnheader')) {
+      await expect(header.tagName).toBe('TH');
+      await expect(header).not.toHaveAttribute('tabindex');
+    }
+    const initialStatuses = rowValues(statusHeader);
+    await userEvent.click(statusSort);
+    await expect(statusHeader).toHaveAttribute('aria-sort', 'ascending');
+    await waitFor(() => expect(rowValues(statusHeader)[0]).toBe('failed'));
+    await expect(rowValues(statusHeader)).not.toEqual(initialStatuses);
+    await expect(statusSort).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    await expect(statusHeader).toHaveAttribute('aria-sort', 'descending');
+    await waitFor(() => expect(rowValues(statusHeader).every(value => value === 'success')).toBe(true));
+
+    // The preceding tab stop is a separate keyboard drag handle, not the header.
+    await userEvent.tab({ shift: true });
+    const statusHandle = tableQueries.getByRole('button', { name: 'Reorder column status' });
+    await expect(statusHandle).toHaveFocus();
+    await userEvent.keyboard('[Space]');
+    await userEvent.keyboard('{ArrowRight}');
+    await userEvent.keyboard('[Space]');
+    await waitFor(() => expect(
+      tableQueries.getAllByRole('button', { name: /^Reorder column / }).map(handle => handle.getAttribute('aria-label')),
+    ).toEqual(['Reorder column select', 'Reorder column email', 'Reorder column status', 'Reorder column amount']));
+    await expect(statusHeader).toHaveAttribute('aria-sort', 'descending');
+    await expect(rowValues(statusHeader).every(value => value === 'success')).toBe(true);
+
+    await userEvent.click(emailSort);
+    await expect(emailHeader).toHaveAttribute('aria-sort', 'ascending');
+    await expect(statusHeader).toHaveAttribute('aria-sort', 'none');
+    await waitFor(() => expect(rowValues(emailHeader)[0]).toBe('example@gmail.com'));
+  },
 };
 
 /**
@@ -187,7 +234,7 @@ export const Minimal: Story = {
 };
 
 /**
- * Toolbar variant - setagaya-front style with toolbar above table
+ * Toolbar variant with controls above the table
  */
 export const Toolbar: Story = {
   args: {

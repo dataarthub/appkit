@@ -12,21 +12,25 @@ const meta = {
     docs: {
       description: {
         component: `
-ガントチャートコンポーネント。タスクをタイムライン形式で表示し、進捗管理やリソース計画を支援。
+Display task timelines, progress and scheduling previews.
 
 ## Features
-- 階層タスク（サブタスク）表示
-- 進捗率の可視化とスライダー編集（キーボード対応）
-- バーの移動・両端リサイズ（明示的に有効化、キーボード・キャンセル対応）
-- FS/SS/FF/SF依存線と前方日程調整（一括保存）
-- 稼働日・休日カレンダー、依存関係ベースのクリティカルパス、容量制約による平準化
-- ベースライン比較
-- ダイアログによるタスク編集
-- フィルタリング機能
-- カスタムマーカー
-- 日次/週次/月次ビュー切替
+- Hierarchical tasks and subtasks
+- Progress display and keyboard-accessible slider editing
+- Opt-in bar movement and resizing, with keyboard and cancellation support
+- FS/SS/FF/SF dependency links and forward scheduling with batch save callbacks
+- Working calendars, dependency-based critical paths and capacity-constrained leveling
+- Baseline comparisons
+- Task editing dialogs
+- Filtering
+- Custom markers
+- Day, week and month views
 
-## Import
+## Required setup
+
+The application owns task state and save callbacks. Scheduling previews in these stories do not persist changes to a backend. Import @alneas/appkit-react/styles once in the host application; the Storybook preview supplies it here.
+
+## Public import
 \`\`\`tsx
 import { GanttChart } from '@alneas/appkit-react/tools/gantt';
 \`\`\`
@@ -109,7 +113,7 @@ export const Default: Story = {
   },
 };
 
-/** 進捗スライダーをポインター・矢印キーで操作する例。 */
+/** Edit progress using the pointer and arrow keys. */
 export const EditableProgress: Story = {
   args: {
     tasks: [

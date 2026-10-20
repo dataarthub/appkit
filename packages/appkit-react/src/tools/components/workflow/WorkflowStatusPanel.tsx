@@ -30,7 +30,7 @@ const FALLBACK_STATUS_INFO: WorkflowStatusInfo = {
   title: 'Unknown Status',
   description: 'Status metadata is not defined.',
   nextSteps: [],
-  color: 'bg-gray-500',
+  color: 'bg-secondary text-secondary-foreground',
 };
 
 /**
@@ -58,7 +58,7 @@ export function WorkflowStatusPanel({
       <Card>
         <CardHeader>
           <CardTitle className='flex items-center gap-2'>
-            <Badge className={`${statusInfo.color} text-white`}>{currentStatus}</Badge>
+            <Badge className={`text-white ${statusInfo.color}`}>{currentStatus}</Badge>
             {statusInfo.title}
           </CardTitle>
         </CardHeader>

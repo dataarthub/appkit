@@ -11,27 +11,46 @@ const meta = {
     docs: {
       description: {
         component: `
-認証プロバイダーコンポーネント。子コンポーネントに認証コンテキストを提供。
+Provide authentication state to descendant components through an application-supplied adapter.
 
 ## Features
-- SSR対応（ハイドレーションミスマッチ防止）
-- TanStack Query統合
-- 楽観的UI更新
-- アダプターパターンによる複数バックエンド対応
+- Server-rendered initial state
+- TanStack Query integration
+- Optimistic UI updates
+- Adapter-based backend integration
 
-## Import
+## Required setup
+
+Requires QueryClientProvider from @tanstack/react-query. The mock adapter used here keeps authentication state in memory; it does not authenticate against a hosted service. Import @alneas/appkit-react/styles once in the host application; the Storybook preview supplies it here.
+
+## Public import
 \`\`\`tsx
 import { AuthProvider, MockAuthAdapter } from '@alneas/appkit-react/tools/auth';
 \`\`\`
 
 ## Usage
-\`\`\`tsx
-const adapter = new MockAuthAdapter({ id: '1', email: 'user@example.com' });
 
-<AuthProvider adapter={adapter}>
-  <App />
-</AuthProvider>
+For TypeScript hosts that check stylesheet side effects, include a global .d.ts file containing \`declare module '@alneas/appkit-react/styles';\` in tsconfig.json.
+
+\`\`\`tsx
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider, MockAuthAdapter } from '@alneas/appkit-react/tools/auth';
+import '@alneas/appkit-react/styles';
+
+export function MockAuthExample() {
+  const [client] = useState(() => new QueryClient());
+  const [adapter] = useState(() => new MockAuthAdapter());
+  return (
+    <QueryClientProvider client={client}>
+      <AuthProvider adapter={adapter}>
+        <output>In-memory authentication demonstration</output>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 \`\`\`
+
         `,
       },
     },

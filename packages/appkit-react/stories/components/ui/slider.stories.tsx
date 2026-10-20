@@ -8,6 +8,7 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  args: { 'aria-label': 'Volume' },
 } satisfies Meta<typeof Slider>;
 
 export default meta;
@@ -24,6 +25,7 @@ export const Default: Story = {
 
 export const WithRange: Story = {
   args: {
+    'aria-label': 'Selected range',
     defaultValue: [25, 75],
     max: 100,
     step: 1,
@@ -54,7 +56,7 @@ export const Volume: Story = {
   render: () => (
     <div className='w-[300px] space-y-2'>
       <label className='text-sm font-medium'>Volume</label>
-      <Slider defaultValue={[70]} max={100} step={1} />
+      <Slider aria-label="Volume" defaultValue={[70]} max={100} step={1} />
     </div>
   ),
 };
@@ -66,7 +68,7 @@ export const PriceRange: Story = {
         <label className='font-medium'>Price Range</label>
         <span className='text-muted-foreground'>$250 - $750</span>
       </div>
-      <Slider defaultValue={[250, 750]} max={1000} step={50} />
+      <Slider aria-label="Price Range" defaultValue={[250, 750]} max={1000} step={50} />
     </div>
   ),
 };

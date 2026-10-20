@@ -32,7 +32,7 @@ const events: SchedulerEvent[] = [
     start: setMinutes(setHours(today, 10), 0),
     end: setMinutes(setHours(today, 11), 30),
     description: 'Project Sync',
-    color: 'bg-blue-500',
+    color: 'bg-blue-700 text-white',
   },
   {
     id: 'e2',
@@ -41,7 +41,7 @@ const events: SchedulerEvent[] = [
     start: setMinutes(setHours(today, 13), 0),
     end: setMinutes(setHours(today, 16), 0),
     description: 'Design Thinking',
-    color: 'bg-green-500',
+    color: 'bg-green-700 text-white',
   },
   {
     id: 'e3',
@@ -49,7 +49,7 @@ const events: SchedulerEvent[] = [
     title: 'Lunch Break',
     start: setMinutes(setHours(today, 12), 0),
     end: setMinutes(setHours(today, 13), 0),
-    color: 'bg-gray-400',
+    color: 'bg-gray-700 text-white',
   },
 ];
 

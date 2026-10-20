@@ -8,6 +8,7 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  args: { 'aria-label': 'Accept terms and conditions' },
 } satisfies Meta<typeof Checkbox>;
 
 export default meta;

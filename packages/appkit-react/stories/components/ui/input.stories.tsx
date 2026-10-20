@@ -50,11 +50,13 @@ export const Disabled: Story = {
 export const WithValue: Story = {
   args: {
     defaultValue: 'Pre-filled value',
+    'aria-label': 'Display name',
   },
 };
 
 export const File: Story = {
   args: {
     type: 'file',
+    'aria-label': 'Upload attachment',
   },
 };

@@ -33,8 +33,8 @@ export const WithLogo: Story = {
           fontFamily: 'Orbitron, sans-serif',
           fontSize: 24,
           letterSpacing: 8,
-          color: '#00f3ff',
-          textShadow: '0 0 20px rgba(0,243,255,0.5)',
+          color: 'var(--foreground)',
+          textShadow: '0 0 20px var(--primary)',
         }}
       >
         MY APP

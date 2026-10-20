@@ -9,6 +9,7 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  args: { 'aria-label': 'Receive notifications' },
 } as any;
 
 export default meta;

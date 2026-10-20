@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GanttChart, type GanttTask } from '../../src/tools/gantt';
 
-/** Controlled task dates shared by docs and Storybook. */
+/** Controlled task dates for isolated Storybook interaction. */
 export default function GanttDemo() {
   const [tasks, setTasks] = useState<GanttTask[]>([
     {

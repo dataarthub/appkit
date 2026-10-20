@@ -57,9 +57,9 @@ const config: ColumnConfig[] = [
     text: 'Status',
     type: 'badge',
     colorMap: {
-      active: 'bg-green-500 text-white',
+      active: 'bg-green-700 text-white',
       inactive: 'bg-gray-500 text-white',
-      pending: 'bg-yellow-500 text-white',
+      pending: 'bg-yellow-800 text-white',
     },
   },
   { field: 'amount', text: 'Amount', type: 'float(2)' },

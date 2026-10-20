@@ -63,7 +63,7 @@ export const AdvancedLayout: Story = {
           control={form.control}
           name='email'
           label='Email Address'
-          labelPosition='none'
+          labelPosition='top'
           overlappingLabel
           description='Required for login.'
           required

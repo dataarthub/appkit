@@ -49,3 +49,14 @@ test('obsolete consumer AI files are detected, not silently left in a package',(
  writeFileSync(join(root,'packages/appkit-core/dist/consumer-ai/obsolete.md'),'outdated');
  assert(checkGenerated(root,config).flatMap(r=>r.differences).some(d=>d.path.endsWith('/obsolete.md')&&d.kind==='extra'));
 }));
+
+test('portal landing links target approved package pages and preserve README anchors',()=>fixture((root,out,generate)=>{
+ const readme=join(root,'README.md');
+ writeFileSync(readme,readFileSync(readme,'utf8')+'\n[Core highlights](packages/appkit-core/README.md#key-highlights)\n');
+ generate(['--output-dir',out]);
+ const landing=readFileSync(join(out,'docs/index.md'),'utf8');
+ assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#quickstart\)/);
+ assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#key-highlights\)/);
+ const manifest=JSON.parse(readFileSync(join(out,'docs.manifest.json'),'utf8'));
+ assert(manifest.documents.some(doc=>doc.source==='packages/appkit-core/docs/index.md'));
+}));

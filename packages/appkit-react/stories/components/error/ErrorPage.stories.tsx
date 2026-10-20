@@ -14,7 +14,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * 一般的なエラーページ
+ * Display a generic error page.
  */
 export const Default: Story = {
   args: {
@@ -26,7 +26,7 @@ export const Default: Story = {
 };
 
 /**
- * 404 ページが見つからない
+ * Display a 404 page.
  */
 export const NotFound: Story = {
   args: {
@@ -40,7 +40,7 @@ export const NotFound: Story = {
 };
 
 /**
- * 認証エラー
+ * Display an authentication error.
  */
 export const Unauthorized: Story = {
   args: {
@@ -52,7 +52,7 @@ export const Unauthorized: Story = {
 };
 
 /**
- * サーバーエラー
+ * Display a server error.
  */
 export const ServerError: Story = {
   args: {
@@ -64,7 +64,7 @@ export const ServerError: Story = {
 };
 
 /**
- * 戻るボタンのみ
+ * Display only the back action.
  */
 export const BackOnly: Story = {
   args: {
@@ -75,7 +75,7 @@ export const BackOnly: Story = {
 };
 
 /**
- * カスタムコンテンツ付き
+ * Display custom content.
  */
 export const WithChildren: Story = {
   args: {
