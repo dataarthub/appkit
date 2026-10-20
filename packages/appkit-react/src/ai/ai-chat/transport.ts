@@ -1,3 +1,4 @@
+// biome-ignore syntax/correctness/noTypeOnlyImportAttributes: TypeScript resolution-mode selects ESM peer declarations under NodeNext.
 import type { ChatTransport, UIMessage, UIMessageChunk } from 'ai' with { 'resolution-mode': 'import' };
 import { createAIChatStream, normalizeAIChatMessages, type AIChatAdapter, type AIChatMessage,
   type AIChatPart, type AIChatRequest } from "@alneas/appkit-core/ai";

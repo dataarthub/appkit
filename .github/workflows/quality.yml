@@ -2,7 +2,6 @@ name: Public quality
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
     inputs:
       packed_consumer:
@@ -23,6 +22,8 @@ jobs:
         node: [24, 26]
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
@@ -48,13 +49,14 @@ jobs:
           path: .turbo/cache
           key: ${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: ${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-
-      - name: Build, type-check and run cached unit tests
-        run: bun run turbo run build typecheck test
-      - name: Check public entries and feature documentation
+      - name: Run the same gate as local pre-push
         if: matrix.node == 24
         run: |
-          bun run check:release
-          bun run check:docs
+          bun run secrets:setup
+          bun run verify:push
+      - name: Verify Node 26 compatibility
+        if: matrix.node != 24
+        run: bun run turbo run build typecheck test
       - name: Verify isolated packed consumer when explicitly requested
         if: matrix.node == 24 && inputs.packed_consumer == true
         run: bun run test:consumer
@@ -63,8 +65,5 @@ jobs:
         with:
           path: .turbo/cache
           key: ${{ steps.tasks.outputs.cache-primary-key }}
-      - uses: actions/upload-artifact@v4
-        if: ${{ always() && hashFiles('.verification/logs/**') != '' }}
-        with:
-          name: public-checks-${{ matrix.node }}
-          path: .verification/logs/
+      # Verification receipts can contain local paths and environment details.
+      # Share only separately reviewed, redacted copies; never upload raw logs.
