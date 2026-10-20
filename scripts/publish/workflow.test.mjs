@@ -44,3 +44,20 @@ test('the real publisher entry point refuses local execution before any registry
   assert.equal(result.status, 1);
   assert.match(result.stderr, /OIDC publication job is required/);
 });
+test('exact-commit Public quality is required before preparation and immediately before publication', () => {
+  const verify = workflow.jobs.verify;
+  const publish = workflow.jobs.publish;
+  assert.equal(verify.permissions.actions, 'read');
+  assert.equal(publish.permissions.actions, 'read');
+  for (const job of [verify,publish]) {
+    const gate = job.steps.findIndex(step => step.run === 'node scripts/publish/require-quality.mjs');
+    assert.ok(gate >= 0);
+    assert.equal(job.steps[gate].env.GITHUB_TOKEN, '${{ github.token }}');
+    assert.ok(gate > job.steps.findIndex(step => step.uses?.startsWith('actions/checkout@')));
+  }
+  const firstGate = verify.steps.findIndex(step => step.run === 'node scripts/publish/require-quality.mjs');
+  assert.ok(firstGate < verify.steps.findIndex(step => step.uses?.startsWith('oven-sh/setup-bun@')));
+  assert.equal(publish.steps.at(-2).run, 'node scripts/publish/require-quality.mjs');
+  assert.equal(publish.needs, 'verify');
+  for (const job of [verify,publish]) assert.doesNotMatch(JSON.stringify(job.steps), /test:storybook|verify:push|continue-on-error/);
+});

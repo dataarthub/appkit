@@ -10,6 +10,7 @@ on:
         default: false
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: appkit-quality-${{ github.ref }}
   cancel-in-progress: true
@@ -49,17 +50,22 @@ jobs:
           path: .turbo/cache
           key: ${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: ${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-
+      - name: Select checks since the last successful main ancestor
+        id: selection
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/verification/plan.mjs --ci
       - name: Install pinned Chromium for Storybook verification
-        if: matrix.node == 24
+        if: matrix.node == 24 && steps.selection.outputs.browser == 'true'
         run: bunx --no-install playwright install --with-deps chromium
       - name: Run the same gate as local pre-push
         if: matrix.node == 24
         run: |
           bun run secrets:setup
-          bun run verify:push
+          bun run verify:push --ci-plan
       - name: Verify Node 26 compatibility
         if: matrix.node != 24
-        run: bun run turbo run build typecheck test
+        run: node scripts/verification/run.mjs --ci-plan --node-compat
       - name: Verify isolated packed consumer when explicitly requested
         if: matrix.node == 24 && inputs.packed_consumer == true
         run: bun run test:consumer
