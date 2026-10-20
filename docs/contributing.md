@@ -15,7 +15,7 @@ Install Node 24+ and Bun 1.4.0, then run `bun install --frozen-lockfile --ignore
 1. Change the owning source and API JSDoc.
 2. Update its English feature guide, including the exact public import subpath. Install commands use package names, not subpaths.
 3. Run affected tests and packaging/type checks. Record commands and identify reused evidence in the PR.
-4. Open a PR explaining the problem and resulting behavior. Keep both packages at 0.1.0 until the initial publication; review later version changes together with internal pins.
+4. Open a PR explaining the problem and resulting behavior. Version 0.1.0 is already published; review later version changes together with internal pins. Working-tree changes are candidates for a future release, not updates to the existing npm version.
 
 `bun run check:release` checks public entry loading, root APIs and packaged files. `bun run check:docs` checks selected sources, subpaths and relative links. Builds generate the export reference and AI indexes; do not hand-edit generated files.
 
@@ -23,7 +23,11 @@ Routine CI uses Turbo caching for builds, types and unit tests. Browser/database
 
 Keep temporary fixtures in .verification/tmp and logs in .verification/logs. Packed consumers use a disposable system-temp directory so undeclared imports cannot resolve through checkout node_modules. Both are excluded from Git and public manifests. Public and private remain independent repositories with separate lockfiles; private uses exact published public versions. Only explicitly selected disposable consumer fixtures replace registry versions with reviewed tarballs.
 
-The portal owns translation, ingestion and deployment. Follow https://docs-d1x.pages.dev/policies/documentation-policy.md and https://docs-d1x.pages.dev/skills/document-authoring/SKILL.md. The root GitHub README is plain Markdown; portal landing pages carry their own frontmatter.
+Ignored files are not automatically safe to share. Verification receipts, including `archives.json`, can contain absolute archive paths and environment details. Keep original receipts local so their hashes remain usable; inspect and redact a separate copy before sharing it. Do not upload raw `.verification/` files as CI artifacts or force-add them to Git. Check logs for credentials without printing matching values; revoke an exposed credential if one is confirmed.
+
+Before committing, check `git var GIT_AUTHOR_IDENT` and `git var GIT_COMMITTER_IDENT`. Use your GitHub-provided noreply address in repository-local Git configuration if you do not want a personal email in future public commits. Changing configuration does not remove an address from existing history; coordinate any history rewrite separately.
+
+The portal owns translation, ingestion and deployment. Follow https://tech-docs.alneas.com/policies/documentation-policy.md and https://tech-docs.alneas.com/skills/document-authoring/SKILL.md. The root GitHub README is plain Markdown; portal landing pages carry their own frontmatter.
 
 ## Local quality checks
 
