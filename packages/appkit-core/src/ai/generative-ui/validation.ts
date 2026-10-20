@@ -23,13 +23,14 @@ function id(value: unknown): value is string {
  * names are allowed here and handled by the application's explicit UI registry.
  * Parse provider JSON and assemble streaming fragments before calling this function.
  *
+ * @param input - Fully assembled untrusted JSON document, after provider JSON parsing/fragment assembly.
+ * @returns A detached frozen version-1 document or fixed INVALID_DOCUMENT failure; unknown component names are allowed at this envelope layer.
+ *
  * @example
- * ```ts
- * import { validateGenerativeUIDocument } from "./";
- * const result = validateGenerativeUIDocument({
- *   version: 1, id: 'answer-1',
- *   blocks: [{ id: 'summary', type: 'sales-table', data: { rows: [] } }],
- * });
+ * ```typescript
+ * import { validateGenerativeUIDocument } from '@alneas/appkit-core/ai';
+ *
+ * console.log(validateGenerativeUIDocument({ version: 1, id: 'response-1', blocks: [{ id: 'summary-1', type: 'summary', data: { text: 'hello' } }] }));
  * ```
  */
 export function validateGenerativeUIDocument(input: unknown): GenerativeUIDocumentResult {

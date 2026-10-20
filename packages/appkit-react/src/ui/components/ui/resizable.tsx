@@ -6,7 +6,19 @@ import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'reac
 import { cn } from '../../lib/utils';
 
 /**
- * ドラッグで幅や高さをリサイズ可能なパネルを配置するためのグループコンテナ。
+ * Coordinates adjacent resizable panels through react-resizable-panels Group.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered ResizablePanelGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place panels and handles as siblings inside the group and give the host a nonzero size. Props follow the installed react-resizable-panels Group/Panel/Separator API; this wrapper does not add size persistence. withHandle defaults to false/absent.
+ * @example
+ * ```tsx
+ * import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ResizablePanelGroup orientation="horizontal"><ResizablePanel defaultSize="50%">Left</ResizablePanel><ResizableHandle withHandle /><ResizablePanel defaultSize="50%">Right</ResizablePanel></ResizablePanelGroup>);
+ * }
+ * ```
  */
 function ResizablePanelGroup({ className, ...props }: React.ComponentProps<typeof PanelGroup>) {
   return (
@@ -19,20 +31,47 @@ function ResizablePanelGroup({ className, ...props }: React.ComponentProps<typeo
 }
 
 /**
- * リサイズ可能な個々のパネル領域。
+ * Renders one panel managed by its surrounding resizable group.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered ResizablePanel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place panels and handles as siblings inside the group and give the host a nonzero size. Props follow the installed react-resizable-panels Group/Panel/Separator API; this wrapper does not add size persistence. withHandle defaults to false/absent.
+ * @example
+ * ```tsx
+ * import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ResizablePanelGroup orientation="horizontal"><ResizablePanel defaultSize="50%">Left</ResizablePanel><ResizableHandle withHandle /><ResizablePanel defaultSize="50%">Right</ResizablePanel></ResizablePanelGroup>);
+ * }
+ * ```
  */
 function ResizablePanel({ ...props }: React.ComponentProps<typeof Panel>) {
   return <Panel data-slot='resizable-panel' {...props} />;
 }
 
 /**
- * パネル間の境界線であり、ドラッグしてサイズ変更を行うためのハンドル。
+ * Renders the draggable panel separator with an optional visible handle.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered ResizableHandle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place panels and handles as siblings inside the group and give the host a nonzero size. Props follow the installed react-resizable-panels Group/Panel/Separator API; this wrapper does not add size persistence. withHandle defaults to false/absent.  children are replaced by the optional withHandle grip.
+ * @example
+ * ```tsx
+ * import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ResizablePanelGroup orientation="horizontal"><ResizablePanel defaultSize="50%">Left</ResizablePanel><ResizableHandle withHandle /><ResizablePanel defaultSize="50%">Right</ResizablePanel></ResizablePanelGroup>);
+ * }
+ * ```
  */
 function ResizableHandle({
   withHandle,
   className,
   ...props
 }: React.ComponentProps<typeof PanelResizeHandle> & {
+  /**
+   * Adds a small visible grip when true; defaults to false/absent.
+   */
   withHandle?: boolean;
 }) {
   return (

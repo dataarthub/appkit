@@ -2,58 +2,161 @@ import { calculateInvoiceAmounts } from "../../data/finance";
 import type { InvoiceAmountsResult, InvoiceCalculationOptions } from "../../data/finance";
 import type { BusinessDocumentData, BusinessDocumentTemplate, DocumentLineItem, DocumentPartyInfo } from "../../data/pdf";
 import { formatUSD, formatUSDate } from '../format';
-/** Supported US business document presets; no tax or electronic-invoice profile is inferred. */
+/**
+ * Supported US business document presets; no tax or electronic-invoice profile is inferred.
+ *
+ * @see {@link createUSBusinessDocument} for a complete renderer-neutral USD document example.
+ */
 export type USDocumentType = 'quote' | 'invoice' | 'creditNote';
-/** US Letter portrait dimensions in PDF points (72 points per inch), with half-inch margins. */
-export const US_LETTER_PAGE = Object.freeze({ width: 612, height: 792, margin: 36 } as const);
-/** Explicit inputs for a renderer-neutral USD document. Line amounts are precomputed dollars. */
+/**
+ * US Letter portrait dimensions in PDF points (72 points per inch), with half-inch margins.
+ *
+ * @see {@link createUSBusinessDocument} for a complete renderer-neutral USD document example.
+ */
+export const US_LETTER_PAGE = Object.freeze({
+  /** US Letter portrait width in PDF points (612, or 8.5 inches). */
+  width: 612,
+  /** US Letter portrait height in PDF points (792, or 11 inches). */
+  height: 792,
+  /** Suggested uniform page margin in PDF points (36, or half an inch). */
+  margin: 36 } as const);
+/**
+ * Explicit inputs for a renderer-neutral USD document. Line amounts are precomputed dollars.
+ *
+ * @see {@link createUSBusinessDocument} for a complete renderer-neutral USD document example.
+ */
 export interface USBusinessDocumentInput {
+
+  /** Selects the quote, invoice or credit-note presentation preset. */
   documentType: USDocumentType;
+
+  /** Required nonblank document reference printed in the model. */
   documentNo: string;
+
   /** Civil date, YYYY-MM-DD; rendered without converting it to a business timezone. */
   issueDate: string;
+
+  /** Issuer party details; companyName and address must be nonblank. */
   issuer: DocumentPartyInfo;
+
+  /** Recipient party details; companyName and address must be nonblank. */
   client: DocumentPartyInfo;
+
   /** Nonnegative precomputed amounts. Discounts must already be reflected in each amount. */
   items: readonly DocumentLineItem[];
+
   /** Explicit rate in percentage points and explicit dollar tax rounder. No default sales tax. */
   taxPolicy: InvoiceCalculationOptions;
+
+  /** Optional YYYY-MM-DD civil payment due date; no holiday shifting. */
   dueDate?: string;
+
+  /** Optional YYYY-MM-DD quote validity date; no holiday shifting. */
   expirationDate?: string;
+
   /** Required for credit notes: the original invoice reference. Credits use positive magnitudes. */
   billingReference?: string;
+
+  /** Optional host-supplied payment terms displayed verbatim. */
   paymentTerms?: string;
+
+  /** Optional host-supplied payment instructions displayed verbatim. */
   paymentInstructions?: string;
+
+  /** Optional host-supplied explanatory text. */
   notes?: string;
 }
-/** Portable document model for a host renderer. This value is not a PDF binary. */
+/**
+ * Portable document model for a host renderer. This value is not a PDF binary.
+ *
+ * @see {@link createUSBusinessDocument} for a complete renderer-neutral USD document example.
+ */
 export interface USBusinessDocumentModel {
+
+  /** USD currency code attached to the document model; no conversion occurs. */
   currency: 'USD';
+
+  /** en-US presentation locale used by built-in formatters. */
   locale: 'en-US';
+
+  /** Shared US Letter page geometry; the host renderer applies these dimensions. */
   page: typeof US_LETTER_PAGE;
+
+  /** Fresh customizable English engine template selected for this document type. */
   template: BusinessDocumentTemplate;
+
+  /** Issuer party details; companyName and address must be nonblank. */
   issuer: DocumentPartyInfo;
+
+  /** Renderer-neutral business-document data, including numeric totals and input civil dates. */
   data: BusinessDocumentData;
+
+  /** Calculated numeric subtotal, tax rate, tax amount and total in dollars/percentage points. */
   amounts: InvoiceAmountsResult;
+
   /** English labels and final formatted values for rendering without Japanese fallbacks. */
   presentation: {
+
+    /** English document title selected by the template. */
     title: string;
+
+    /** Document reference copied into the final presentation values. */
     documentNo: string;
+
+    /** Issue date formatted as an en-US civil date in UTC to preserve the input day. */
     issueDate: string;
+
+    /** Optional civil date formatted as en-US date text without shifting its calendar day. */
     dueDate?: string;
+
+    /** Optional civil date formatted as en-US date text without shifting its calendar day. */
     expirationDate?: string;
+
+    /** English label From for the issuer block. */
     issuerLabel: string;
+
+    /** Prepared For on quotes, otherwise Bill To. */
     clientLabel: string;
+
+    /** English Subtotal label. */
     subtotalLabel: string;
+
+    /** English Sales Tax label including the explicit percentage-point rate. */
     taxLabel: string;
+
+    /** English total/credit-total label identifying USD. */
     totalLabel: string;
+
+    /** Subtotal formatted as en-US USD currency text. */
     subtotal: string;
+
+    /** Calculated tax formatted as en-US USD currency text. */
     tax: string;
+
+    /** Final total formatted as en-US USD currency text. */
     total: string;
-    lines: Array<{ description: string; quantity: string; unitPrice: string; amount: string }>;
+
+    /** Input-order line values formatted as English-facing text for the host renderer. */
+    lines: Array<{
+      /** Line name used as the display description. */
+      description: string;
+      /** Quantity formatted with en-US number presentation. */
+      quantity: string;
+      /** Unit price formatted as USD text. */
+      unitPrice: string;
+      /** Precomputed line amount formatted as USD text. */
+      amount: string }>;
+
+    /** Optional host-supplied payment terms displayed verbatim. */
     paymentTerms?: string;
+
+    /** Optional host-supplied payment instructions displayed verbatim. */
     paymentInstructions?: string;
+
+    /** Optional host-supplied explanatory text. */
     notes?: string;
+
+    /** Original invoice identifier displayed for credit notes. */
     billingReference?: string;
   };
 }
@@ -66,6 +169,8 @@ export interface USBusinessDocumentModel {
  * import { createUSDocumentTemplate } from '@alneas/appkit-core/us/documents';
  * const template = createUSDocumentTemplate('invoice');
  * template.title = 'Commercial Invoice';
+ *
+ * @throws TypeError when documentType is not quote, invoice or creditNote.
  */
 export function createUSDocumentTemplate(documentType: USDocumentType): BusinessDocumentTemplate {
   if (!['quote', 'invoice', 'creditNote'].includes(documentType)) throw new TypeError('Unknown US document type');

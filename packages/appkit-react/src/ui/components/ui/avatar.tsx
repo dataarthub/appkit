@@ -5,9 +5,30 @@ import { Avatar as AvatarPrimitive } from '@base-ui/react/avatar';
 
 import { cn } from '../../lib/utils';
 
+/**
+ * Coordinates avatar image/fallback rendering and size styling.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: size='default'.
+ * @returns The rendered Avatar composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place Image/Fallback/Badge inside Avatar. size defaults to default (size-8), with sm size-6 and lg size-10. AvatarGroupCount renders supplied children and does not calculate overflow or hide avatars. Supply meaningful image alt text. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AvatarGroup><Avatar><AvatarImage src="/avatar.png" alt="Ada" /><AvatarFallback>AD</AvatarFallback><AvatarBadge aria-label="Online" /></Avatar><AvatarGroupCount>+2</AvatarGroupCount></AvatarGroup>);
+ * }
+ * ```
+ */
 const Avatar = React.forwardRef<
   HTMLSpanElement,
-  AvatarPrimitive.Root.Props & { size?: 'default' | 'sm' | 'lg' }
+  AvatarPrimitive.Root.Props & { /**
+ * Visual size preset; defaults to default unless the owning component states otherwise.
+ */
+  /**
+   * Visual size preset; defaults to default unless the owning component states otherwise.
+   */
+  size?: 'default' | 'sm' | 'lg' }
 >(({ className, size = 'default', ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
@@ -22,6 +43,21 @@ const Avatar = React.forwardRef<
 ));
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
+/**
+ * Renders the avatar image using Base UI loading behavior.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AvatarImage composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place Image/Fallback/Badge inside Avatar. size defaults to default (size-8), with sm size-6 and lg size-10. AvatarGroupCount renders supplied children and does not calculate overflow or hide avatars. Supply meaningful image alt text. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AvatarGroup><Avatar><AvatarImage src="/avatar.png" alt="Ada" /><AvatarFallback>AD</AvatarFallback><AvatarBadge aria-label="Online" /></Avatar><AvatarGroupCount>+2</AvatarGroupCount></AvatarGroup>);
+ * }
+ * ```
+ */
 const AvatarImage = React.forwardRef<HTMLImageElement, AvatarPrimitive.Image.Props>(
   ({ className, ...props }, ref) => (
     <AvatarPrimitive.Image
@@ -34,6 +70,21 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarPrimitive.Image.Pro
 );
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
+/**
+ * Renders replacement avatar content when the image is unavailable.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AvatarFallback composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place Image/Fallback/Badge inside Avatar. size defaults to default (size-8), with sm size-6 and lg size-10. AvatarGroupCount renders supplied children and does not calculate overflow or hide avatars. Supply meaningful image alt text. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AvatarGroup><Avatar><AvatarImage src="/avatar.png" alt="Ada" /><AvatarFallback>AD</AvatarFallback><AvatarBadge aria-label="Online" /></Avatar><AvatarGroupCount>+2</AvatarGroupCount></AvatarGroup>);
+ * }
+ * ```
+ */
 const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarPrimitive.Fallback.Props>(
   ({ className, ...props }, ref) => (
     <AvatarPrimitive.Fallback
@@ -50,7 +101,19 @@ const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarPrimitive.Fallbac
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
 /**
- * アバターの右下などにステータス（オンラインなど）を示すためのバッジ。
+ * Positions a status indicator over the lower-right corner of an avatar.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AvatarBadge composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place Image/Fallback/Badge inside Avatar. size defaults to default (size-8), with sm size-6 and lg size-10. AvatarGroupCount renders supplied children and does not calculate overflow or hide avatars. Supply meaningful image alt text.
+ * @example
+ * ```tsx
+ * import { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AvatarGroup><Avatar><AvatarImage src="/avatar.png" alt="Ada" /><AvatarFallback>AD</AvatarFallback><AvatarBadge aria-label="Online" /></Avatar><AvatarGroupCount>+2</AvatarGroupCount></AvatarGroup>);
+ * }
+ * ```
  */
 function AvatarBadge({ className, ...props }: React.ComponentProps<'span'>) {
   return (
@@ -69,7 +132,19 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<'span'>) {
 }
 
 /**
- * 複数のアバターを重ねて表示するグループコンテナ。
+ * Overlaps adjacent avatars with matching background rings.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AvatarGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place Image/Fallback/Badge inside Avatar. size defaults to default (size-8), with sm size-6 and lg size-10. AvatarGroupCount renders supplied children and does not calculate overflow or hide avatars. Supply meaningful image alt text.
+ * @example
+ * ```tsx
+ * import { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AvatarGroup><Avatar><AvatarImage src="/avatar.png" alt="Ada" /><AvatarFallback>AD</AvatarFallback><AvatarBadge aria-label="Online" /></Avatar><AvatarGroupCount>+2</AvatarGroupCount></AvatarGroup>);
+ * }
+ * ```
  */
 function AvatarGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -85,7 +160,19 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * アバターグループにおいて、表示制限を超えた残りのアバター数を表示するコンポーネント。
+ * Styles caller-provided overflow text after a group of avatars.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AvatarGroupCount composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place Image/Fallback/Badge inside Avatar. size defaults to default (size-8), with sm size-6 and lg size-10. AvatarGroupCount renders supplied children and does not calculate overflow or hide avatars. Supply meaningful image alt text.
+ * @example
+ * ```tsx
+ * import { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AvatarGroup><Avatar><AvatarImage src="/avatar.png" alt="Ada" /><AvatarFallback>AD</AvatarFallback><AvatarBadge aria-label="Online" /></Avatar><AvatarGroupCount>+2</AvatarGroupCount></AvatarGroup>);
+ * }
+ * ```
  */
 function AvatarGroupCount({ className, ...props }: React.ComponentProps<'div'>) {
   return (

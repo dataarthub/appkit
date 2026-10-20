@@ -7,21 +7,57 @@ import { ChevronRightIcon, CheckIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 /**
- * ドロップダウンメニューのルートコンポーネント。
+ * Coordinates popup menu state and focus behavior.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenu composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
  */
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root data-slot='dropdown-menu' {...props} />;
 }
 
 /**
- * メニュー要素をポータル経由でDOMの別の場所に描画するためのコンポーネント。
+ * Mounts menu descendants in a separate DOM container.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuPortal composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
  */
 function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
   return <MenuPrimitive.Portal data-slot='dropdown-menu-portal' {...props} />;
 }
 
 /**
- * ドロップダウンメニューを開くためのトリガーボタン。
+ * Renders the control or context target that opens a menu.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
  */
 function DropdownMenuTrigger({
   children,
@@ -37,6 +73,21 @@ function DropdownMenuTrigger({
   );
 }
 
+/**
+ * Portals the menu popup through its positioned container.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: align='start', alignOffset=0, side='bottom', sideOffset=4.
+ * @returns The rendered DropdownMenuContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuContent = React.forwardRef<
   HTMLDivElement,
   MenuPrimitive.Popup.Props &
@@ -70,15 +121,48 @@ const DropdownMenuContent = React.forwardRef<
 DropdownMenuContent.displayName = MenuPrimitive.Popup.displayName;
 
 /**
- * メニューアイテムを論理的なグループにまとめるためのコンポーネント。
+ * Groups related menu actions.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
  */
 function DropdownMenuGroup({ ...props }: MenuPrimitive.Group.Props) {
   return <MenuPrimitive.Group data-slot='dropdown-menu-group' {...props} />;
 }
 
+/**
+ * Renders the accessible label of a menu group with optional inset spacing.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuLabel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuLabel = React.forwardRef<
   HTMLDivElement,
-  MenuPrimitive.GroupLabel.Props & { inset?: boolean }
+  MenuPrimitive.GroupLabel.Props & { /**
+ * Adds left inset spacing when true; omitted/false uses normal alignment.
+ */
+  /**
+   * Adds left inset spacing when true; omitted/false uses normal alignment.
+   */
+  inset?: boolean }
 >(({ className, inset, ...props }, ref) => (
   <MenuPrimitive.GroupLabel
     ref={ref}
@@ -93,10 +177,31 @@ const DropdownMenuLabel = React.forwardRef<
 ));
 DropdownMenuLabel.displayName = MenuPrimitive.GroupLabel.displayName;
 
+/**
+ * Renders a menu action with optional destructive styling and inset spacing.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='default'.
+ * @returns The rendered DropdownMenuItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuItem = React.forwardRef<
   HTMLDivElement,
   MenuPrimitive.Item.Props & {
+    /**
+     * Adds left inset spacing when true; omitted/false uses normal alignment.
+     */
     inset?: boolean;
+    /**
+     * Visual treatment from the declared variant union; changing it does not alter host action semantics.
+     */
     variant?: 'default' | 'destructive';
   }
 >(({ className, inset, variant = 'default', children, ...props }, ref) => (
@@ -117,15 +222,48 @@ const DropdownMenuItem = React.forwardRef<
 DropdownMenuItem.displayName = MenuPrimitive.Item.displayName;
 
 /**
- * サブメニュー（入れ子になったメニュー）用のルートコンポーネント。
+ * Coordinates a submenu nested inside a parent menu.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuSub composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
  */
 function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
   return <MenuPrimitive.SubmenuRoot data-slot='dropdown-menu-sub' {...props} />;
 }
 
+/**
+ * Renders a submenu opener with a trailing chevron.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuSubTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuSubTrigger = React.forwardRef<
   HTMLDivElement,
-  MenuPrimitive.SubmenuTrigger.Props & { inset?: boolean }
+  MenuPrimitive.SubmenuTrigger.Props & { /**
+ * Adds left inset spacing when true; omitted/false uses normal alignment.
+ */
+  /**
+   * Adds left inset spacing when true; omitted/false uses normal alignment.
+   */
+  inset?: boolean }
 >(({ className, inset, children, ...props }, ref) => (
   <MenuPrimitive.SubmenuTrigger
     ref={ref}
@@ -143,6 +281,21 @@ const DropdownMenuSubTrigger = React.forwardRef<
 ));
 DropdownMenuSubTrigger.displayName = MenuPrimitive.SubmenuTrigger.displayName;
 
+/**
+ * Renders a positioned submenu popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: align='start', alignOffset=-3, side='right', sideOffset=0.
+ * @returns The rendered DropdownMenuSubContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuSubContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentPropsWithoutRef<typeof DropdownMenuContent>
@@ -168,6 +321,21 @@ const DropdownMenuSubContent = React.forwardRef<
 );
 DropdownMenuSubContent.displayName = 'DropdownMenuSubContent';
 
+/**
+ * Renders a checked menu action with a checkmark indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuCheckboxItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuCheckboxItem = React.forwardRef<HTMLDivElement, MenuPrimitive.CheckboxItem.Props>(
   ({ className, children, checked, ...props }, ref) => (
     <MenuPrimitive.CheckboxItem
@@ -195,12 +363,39 @@ const DropdownMenuCheckboxItem = React.forwardRef<HTMLDivElement, MenuPrimitive.
 DropdownMenuCheckboxItem.displayName = MenuPrimitive.CheckboxItem.displayName;
 
 /**
- * 選択状態を共有し、単一選択（ラジオ）可能なアイテムをグループ化するコンポーネント。
+ * Coordinates mutually exclusive menu choices.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuRadioGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
  */
 function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
   return <MenuPrimitive.RadioGroup data-slot='dropdown-menu-radio-group' {...props} />;
 }
 
+/**
+ * Renders one value in a menu radio group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuRadioItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuRadioItem = React.forwardRef<HTMLDivElement, MenuPrimitive.RadioItem.Props>(
   ({ className, children, ...props }, ref) => (
     <MenuPrimitive.RadioItem
@@ -226,6 +421,21 @@ const DropdownMenuRadioItem = React.forwardRef<HTMLDivElement, MenuPrimitive.Rad
 );
 DropdownMenuRadioItem.displayName = MenuPrimitive.RadioItem.displayName;
 
+/**
+ * Draws a divider between menu sections.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuSeparator = React.forwardRef<HTMLDivElement, MenuPrimitive.Separator.Props>(
   ({ className, ...props }, ref) => (
     <MenuPrimitive.Separator
@@ -238,6 +448,21 @@ const DropdownMenuSeparator = React.forwardRef<HTMLDivElement, MenuPrimitive.Sep
 );
 DropdownMenuSeparator.displayName = MenuPrimitive.Separator.displayName;
 
+/**
+ * Styles a shortcut hint without installing keyboard listeners.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered DropdownMenuShortcut composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching DropdownMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<DropdownMenu><DropdownMenuTrigger>Actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuGroup><DropdownMenuLabel>Document</DropdownMenuLabel><DropdownMenuItem onClick={() => console.log("Open requested")}>Open</DropdownMenuItem></DropdownMenuGroup><DropdownMenuSeparator /><DropdownMenuItem disabled>Unavailable</DropdownMenuItem></DropdownMenuContent></DropdownMenu>);
+ * }
+ * ```
+ */
 const DropdownMenuShortcut = React.forwardRef<HTMLSpanElement, React.ComponentProps<'span'>>(
   ({ className, ...props }, ref) => (
     <span

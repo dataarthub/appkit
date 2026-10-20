@@ -3,7 +3,10 @@ import { validateGenerativeUIDocument } from "@alneas/appkit-core/ai";
 import { MinimalErrorBoundary } from './error-boundary';
 import type { GenerativeUIIssue, GenerativeUIRegistry } from './registry';
 
-/** Props for rendering a fully assembled, immutable JSON response. */
+/**
+ * Props for rendering a fully assembled, immutable JSON response.
+ * @see GenerativeUIRenderer for the canonical usage example.
+ */
 export interface GenerativeUIRendererProps {
   /** Parsed JSON input. Replace its reference to submit a new immutable document. */
   input: unknown;
@@ -20,6 +23,7 @@ function defaultFallback(issue: GenerativeUIIssue): ReactNode {
 /**
  * Renders validated JSON blocks using an explicit application registry.
  *
+ *
  * @remarks
  * Envelope validation snapshots input by reference. Pass immutable documents; replace
  * input when a response changes. Component validators run during rendering and must
@@ -27,10 +31,24 @@ function defaultFallback(issue: GenerativeUIIssue): ReactNode {
  * get a document fallback. MinimalErrorBoundary isolates client render failures.
  * Block identity includes document ID, block ID/type and data.
  *
+ *
+ * @param props - Immutable response, explicit registry and optional localized fallback renderer.
+ *
+ * @returns Block wrappers and registered elements, or fallback content for invalid input.
+ *
+ * @remarks Requires React; registered components own any other providers or CSS.
+ * The default fallback is an English status paragraph. Client error boundaries handle
+ * descendant render failures; React server rendering errors are not isolated by them.
+ * Fallback callback errors propagate. Changing registry identity remounts blocks.
+ *
  * @example
  * ```tsx
- * import { GenerativeUIRenderer } from "./";
- * <GenerativeUIRenderer input={response} registry={registry} />
+ * import { createGenerativeUIRegistry, GenerativeUIRenderer } from '@alneas/appkit-react/ai/generative-ui';
+ * const registry = createGenerativeUIRegistry([]);
+ * // Supply a parsed host response; unregistered types receive the fallback.
+ * export function GeneratedResponse({ response }: { response: unknown }) {
+ *   return <GenerativeUIRenderer input={response} registry={registry} />;
+ * }
  * ```
  */
 export function GenerativeUIRenderer({

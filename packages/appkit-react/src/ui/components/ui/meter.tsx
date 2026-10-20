@@ -6,7 +6,19 @@ import { Meter as MeterPrimitive } from '@base-ui/react/meter';
 import { cn } from '../../lib/utils';
 
 /**
- * 測定値や進捗状況（ゲージなど）を表示するメーターのルートコンポーネント。
+ * Coordinates an accessible bounded measurement display.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Meter composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Indicator, Label and Value require Meter context. Base UI owns numeric range and accessible measurement state. MeterIndicator is typed with Track props but forwards its received props and className to the inner Indicator, not the outer track.
+ * @example
+ * ```tsx
+ * import { Meter, MeterIndicator, MeterLabel, MeterValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Meter value={65}><MeterLabel>Storage used</MeterLabel><MeterValue /><MeterIndicator /></Meter>);
+ * }
+ * ```
  */
 function Meter({ className, ...props }: React.ComponentProps<typeof MeterPrimitive.Root>) {
   return (
@@ -19,7 +31,19 @@ function Meter({ className, ...props }: React.ComponentProps<typeof MeterPrimiti
 }
 
 /**
- * メーターの進捗バーを視覚的に表現するインジケーター。
+ * Renders a meter track containing its styled measurement indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MeterIndicator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Indicator, Label and Value require Meter context. Base UI owns numeric range and accessible measurement state. MeterIndicator is typed with Track props but forwards its received props and className to the inner Indicator, not the outer track.
+ * @example
+ * ```tsx
+ * import { Meter, MeterIndicator, MeterLabel, MeterValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Meter value={65}><MeterLabel>Storage used</MeterLabel><MeterValue /><MeterIndicator /></Meter>);
+ * }
+ * ```
  */
 function MeterIndicator({
   className,
@@ -40,7 +64,19 @@ function MeterIndicator({
 }
 
 /**
- * メーターの名前や説明を表示するラベル。
+ * Provides the accessible label of a meter.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MeterLabel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Indicator, Label and Value require Meter context. Base UI owns numeric range and accessible measurement state. MeterIndicator is typed with Track props but forwards its received props and className to the inner Indicator, not the outer track.
+ * @example
+ * ```tsx
+ * import { Meter, MeterIndicator, MeterLabel, MeterValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Meter value={65}><MeterLabel>Storage used</MeterLabel><MeterValue /><MeterIndicator /></Meter>);
+ * }
+ * ```
  */
 function MeterLabel({ className, ...props }: React.ComponentProps<typeof MeterPrimitive.Label>) {
   return (
@@ -53,7 +89,19 @@ function MeterLabel({ className, ...props }: React.ComponentProps<typeof MeterPr
 }
 
 /**
- * メーターの現在の数値を表示するコンポーネント。
+ * Renders the formatted current measurement from meter context.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MeterValue composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Indicator, Label and Value require Meter context. Base UI owns numeric range and accessible measurement state. MeterIndicator is typed with Track props but forwards its received props and className to the inner Indicator, not the outer track.
+ * @example
+ * ```tsx
+ * import { Meter, MeterIndicator, MeterLabel, MeterValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Meter value={65}><MeterLabel>Storage used</MeterLabel><MeterValue /><MeterIndicator /></Meter>);
+ * }
+ * ```
  */
 function MeterValue({ className, ...props }: React.ComponentProps<typeof MeterPrimitive.Value>) {
   return (

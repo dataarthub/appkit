@@ -3,13 +3,30 @@ import type { ActionDefinition, ActionValidator, ExecutionContext } from "@alnea
 import { useScreenActionRegistry } from './context';
 
 /**
- * Registers an action on the current screen's ActionRegistry.
+ * Registers a validated action on the nearest screen registry after commit.
  *
- * Handler and validator automatically capture the latest committed
- * props and state via refs without requiring dependency arrays.
- * Metadata is a registration descriptor; keep it stable and replace it to update the list.
- * The action is automatically unregistered when the component unmounts
- * or when the action ID changes.
+ * @typeParam TInput - Validated input shape; defaults to unknown.
+ *
+ * @typeParam TOutput - Handler output shape; defaults to unknown.
+ *
+ * @param action - Stable ID/description/metadata with validator and handler from the host.
+ *
+ * @returns No value; effect cleanup unregisters this registration.
+ *
+ * @throws Error without ScreenActionProvider; registration errors propagate from the layout effect.
+ *
+ * @remarks Latest committed validator/handler are read through refs. ID, description or
+ * metadata identity changes trigger re-registration. No action executes automatically;
+ * no styles are required. The host owns effects and authorization in its handler.
+ *
+ * @example
+ * ```tsx
+ * import { ScreenActionProvider, useScreenAction, type ActionDefinition } from '@alneas/appkit-react/ai/action';
+ * function Registration({ action }: { action: ActionDefinition<string, string> }) { useScreenAction(action); return null; }
+ * export function Screen({ action }: { action: ActionDefinition<string, string> }) {
+ *   return <ScreenActionProvider><Registration action={action} /></ScreenActionProvider>;
+ * }
+ * ```
  */
 export function useScreenAction<TInput = unknown, TOutput = unknown>(
   action: ActionDefinition<TInput, TOutput>

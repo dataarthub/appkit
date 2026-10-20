@@ -86,39 +86,41 @@ function detectMimeType(key: string): string {
  *
  * @example
  * ```typescript
- * const storage = new LocalStorageAdapter({
- *   baseDir: './uploads',
- *   baseUrl: 'http://localhost:3000/files',
- * });
+ * import { LocalStorageAdapter, type LocalStorageConfig } from '@alneas/appkit-core/storage/server';
  *
- * // Upload
- * await storage.upload('invoices/inv-001.pdf', pdfBuffer);
- *
- * // Get URL
- * const url = await storage.getUrl('invoices/inv-001.pdf');
- * // -> 'http://localhost:3000/files/invoices/inv-001.pdf'
- *
- * // Download
- * const data = await storage.download('invoices/inv-001.pdf');
- *
- * // List
- * const { objects } = await storage.list({ prefix: 'invoices/' });
+ * // The host supplies storage configuration and enforces its access policy.
+ * export function createStorage(config: LocalStorageConfig) {
+ *   return new LocalStorageAdapter(config);
+ * }
  * ```
  */
 export class LocalStorageAdapter implements StorageAdapter {
+
   /** Adapter configuration */
   private readonly config: Readonly<LocalStorageConfig>;
   private readonly paths: ContainedPathRoot;
+
 
   /**
    * Creates an instance of LocalStorageAdapter.
    *
    * @param config - Adapter configuration
+   *
+   * @example
+   * ```typescript
+   * import { LocalStorageAdapter, type LocalStorageConfig } from '@alneas/appkit-core/storage/server';
+   *
+   * // The host supplies storage configuration and enforces its access policy.
+   * export function createStorage(config: LocalStorageConfig) {
+   *   return new LocalStorageAdapter(config);
+   * }
+   * ```
    */
   constructor(config: LocalStorageConfig) {
     this.paths = new ContainedPathRoot(config.baseDir);
     this.config = Object.freeze({ ...config, baseDir: this.paths.root });
   }
+
 
   /**
    * Resolves the full path from a relative key.
@@ -131,15 +133,24 @@ export class LocalStorageAdapter implements StorageAdapter {
     return this.paths.resolve(key);
   }
 
+
   /**
-   * Uploads a file to local storage.
+   * Writes file data to the configured storage backend.
    *
-   * Automatically creates parent directories if they do not exist.
+   * @param key - Destination object key, relative to the configured storage namespace.
+   * @param data - Bytes or text to store; strings use UTF-8 and streams are buffered in memory.
+   * @param options - Optional MIME type, metadata and cache settings; public is ignored.
+   * @returns Metadata reported for the uploaded object.
+   * @throws Rejects filesystem containment violations or propagated I/O errors.
+   * @remarks Strings and streams are materialized in memory. MIME detection is local-only; remote uploads require contentType to send that header. Host access policy is external.
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
    *
-   * @param key - Object key (path)
-   * @param data - File data
-   * @param options - Upload options
-   * @returns Metadata of the uploaded object
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.upload("reports/note.txt", "hello", { contentType: "text/plain" });
+   * }
+   * ```
    */
   async upload(
     key: string,
@@ -196,11 +207,21 @@ export class LocalStorageAdapter implements StorageAdapter {
     };
   }
 
+
   /**
-   * Downloads a file from local storage.
+   * Reads the complete stored object into memory.
    *
-   * @param key - Object key (path)
-   * @returns File data as Uint8Array, or null if not found
+   * @param key - Object key to retrieve.
+   * @returns File bytes, or null on any caught read error (including missing files).
+   * @throws Rejects filesystem containment violations or propagated I/O errors.
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
+   *
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.download("reports/note.txt");
+   * }
+   * ```
    */
   async download(key: string): Promise<Uint8Array | null> {
     const fullPath = await this.getFullPath(key);
@@ -212,15 +233,23 @@ export class LocalStorageAdapter implements StorageAdapter {
     }
   }
 
+
   /**
-   * Retrieves a URL to access the object.
+   * Builds a URL for reading the configured object key.
    *
-   * The local adapter generates a simple URL.
-   * For signed URLs, use a token-based approach.
+   * @param key - Contained relative object key.
+   * @param options - Only downloadFilename is used; signed and expiresIn are ignored.
+   * @returns A URL string; generating it does not verify object existence or access policy.
+   * @throws Rejects unsafe paths or containment violations.
+   * @remarks Uses baseUrl when set, otherwise file:. The host must serve any HTTP URL and implement download handling/access control.
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
    *
-   * @param key - Object key (path)
-   * @param options - URL generation options
-   * @returns URL string
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.getUrl("reports/note.txt", { expiresIn: 300 });
+   * }
+   * ```
    */
   async getUrl(key: string, options?: StorageURLOptions): Promise<string> {
     const fullPath = await this.getFullPath(key);
@@ -236,11 +265,21 @@ export class LocalStorageAdapter implements StorageAdapter {
     return url;
   }
 
+
   /**
-   * Deletes an object from local storage.
+   * Requests deletion of the object key.
    *
-   * @param key - Object key (path)
-   * @returns True if deleted successfully, false if not found
+   * @param key - Object key to delete.
+   * @returns Whether deletion was acknowledged; false also covers caught transport failures.
+   * @throws Rejects unsafe local paths before deletion.
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
+   *
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.delete("reports/note.txt");
+   * }
+   * ```
    */
   async delete(key: string): Promise<boolean> {
     const fullPath = await this.getFullPath(key);
@@ -252,22 +291,42 @@ export class LocalStorageAdapter implements StorageAdapter {
     }
   }
 
+
   /**
-   * Checks whether an object exists.
+   * Checks whether object metadata can be retrieved.
    *
-   * @param key - Object key (path)
-   * @returns True if the object exists
+   * @param key - Object key to inspect.
+   * @returns True when a metadata lookup finds the key; false when absent.
+   * @throws Rejects filesystem containment violations or propagated I/O errors.
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
+   *
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.exists("reports/note.txt");
+   * }
+   * ```
    */
   async exists(key: string): Promise<boolean> {
     const fullPath = await this.getFullPath(key);
     return existsSync(fullPath);
   }
 
+
   /**
-   * Retrieves object metadata without downloading the content.
+   * Retrieves metadata without downloading the object body.
    *
-   * @param key - Object key (path)
-   * @returns Object metadata, or null if not found
+   * @param key - Object key to inspect.
+   * @returns Size, extension-derived MIME type and modification time, or null on any caught stat error.
+   * @throws Rejects filesystem containment violations or propagated I/O errors.
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
+   *
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.head("reports/note.txt");
+   * }
+   * ```
    */
   async head(key: string): Promise<StorageObject | null> {
     const fullPath = await this.getFullPath(key);
@@ -284,11 +343,32 @@ export class LocalStorageAdapter implements StorageAdapter {
     }
   }
 
+
   /**
    * Lists objects in local storage.
    *
-   * @param options - List options (prefix, delimiter, limit, cursor)
-   * @returns Paginated list result
+   * @param options - Optional prefix, '/' delimiter and combined object/prefix limit.
+   * The limit defaults to 1000 when omitted or zero. cursor and includeMetadata
+   * are ignored; file size, inferred MIME type and modification time are always included.
+   * @returns A fresh traversal's objects and optional prefixes, without nextCursor.
+   * hasMore is true when the combined count reaches the limit, including an exact
+   * match with no additional entries. A missing root directory returns an empty list.
+   * @throws Rejects for an unsafe prefix, a containment violation or filesystem
+   * errors other than a missing directory during traversal.
+   * @remarks
+   * Cursor pagination is unsupported: repeating the call starts from the beginning.
+   * Do not loop on hasMore; increase the limit or narrow the prefix as appropriate.
+   * Symlink entries are skipped. This operation does not provide a snapshot during
+   * concurrent filesystem changes. The host must protect the configured root.
+   *
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
+   *
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.list({ prefix: "reports/", limit: 100 });
+   * }
+   * ```
    */
   async list(options?: StorageListOptions): Promise<StorageListResult> {
     const prefix = options?.prefix || '';
@@ -303,6 +383,7 @@ export class LocalStorageAdapter implements StorageAdapter {
 
     const objects: StorageObject[] = [];
     const prefixes: string[] = [];
+
 
     /**
      * Recursively traverses a directory.
@@ -379,13 +460,22 @@ export class LocalStorageAdapter implements StorageAdapter {
     };
   }
 
+
   /**
-   * Copies an object to a new key.
+   * Copies an object into a destination key.
    *
-   * @param sourceKey - Source object key
-   * @param destinationKey - Destination object key
-   * @returns Metadata of the copied object
-   * @throws If the source object does not exist
+   * @param sourceKey - Existing source object key.
+   * @param destinationKey - Destination key to create or overwrite.
+   * @returns Metadata of the uploaded destination; a same-key copy still rewrites the file.
+   * @throws Rejects filesystem containment violations or propagated I/O errors.
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
+   *
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.copy("reports/note.txt", "archive/note.txt");
+   * }
+   * ```
    */
   async copy(sourceKey: string, destinationKey: string): Promise<StorageObject> {
     await this.getFullPath(sourceKey);
@@ -397,12 +487,23 @@ export class LocalStorageAdapter implements StorageAdapter {
     return this.upload(destinationKey, data);
   }
 
+
   /**
-   * Moves an object to a new key (copy + delete).
+   * Copies an object and then deletes the source key.
    *
-   * @param sourceKey - Source object key
-   * @param destinationKey - Destination object key
-   * @returns Metadata of the moved object
+   * @param sourceKey - Existing source object key.
+   * @param destinationKey - Destination key to create or overwrite.
+   * @returns Destination metadata after source deletion, or existing metadata for a same-key move.
+   * @throws Rejects copy errors, missing same-key source, or source deletion failure after copying.
+   * @remarks Copy and delete are separate operations: failure can leave both source and destination. Bucket versioning/retention controls remote deletion.
+   * @example
+   * ```typescript
+   * import type { LocalStorageAdapter } from '@alneas/appkit-core/storage/server';
+   *
+   * export async function example(storage: LocalStorageAdapter) {
+   *   return storage.move("reports/note.txt", "archive/note.txt");
+   * }
+   * ```
    */
   async move(sourceKey: string, destinationKey: string): Promise<StorageObject> {
     if (sourceKey === destinationKey) {

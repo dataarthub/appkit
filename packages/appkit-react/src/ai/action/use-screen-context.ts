@@ -4,18 +4,55 @@ import { useScreenActionRegistry } from './context';
 import type { UseScreenContextOptions } from './types';
 
 /**
- * Registers an on-demand context getter on the current screen's ActionRegistry.
+ * Registers an on-demand context getter using positional arguments.
  *
- * The getter function automatically captures the latest committed props and state
- * via refs without requiring dependency arrays.
- * The context is automatically unregistered when the component unmounts
- * or when the context key changes.
+ * @typeParam T - Context getter result shape; defaults to unknown.
+ *
+ * @param key - Stable registry key.
+ *
+ * @param getter - Pure host getter invoked by registry context reads, using its latest committed version.
+ *
+ * @param description - Optional human/model-facing description.
+ *
+ * @returns No value; cleanup unregisters the context.
+ *
+ * @throws Error without ScreenActionProvider; registry registration failures propagate from the layout effect.
+ *
+ * @remarks Requires ScreenActionProvider; no styles. Key/description/registry changes
+ * re-register the context, while getter changes update a ref after commit.
+ *
+ * @example
+ * ```tsx
+ * import { ScreenActionProvider, useScreenContext } from '@alneas/appkit-react/ai/action';
+ * function Context() { useScreenContext('selection', () => ({ ids: [] as string[] })); return null; }
+ * export function Screen() { return <ScreenActionProvider><Context /></ScreenActionProvider>; }
+ * ```
  */
 export function useScreenContext<T = unknown>(
   key: string,
   getter: ContextGetter<T>,
   description?: string
 ): void;
+/**
+ * Registers an on-demand context getter using an options object.
+ *
+ * @typeParam T - Context getter result shape; defaults to unknown.
+ *
+ * @param options - Stable key, optional description and latest committed getter.
+ *
+ * @returns No value; cleanup unregisters the context.
+ *
+ * @throws Error without ScreenActionProvider; registry registration errors propagate from the layout effect.
+ *
+ * @remarks Requires ScreenActionProvider; no styles. Lifecycle matches the positional overload.
+ *
+ * @example
+ * ```tsx
+ * import { ScreenActionProvider, useScreenContext } from '@alneas/appkit-react/ai/action';
+ * function Context() { useScreenContext({ key: 'selection', getter: () => ({ ids: [] as string[] }) }); return null; }
+ * export function Screen() { return <ScreenActionProvider><Context /></ScreenActionProvider>; }
+ * ```
+ */
 export function useScreenContext<T = unknown>(
   options: UseScreenContextOptions<T>
 ): void;

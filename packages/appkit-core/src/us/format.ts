@@ -1,5 +1,13 @@
-/** US presentation settings; currency does not imply a tax policy or timezone. */
-export const US_BUSINESS_DEFAULTS = Object.freeze({ locale: 'en-US', currency: 'USD' } as const);
+/**
+ * US presentation settings; currency does not imply a tax policy or timezone.
+ *
+ * @see {@link formatUSD} for USD formatting with this presentation preset.
+ */
+export const US_BUSINESS_DEFAULTS = Object.freeze({
+  /** English (United States) locale passed to the built-in Intl formatters. */
+  locale: 'en-US',
+  /** USD currency identifier used for presentation; no currency conversion is performed. */
+  currency: 'USD' } as const);
 
 /**
  * Formats a finite USD amount in dollars using en-US and two fractional digits.

@@ -18,18 +18,19 @@ const sidebarDensity: Record<SpacingTheme, {
 };
 
 /**
- * サイドバーのアイテム
+ * A navigation item rendered by {@link SmartSidebar}.
+ * @see SmartSidebar
  */
 export interface SmartSidebarItem {
-  /** ラベル */
+  /** Visible item label; also used in collapsed tooltips. */
   label: string;
-  /** アイコン */
+  /** Icon rendered in expanded and collapsed layouts. */
   icon: React.ReactNode;
-  /** パス */
+  /** Opaque destination passed to onNavigate; compared exactly with activePath. */
   path: string;
-  /** 無効化 */
+  /** Disables item activation when true; omitted means enabled. */
   disabled?: boolean;
-  /** バッジ等の追加コンテンツ */
+  /** Additional content shown beside the expanded item label. */
   extra?: React.ReactNode;
 }
 
@@ -37,13 +38,13 @@ export interface SmartSidebarItem {
  * サイドバーのグループ
  */
 export interface SmartSidebarGroup {
-  /** グループタイトル */
+  /** Optional heading; omitted headings render no group title. */
   title?: string;
-  /** アイテム */
+  /** Items in display order. */
   items: SmartSidebarItem[];
-  /** 折りたたみ可能か */
+  /** Allows the expanded sidebar heading to toggle between all items and a two-item preview. */
   collapsible?: boolean;
-  /** 初期状態で折りたたまれているか */
+  /** Initial two-item group preview state; defaults to false. Later prop changes do not reset local state. */
   defaultCollapsed?: boolean;
 }
 
@@ -51,54 +52,51 @@ export interface SmartSidebarGroup {
  * サイドバーのプロップス
  */
 export interface SidebarProps {
-  /** 追加CSS */
+  /** Additional classes for the sidebar root. */
   className?: string;
-  /** ナビゲーショングループ */
+  /** Groups in display order. */
   groups: SmartSidebarGroup[];
-  /** フッターアイテム */
+  /** Optional navigation items pinned below the scrollable groups. */
   footerItems?: SmartSidebarItem[];
-  /** 現在のパス */
+  /** Exact path used to highlight active items; no item is active when omitted. */
   activePath?: string;
-  /** ナビゲーション発火 */
+  /** Called with the activated item path; the host performs routing. */
   onNavigate?: (path: string) => void;
-  /** 折りたたみ状態 */
+  /** Controlled whole-sidebar collapse state; defaults to false. */
   collapsed?: boolean;
-  /** 折りたたみトグル */
+  /** Called by the toggle button; the host must update collapsed. Omitted hides the button. */
   onToggleCollapse?: () => void;
-  /** カスタムヘッダー */
+  /** Renders header content with the current collapsed state. */
   header?: (collapsed: boolean) => React.ReactNode;
-  /** カスタムフッター */
+  /** Renders footer content with the current collapsed state. */
   sidebarFooter?: (collapsed: boolean) => React.ReactNode;
 }
 
 /**
- * サイドバーコンポーネント
- *
- * 折りたたみ可能なナビゲーションサイドバー。
- * グループ化されたアイテム、アイコン、ツールチップに対応。
- *
+ * Renders grouped navigation with controlled sidebar collapse and local group collapse.
+ * @param props - Navigation items, controlled selection/collapse and render callbacks; see {@link SidebarProps}.
+ * @returns The sidebar element, including its own tooltip provider.
+ * @remarks Import Appkit CSS. ThemeProvider enables reactive spacing density; without one,
+ * the theme context uses normal spacing. The host owns routing
+ * and updates activePath/collapsed. Sidebar from the same entry is a compound namespace;
+ * use SmartSidebar for this groups-based API. CSS variables --sidebar-width and
+ * --sidebar-collapsed-width fall back to 16rem and 4rem respectively.
  * @example
  * ```tsx
- * import { Sidebar } from '@alneas/appkit-react/tools/sidebar';
- * import { Home, Settings } from 'lucide-react';
+ * import { useState } from 'react';
+ * import { SmartSidebar } from '@alneas/appkit-react/tools/sidebar';
+ * import { ThemeProvider } from '@alneas/appkit-react/ui/theme';
+ * import '@alneas/appkit-react/styles';
  *
- * const groups = [
- *   {
- *     title: 'メイン',
- *     items: [
- *       { label: 'ホーム', icon: <Home />, path: '/' },
- *       { label: '設定', icon: <Settings />, path: '/settings' },
- *     ],
- *   },
- * ];
- *
- * <Sidebar
- *   groups={groups}
- *   activePath={location.pathname}
- *   onNavigate={(path) => navigate(path)}
- *   collapsed={isCollapsed}
- *   onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
- * />
+ * export function Navigation() {
+ *   const [path, setPath] = useState('/');
+ *   const [collapsed, setCollapsed] = useState(false);
+ *   return <ThemeProvider><SmartSidebar
+ *     groups={[{ title: 'Main', items: [{ label: 'Home', icon: <span>H</span>, path: '/' }] }]}
+ *     activePath={path} onNavigate={setPath} collapsed={collapsed}
+ *     onToggleCollapse={() => setCollapsed(value => !value)}
+ *   /></ThemeProvider>;
+ * }
  * ```
  */
 export function SmartSidebar({

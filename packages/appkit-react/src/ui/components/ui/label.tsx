@@ -4,6 +4,21 @@ import * as React from 'react';
 
 import { cn } from '../../lib/utils';
 
+/**
+ * Renders a styled native label for an explicitly associated form control.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered Label composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Use htmlFor matching a control id, or wrap the control as native label semantics permit. This component does not allocate IDs or supply a form context. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Label, Input } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><Label htmlFor="name">Name</Label><Input id="name" /></>);
+ * }
+ * ```
+ */
 const Label = React.forwardRef<HTMLLabelElement, React.ComponentProps<'label'>>(
   ({ className, ...props }, ref) => (
     <label

@@ -1,6 +1,8 @@
 /**
  * Finite JSON data used by bounded input snapshots.
  * @internal
+ *
+ * @see {@link jsonSnapshot} for canonical public-import usage and setup.
  */
 export type SnapshotValue = null | boolean | number | string | readonly SnapshotValue[] | { readonly [key: string]: SnapshotValue };
 
@@ -10,6 +12,17 @@ export type SnapshotValue = null | boolean | number | string | readonly Snapshot
  * JavaScript UTF-16 code units. The size check is not a UTF-8 byte limit and does
  * not replace request/stream limits before parsing.
  * @internal
+ *
+ * @param value - Plain finite JSON-like input; accessors, toJSON hooks, symbols, sparse arrays and class instances are rejected without intentionally invoking them.
+ * @returns Detached recursively frozen JSON data; primitive values are retained.
+ * @throws Throws unsupported values/cycles, depth over 64, over 10000 visited values or over 1000000 serialized UTF-16 code units.
+ *
+ * @example
+ * ```typescript
+ * import { jsonSnapshot } from '@alneas/appkit-core/ai';
+ *
+ * console.log(jsonSnapshot({ text: 'hello', values: [1, true, null] }));
+ * ```
  */
 // Clone data without invoking accessors or toJSON, and preserve special keys as own properties.
 // These limits apply independently to each schema, arguments object and projected result.

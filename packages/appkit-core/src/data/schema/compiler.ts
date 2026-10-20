@@ -153,6 +153,8 @@ export const schemaRegistry: Record<string, JSONSchema> = {};
  *
  * @example
  * ```typescript
+ * import { registerSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
  * registerSchema({
  *     type: 'object',
  *     title: 'users',
@@ -178,6 +180,9 @@ export function registerSchema(schema: JSONSchema): JSONSchema {
  *
  * @example
  * ```typescript
+ * import { registerSchema, getSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * registerSchema({ title: 'users', type: 'object', properties: { name: { type: 'string' } } });
  * const userSchema = getSchema('users');
  * if (userSchema) {
  *     console.log(userSchema.properties);
@@ -203,6 +208,8 @@ export function getSchema(name: string): JSONSchema | undefined {
  *
  * @example
  * ```typescript
+ * import { createSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
  * const userSchema = createSchema({
  *     type: 'object',
  *     title: 'users',
@@ -440,11 +447,15 @@ function jsonSchemaPropertyToZodValidator(prop: JSONSchemaProperty): z.ZodTypeAn
  *
  * @example
  * ```typescript
+ * import { generateZodSchema, type JSONSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * const userSchema = {
+ *   title: 'users', type: 'object',
+ *   properties: { email: { type: 'string', format: 'email' } }, required: ['email'],
+ * } satisfies JSONSchema;
  * const zodSchema = generateZodSchema(userSchema);
- * const result = zodSchema.safeParse(formData);
- * if (!result.success) {
- *     console.log(result.error.issues);
- * }
+ * const result = zodSchema.safeParse({ email: 'ada@example.com' });
+ * console.log(result.success); // true
  * ```
  */
 export function generateZodSchema(schema: JSONSchema): z.ZodObject<z.ZodRawShape> {
@@ -572,17 +583,33 @@ export function generateZodSchemaLegacy(schema: SchemaDefinition): z.ZodObject<z
 }
 
 /**
- * Generates Zod schema code string from a JSONSchema.
+ * Serializes a JSON Schema into a module that calls generateZodSchema at runtime.
  *
- * Useful for code generation tools and documentation purposes.
- *
- * @param schema - JSONSchema schema
- * @returns TypeScript code string for the Zod schema
- *
+ * @param schema - JSON-serializable schema; title, then x-db.tableName, then
+ * "unnamed" supplies the export-name prefix. Non-identifier characters become
+ * underscores and a leading digit receives an underscore prefix.
+ * @returns Module source importing generateZodSchema from "./compiler" and exporting
+ * the named schema by passing JSON.parse of the serialized input to that helper.
+ * @throws Throws if JSON serialization fails, for example for cyclic input or BigInt.
+ * @remarks
+ * The output is not a standalone z.object expression and this function does not
+ * validate or compile the schema. Evaluating the emitted module runs the helper
+ * and can raise its schema-conversion errors. Provide a sibling compiler module
+ * exporting generateZodSchema and a resolver that supports the emitted extensionless
+ * import; native Node.js ESM does not resolve that import without adjustment.
+ * The runtime helper uses Zod, which is a Core dependency.
  * @example
  * ```typescript
- * const code = generateZodSchemaCode(userSchema);
- * // Output: "export const usersSchema = z.object({...});"
+ * import { generateZodSchemaCode } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * const code = generateZodSchemaCode({
+ *   title: 'users', type: 'object', properties: { name: { type: 'string' } },
+ * });
+ * console.log(code);
+ * // First line: import { generateZodSchema } from "./compiler";
+ * // Second line exports usersSchema = generateZodSchema(JSON.parse(...)).
+ * // For a bundler that resolves extensionless imports, a sibling compiler.ts can contain:
+ * // export { generateZodSchema } from '@alneas/appkit-core/data/schema/compiler';
  * ```
  */
 export function generateZodSchemaCode(schema: JSONSchema): string {
@@ -661,8 +688,14 @@ export function generateZodSchemaCodeLegacy(schema: SchemaDefinition): string {
  *
  * @example
  * ```typescript
+ * import { generateMongoSchema, type JSONSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * const userSchema = {
+ *   title: 'users', type: 'object',
+ *   properties: { email: { type: 'string', format: 'email' } }, required: ['email'],
+ * } satisfies JSONSchema;
  * const mongoSchema = generateMongoSchema(userSchema);
- * const UserModel = mongoose.model('User', new mongoose.Schema(mongoSchema));
+ * console.log(mongoSchema.email); // Definition data; no database connection is created.
  * ```
  */
 export function generateMongoSchema(schema: JSONSchema): MongoSchemaDefinition {
@@ -783,7 +816,13 @@ export function generateSupabaseTableSql(schema: SchemaDefinition): string {
  *
  * @example
  * ```typescript
- * const defaults = generateDefaultValues(userSchema);
+ * import { generateDefaultValues, type JSONSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * const userSchema = {
+ *   title: 'users', type: 'object',
+ *   properties: { name: { type: 'string', default: 'Guest' } },
+ * } satisfies JSONSchema;
+ * console.log(generateDefaultValues(userSchema).name); // 'Guest'
  * ```
  */
 export function generateDefaultValues(schema: JSONSchema): Record<string, unknown> {
@@ -974,7 +1013,13 @@ function getReferenceColumn(reference: { field?: string; column?: string }): str
  *
  * @example
  * ```typescript
- * const sql = generateSqlFromJSONSchema(userSchema);
+ * import { generateSqlFromJSONSchema, type JSONSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * const userSchema = {
+ *   title: 'users', type: 'object',
+ *   properties: { id: { type: 'string', 'x-db': { primaryKey: true } }, name: { type: 'string' } },
+ * } satisfies JSONSchema;
+ * console.log(generateSqlFromJSONSchema(userSchema)); // Review the generated DDL before execution.
  * ```
  */
 export function generateSqlFromJSONSchema(schema: JSONSchema): string {
@@ -1121,7 +1166,13 @@ export function generateSqlFromJSONSchema(schema: JSONSchema): string {
  *
  * @example
  * ```typescript
- * const code = generateConvexFromJSONSchema(userSchema);
+ * import { generateConvexFromJSONSchema, type JSONSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * const userSchema = {
+ *   title: 'users', type: 'object',
+ *   properties: { name: { type: 'string' } }, required: ['name'],
+ * } satisfies JSONSchema;
+ * console.log(generateConvexFromJSONSchema(userSchema)); // Generated source text; no Convex client is required here.
  * ```
  */
 export function generateConvexFromJSONSchema(schema: JSONSchema): string {
@@ -1214,10 +1265,16 @@ export function generateConvexFromJSONSchemaMultiple(schemas: JSONSchema[]): str
  *
  * @example
  * ```typescript
- * const rlsSql = generateRLSFromJSONSchema(postSchema);
- * // Output:
- * // ALTER TABLE "posts" ENABLE ROW LEVEL SECURITY;
- * // CREATE POLICY posts_select_policy ON "posts" FOR SELECT TO authenticated USING (auth.uid() = user_id);
+ * import { generateRLSFromJSONSchema, type JSONSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * const postSchema = {
+ *   title: 'posts', type: 'object',
+ *   properties: { user_id: { type: 'string' } },
+ *   'x-rls': { enabled: true, select: { roles: ['authenticated'], using: 'auth.uid() = user_id' } },
+ * } satisfies JSONSchema;
+ * console.log(generateRLSFromJSONSchema(postSchema));
+ * // Generates ENABLE ROW LEVEL SECURITY and a SELECT policy using the supplied expression.
+ * // Review the SQL and host authentication setup before execution.
  * ```
  */
 export function generateRLSFromJSONSchema(schema: JSONSchema): string {
@@ -1393,8 +1450,14 @@ export interface MigrationOptions {
  *
  * @example
  * ```typescript
- * const sql = generateAlterTableFromJSONSchema(schema, ['id', 'name']);
- * // Adds columns other than id and name via ADD COLUMN
+ * import { generateAlterTableFromJSONSchema, type JSONSchema } from '@alneas/appkit-core/data/schema/compiler';
+ *
+ * const userSchema = {
+ *   title: 'users', type: 'object',
+ *   properties: { id: { type: 'string' }, name: { type: 'string' }, email: { type: 'string' } },
+ * } satisfies JSONSchema;
+ * console.log(generateAlterTableFromJSONSchema(userSchema, ['id', 'name']));
+ * // Generates ADD COLUMN for email; review the DDL before execution.
  * ```
  */
 export function generateAlterTableFromJSONSchema(

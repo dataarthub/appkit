@@ -8,14 +8,38 @@ import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
 
 /**
- * 画面の端からスライドインして表示されるサイドパネルのルートコンポーネント。
+ * Coordinates open state and interaction context for the popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Sheet composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Sheet; the underlying primitive owns open state and focus. Content supplies its own portal and backdrop. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent><SheetTitle>Details</SheetTitle><SheetDescription>Project information</SheetDescription></SheetContent></Sheet>);
+ * }
+ * ```
  */
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot='sheet' {...props} />;
 }
 
 /**
- * シートパネルを開くためのトリガーボタン。
+ * Renders the control that requests opening its popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SheetTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Sheet; the underlying primitive owns open state and focus. Content supplies its own portal and backdrop. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent><SheetTitle>Details</SheetTitle><SheetDescription>Project information</SheetDescription></SheetContent></Sheet>);
+ * }
+ * ```
  */
 function SheetTrigger({
   children,
@@ -32,7 +56,19 @@ function SheetTrigger({
 }
 
 /**
- * シートパネルを閉じるためのボタンまたはトリガー。
+ * Renders a control that requests closing its popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SheetClose composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Sheet; the underlying primitive owns open state and focus. Content supplies its own portal and backdrop. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent><SheetTitle>Details</SheetTitle><SheetDescription>Project information</SheetDescription></SheetContent></Sheet>);
+ * }
+ * ```
  */
 function SheetClose({ ...props }: SheetPrimitive.Close.Props) {
   return <SheetPrimitive.Close data-slot='sheet-close' {...props} />;
@@ -55,12 +91,41 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   );
 }
 
+/**
+ * Base UI popup props with drawer edge, close-control and test-selector settings.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see SheetContent
+ */
 interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Popup> {
+  /**
+   * Edge from which the sheet enters; defaults to right.
+   */
   side?: 'top' | 'right' | 'bottom' | 'left';
+  /**
+   * Shows the built-in close button; defaults to true.
+   */
   showCloseButton?: boolean;
+  /**
+   * data-testid on the sheet popup only; the built-in close control does not receive a derived test ID.
+   */
   testId?: string;
 }
 
+/**
+ * Portals the popup and its positioning/backdrop composition.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: side='right', showCloseButton=true.
+ * @returns The rendered SheetContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Sheet; the underlying primitive owns open state and focus. Content supplies its own portal and backdrop. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent><SheetTitle>Details</SheetTitle><SheetDescription>Project information</SheetDescription></SheetContent></Sheet>);
+ * }
+ * ```
+ */
 const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
   ({ className, children, side = 'right', showCloseButton = true, testId, ...props }, ref) => (
     <SheetPortal>
@@ -101,6 +166,21 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
 );
 SheetContent.displayName = SheetPrimitive.Popup.displayName;
 
+/**
+ * Groups popup heading and explanatory content.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SheetHeader composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Sheet; the underlying primitive owns open state and focus. Content supplies its own portal and backdrop. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent><SheetTitle>Details</SheetTitle><SheetDescription>Project information</SheetDescription></SheetContent></Sheet>);
+ * }
+ * ```
+ */
 const SheetHeader = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -113,6 +193,21 @@ const SheetHeader = React.forwardRef<HTMLDivElement, React.ComponentPropsWithout
 );
 SheetHeader.displayName = 'SheetHeader';
 
+/**
+ * Lays out popup actions below its content.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SheetFooter composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Sheet; the underlying primitive owns open state and focus. Content supplies its own portal and backdrop. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent><SheetTitle>Details</SheetTitle><SheetDescription>Project information</SheetDescription></SheetContent></Sheet>);
+ * }
+ * ```
+ */
 const SheetFooter = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -125,6 +220,21 @@ const SheetFooter = React.forwardRef<HTMLDivElement, React.ComponentPropsWithout
 );
 SheetFooter.displayName = 'SheetFooter';
 
+/**
+ * Provides the accessible title of the associated popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SheetTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Sheet; the underlying primitive owns open state and focus. Content supplies its own portal and backdrop. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent><SheetTitle>Details</SheetTitle><SheetDescription>Project information</SheetDescription></SheetContent></Sheet>);
+ * }
+ * ```
+ */
 const SheetTitle = React.forwardRef<
   React.ComponentRef<typeof SheetPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
@@ -138,6 +248,21 @@ const SheetTitle = React.forwardRef<
 ));
 SheetTitle.displayName = SheetPrimitive.Title.displayName;
 
+/**
+ * Provides the accessible explanatory text of the associated popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered SheetDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Sheet; the underlying primitive owns open state and focus. Content supplies its own portal and backdrop. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent><SheetTitle>Details</SheetTitle><SheetDescription>Project information</SheetDescription></SheetContent></Sheet>);
+ * }
+ * ```
+ */
 const SheetDescription = React.forwardRef<
   React.ComponentRef<typeof SheetPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>

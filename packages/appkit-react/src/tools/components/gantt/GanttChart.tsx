@@ -1,53 +1,3 @@
-/**
- * Enhanced Gantt Chart Component
- *
- * タスクとマイルストーンをタイムライン形式で表示する高機能ガントチャート。
- *
- * ## Features
- * - 階層タスク（サブタスク）表示
- * - 進捗率の可視化
- * - ベースライン比較
- * - ダイアログによるタスク編集
- * - 日単位のバー移動・両端リサイズ（明示的に有効化、キーボード対応）
- * - FS/SS/FF/SF依存線、稼働日・クリティカルパス・容量制約付き前方自動調整
- * - 100件を超えるタスクの行仮想化（全行描画へ切替可能）
- * - フィルタリング機能
- * - カスタムマーカー
- * - 日次/週次/月次ビュー切替
- * - 楽観的UIアップデート
- *
- * ## AI/Automation Attributes
- * - `data-testid`: Container element
- * - `data-task-count`: Number of visible tasks
- *
- * @example
- * ```tsx
- * import { GanttChart } from '@alneas/appkit-react/tools/gantt';
- *
- * const tasks = [
- *   {
- *     id: '1',
- *     title: 'Phase 1',
- *     start_date: '2024-01-01',
- *     due_date: '2024-01-31',
- *     status: 'doing',
- *     progress: 50,
- *     created_at: '2024-01-01',
- *   },
- * ];
- *
- * <GanttChart
- *   tasks={tasks}
- *   initialViewMode="Week"
- *   onTaskClick={(task) => console.log(task)}
- *   onTaskUpdate={(task) => updateTask(task)}
- * />
- * ```
- *
- * @param props - {@link GanttChartProps}
- * @returns ガントチャートコンポーネント
- */
-
 import { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   format,
@@ -90,7 +40,26 @@ const MemoTaskBar = memo(GanttTaskBar);
 const EMPTY_DEPENDENCIES: GanttDependency[] = [];
 
 /**
- * タスクとマイルストーンを階層構造およびタイムライン形式で表示する、高機能なガントチャートコンポーネント。
+ * Renders hierarchical tasks, milestones and dependency planning on an editable timeline.
+ * @param props - Task data, display/planning settings and host callbacks; see {@link GanttChartProps}.
+ * @returns The chart with its toolbar, task list, timeline and optional edit dialog.
+ * @remarks Import Appkit CSS. initialViewMode defaults to Week, editMode to dialog and
+ * optimistic updates are enabled unless disableOptimisticUpdates is true. The host owns
+ * persistence and must replace tasks after updates; optimistic state resets when tasks changes.
+ * Date dragging/resizing and auto-scheduling require their explicit options. Calendar formatting
+ * uses enUS. The root exposes data-task-count for the filtered visible task count and
+ *  data-virtualized="true" while virtualized; no data-testid prop/attribute is implemented.
+ * @example
+ * ```tsx
+ * import { GanttChart, type GanttTask } from '@alneas/appkit-react/tools/gantt';
+ * import '@alneas/appkit-react/styles';
+ *
+ * const tasks: GanttTask[] = [{ id: 'phase-1', title: 'Phase 1', status: 'doing',
+ *   start_date: '2026-01-01', due_date: '2026-01-31', progress: 50, created_at: '2026-01-01' }];
+ * export function ProjectTimeline() {
+ *   return <GanttChart tasks={tasks} initialViewMode="Week" editMode="none" />;
+ * }
+ * ```
  */
 export function GanttChart({
   tasks,

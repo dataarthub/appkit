@@ -13,90 +13,65 @@ const PHASE_MESSAGES: Record<string, string> = {
   ready: '',
 };
 
+/**
+ * Host inputs and presentation settings for SplashScreen.
+ * @see SplashScreen
+ */
 export interface SplashScreenProps {
-  /** スプラッシュを表示するか（false で退場アニメ開始） */
+  /**
+   * Mount as true, then set false to trigger one dismissal. Initial false does not dismiss automatically.
+   */
   show: boolean;
-  /** 退場アニメーションのタイプ */
+  /**
+   * Transition class-name suffix; defaults to glitch. Matching animation CSS is host-owned.
+   */
   type?: TransitionType;
-  /** アニメーション時間（ms, デフォルト 600） */
+  /**
+   * Configured full transition duration in milliseconds; defaults to 600. Splash removal/onComplete occur at duration / 2.
+   */
   duration?: number;
-  /** 表示フェーズ（initializing / loading / hydrating / connecting / syncing） */
+  /**
+   * Built-in phase message key (initializing/loading/hydrating/connecting/syncing/ready); unknown strings display verbatim, omitted displays LOADING.
+   */
   phase?: string;
-  /** 任意のメッセージ（phase より優先） */
+  /**
+   * Truthy custom text overriding the phase message; an empty string falls back to the phase.
+   */
   message?: string;
-  /** 任意のロゴ要素 */
+  /**
+   * Optional logo; omitted renders LOADING text.
+   */
   logo?: React.ReactNode;
-  /** 完全カスタムコンテンツ（渡すと phase/message/logo は無視） */
+  /**
+   * Truthy custom content replacing phase/message/logo output.
+   */
   children?: React.ReactNode;
-  /** アニメーション完了時のコールバック */
+  /**
+   * Called once when the exit midpoint removes the splash, not after the full duration. Later show=true does not remount it.
+   * @returns No value; complete the host callback action.
+   */
   onComplete?: () => void;
-  /** 追加クラス */
+  /**
+   * Additional classes on the component outer element.
+   */
   className?: string;
 }
 
 /**
- * 全画面スプラッシュ画面コンポーネント。
- *
- * アプリ起動時の初期化・データ読み込み中などに表示する。
- * `show` が `false` になると `ScreenTransition` の退場アニメーションを再生し、
- * 完了後に DOM から削除される。
- *
- * 子要素を渡せば完全カスタム表示、渡さなければ `phase` に応じた
- * デフォルトメッセージ + ロゴを表示する。
- *
- * ### 表示タイミングの制御
- *
- * スプラッシュの表示制御はプロジェクト側で行う。典型的なパターン:
- *
- * ```tsx
- * function App() {
- *   const [ready, setReady] = useState(false);
- *
- *   useEffect(() => {
- *     Promise.all([
- *       initAuth(),
- *       loadData(),
- *       hydrateApp(),
- *     ]).then(() => setReady(true));
- *   }, []);
- *
- *   return (
- *     <>
- *       <SplashScreen
- *         show={!ready}
- *         type="radial"
- *         phase={phase}
- *         onComplete={() => console.log('splash finished')}
- *       />
- *       {ready && <MainApp />}
- *     </>
- *   );
- * }
- * ```
- *
- * @param props - コンポーネントのプロパティ
- * @param props.show - false になると退場アニメーションを開始する
- * @param props.type - 退場アニメーションの種類（デフォルト: glitch）
- * @param props.duration - アニメーション時間（デフォルト: 600ms）
- * @param props.phase - 表示するフェーズ名。内蔵メッセージ: initializing / loading / hydrating / connecting / syncing
- * @param props.message - 任意のメッセージ文字列（phase より優先）
- * @param props.logo - ロゴ要素
- * @param props.children - 完全カスタムコンテンツ
- * @param props.onComplete - 退場アニメーション完了時のコールバック
- * @param props.className - 追加クラス
- *
+ * Shows a full-screen loading surface until a true-to-false show change reaches the transition midpoint.
+ * @param props - Visibility trigger, transition settings and optional loading content/callback; see SplashScreenProps. Wrapper defaults: type='glitch', duration=600.
+ * @returns The rendered SplashScreen composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Import Appkit CSS. The host owns readiness and must mount with show=true, then change to false to start dismissal. Initial show=false does not dismiss because the internal transition records that initial trigger. At duration/2 the splash unmounts itself and calls onComplete; it does not wait for a full exit/enter cycle or reappear after show becomes true. Supplied truthy children replace default content. Transition class names and --future-duration are emitted, but this package has no public tools/transitions stylesheet/export and its bundled CSS supplies no future-transition/splash-dot animation rules; the host must add matching CSS to see those effects.
  * @example
  * ```tsx
- * // デフォルト表示（phase で自動メッセージ）
- * <SplashScreen show={splash} type="radial" phase="hydrating" />
+ * import { useState } from 'react';
+ * import { SplashScreen } from '@alneas/appkit-react/tools/splash';
+ * import '@alneas/appkit-react/styles';
  *
- * // カスタムメッセージ
- * <SplashScreen show={splash} message="データ準備中..." />
- *
- * // 完全カスタム
- * <SplashScreen show={splash} type="glitch">
- *   <MyCustomContent />
- * </SplashScreen>
+ * export function Example() {
+ *   const [show, setShow] = useState(true);
+ *   return (<><button type="button" onClick={() => setShow(false)}>Ready</button><SplashScreen show={show} phase="loading" /></>);
+ * }
  * ```
  */
 export function SplashScreen({

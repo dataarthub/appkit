@@ -8,7 +8,22 @@ import type {
 import { graph } from './graph';
 import { planGanttTasks } from './planning';
 
-/** Validate before drawing or enabling cascading edits; never mutate the graph. */
+/**
+ * Validate before drawing or enabling cascading edits; never mutate the graph.
+ *
+ * @param tasks - Task records whose IDs and summary relationships are validated.
+ * @param dependencies - Directed leaf-task links to validate.
+ * @returns Null for valid dependencies, otherwise a diagnostic string; invalid dependencies are returned as data.
+ *
+ * @example
+ * ```typescript
+ * import { dependencyError } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', created_at: '2026-10-20', durationDays: 2 }];
+ * const dependencies: never[] = [];
+ * console.log(dependencyError(tasks, dependencies));
+ * ```
+ */
 export function dependencyError(
   tasks: GanttPlanningTask[],
   dependencies: GanttDependency[],
@@ -21,13 +36,30 @@ export function dependencyError(
   }
 }
 
-/** Resolve the existing task date convention. Missing due dates get a one-day duration. */
+/**
+ * Resolve the existing task date convention. Missing due dates get a one-day duration.
+ *
+ * @param task - Task with start_date or created_at and optional due_date; absent due date becomes start plus one calendar day.
+ * @returns Newly created start/end Date values using the legacy date convention.
+ * @throws Throws invalid dates or an end before the start.
+ *
+ * @example
+ * ```typescript
+ * import { taskDates } from '@alneas/appkit-core/graph';
+ *
+ * console.log(taskDates({ id: 'a', created_at: '2026-10-20' }));
+ * ```
+ */
 export function taskDates(task: GanttPlanningTask) {
   const start = new Date(task.start_date ?? task.created_at);
   const end = task.due_date == null ? addDays(start, 1) : new Date(task.due_date);
   if (!Number.isFinite(+start) || !Number.isFinite(+end) || +end < +start)
     throw new Error(`Invalid task dates: ${task.id}`);
-  return { start, end };
+  return {
+    /** Resolved start date from start_date or created_at. */
+    start,
+    /** Resolved due date or one calendar day after start. */
+    end };
 }
 
 /**
@@ -37,10 +69,20 @@ export function taskDates(task: GanttPlanningTask) {
  * A third options argument opts into the local-midnight day planner with working calendars
  * and optional capacity leveling. Omit it to preserve legacy time-of-day behavior.
  *
+ * @param tasks - Task records with unique IDs and release dates; inputs are not mutated.
+ * @param dependencies - Unique directed leaf-task links using FS/SS/FF/SF and integer lagDays.
+ * @param options - Optional working calendar, resource leveling and search bounds; defaults to {} for the planner. Omitting it from scheduleGanttTasks preserves legacy calendar-day/time-of-day behavior.
+ * @returns Tasks in input order with scheduled dates; unchanged tasks may retain original references.
+ * @throws Throws invalid graph/date/calendar/duration inputs or exhausted search bounds; the working-day planner also rejects infeasible resource demand.
+ * @typeParam T - Consumer task shape extending the required scheduling fields; extra fields are preserved.
+ *
  * @example
- * ```ts
- * import { scheduleGanttTasks } from "./";
- * const nextTasks = scheduleGanttTasks(tasks, dependencies);
+ * ```typescript
+ * import { scheduleGanttTasks } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', created_at: '2026-10-20', durationDays: 2 }];
+ * const dependencies: never[] = [];
+ * console.log(scheduleGanttTasks(tasks, dependencies));
  * ```
  */
 export function scheduleGanttTasks<T extends GanttPlanningTask>(

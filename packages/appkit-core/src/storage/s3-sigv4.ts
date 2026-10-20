@@ -13,23 +13,61 @@ import type {
   StorageURLOptions,
 } from './types';
 
+/**
+ * Credentials, endpoint addressing and expiry defaults for signed S3-compatible requests.
+ *
+ * @see {@link S3CompatibleRuntime.putObject} for a runtime-client usage example.
+ */
 export interface S3RuntimeConfig {
+
+  /** SigV4 signing region; use the provider-required region (for example auto for R2). */
   region: string;
+
+  /** Bucket namespace to address in request paths or hostnames. */
   bucket: string;
+
+  /** Optional absolute S3-compatible endpoint; omitted uses the AWS regional endpoint. */
   endpoint?: string;
+
+  /** Credential identifier included in SigV4 authorization; supplied by the host. */
   accessKeyId: string;
+
+  /** Host-supplied signing secret; keep it outside untrusted client code. */
   secretAccessKey: string;
+
+  /** For a custom endpoint, use bucket-in-path addressing unless explicitly false. */
   forcePathStyle?: boolean;
+
+  /** Default signed-URL lifetime in whole seconds (1–604800); omitted uses 3600. */
   defaultExpiresIn?: number;
 }
 
+/**
+ * Object body and headers to send in one signed PUT request.
+ *
+ * @see {@link S3CompatibleRuntime.putObject} for a runtime-client usage example.
+ */
 export interface S3PutInput {
+
+  /** Destination key within the configured bucket. */
   key: string;
+
+  /** Complete payload bytes or UTF-8 text to send. */
   body: Uint8Array | string;
+
+  /** Optional Content-Type header; omitted sends no MIME header. */
   contentType?: string;
+
+  /** Optional Cache-Control response metadata to store. */
   cacheControl?: string;
+
+  /** Optional string metadata stored under lowercase x-amz-meta-* headers; non-ASCII values are encoded. */
   metadata?: Record<string, string>;
+
+  /** Optional retention mode header; requires provider-side Object Lock support and permissions. */
   objectLockMode?: 'GOVERNANCE' | 'COMPLIANCE';
+
+  /** Optional absolute retention expiry sent as an ISO timestamp. */
   objectLockRetainUntilDate?: Date;
 }
 
@@ -169,12 +207,46 @@ function presignS3Url(
   return `${origin}${canonicalUri}?${canonicalQueryString}&X-Amz-Signature=${signature}`;
 }
 
-/** Generate a signed download URL without an SDK. */
+/**
+ * Generate a signed download URL without an SDK.
+ *
+ * @param config - Host-supplied bucket, signing credentials and endpoint settings.
+ * @param key - Key inside the configured bucket.
+ * @param options - Optional whole-second expiry from 1 to 604800; defaults to config.defaultExpiresIn or 3600. GET additionally supports downloadFilename.
+ * @returns A signed URL without a network request or existence check.
+ * @throws Throws for invalid expiry or malformed endpoint configuration.
+ *
+ * @example
+ * ```typescript
+ * import { presignS3GetUrl, type S3RuntimeConfig } from "@alneas/appkit-core/storage";
+ *
+ * export function sign(config: S3RuntimeConfig) {
+ *   return presignS3GetUrl(config, "reports/note.txt", { expiresIn: 300 });
+ * }
+ * ```
+ */
 export function presignS3GetUrl(config: S3RuntimeConfig, key: string, options?: StorageURLOptions): string {
   return presignS3Url(config, key, options, 'GET');
 }
 
-/** Generate a signed PUT URL. Upload the bytes with HTTP PUT to this exact URL. */
+/**
+ * Generate a signed PUT URL. Upload the bytes with HTTP PUT to this exact URL.
+ *
+ * @param config - Host-supplied bucket, signing credentials and endpoint settings.
+ * @param key - Key inside the configured bucket.
+ * @param options - Optional whole-second expiry from 1 to 604800; defaults to config.defaultExpiresIn or 3600. GET additionally supports downloadFilename.
+ * @returns A signed URL without a network request or existence check.
+ * @throws Throws for invalid expiry or malformed endpoint configuration.
+ *
+ * @example
+ * ```typescript
+ * import { presignS3PutUrl, type S3RuntimeConfig } from "@alneas/appkit-core/storage";
+ *
+ * export function sign(config: S3RuntimeConfig) {
+ *   return presignS3PutUrl(config, "reports/note.txt", { expiresIn: 300 });
+ * }
+ * ```
+ */
 export function presignS3PutUrl(config: S3RuntimeConfig, key: string, options?: Pick<StorageURLOptions, 'expiresIn'>): string {
   return presignS3Url(config, key, options, 'PUT');
 }
@@ -198,9 +270,32 @@ function extractXmlTag(xml: string, tag: string): string | undefined {
 /**
  * Common runtime client for S3, R2, and OCI.
  * Always uses standard fetch + SigV4. Installing an unrelated SDK never changes behavior.
+ *
+ * @example
+ * ```typescript
+ * import { S3CompatibleRuntime, type S3RuntimeConfig } from "@alneas/appkit-core/storage";
+ *
+ * export function createRuntime(config: S3RuntimeConfig) {
+ *   return new S3CompatibleRuntime(config);
+ * }
+ * ```
  */
 export class S3CompatibleRuntime {
   private readonly config: S3RuntimeConfig;
+
+  /**
+   * Snapshots connection and signing settings without sending a request.
+   *
+   * @param config - Host-supplied S3-compatible endpoint and signing credentials.
+   * @example
+   * ```typescript
+   * import { S3CompatibleRuntime, type S3RuntimeConfig } from "@alneas/appkit-core/storage";
+   *
+   * export function createRuntime(config: S3RuntimeConfig) {
+   *   return new S3CompatibleRuntime(config);
+   * }
+   * ```
+   */
   constructor(config: S3RuntimeConfig) {
     this.config = Object.freeze({ ...config });
   }
@@ -291,14 +386,65 @@ export class S3CompatibleRuntime {
     });
   }
 
+
+  /**
+   * Signs a URL for an HTTP GET download.
+   *
+   * @param key - Object key to retrieve.
+   * @param options - Optional expiry in seconds (1–604800) and download filename; signing is always performed.
+   * @returns A signed GET URL; no object is fetched by this call.
+   * @throws Rejects expiry outside 1–604800 whole seconds or malformed endpoint configuration.
+   * @example
+   * ```typescript
+   * import type { S3CompatibleRuntime } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: S3CompatibleRuntime) {
+   *   return storage.getSignedGetUrl("reports/note.txt", { expiresIn: 300 });
+   * }
+   * ```
+   */
   async getSignedGetUrl(key: string, options?: StorageURLOptions): Promise<string> {
     return presignS3GetUrl(this.config, key, options);
   }
 
+
+  /**
+   * Signs a URL for a direct HTTP PUT upload.
+   *
+   * @param key - Destination object key.
+   * @param options - Optional expiry in seconds, defaulting to the configured value or 3600; valid range 1–604800.
+   * @returns A signed PUT URL; no object is uploaded by this call.
+   * @throws Rejects expiry outside 1–604800 whole seconds or malformed endpoint configuration.
+   * @example
+   * ```typescript
+   * import type { S3CompatibleRuntime } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: S3CompatibleRuntime) {
+   *   return storage.getSignedPutUrl("reports/note.txt", { expiresIn: 300 });
+   * }
+   * ```
+   */
   async getSignedPutUrl(key: string, options?: Pick<StorageURLOptions, 'expiresIn'>): Promise<string> {
     return presignS3PutUrl(this.config, key, options);
   }
 
+
+  /**
+   * Uploads a complete payload with SigV4 authorization and optional metadata/retention headers.
+   *
+   * @param input - Destination key, buffered payload and optional headers; see S3PutInput.
+   * @returns No value; resolves after a successful HTTP PUT response.
+   * @throws Rejects signing/network errors, invalid retention dates or unsuccessful PUT responses.
+   * @remarks This does not configure bucket access policies or infer MIME types.
+   * @example
+   * ```typescript
+   * import type { S3CompatibleRuntime } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(runtime: S3CompatibleRuntime) {
+   *   await runtime.putObject({ key: "notes.txt", body: "hello", contentType: "text/plain" });
+   * }
+   * ```
+   */
   async putObject(input: S3PutInput): Promise<void> {
     const headers: Record<string, string | undefined> = {
       'content-type': input.contentType,
@@ -332,6 +478,22 @@ export class S3CompatibleRuntime {
     }
   }
 
+
+  /**
+   * Reads the complete stored object into memory.
+   *
+   * @param key - Object key to retrieve.
+   * @returns The downloaded bytes, or null when the object is absent.
+   * @throws Rejects invalid signing configuration, network failures or unsuccessful provider responses.
+   * @example
+   * ```typescript
+   * import type { S3CompatibleRuntime } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: S3CompatibleRuntime) {
+   *   return storage.getObject("reports/note.txt");
+   * }
+   * ```
+   */
   async getObject(key: string): Promise<Uint8Array | null> {
     const response = await this.signedFetch('GET', key);
     if (response.status === 404) return null;
@@ -341,6 +503,21 @@ export class S3CompatibleRuntime {
     return new Uint8Array(await response.arrayBuffer());
   }
 
+
+  /**
+   * Requests deletion of the object key.
+   *
+   * @param key - Object key to delete.
+   * @returns Whether deletion was acknowledged; false also covers caught transport failures.
+   * @example
+   * ```typescript
+   * import type { S3CompatibleRuntime } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: S3CompatibleRuntime) {
+   *   return storage.deleteObject("reports/note.txt");
+   * }
+   * ```
+   */
   async deleteObject(key: string): Promise<boolean> {
     try {
       const response = await this.signedFetch('DELETE', key);
@@ -350,6 +527,22 @@ export class S3CompatibleRuntime {
     }
   }
 
+
+  /**
+   * Retrieves metadata without downloading the object body.
+   *
+   * @param key - Object key to inspect.
+   * @returns Object metadata, or null when the key is absent.
+   * @throws Rejects invalid signing configuration, network failures or unsuccessful provider responses.
+   * @example
+   * ```typescript
+   * import type { S3CompatibleRuntime } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: S3CompatibleRuntime) {
+   *   return storage.headObject("reports/note.txt");
+   * }
+   * ```
+   */
   async headObject(key: string): Promise<StorageObject | null> {
     const response = await this.signedFetch('HEAD', key);
     if (response.status === 404) return null;
@@ -383,6 +576,22 @@ export class S3CompatibleRuntime {
     };
   }
 
+
+  /**
+   * Lists one provider page of object keys and optional common prefixes.
+   *
+   * @param options - Optional prefix, delimiter, page limit and continuation token; a missing or zero limit uses 1000.
+   * @returns Objects and prefixes with provider continuation state; includeMetadata is ignored.
+   * @throws Rejects invalid signing configuration, network failures or unsuccessful provider responses.
+   * @example
+   * ```typescript
+   * import type { S3CompatibleRuntime } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: S3CompatibleRuntime) {
+   *   return storage.listObjects({ prefix: "reports/", limit: 100 });
+   * }
+   * ```
+   */
   async listObjects(options?: StorageListOptions): Promise<StorageListResult> {
     const response = await this.signedFetch('GET', undefined, {
       query: {
@@ -426,6 +635,23 @@ export class S3CompatibleRuntime {
     };
   }
 
+
+  /**
+   * Copies an object into a destination key.
+   *
+   * @param sourceKey - Existing source object key.
+   * @param destinationKey - Destination key to create or overwrite.
+   * @returns Metadata confirming the destination, or source metadata for a same-key copy.
+   * @throws Rejects invalid signing configuration, network failures or unsuccessful provider responses.
+   * @example
+   * ```typescript
+   * import type { S3CompatibleRuntime } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: S3CompatibleRuntime) {
+   *   return storage.copyObject("reports/note.txt", "archive/note.txt");
+   * }
+   * ```
+   */
   async copyObject(sourceKey: string, destinationKey: string): Promise<StorageObject> {
     if (sourceKey === destinationKey) {
       const existing = await this.headObject(sourceKey);

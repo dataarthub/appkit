@@ -5,10 +5,22 @@ import { createAIChatStream, normalizeAIChatMessages, type AIChatAdapter, type A
 import type { ActionToolObject, ActionToolValue } from "@alneas/appkit-core/ai";
 
 /**
- * SDK 7 UIMessage -> provider-neutral history. Incomplete tool inputs and UI-only
- * reasoning/source/step parts are omitted. Completed tool calls/results, errors,
- * files, persistent data parts and metadata are preserved without executing tools.
- * The common JSON/history boundary is owned by ai-core, not this SDK binding.
+ * Converts AI SDK 7 UI messages into normalized provider-neutral chat history.
+ *
+ * @param messages - SDK UI messages; incomplete tool inputs and UI-only reasoning/source/step parts are omitted.
+ *
+ * @returns New normalized history preserving supported text, files, tool calls/results, data and metadata.
+ *
+ * @throws Error for invalid tool identities or data rejected by Core history normalization.
+ *
+ * @remarks Requires the optional ai peer for types. Does not execute tools, call a model,
+ * or create persistence. No React provider or CSS is required.
+ *
+ * @example
+ * ```ts
+ * import { toAIChatMessages } from '@alneas/appkit-react/ai/ai-chat';
+ * const history = toAIChatMessages([{ id: 'user-1', role: 'user', parts: [{ type: 'text', text: 'Hello' }] }]);
+ * ```
  */
 export function toAIChatMessages(messages: readonly UIMessage[]): AIChatMessage[] {
   const converted = messages.map(message => {
@@ -33,10 +45,25 @@ export function toAIChatMessages(messages: readonly UIMessage[]): AIChatMessage[
 }
 
 /**
- * SDK 7 ChatTransport binding. Install the optional ai peer for its declarations.
- * Network/lifecycle validation lives in ai-core. Cancellation reaches pending reads;
- * resumption is unsupported and tool execution stays explicit application work.
- * Nothing in this entry imports a provider SDK or browser persistence at runtime.
+ * Binds a provider-neutral adapter to the AI SDK 7 ChatTransport interface.
+ *
+ * @param adapter - Host-configured chat adapter that owns provider calls and credentials.
+ *
+ * @param options - Optional tools and parameters forwarded to Core; request body fields override parameters.
+ *
+ * @returns Transport emitting SDK chunks; reconnectToStream resolves null because resumption is unsupported.
+ *
+ * @remarks Install optional ai peer for declarations. Sending messages creates a Core
+ * stream; pending-read cancellation reaches it and readers are released on completion,
+ * error or cancel. Tools are represented as data and never executed by this binding.
+ * Request/conversion/adapter failures surface through sendMessages rejection or stream
+ * errors. No provider SDK, React context, CSS or persistence is created here.
+ *
+ * @example
+ * ```ts
+ * import { createAIChatTransport, type AIChatAdapter } from '@alneas/appkit-react/ai/ai-chat';
+ * export function transportFor(adapter: AIChatAdapter) { return createAIChatTransport(adapter); }
+ * ```
  */
 export function createAIChatTransport(adapter: AIChatAdapter, options: Pick<AIChatRequest, 'tools' | 'parameters'> = {}): ChatTransport<UIMessage> {
   return {

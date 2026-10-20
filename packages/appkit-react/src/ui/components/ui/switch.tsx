@@ -5,11 +5,37 @@ import { Switch as SwitchPrimitive } from '@base-ui/react/switch';
 
 import { cn } from '../../lib/utils';
 
+/**
+ * Base UI switch-root props plus size and stable selector.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see Switch
+ */
 interface SwitchProps extends SwitchPrimitive.Root.Props {
+  /**
+   * Visual size preset; defaults to default unless the owning component states otherwise.
+   */
   size?: 'sm' | 'default';
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
+/**
+ * Renders a binary Base UI switch with an integrated thumb and optional test ID.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: size='default'.
+ * @returns The rendered Switch composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. size defaults to default; sm selects the smaller track/thumb styling. testId maps to data-testid. Provide an associated label or accessible name. Base UI owns checked/defaultChecked and onCheckedChange behavior. The ref prop forwards to the rendered control or container declared by the component ref type.  children are replaced by the built-in thumb.
+ * @example
+ * ```tsx
+ * import { Switch, Label } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<div><Switch id="notifications" defaultChecked testId="notifications" /><Label htmlFor="notifications">Notifications</Label></div>);
+ * }
+ * ```
+ */
 const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
   ({ className, size = 'default', testId, ...props }, ref) => (
     <SwitchPrimitive.Root

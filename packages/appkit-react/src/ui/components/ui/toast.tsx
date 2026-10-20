@@ -6,8 +6,42 @@ import { XIcon } from 'lucide-react';
 
 import { cn } from '../../lib/utils';
 
+/**
+ * Provides Base UI toast context for the separately exported viewport.
+ * @param props - Inherited primitive configuration, children and controlled/default state; the upstream prop type remains authoritative.
+ * @returns The rendered ToastProvider composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Toast is a custom div-based notification, not Base UI Toast.Root. It returns null only when open=false; an omitted open renders indefinitely without starting its timer. With open=true and onOpenChange, duration defaults to 3000ms; 0 or Infinity disables the timer. Timer cleanup runs on dependency change/unmount. toast is accepted but ignored. ToastAction does not dismiss automatically. ToastDescription has paragraph-typed props/ref but renders div; avoid relying on paragraph-specific DOM behavior. The host controls live-region announcements and persistence.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [open, setOpen] = useState(true);
+ *   return (<Toast open={open} onOpenChange={setOpen} duration={3000}><ToastTitle>Draft ready</ToastTitle><ToastDescription>Review your draft.</ToastDescription><ToastAction type="button" onClick={() => console.log("Review requested")}>Review</ToastAction><ToastClose type="button" /></Toast>);
+ * }
+ * ```
+ */
 const ToastProvider = ToastPrimitive.Provider;
 
+/**
+ * Renders the positioned Base UI notification viewport.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToastViewport composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Toast is a custom div-based notification, not Base UI Toast.Root. It returns null only when open=false; an omitted open renders indefinitely without starting its timer. With open=true and onOpenChange, duration defaults to 3000ms; 0 or Infinity disables the timer. Timer cleanup runs on dependency change/unmount. toast is accepted but ignored. ToastAction does not dismiss automatically. ToastDescription has paragraph-typed props/ref but renders div; avoid relying on paragraph-specific DOM behavior. The host controls live-region announcements and persistence. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [open, setOpen] = useState(true);
+ *   return (<Toast open={open} onOpenChange={setOpen} duration={3000}><ToastTitle>Draft ready</ToastTitle><ToastDescription>Review your draft.</ToastDescription><ToastAction type="button" onClick={() => console.log("Review requested")}>Review</ToastAction><ToastClose type="button" /></Toast>);
+ * }
+ * ```
+ */
 const ToastViewport = React.forwardRef<HTMLDivElement, ToastPrimitive.Viewport.Props>(
   ({ className, ...props }, ref) => (
     <ToastPrimitive.Viewport
@@ -25,13 +59,47 @@ ToastViewport.displayName = 'ToastViewport';
 
 const ToastContext = React.createContext<{ onOpenChange?: (open: boolean) => void }>({});
 
+/**
+ * Renders host-controlled notification content and optionally requests timed dismissal.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='default', duration=3000.
+ * @returns The rendered Toast composition, or null when it has no visible content.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Toast is a custom div-based notification, not Base UI Toast.Root. It returns null only when open=false; an omitted open renders indefinitely without starting its timer. With open=true and onOpenChange, duration defaults to 3000ms; 0 or Infinity disables the timer. Timer cleanup runs on dependency change/unmount. toast is accepted but ignored. ToastAction does not dismiss automatically. ToastDescription has paragraph-typed props/ref but renders div; avoid relying on paragraph-specific DOM behavior. The host controls live-region announcements and persistence. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [open, setOpen] = useState(true);
+ *   return (<Toast open={open} onOpenChange={setOpen} duration={3000}><ToastTitle>Draft ready</ToastTitle><ToastDescription>Review your draft.</ToastDescription><ToastAction type="button" onClick={() => console.log("Review requested")}>Review</ToastAction><ToastClose type="button" /></Toast>);
+ * }
+ * ```
+ */
 const Toast = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
+    /**
+     * Visual treatment from the declared variant union; changing it does not alter host action semantics.
+     */
     variant?: 'default' | 'destructive';
+    /**
+     * Controlled visibility; the host updates this value in response to close/open requests.
+     */
     open?: boolean;
+    /**
+     * Requests a new visibility state; the host must update open. Toast invokes false after its duration or close action.
+     * @param open - Requested visibility; false requests dismissal.
+     * @returns No value; complete the host callback action.
+     */
     onOpenChange?: (open: boolean) => void;
+    /**
+     * Compatibility input accepted but ignored by this div-based Toast wrapper.
+     */
     toast?: unknown;
+    /**
+     * Dismissal delay in milliseconds, default 3000; 0 or Infinity disables the timer.
+     */
     duration?: number;
   }
 >(
@@ -81,6 +149,23 @@ const Toast = React.forwardRef<
 
 Toast.displayName = 'Toast';
 
+/**
+ * Renders a notification heading as h3.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToastTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Toast is a custom div-based notification, not Base UI Toast.Root. It returns null only when open=false; an omitted open renders indefinitely without starting its timer. With open=true and onOpenChange, duration defaults to 3000ms; 0 or Infinity disables the timer. Timer cleanup runs on dependency change/unmount. toast is accepted but ignored. ToastAction does not dismiss automatically. ToastDescription has paragraph-typed props/ref but renders div; avoid relying on paragraph-specific DOM behavior. The host controls live-region announcements and persistence. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [open, setOpen] = useState(true);
+ *   return (<Toast open={open} onOpenChange={setOpen} duration={3000}><ToastTitle>Draft ready</ToastTitle><ToastDescription>Review your draft.</ToastDescription><ToastAction type="button" onClick={() => console.log("Review requested")}>Review</ToastAction><ToastClose type="button" /></Toast>);
+ * }
+ * ```
+ */
 const ToastTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
     <h3
@@ -93,6 +178,23 @@ const ToastTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTM
 );
 ToastTitle.displayName = 'ToastTitle';
 
+/**
+ * Renders supporting notification text in a div.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToastDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Toast is a custom div-based notification, not Base UI Toast.Root. It returns null only when open=false; an omitted open renders indefinitely without starting its timer. With open=true and onOpenChange, duration defaults to 3000ms; 0 or Infinity disables the timer. Timer cleanup runs on dependency change/unmount. toast is accepted but ignored. ToastAction does not dismiss automatically. ToastDescription has paragraph-typed props/ref but renders div; avoid relying on paragraph-specific DOM behavior. The host controls live-region announcements and persistence. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [open, setOpen] = useState(true);
+ *   return (<Toast open={open} onOpenChange={setOpen} duration={3000}><ToastTitle>Draft ready</ToastTitle><ToastDescription>Review your draft.</ToastDescription><ToastAction type="button" onClick={() => console.log("Review requested")}>Review</ToastAction><ToastClose type="button" /></Toast>);
+ * }
+ * ```
+ */
 const ToastDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -106,6 +208,23 @@ const ToastDescription = React.forwardRef<
 ));
 ToastDescription.displayName = 'ToastDescription';
 
+/**
+ * Renders a native action button inside a notification.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToastAction composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Toast is a custom div-based notification, not Base UI Toast.Root. It returns null only when open=false; an omitted open renders indefinitely without starting its timer. With open=true and onOpenChange, duration defaults to 3000ms; 0 or Infinity disables the timer. Timer cleanup runs on dependency change/unmount. toast is accepted but ignored. ToastAction does not dismiss automatically. ToastDescription has paragraph-typed props/ref but renders div; avoid relying on paragraph-specific DOM behavior. The host controls live-region announcements and persistence. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [open, setOpen] = useState(true);
+ *   return (<Toast open={open} onOpenChange={setOpen} duration={3000}><ToastTitle>Draft ready</ToastTitle><ToastDescription>Review your draft.</ToastDescription><ToastAction type="button" onClick={() => console.log("Review requested")}>Review</ToastAction><ToastClose type="button" /></Toast>);
+ * }
+ * ```
+ */
 const ToastAction = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
@@ -122,6 +241,23 @@ const ToastAction = React.forwardRef<
 ));
 ToastAction.displayName = 'ToastAction';
 
+/**
+ * Requests dismissal through Toast context before calling the host click handler.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToastClose composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Toast is a custom div-based notification, not Base UI Toast.Root. It returns null only when open=false; an omitted open renders indefinitely without starting its timer. With open=true and onOpenChange, duration defaults to 3000ms; 0 or Infinity disables the timer. Timer cleanup runs on dependency change/unmount. toast is accepted but ignored. ToastAction does not dismiss automatically. ToastDescription has paragraph-typed props/ref but renders div; avoid relying on paragraph-specific DOM behavior. The host controls live-region announcements and persistence. The ref prop forwards to the rendered control or container declared by the component ref type.  children are replaced by the fixed dismiss icon.
+ * @example
+ * ```tsx
+ * import { useState } from 'react';
+ * import { Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [open, setOpen] = useState(true);
+ *   return (<Toast open={open} onOpenChange={setOpen} duration={3000}><ToastTitle>Draft ready</ToastTitle><ToastDescription>Review your draft.</ToastDescription><ToastAction type="button" onClick={() => console.log("Review requested")}>Review</ToastAction><ToastClose type="button" /></Toast>);
+ * }
+ * ```
+ */
 const ToastClose = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>

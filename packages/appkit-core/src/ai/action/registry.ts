@@ -27,6 +27,29 @@ interface ContextEntry {
 /**
  * Registry for managing explicit screen actions and on-demand context getters.
  * Framework-independent, zero-dependency.
+ *
+ * @example
+ * ```typescript
+ * import { ActionRegistry, defineActionTool, createActionToolBridge } from '@alneas/appkit-core/ai/action';
+ *
+ * const registry = new ActionRegistry();
+ * const echo = defineActionTool<{ text: string }, { text: string }>({
+ *   id: 'echo', name: 'echo_text', description: 'Return the supplied text',
+ *   inputSchema: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'], additionalProperties: false },
+ *   parseInput: input => typeof input.text === 'string'
+ *     ? { ok: true, data: { text: input.text } } : { ok: false, error: 'Text required' },
+ *   handler: input => ({ text: input.text }),
+ *   mapOutput: value => value,
+ * });
+ * const unregister = registry.registerAction(echo.action);
+ * const bridge = createActionToolBridge(registry, { tools: [echo.tool] });
+ * try {
+ *   console.log(await bridge.execute({ callId: 'call-1', name: 'echo_text', arguments: { text: 'hello' } }));
+ * } finally {
+ *   bridge.close();
+ *   unregister();
+ * }
+ * ```
  */
 export class ActionRegistry {
   private actions = new Map<string, ActionEntry>();
@@ -37,7 +60,33 @@ export class ActionRegistry {
   private actionListSnapshot: readonly ActionDescriptor[] = [];
   private contextListSnapshot: readonly ContextDescriptor[] = [];
 
-  /** Creates an empty, screen-independent registry. */
+
+  /**
+   * Creates an empty, screen-independent registry.
+   *
+   * @example
+   * ```typescript
+   * import { ActionRegistry, defineActionTool, createActionToolBridge } from '@alneas/appkit-core/ai/action';
+   *
+   * const registry = new ActionRegistry();
+   * const echo = defineActionTool<{ text: string }, { text: string }>({
+   *   id: 'echo', name: 'echo_text', description: 'Return the supplied text',
+   *   inputSchema: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'], additionalProperties: false },
+   *   parseInput: input => typeof input.text === 'string'
+   *     ? { ok: true, data: { text: input.text } } : { ok: false, error: 'Text required' },
+   *   handler: input => ({ text: input.text }),
+   *   mapOutput: value => value,
+   * });
+   * const unregister = registry.registerAction(echo.action);
+   * const bridge = createActionToolBridge(registry, { tools: [echo.tool] });
+   * try {
+   *   console.log(await bridge.execute({ callId: 'call-1', name: 'echo_text', arguments: { text: 'hello' } }));
+   * } finally {
+   *   bridge.close();
+   *   unregister();
+   * }
+   * ```
+   */
   constructor() {
     this.updateActionListSnapshot();
     this.updateContextListSnapshot();
@@ -47,9 +96,26 @@ export class ActionRegistry {
   // Action Registration & Execution
   // ---------------------------------------------------------------------------
 
+
   /**
    * Registers an action. Returns an unregister function scoped to this specific registration.
    * Throws an Error if an action with the same ID is already registered.
+   *
+   * @typeParam TInput - Input established by the action validator.
+   * @typeParam TOutput - Handler result type.
+   * @param action - Unique nonblank ID with mandatory validator and handler; the definition is shallow-frozen on registration.
+   * @returns An idempotent unregister callback scoped to this registration token.
+   * @throws Throws invalid/duplicate action IDs or missing validator/handler.
+   *
+   * @example
+   * ```typescript
+   * import { ActionRegistry, type ActionDefinition } from '@alneas/appkit-core/ai/action';
+   *
+   * export function register(registry: ActionRegistry, action: ActionDefinition<string, string>) {
+   *   const unregister = registry.registerAction(action);
+   *   return unregister; // The host calls this when the registration is disposed.
+   * }
+   * ```
    */
   registerAction<TInput, TOutput>(
     action: ActionDefinition<TInput, TOutput>
@@ -91,31 +157,85 @@ export class ActionRegistry {
     };
   }
 
+
   /**
    * Checks if an action is currently registered.
+   *
+   * @param id - Exact registered action identifier.
+   * @returns Whether that ID is registered now.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.hasAction('echo');
+   * }
+   * ```
    */
   hasAction(id: string): boolean {
     return this.actions.has(id);
   }
 
+
   /**
    * Returns the action definition if registered.
+   *
+   * @param id - Exact action identifier to inspect.
+   * @returns The registered shallow-frozen definition, or undefined when absent.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.getAction('echo');
+   * }
+   * ```
    */
   getAction(id: string): ActionDefinition<any, any> | undefined {
     return this.actions.get(id)?.definition;
   }
 
+
   /**
    * Returns a stable snapshot of public action descriptors.
    * The returned array reference is unchanged as long as registrations do not change.
+   *
+   * @returns Stable frozen descriptor snapshot, initially empty; nested metadata remains host-owned.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.listActions();
+   * }
+   * ```
    */
   listActions(): readonly ActionDescriptor[] {
     return this.actionListSnapshot;
   }
 
+
   /**
    * Executes an action by its ID with validation.
    * Returns an ActionResult containing either data or a typed failure code.
+   *
+   * @param id - Action identifier looked up at call time.
+   * @param input - Untrusted input passed through the mandatory synchronous validator.
+   * @param context - Optional cooperative cancellation and progress context passed to the handler.
+   * @returns Success data or a failure result for missing registration, invalid input, cancellation or handler errors; caught causes remain local.
+   * @remarks This is an in-memory dispatch boundary; server authorization/idempotency and rollback remain host-owned.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.executeAction('echo', { text: 'hello' });
+   * }
+   * ```
    */
   async executeAction(
     id: string,
@@ -194,9 +314,24 @@ export class ActionRegistry {
   // Context Registration & Retrieval
   // ---------------------------------------------------------------------------
 
+
   /**
    * Registers a screen context provider. Returns an unregister function scoped to this registration.
    * Throws an Error if a context with the same key is already registered.
+   *
+   * @typeParam T - Value returned/resolved by the context getter.
+   * @param definition - Unique nonblank context key and on-demand getter; the definition is shallow-frozen.
+   * @returns An idempotent unregister callback scoped to this registration.
+   * @throws Throws invalid/duplicate keys or a non-function getter.
+   *
+   * @example
+   * ```typescript
+   * import { ActionRegistry, type ContextDefinition } from '@alneas/appkit-core/ai/action';
+   *
+   * export function register(registry: ActionRegistry, context: ContextDefinition<string>) {
+   *   return registry.registerContext(context);
+   * }
+   * ```
    */
   registerContext<T>(definition: ContextDefinition<T>): () => void {
     if (!definition || typeof definition.key !== 'string' || !definition.key.trim()) {
@@ -233,25 +368,63 @@ export class ActionRegistry {
     };
   }
 
+
   /**
    * Checks if a context provider is currently registered.
+   *
+   * @param key - Exact application context key.
+   * @returns Whether the key is currently registered.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.hasContext('selection');
+   * }
+   * ```
    */
   hasContext(key: string): boolean {
     return this.contexts.has(key);
   }
 
+
   /**
    * Returns a stable snapshot of public context descriptors.
    * The returned array reference is unchanged as long as registrations do not change.
+   *
+   * @returns Stable frozen context-descriptor snapshot, initially empty.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.listContexts();
+   * }
+   * ```
    */
   listContexts(): readonly ContextDescriptor[] {
     return this.contextListSnapshot;
   }
 
+
   /**
    * Retrieves the current value of a context on demand.
    * Safely catches errors and verifies that the registration was not removed or replaced
    * while the getter was executing.
+   *
+   * @param key - Exact context key whose getter runs once for this call.
+   * @returns Current getter value or a NOT_FOUND/UNREGISTERED/GETTER_FAILED result; getters are not cached.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.getContext('selection');
+   * }
+   * ```
    */
   async getContext(key: string): Promise<ContextValueResult<unknown>> {
     const entry = this.contexts.get(key);
@@ -292,8 +465,20 @@ export class ActionRegistry {
     }
   }
 
+
   /**
    * Retrieves all registered contexts on demand as a key-value record of results.
+   *
+   * @returns A null-prototype record of per-key results, read sequentially from keys registered at call start; each getter can fail independently.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.getAllContext();
+   * }
+   * ```
    */
   async getAllContext(): Promise<Record<string, ContextValueResult<unknown>>> {
     const keys = Array.from(this.contexts.keys());
@@ -308,9 +493,22 @@ export class ActionRegistry {
   // Subscription (useSyncExternalStore support)
   // ---------------------------------------------------------------------------
 
+
   /**
    * Subscribes a listener to registration changes.
    * Returns an unsubscribe function.
+   *
+   * @param listener - Zero-argument synchronous callback on registration changes; return ignored and observer errors caught.
+   * @returns An unsubscribe callback; execution/context-value changes do not trigger notifications.
+   *
+   * @example
+   * ```typescript
+   * import type { ActionRegistry } from '@alneas/appkit-core/ai/action';
+   *
+   * export async function example(registry: ActionRegistry) {
+   *   return registry.subscribe(() => console.log(registry.listActions()));
+   * }
+   * ```
    */
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);

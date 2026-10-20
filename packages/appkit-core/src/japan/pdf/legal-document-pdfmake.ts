@@ -100,7 +100,22 @@ function buildSignatureParty(party: PartyInfo) {
   };
 }
 
-/** Builds pdfmake document definition content from a ParsedDocument. */
+/**
+ * Builds pdfmake document definition content from a ParsedDocument.
+ *
+ * @param parsed - Structured document from parseLegalDocument or an equivalent host-supplied model.
+ * @returns pdfmake-style content, styles, A4 page geometry and default text settings; no PDF bytes.
+ * @remarks The host supplies a pdfmake renderer and suitable Japanese fonts. This function does not verify legal validity or sign documents.
+ *
+ * @example
+ * ```typescript
+ * import { parseLegalDocument } from '@alneas/appkit-core/japan/legal-document/parser';
+ * import { buildLegalDocumentPdfmakeContent } from '@alneas/appkit-core/japan/pdf';
+ *
+ * const definition = buildLegalDocumentPdfmakeContent(parseLegalDocument('第1条（目的）\n  Sample terms.'));
+ * console.log(definition.pageSize, definition.content);
+ * ```
+ */
 export function buildLegalDocumentPdfmakeContent(
   parsed: ParsedDocument,
 ) {
@@ -139,33 +154,77 @@ export function buildLegalDocumentPdfmakeContent(
   }
 
   return {
+
+    /** Ordered pdfmake content nodes representing the parsed blocks. */
     content,
+
+    /** Named text styles referenced by the generated content. */
     styles: {
+
+      /** Centered bold document-title style. */
       docTitle: {
+
+        /** Font size in PDF points for this style. */
         fontSize: FONT_SIZES.title,
+
+        /** Whether this style requests bold text. */
         bold: true,
+
+        /** Horizontal text alignment requested by the style. */
         alignment: 'center',
       },
+
+      /** Style for the optional document reference number. */
       docReference: {
+
+        /** Font size in PDF points for this style. */
         fontSize: FONT_SIZES.reference,
       },
+
+      /** Bold Japanese article-heading style. */
       articleHeader: {
+
+        /** Font size in PDF points for this style. */
         fontSize: FONT_SIZES.article,
+
+        /** Whether this style requests bold text. */
         bold: true,
       },
+
+      /** Bold party-role label style in signature blocks. */
       signatureRole: {
+
+        /** Font size in PDF points for this style. */
         fontSize: FONT_SIZES.body,
+
+        /** Whether this style requests bold text. */
         bold: true,
+
+        /** Left, top, right and bottom spacing in PDF points. */
         margin: [0, 0, 0, 2],
       },
+
+      /** Party name/address/representative text style. */
       signatureText: {
+
+        /** Font size in PDF points for this style. */
         fontSize: FONT_SIZES.body,
       },
     },
+
+    /** A4 page preset for the returned document definition. */
     pageSize: 'A4' as const,
+
+    /** Left/top/right/bottom page margins in PDF points (40/50/40/50). */
     pageMargins: [40, 50, 40, 50] as [number, number, number, number],
+
+    /** Default body text settings inherited by content nodes. */
     defaultStyle: {
+
+      /** Font size in PDF points for this style. */
       fontSize: FONT_SIZES.body,
+
+      /** Body line-height multiplier, 1.7. */
       lineHeight: 1.7,
     },
   };

@@ -2,37 +2,40 @@ import { validateFilter, comparisonOperators, quoteSqlIdentifier, validatePagina
 import { DataAccessAdapter, Filter, QueryOptions, OperationResult, normalizePopulateOptions } from './types';
 
 /**
- * Configuration options for the Neon DB adapter.
+ * Connection or host execution configuration for NeonAdapter. Use a server-trusted connection string, or a host SQL executor with its own authorization boundary.
+ * @see {@link NeonAdapter} for construction.
  */
 export interface NeonConfig {
   /**
-   * Neon (PostgreSQL) connection string.
-   * Example: `postgres://user:pass@ep-xyz.neon.tech/neondb?sslmode=require`
-   * If `queryFn` is not specified, connection is established using `@neondatabase/serverless`.
+   * Server-side PostgreSQL connection string used only without queryFn. The optional @neondatabase/serverless peer is loaded lazily on the first operation; credentials must remain in a trusted runtime.
    */
   connectionString?: string;
 
   /**
-   * Custom SQL execution function.
-   * Used when directly injecting a `@neondatabase/serverless` `neon()` instance or
-   * a function that executes SQL via a backend API.
-   * @param query SQL query string
-   * @param params Parameter array
+   * Optional executor taking precedence over connectionString.
+   * @param query - Generated parameterized PostgreSQL SQL text.
+   * @param params - Positional values corresponding to $1, $2 and later placeholders.
+   * @returns Row objects for SELECT and RETURNING operations; rejections propagate unchanged.
    */
   queryFn?: (query: string, params?: unknown[]) => Promise<unknown[]>;
 
   /**
-   * Primary key column name (default: `'id'`)
+   * Identifier column used for single-record operations; defaults to id for any falsy configured string.
    */
   idColumn?: string;
 }
 
 /**
- * DataAccessAdapter implementation using Neon (PostgreSQL).
- * 
- * Converts MongoDB-style Filter objects into PostgreSQL parameterized SQL,
- * executing CRUD operations while preventing SQL injection.
- * Usable on both client-side and server-side (BFF / Edge runtime / Node.js).
+ * Compiles supported filters and CRUD operations to parameterized PostgreSQL SQL. The host owns credentials, schema, permissions and connection lifetime. Identifier/value validation limits query syntax but does not establish authorization.
+ * @remarks find handles projection, sort, pagination and simple in-memory populate. signal and other unsupported options are ignored. Multi-step operations have no shared transaction or retry. replace is a partial update.
+ * @example
+ * ```ts
+ * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+ * import type { NeonConfig } from '@alneas/appkit-core/data/neon';
+ * export function connectPostgres(queryFn: NonNullable<NeonConfig['queryFn']>) {
+ *   return new NeonAdapter({ queryFn, idColumn: 'id' });
+ * }
+ * ```
  */
 export class NeonAdapter implements DataAccessAdapter {
   private config: NeonConfig;
@@ -40,8 +43,16 @@ export class NeonAdapter implements DataAccessAdapter {
   private neonQueryFn?: (query: string, params?: unknown[]) => Promise<unknown[]>;
 
   /**
-   * Creates a new instance of NeonAdapter.
-   * @param config Configuration for Neon adapter
+   * Stores configuration and an injected executor without opening a connection or validating schema.
+   * @param config - Optional queryFn, otherwise a connectionString and installed @neondatabase/serverless peer are required at operation time.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * import type { NeonConfig } from '@alneas/appkit-core/data/neon';
+   * export function connectPostgres(queryFn: NonNullable<NeonConfig['queryFn']>) {
+   *   return new NeonAdapter({ queryFn, idColumn: 'id' });
+   * }
+   * ```
    */
   constructor(config: NeonConfig) {
     this.config = config;
@@ -254,7 +265,20 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Searches for multiple records.
+   * Selects rows and optionally populates simple related records using additional queries.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param filter - Supported Mongo-style comparisons and $or/$and; empty filters select all rows.
+   * @param options - Projection, sorting, pagination and simple populate options; signal is ignored.
+   * @returns Rows cast to T[]. Populate stringifies foreign keys, assigns one related object or null, ignores unwind and does not implement array fan-out. It mutates the returned row objects.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function findTasks(adapter: NeonAdapter) {
+   *   return adapter.find('tasks', { status: 'open' }, { limit: 20 });
+   * }
+   * ```
    */
   async find<T = unknown>(
     collection: string,
@@ -307,7 +331,20 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Retrieves a single record by ID.
+   * Calls find using the configured id column and limit forced to one.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param id - Value bound against idColumn.
+   * @param options - Projection, sorting, pagination and simple populate options; signal is ignored.
+   * @returns First matching row or null; caller projection, skip and populate still apply.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function findOneTasks(adapter: NeonAdapter) {
+   *   return adapter.findOne('tasks', 'task-1');
+   * }
+   * ```
    */
   async findOne<T = unknown>(
     collection: string,
@@ -320,7 +357,20 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Creates a new record.
+   * Inserts fields with RETURNING *, or DEFAULT VALUES for an empty object.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param data - Column values (or batch rows) passed as bind parameters; database conversion and validation belong to the executor.
+   * @param _options - Accepted for interface compatibility and ignored by this operation.
+   * @returns The first returned row cast to T; it may be undefined at runtime if the executor returns no rows.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function createTasks(adapter: NeonAdapter) {
+   *   return adapter.create('tasks', { title: 'Draft' });
+   * }
+   * ```
    */
   async create<T = unknown>(
     collection: string,
@@ -347,7 +397,21 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Updates a record.
+   * Updates only supplied columns by the configured id.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param id - Value bound against idColumn.
+   * @param data - Column values (or batch rows) passed as bind parameters; database conversion and validation belong to the executor.
+   * @param _options - Accepted for interface compatibility and ignored by this operation.
+   * @returns The first returned row, which can be undefined for no match despite Promise<T>. Empty data calls findOne and can return null.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function updateTasks(adapter: NeonAdapter) {
+   *   return adapter.update('tasks', 'task-1', { title: 'Reviewed' });
+   * }
+   * ```
    */
   async update<T = unknown>(
     collection: string,
@@ -374,7 +438,21 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Replaces a record (dynamically compatible with update).
+   * Delegates directly to update; omitted columns are preserved.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param id - Value bound against idColumn.
+   * @param data - Column values (or batch rows) passed as bind parameters; database conversion and validation belong to the executor.
+   * @param options - Forwarded to delegated methods where supported; write SQL otherwise ignores query options.
+   * @returns The same result and missing-row behavior as update; this is not whole-row replacement.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function replaceTasks(adapter: NeonAdapter) {
+   *   return adapter.replace('tasks', 'task-1', { title: 'Reviewed' });
+   * }
+   * ```
    */
   async replace<T = unknown>(
     collection: string,
@@ -386,7 +464,20 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Deletes a record.
+   * Deletes by configured id using RETURNING *.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param id - Value bound against idColumn.
+   * @param _options - Accepted for interface compatibility and ignored by this operation.
+   * @returns The first deleted row cast to T, or undefined at runtime when no row matched.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function deleteTasks(adapter: NeonAdapter) {
+   *   return adapter.delete('tasks', 'task-1');
+   * }
+   * ```
    */
   async delete<T = unknown>(
     collection: string,
@@ -403,7 +494,19 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Counts the number of records matching the filter.
+   * Runs COUNT(*)::int for the supplied filter.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param filter - Supported Mongo-style comparisons and $or/$and; empty filters select all rows.
+   * @param _options - Accepted for interface compatibility and ignored by this operation.
+   * @returns A numeric count, parsing string results and falling back to zero when no row or a nonnumeric string is returned.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function countTasks(adapter: NeonAdapter) {
+   *   return adapter.count('tasks', { status: 'open' });
+   * }
+   * ```
    */
   async count(
     collection: string,
@@ -426,7 +529,20 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk creates multiple records.
+   * Inserts a batch using the union of input columns and RETURNING *.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param data - Column values (or batch rows) passed as bind parameters; database conversion and validation belong to the executor.
+   * @param _options - Accepted for interface compatibility and ignored by this operation.
+   * @returns Returned rows. Missing/undefined fields become null. Empty input yields []; rows with no columns are inserted sequentially via create, so a later failure can leave earlier writes.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function createManyTasks(adapter: NeonAdapter) {
+   *   return adapter.createMany('tasks', [{ title: 'Draft' }]);
+   * }
+   * ```
    */
   async createMany<T = unknown>(
     collection: string,
@@ -470,7 +586,21 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk updates multiple records matching the criteria.
+   * Updates every filtered row using one statement when data is nonempty.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param filter - Supported Mongo-style comparisons and $or/$and; empty filters select all rows.
+   * @param data - Column values (or batch rows) passed as bind parameters; database conversion and validation belong to the executor.
+   * @param _options - Accepted for interface compatibility and ignored by this operation.
+   * @returns Returned rows. Empty data calls find; an empty filter with nonempty data updates all rows.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function updateManyTasks(adapter: NeonAdapter) {
+   *   return adapter.updateMany('tasks', { status: 'open' }, { status: 'closed' });
+   * }
+   * ```
    */
   async updateMany<T = unknown>(
     collection: string,
@@ -509,7 +639,20 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk deletes multiple records matching the criteria.
+   * Deletes filtered rows with RETURNING *.
+   * @typeParam T - Expected row shape, trusted without runtime validation; defaults to unknown.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param filter - Supported Mongo-style comparisons and $or/$and; empty filters select all rows.
+   * @param _options - Accepted for interface compatibility and ignored by this operation.
+   * @returns Deleted rows; an empty filter deletes all rows.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function deleteManyTasks(adapter: NeonAdapter) {
+   *   return adapter.deleteMany('tasks', { status: 'archived' });
+   * }
+   * ```
    */
   async deleteMany<T = unknown>(
     collection: string,
@@ -531,7 +674,19 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Inserts a single record and returns the outcome as an OperationResult.
+   * Calls create and derives operation metadata from the returned row.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param data - Column values (or batch rows) passed as bind parameters; database conversion and validation belong to the executor.
+   * @param options - Forwarded to delegated methods where supported; write SQL otherwise ignores query options.
+   * @returns acknowledged true with matchedCount/modifiedCount 1; insertedId is stringified only when the returned id value is truthy. This is synthesized metadata rather than a database acknowledgement object.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function insertOneTasks(adapter: NeonAdapter) {
+   *   return adapter.insertOne('tasks', { title: 'Draft' });
+   * }
+   * ```
    */
   async insertOne(
     collection: string,
@@ -549,7 +704,19 @@ export class NeonAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Deletes a single record and returns the outcome as an OperationResult.
+   * Finds one matching id, then deletes by that id in a separate statement.
+   * @param collection - Validated table identifier, optionally schema-qualified.
+   * @param filter - Supported Mongo-style comparisons and $or/$and; empty filters select all rows.
+   * @param options - Forwarded to delegated methods where supported; write SQL otherwise ignores query options.
+   * @returns acknowledged true and deletedCount 0 when no row was found, otherwise 1 after delete resolves. Concurrent changes can make this differ from the actual affected-row count.
+   * @throws Rejects on identifier/filter/pagination validation, missing executor configuration/peer, or execution failure. No rollback is added around multiple queries.
+   * @example
+   * ```ts
+   * import { NeonAdapter } from '@alneas/appkit-core/data/neon';
+   * export async function deleteOneTasks(adapter: NeonAdapter) {
+   *   return adapter.deleteOne('tasks', { id: 'task-1' });
+   * }
+   * ```
    */
   async deleteOne(
     collection: string,

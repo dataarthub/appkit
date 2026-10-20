@@ -7,7 +7,19 @@ import { cn } from '../../lib/utils';
 import { Separator } from './separator';
 
 /**
- * リスト形式のアイテムをグループ化するコンテナコンポーネント。
+ * Renders a list-role container for vertically arranged item cards.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ItemGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -24,7 +36,19 @@ function ItemGroup({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * アイテムグループ内のアイテム同士を区切るためのセパレーター（区切り線）。
+ * Draws a horizontal divider between item cards.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ItemSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemSeparator({ className, ...props }: React.ComponentProps<typeof Separator>) {
   return (
@@ -41,11 +65,23 @@ const itemVariants = cva(
   '[a]:hover:bg-muted rounded-lg border text-sm w-full group/item focus-visible:border-ring focus-visible:ring-ring/50 flex items-center flex-wrap outline-none transition-colors duration-100 focus-visible:ring-[3px] [a]:transition-colors',
   {
     variants: {
+      /**
+       * Visual treatment selected by the consumer; these values change CSS classes only.
+       * Accepted values: default, outline, muted.
+       * @defaultValue 'default'
+       * @see itemVariants
+       */
       variant: {
         default: 'border-transparent',
         outline: 'border-border',
         muted: 'bg-muted/50 border-transparent',
       },
+      /**
+       * Control size preset selected by the consumer; sizes are class-based rather than numeric dimensions.
+       * Accepted values: default, sm, xs.
+       * @defaultValue 'default'
+       * @see itemVariants
+       */
       size: {
         default: 'gap-2.5 px-3 py-2.5',
         sm: 'gap-2.5 px-3 py-2.5',
@@ -60,7 +96,19 @@ const itemVariants = cva(
 );
 
 /**
- * リストやグリッド内の個々のアイテムを表す基本コンポーネント。
+ * Renders a list-item surface with configurable size, border treatment and render element.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='default', size='default'.
+ * @returns The rendered Item composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function Item({
   className,
@@ -90,6 +138,12 @@ const itemMediaVariants = cva(
   'gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start flex shrink-0 items-center justify-center [&_svg]:pointer-events-none',
   {
     variants: {
+      /**
+       * Visual treatment selected by the consumer; these values change CSS classes only.
+       * Accepted values: default, icon, image.
+       * @defaultValue 'default'
+       * @see itemMediaVariants
+       */
       variant: {
         default: 'bg-transparent',
         icon: "[&_svg:not([class*='size-'])]:size-4",
@@ -104,7 +158,19 @@ const itemMediaVariants = cva(
 );
 
 /**
- * アイテム内のアバター、アイコン、画像などのメディア要素を表示するコンポーネント。
+ * Styles leading media as plain content, an icon or a cropped image.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='default'.
+ * @returns The rendered ItemMedia composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemMedia({
   className,
@@ -122,7 +188,19 @@ function ItemMedia({
 }
 
 /**
- * アイテム内のコンテンツ（タイトルや説明など）を格納するコンテナ。
+ * Arranges an item title and supporting content in a flexible column.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ItemContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -138,7 +216,19 @@ function ItemContent({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * アイテムのタイトル。
+ * Styles a single-line item title.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ItemTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -154,7 +244,19 @@ function ItemTitle({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * アイテムの補助的な説明テキスト。
+ * Styles a two-line item description and embedded links.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ItemDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemDescription({ className, ...props }: React.ComponentProps<'p'>) {
   return (
@@ -170,7 +272,19 @@ function ItemDescription({ className, ...props }: React.ComponentProps<'p'>) {
 }
 
 /**
- * アイテムに関連するアクションボタンや操作子を配置するコンポーネント。
+ * Aligns host-provided item action controls.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ItemActions composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemActions({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -179,7 +293,19 @@ function ItemActions({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * アイテムの上部にメタ情報などを配置するヘッダー領域。
+ * Lays out full-width metadata above the main item content.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ItemHeader composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -192,7 +318,19 @@ function ItemHeader({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * アイテムの下部にメタ情報やアクションを配置するフッター領域。
+ * Lays out full-width metadata or controls below item content.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ItemFooter composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. These slots provide presentation, not selection or navigation. Item renders a div unless render is supplied; custom render elements must accept merged props. variant and size default to default; ItemMedia variant also defaults to default. ItemGroup role=list does not automatically assign role=listitem to children; the host may supply appropriate semantics.
+ * @example
+ * ```tsx
+ * import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions, ItemHeader, ItemFooter, ItemSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ItemGroup><Item><ItemHeader>Today</ItemHeader><ItemMedia variant="icon">D</ItemMedia><ItemContent><ItemTitle>Draft</ItemTitle><ItemDescription>Ready to review</ItemDescription></ItemContent><ItemActions><button type="button">Open</button></ItemActions><ItemFooter>Updated recently</ItemFooter></Item><ItemSeparator /></ItemGroup>);
+ * }
+ * ```
  */
 function ItemFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (

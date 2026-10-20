@@ -3,40 +3,54 @@ import React, { useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
 /**
- * バーコード生成器のプロップス
+ * Host inputs and presentation settings for BarcodeGenerator.
+ * @see BarcodeGenerator
  */
 interface BarcodeGeneratorProps {
-  /** エンコードする値 */
+  /**
+   * Text passed unchanged to the encoder; format/value validity is determined by the optional encoding library.
+   */
   value: string;
-  /** バーコードフォーマット（CODE128, EAN13, UPC等） */
+  /**
+   * jsbarcode format name; defaults to CODE128. Supply values valid for that format; errors are logged, not returned.
+   */
   format?: string;
-  /** カードのタイトル */
+  /**
+   * Card heading.
+   * @defaultValue Barcode
+   */
   title?: string;
-  /** カードの説明 */
+  /**
+   * Optional supporting card text; omitted means no description.
+   */
   description?: string;
-  /** バーの幅（ピクセル） */
+  /**
+   * Width of each barcode bar in jsbarcode pixel units; defaults to 2.
+   */
   width?: number;
-  /** バーコードの高さ */
+  /**
+   * Barcode height in jsbarcode pixel units; defaults to 100.
+   */
   height?: number;
-  /** 値を下部に表示するか */
+  /**
+   * Displays encoded text below the bars; defaults to true.
+   */
   displayValue?: boolean;
 }
 
 /**
- * バーコード生成コンポーネント
- *
- * 商品コードなどのバーコードを生成して表示します。
- * CODE128、EAN13、UPC、CODE39などの形式に対応。
- *
+ * Draws a barcode onto a canvas after loading jsbarcode in the client effect.
+ * @param props - Encoded value, barcode format and card/drawing settings; see BarcodeGeneratorProps. Wrapper defaults: format='CODE128', title='Barcode', width=2, height=100, displayValue=true.
+ * @returns The rendered BarcodeGenerator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Import Appkit CSS and install the optional jsbarcode peer. Rendering requires a browser canvas; server rendering produces the card/canvas without drawing. Supported format/value constraints come from jsbarcode and are not validated here. Drawing/import failures are caught and logged, with no error UI or completion callback. No cleanup cancels an in-flight dynamic import.
  * @example
  * ```tsx
  * import { BarcodeGenerator } from '@alneas/appkit-react/tools/barcode';
+ * import '@alneas/appkit-react/styles';
  *
- * <BarcodeGenerator
- *   value="4901234567890"
- *   format="EAN13"
- *   title="商品バーコード"
- * />
+ * export function Example() {
+ *   return (<BarcodeGenerator value="APPKIT-001" format="CODE128" title="Document barcode" />);
+ * }
  * ```
  */
 export const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({

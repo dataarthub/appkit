@@ -37,17 +37,31 @@ type SupabaseQueryResult = {
 };
 
 /**
- * DataAccess adapter performing data operations via Supabase (PostgREST).
- *
- * Converts MongoDB-style filter operators into Supabase query builder syntax.
- * Also supports joining related tables (Inner/Left Join) via populate.
+ * Maps supported Mongo-style filters and CRUD calls to a host Supabase PostgREST client. The client and database policies own sessions, schema and authorization.
+ * @remarks Supports restricted comparisons/$and and $ilike; $or is rejected. Related selections use PostgREST foreign-key syntax. QueryOptions.signal is not wired to cancellation. Replacement methods perform partial updates. Write methods named One do not add a one-row mutation limit; use uniquely identifying filters.
+ * @example
+ * ```ts
+ * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+ * import type { SupabaseClient } from '@supabase/supabase-js';
+ * export function connectSupabase(client: SupabaseClient) {
+ *   return new SupabaseAdapter(client);
+ * }
+ * ```
  */
 export class SupabaseAdapter implements DataAccessAdapter {
   protected client: SupabaseClient;
 
   /**
-   * Creates a new instance of SupabaseAdapter.
-   * @param client SupabaseClient instance
+   * Stores the configured host client without making a request or validating schema.
+   * @param client - Host-owned Supabase client with appropriate session and backend policies.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * import type { SupabaseClient } from '@supabase/supabase-js';
+   * export function connectSupabase(client: SupabaseClient) {
+   *   return new SupabaseAdapter(client);
+   * }
+   * ```
    */
   constructor(client: SupabaseClient) {
     this.client = client;
@@ -199,9 +213,20 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Searches for multiple records.
-   * When options.paginateAll is specified, automatically executes repeated queries (auto-pagination)
-   * to retrieve all records and bypass Supabase (PostgREST) default 1000-row limit.
+   * Selects matching rows with optional projection/populate, top-level sorting and range controls.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param filter - Supported comparisons/$and; $or is rejected. Empty filters impose no row restriction.
+   * @param options - Projection/populate and, for find, sort/pagination requests. Related-field sort keys are skipped and signal is ignored.
+   * @returns Response rows cast to T[]. Truthy skip without limit requests ten rows. paginateAll loops in pages of 1,000 only when limit is falsy and skip is undefined, stopping at a short page; server caps below 1,000 can stop early. Use a stable sort when paging, and account for concurrent writes.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function findTasks(adapter: SupabaseAdapter) {
+   *   return adapter.find('tasks', { status: 'open' }, { limit: 20 });
+   * }
+   * ```
    */
   async find<T = unknown>(
     collection: string,
@@ -261,7 +286,20 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Emulates an aggregation pipeline or executes a count operation.
+   * Emulates a limited subset of aggregation stages with PostgREST queries.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param pipeline - Limited PostgREST-compatible stage objects; only each object's first key is interpreted.
+   * @param options - Projection/populate used for select. Other controls come from supported pipeline stages.
+   * @returns Rows, or [{ count: number }] when any $count stage exists. Supports first-key $match/$sort/$skip/$limit/$count only; unsupported stages warn and are skipped. Count ignores sorting/pagination and always uses key count. A positive skip without limit requests an inclusive range of 1,001 rows; no later pages are fetched.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function aggregateTasks(adapter: SupabaseAdapter) {
+   *   return adapter.aggregate('tasks', [{ $match: { status: 'open' } }, { $limit: 20 }]);
+   * }
+   * ```
    */
   async aggregate<T = unknown>(
     collection: string,
@@ -331,7 +369,20 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Searches for a single record by ID.
+   * Selects a row by id using maybeSingle.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param id - String compared with the id column; uniqueness belongs to the database schema.
+   * @param options - Projection/populate and, for find, sort/pagination requests. Related-field sort keys are skipped and signal is ignored.
+   * @returns A row or null; multiple rows and other Supabase errors reject. Projection/populate apply, while sorting/pagination options do not.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function findOneTasks(adapter: SupabaseAdapter) {
+   *   return adapter.findOne('tasks', 'task-1');
+   * }
+   * ```
    */
   async findOne<T = unknown>(
     collection: string,
@@ -348,7 +399,20 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Creates a new record.
+   * Normalizes values, inserts one row and requests a single returned record.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param data - Input record values or batch rows; see this method's normalization behavior.
+   * @param _options - Accepted for interface compatibility and ignored.
+   * @returns The response cast to T. Top-level empty strings become null, $unset keys become null, and $inc is warned about and removed; other operators are not generally translated.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function createTasks(adapter: SupabaseAdapter) {
+   *   return adapter.create('tasks', { title: 'Draft' });
+   * }
+   * ```
    */
   async create<T = unknown>(
     collection: string,
@@ -397,7 +461,21 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Partially updates a record.
+   * Normalizes values and partially updates rows matching id, selecting a single response.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param id - String compared with the id column; uniqueness belongs to the database schema.
+   * @param data - Input record values or batch rows; see this method's normalization behavior.
+   * @param _options - Accepted for interface compatibility and ignored.
+   * @returns The response cast to T; missing/multiple-row errors propagate. Top-level empty strings become null, $unset keys become null, and $inc is warned about and removed; other operators are not generally translated.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function updateTasks(adapter: SupabaseAdapter) {
+   *   return adapter.update('tasks', 'task-1', { title: 'Reviewed' });
+   * }
+   * ```
    */
   async update<T = unknown>(
     collection: string,
@@ -418,7 +496,21 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Replaces a record.
+   * Partially updates rows matching id, retaining omitted columns.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param id - String compared with the id column; uniqueness belongs to the database schema.
+   * @param data - Input record values or batch rows; see this method's normalization behavior.
+   * @param _options - Accepted for interface compatibility and ignored.
+   * @returns The same normalized partial-update response as update; this does not clear unspecified columns. Top-level empty strings become null, $unset keys become null, and $inc is warned about and removed; other operators are not generally translated.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function replaceTasks(adapter: SupabaseAdapter) {
+   *   return adapter.replace('tasks', 'task-1', { title: 'Reviewed' });
+   * }
+   * ```
    */
   async replace<T = unknown>(
     collection: string,
@@ -439,7 +531,20 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Deletes a record.
+   * Deletes rows matching id and requests a single returned record.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param id - String compared with the id column; uniqueness belongs to the database schema.
+   * @param _options - Accepted for interface compatibility and ignored.
+   * @returns The deleted response cast to T; missing/multiple-row errors propagate.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function deleteTasks(adapter: SupabaseAdapter) {
+   *   return adapter.delete('tasks', 'task-1');
+   * }
+   * ```
    */
   async delete<T = unknown>(collection: string, id: string, _options?: QueryOptions): Promise<T> {
     const { data: deleted, error } = await (
@@ -454,7 +559,19 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Counts the number of records matching the filter.
+   * Requests an exact count using a head-only selection.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param filter - Supported comparisons/$and; $or is rejected. Empty filters impose no row restriction.
+   * @param _options - Accepted for interface compatibility and ignored.
+   * @returns The reported count or zero when absent/falsy; no rows are returned.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function countTasks(adapter: SupabaseAdapter) {
+   *   return adapter.count('tasks', { status: 'open' });
+   * }
+   * ```
    */
   async count(collection: string, filter?: Filter, _options?: QueryOptions): Promise<number> {
     let query = this.client
@@ -470,7 +587,20 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk creates multiple records.
+   * Inserts the batch unchanged and selects returned rows.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param data - Input record values or batch rows; see this method's normalization behavior.
+   * @param _options - Accepted for interface compatibility and ignored.
+   * @returns Response rows cast to T[]. Unlike create, this method does not normalize empty strings, $unset or $inc.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function createManyTasks(adapter: SupabaseAdapter) {
+   *   return adapter.createMany('tasks', [{ title: 'Draft' }]);
+   * }
+   * ```
    */
   async createMany<T = unknown>(
     collection: string,
@@ -486,7 +616,21 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk updates multiple records.
+   * Normalizes data and updates every row matching the supported filter.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param filter - Supported comparisons/$and; $or is rejected. Empty filters impose no row restriction.
+   * @param data - Input record values or batch rows; see this method's normalization behavior.
+   * @param _options - Accepted for interface compatibility and ignored.
+   * @returns Response rows cast to T[]; empty filters can update all visible rows. Top-level empty strings become null, $unset keys become null, and $inc is warned about and removed; other operators are not generally translated.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function updateManyTasks(adapter: SupabaseAdapter) {
+   *   return adapter.updateMany('tasks', { status: 'open' }, { status: 'closed' });
+   * }
+   * ```
    */
   async updateMany<T = unknown>(
     collection: string,
@@ -509,7 +653,20 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk deletes multiple records.
+   * Deletes every row matching the supported filter and selects deleted rows.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param filter - Supported comparisons/$and; $or is rejected. Empty filters impose no row restriction.
+   * @param _options - Accepted for interface compatibility and ignored.
+   * @returns Response rows cast to T[]; empty filters can delete all visible rows.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function deleteManyTasks(adapter: SupabaseAdapter) {
+   *   return adapter.deleteMany('tasks', { status: 'archived' });
+   * }
+   * ```
    */
   async deleteMany<T = unknown>(
     collection: string,
@@ -530,7 +687,18 @@ export class SupabaseAdapter implements DataAccessAdapter {
   // --- Explicit Mongo-Style Operations ---
 
   /**
-   * Executes a single insert and returns an OperationResult.
+   * Inserts one row unchanged and derives OperationResult from a single selected response.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param data - Input record values or batch rows; see this method's normalization behavior.
+   * @returns acknowledged true and insertedId only when the returned id is a string. Other counts are absent; no create-style value normalization is applied.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function insertOneTasks(adapter: SupabaseAdapter) {
+   *   return adapter.insertOne('tasks', { title: 'Draft' });
+   * }
+   * ```
    */
   async insertOne(collection: string, data: Record<string, unknown>): Promise<OperationResult> {
     const { data: created, error } = await (
@@ -548,7 +716,19 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Executes a single update and returns an OperationResult.
+   * Normalizes data and updates all matching rows, without imposing a one-row limit.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param filter - Supported comparisons/$and; $or is rejected. Empty filters impose no row restriction.
+   * @param data - Input record values or batch rows; see this method's normalization behavior.
+   * @returns acknowledged true with matchedCount and modifiedCount both set to the reported exact count or zero. These do not distinguish rows whose stored values actually changed. Top-level empty strings become null, $unset keys become null, and $inc is warned about and removed; other operators are not generally translated.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function updateOneTasks(adapter: SupabaseAdapter) {
+   *   return adapter.updateOne('tasks', { id: 'task-1' }, { title: 'Reviewed' });
+   * }
+   * ```
    */
   async updateOne(
     collection: string,
@@ -583,7 +763,24 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Executes a single replace.
+   * Applies an update through updateOne; omitted columns are retained.
+   *
+   * @param collection - Supabase table name accessible to the supplied client.
+   * @param filter - Supported comparison/AND filters; this method does not add an ID filter.
+   * @param data - Fields to update, normalized like updateOne (not a full replacement).
+   * @returns Acknowledged result whose matchedCount and modifiedCount are the returned exact count, or zero when absent.
+   * @throws Rejects for unsupported filters and propagated Supabase errors.
+   * @remarks Despite its name, this method delegates to updateOne. It does not
+   * clear omitted columns or add a one-row limit; narrow the filter explicitly.
+   * The supplied client and backend policies determine authorization.
+   * @example
+   * ```typescript
+   * import type { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   *
+   * export async function renameUser(adapter: SupabaseAdapter, id: string) {
+   *   return adapter.replaceOne('users', { id }, { name: 'New name' });
+   * }
+   * ```
    */
   async replaceOne(
     collection: string,
@@ -594,7 +791,18 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Executes a single delete and returns an OperationResult.
+   * Deletes all matching rows, without imposing a one-row limit.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param filter - Supported comparisons/$and; $or is rejected. Empty filters impose no row restriction.
+   * @returns acknowledged true and deletedCount from the reported exact count or zero.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function deleteOneTasks(adapter: SupabaseAdapter) {
+   *   return adapter.deleteOne('tasks', { id: 'task-1' });
+   * }
+   * ```
    */
   async deleteOne(collection: string, filter: Filter): Promise<OperationResult> {
     let query = (this.client.from(collection) as unknown as SupabaseQueryLike).delete();
@@ -621,7 +829,20 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Finds and updates a record atomically.
+   * Normalizes data, updates matching rows and requests a single selected response.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param filter - Supported comparisons/$and; $or is rejected. Empty filters impose no row restriction.
+   * @param data - Input record values or batch rows; see this method's normalization behavior.
+   * @returns The selected response cast to T, or null if returned without an error. Absence is not normalized to null; single-row errors propagate. There is no one-row mutation limit, and a response-selection error does not establish rollback. Top-level empty strings become null, $unset keys become null, and $inc is warned about and removed; other operators are not generally translated.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function findOneAndUpdateTasks(adapter: SupabaseAdapter) {
+   *   return adapter.findOneAndUpdate('tasks', { id: 'task-1' }, { title: 'Reviewed' });
+   * }
+   * ```
    */
   async findOneAndUpdate<T = unknown>(
     collection: string,
@@ -642,7 +863,32 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Finds and replaces a record atomically.
+   * Updates supplied fields and returns the selected row, retaining omitted columns.
+   *
+   * @typeParam T - Expected returned row shape; the adapter casts the response without runtime validation.
+   * @param collection - Supabase table name accessible to the supplied client.
+   * @param filter - Supported comparison/AND filters identifying the intended row.
+   * @param data - Partial field values: empty strings and $unset keys become null;
+   * $inc is warned about and removed rather than applied.
+   * @returns The selected response cast to T (or null if returned without an error).
+   * @throws Rejects for unsupported filters and errors returned by Supabase,
+   * including single-row selection errors; absence is not converted to null.
+   * @remarks
+   * This method delegates to findOneAndUpdate and is not a whole-record replacement.
+   * It issues update(...).select().single() without a one-row mutation limit;
+   * choose a uniquely identifying filter. A single-row response error does not
+   * by itself establish whether the database mutation was rolled back.
+   * The host must supply a configured adapter/client and enforce access policies.
+   * @example
+   * ```typescript
+   * import type { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   *
+   * type User = { id: string; name: string; email: string };
+   * export async function renameUser(adapter: SupabaseAdapter, id: string) {
+   *   // Only name is supplied; the existing email column is retained.
+   *   return adapter.findOneAndReplace<User>('users', { id }, { name: 'New name' });
+   * }
+   * ```
    */
   async findOneAndReplace<T = unknown>(
     collection: string,
@@ -653,7 +899,19 @@ export class SupabaseAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Finds and deletes a record atomically.
+   * Deletes matching rows and requests a single selected response.
+   * @typeParam T - Expected response shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Table name accessible through the supplied client and its database policies.
+   * @param filter - Supported comparisons/$and; $or is rejected. Empty filters impose no row restriction.
+   * @returns The selected deleted response cast to T, or null if returned without an error. There is no one-row mutation limit; absence and multiple-row errors propagate rather than being normalized to null, and selection errors do not establish rollback.
+   * @throws Rejects on unsupported filters and errors returned by the supplied client, including response-cardinality errors where single selection is requested. No wrapper retry or rollback is added.
+   * @example
+   * ```ts
+   * import { SupabaseAdapter } from '@alneas/appkit-core/data/supabase';
+   * export async function findOneAndDeleteTasks(adapter: SupabaseAdapter) {
+   *   return adapter.findOneAndDelete('tasks', { id: 'task-1' });
+   * }
+   * ```
    */
   async findOneAndDelete<T = unknown>(collection: string, filter: Filter): Promise<T | null> {
     let query = (this.client.from(collection) as unknown as SupabaseQueryLike).delete();

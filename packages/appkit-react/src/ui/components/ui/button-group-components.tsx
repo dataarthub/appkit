@@ -7,7 +7,19 @@ import { Separator } from './separator';
 import { buttonGroupVariants } from './button-group-variants';
 
 /**
- * 複数のボタンを結合して一体のグループとして表示するコンテナ。
+ * Visually joins adjacent buttons in a labeled group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ButtonGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. orientation defaults to horizontal through buttonGroupVariants. This group provides styling and role=group, without roving focus or selection state. Text uses Base UI useRender composition; custom elements must accept merged props.
+ * @example
+ * ```tsx
+ * import { ButtonGroup, ButtonGroupText, ButtonGroupSeparator, Button } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ButtonGroup aria-label="Document actions"><ButtonGroupText>Draft</ButtonGroupText><Button>Save</Button><ButtonGroupSeparator /><Button>Preview</Button></ButtonGroup>);
+ * }
+ * ```
  */
 function ButtonGroup({
   className,
@@ -26,7 +38,19 @@ function ButtonGroup({
 }
 
 /**
- * ボタングループ内にテキストラベルを挿入するためのコンポーネント。
+ * Renders supplemental text or a custom render element inside a button group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ButtonGroupText composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. orientation defaults to horizontal through buttonGroupVariants. This group provides styling and role=group, without roving focus or selection state. Text uses Base UI useRender composition; custom elements must accept merged props.
+ * @example
+ * ```tsx
+ * import { ButtonGroup, ButtonGroupText, ButtonGroupSeparator, Button } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ButtonGroup aria-label="Document actions"><ButtonGroupText>Draft</ButtonGroupText><Button>Save</Button><ButtonGroupSeparator /><Button>Preview</Button></ButtonGroup>);
+ * }
+ * ```
  */
 function ButtonGroupText({ className, render, ...props }: useRender.ComponentProps<'div'>) {
   return useRender({
@@ -48,7 +72,19 @@ function ButtonGroupText({ className, render, ...props }: useRender.ComponentPro
 }
 
 /**
- * ボタングループ内の各ボタンを区切るためのセパレーター。
+ * Separates adjacent button-group controls with a vertical separator by default.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: orientation='vertical'.
+ * @returns The rendered ButtonGroupSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. orientation defaults to horizontal through buttonGroupVariants. This group provides styling and role=group, without roving focus or selection state. Text uses Base UI useRender composition; custom elements must accept merged props.
+ * @example
+ * ```tsx
+ * import { ButtonGroup, ButtonGroupText, ButtonGroupSeparator, Button } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ButtonGroup aria-label="Document actions"><ButtonGroupText>Draft</ButtonGroupText><Button>Save</Button><ButtonGroupSeparator /><Button>Preview</Button></ButtonGroup>);
+ * }
+ * ```
  */
 function ButtonGroupSeparator({
   className,

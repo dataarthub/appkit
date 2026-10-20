@@ -1,7 +1,9 @@
 import type { EdiInvoiceData, EdiCreditNoteData, EdiLine } from './types';
 import type { InvoiceData } from "../../data/edi";
 
-/** @internal */
+/**
+ * @internal
+ */
 function lineToInvoiceItem(line: EdiLine): { description: string; quantity: number; price: number } {
   return {
     description: [line.product_code, line.description].filter(Boolean).join(' - '),
@@ -14,6 +16,15 @@ function lineToInvoiceItem(line: EdiLine): { description: string; quantity: numb
  * Converts an EDI invoice into renderer-agnostic compatible data. Use EdiPdfService for PDF generation.
  * @param doc - Source EDI invoice document
  * @returns InvoiceData in existing format (rendering logic not included)
+ *
+ * @example
+ * ```typescript
+ * import { ediInvoiceToInvoiceData } from '@alneas/appkit-core/japan/edi';
+ *
+ * export function convert(doc: Parameters<typeof ediInvoiceToInvoiceData>[0]) {
+ *   return ediInvoiceToInvoiceData(doc);
+ * }
+ * ```
  */
 export function ediInvoiceToInvoiceData(doc: EdiInvoiceData): InvoiceData {
   return {
@@ -46,6 +57,15 @@ export function ediInvoiceToInvoiceData(doc: EdiInvoiceData): InvoiceData {
  * Converts an EDI credit note into renderer-agnostic compatible data.
  * @param doc - Source EDI credit note document
  * @returns InvoiceData in existing format (rendering logic not included)
+ *
+ * @example
+ * ```typescript
+ * import { ediCreditNoteToInvoiceData } from '@alneas/appkit-core/japan/edi';
+ *
+ * export function convert(doc: Parameters<typeof ediCreditNoteToInvoiceData>[0]) {
+ *   return ediCreditNoteToInvoiceData(doc);
+ * }
+ * ```
  */
 export function ediCreditNoteToInvoiceData(doc: EdiCreditNoteData): InvoiceData {
   return {

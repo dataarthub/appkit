@@ -5,15 +5,18 @@ import { cn } from '../../lib/utils';
 import { Input, type InputProps } from './input';
 
 /**
- * PasswordInput コンポーネント
- *
- * パスワード表示/非表示の切り替え機能がついた入力フィールドです。
- * 右側に Eye/EyeOff アイコンが表示され、クリックすることで type 属性が
- * "password" と "text" の間で切り替わります。
- *
+ * Wraps Input with a local visibility toggle that switches password/text presentation.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered PasswordInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The ref targets the input, className styles the input, and the toggle starts hidden (type=password). Caller props spread after the computed type can override it. disabled also disables the toggle; readOnly does not. Visibility state is local and does not validate, authenticate or store credentials. The ref prop forwards to the rendered control or container declared by the component ref type.
  * @example
  * ```tsx
- * <PasswordInput placeholder="パスワードを入力" />
+ * import { PasswordInput, Label } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><Label htmlFor="password">Password</Label><PasswordInput id="password" autoComplete="current-password" /></>);
+ * }
  * ```
  */
 const PasswordInput = React.forwardRef<HTMLInputElement, InputProps>(

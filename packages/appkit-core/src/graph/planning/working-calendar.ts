@@ -1,7 +1,20 @@
 import { addDays, dateKey, parseLocalDate } from './dates';
 import type { GanttPlanningTask, GanttWorkingCalendar } from './types';
 
-/** Day planning intentionally rejects sub-day timestamps instead of silently truncating them. */
+/**
+ * Day planning intentionally rejects sub-day timestamps instead of silently truncating them.
+ *
+ * @param value - Local-midnight Date or valid YYYY-MM-DD date string.
+ * @returns A new Date representing the same local planning day.
+ * @throws Throws invalid dates or sub-day timestamps.
+ *
+ * @example
+ * ```typescript
+ * import { planningDate } from '@alneas/appkit-core/graph';
+ *
+ * console.log(planningDate('2026-10-20'));
+ * ```
+ */
 export function planningDate(value: string | Date): Date {
   const date = typeof value === 'string' ? parseLocalDate(value) : new Date(value);
   if (
@@ -15,7 +28,21 @@ export function planningDate(value: string | Date): Date {
   return date;
 }
 
-/** Compile and validate the shared calendar once for repeated day checks. */
+/**
+ * Compile and validate the shared calendar once for repeated day checks.
+ *
+ * @param calendar - Optional weekday/holiday overrides; omission permits every day, while {} selects Monday–Friday.
+ * @returns A reusable callback accepting a local Date and returning whether its date is a working day; explicit workingDates override holidays/weekdays. The callback performs no validity check on its Date input.
+ * @throws Throws invalid weekdays/exception dates or calendars without any working day.
+ *
+ * @example
+ * ```typescript
+ * import { workingDayPredicate, planningDate } from '@alneas/appkit-core/graph';
+ *
+ * const isWorking = workingDayPredicate({});
+ * console.log(isWorking(planningDate('2026-10-20')));
+ * ```
+ */
 export function workingDayPredicate(calendar?: GanttWorkingCalendar) {
   const weekdays =
     calendar?.workingWeekdays ?? (calendar ? [1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6]);
@@ -39,13 +66,41 @@ export function workingDayPredicate(calendar?: GanttWorkingCalendar) {
   };
 }
 
-/** Test a local date against explicit weekdays, holidays and working-date overrides. No country holiday lookup. */
+/**
+ * Test a local date against explicit weekdays, holidays and working-date overrides. No country holiday lookup.
+ *
+ * @param date - Valid Date whose local calendar day is tested.
+ * @param calendar - Optional weekday/holiday overrides; omission permits every day, {} means Monday–Friday.
+ * @returns Whether the local date passes the configured calendar.
+ * @throws Throws invalid date/calendar settings.
+ *
+ * @example
+ * ```typescript
+ * import { isGanttWorkingDay, planningDate } from '@alneas/appkit-core/graph';
+ *
+ * console.log(isGanttWorkingDay(planningDate('2026-10-20'), {}));
+ * ```
+ */
 export function isGanttWorkingDay(date: Date, calendar?: GanttWorkingCalendar): boolean {
   if (!Number.isFinite(+date)) throw new Error('Invalid calendar date.');
   return workingDayPredicate(calendar)(date);
 }
 
-/** Count occupied working days in [start,end). Positive non-working-only spans become one workday. */
+/**
+ * Count occupied working days in [start,end). Positive non-working-only spans become one workday.
+ *
+ * @param task - Task dates or an explicit nonnegative integer durationDays; explicit duration takes precedence.
+ * @param calendar - Optional working-day policy; omitted permits every day.
+ * @returns Occupied working days in [start,end); zero for equal endpoints, at least one for any positive span.
+ * @throws Throws invalid duration/dates/calendar, reversed dates or an inferred scan exceeding 36600 days.
+ *
+ * @example
+ * ```typescript
+ * import { getGanttWorkingDuration } from '@alneas/appkit-core/graph';
+ *
+ * console.log(getGanttWorkingDuration({ id: 'a', created_at: '2026-10-20', durationDays: 2 }));
+ * ```
+ */
 export function getGanttWorkingDuration(
   task: GanttPlanningTask,
   calendar?: GanttWorkingCalendar,

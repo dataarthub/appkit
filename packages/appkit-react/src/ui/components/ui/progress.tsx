@@ -6,9 +6,19 @@ import { Progress as ProgressPrimitive } from '@base-ui/react/progress';
 import { cn } from '../../lib/utils';
 
 /**
- * プログレスバーコンポーネント
+ * Coordinates an accessible progress value and always appends a styled track/indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Progress composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose labels/value content inside Progress. The root always appends its own Track/Indicator after children; supplying another Track/Indicator adds a second bar rather than replacing the built-in one. Base UI owns range and indeterminate semantics. The host owns task progress. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Progress, ProgressTrack, ProgressIndicator, ProgressLabel, ProgressValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
  *
- * 進捗状況を視覚的に表示。
+ * export function Example() {
+ *   return (<Progress value={45}><ProgressLabel>Upload</ProgressLabel><ProgressValue /></Progress>);
+ * }
+ * ```
  */
 const Progress = React.forwardRef<HTMLDivElement, ProgressPrimitive.Root.Props>(
   ({ className, children, value, ...props }, ref) => (
@@ -28,6 +38,21 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressPrimitive.Root.Props>(
 );
 Progress.displayName = 'Progress';
 
+/**
+ * Renders the background track for a progress indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ProgressTrack composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose labels/value content inside Progress. The root always appends its own Track/Indicator after children; supplying another Track/Indicator adds a second bar rather than replacing the built-in one. Base UI owns range and indeterminate semantics. The host owns task progress. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Progress, ProgressTrack, ProgressIndicator, ProgressLabel, ProgressValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Progress value={45}><ProgressLabel>Upload</ProgressLabel><ProgressValue /></Progress>);
+ * }
+ * ```
+ */
 const ProgressTrack = React.forwardRef<HTMLDivElement, ProgressPrimitive.Track.Props>(
   ({ className, ...props }, ref) => (
     <ProgressPrimitive.Track
@@ -43,6 +68,21 @@ const ProgressTrack = React.forwardRef<HTMLDivElement, ProgressPrimitive.Track.P
 );
 ProgressTrack.displayName = 'ProgressTrack';
 
+/**
+ * Renders the fill element driven by the surrounding progress context.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ProgressIndicator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose labels/value content inside Progress. The root always appends its own Track/Indicator after children; supplying another Track/Indicator adds a second bar rather than replacing the built-in one. Base UI owns range and indeterminate semantics. The host owns task progress. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Progress, ProgressTrack, ProgressIndicator, ProgressLabel, ProgressValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Progress value={45}><ProgressLabel>Upload</ProgressLabel><ProgressValue /></Progress>);
+ * }
+ * ```
+ */
 const ProgressIndicator = React.forwardRef<HTMLDivElement, ProgressPrimitive.Indicator.Props>(
   ({ className, ...props }, ref) => (
     <ProgressPrimitive.Indicator
@@ -55,6 +95,21 @@ const ProgressIndicator = React.forwardRef<HTMLDivElement, ProgressPrimitive.Ind
 );
 ProgressIndicator.displayName = 'ProgressIndicator';
 
+/**
+ * Provides the accessible label of a progress display.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ProgressLabel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose labels/value content inside Progress. The root always appends its own Track/Indicator after children; supplying another Track/Indicator adds a second bar rather than replacing the built-in one. Base UI owns range and indeterminate semantics. The host owns task progress. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Progress, ProgressTrack, ProgressIndicator, ProgressLabel, ProgressValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Progress value={45}><ProgressLabel>Upload</ProgressLabel><ProgressValue /></Progress>);
+ * }
+ * ```
+ */
 const ProgressLabel = React.forwardRef<HTMLSpanElement, ProgressPrimitive.Label.Props>(
   ({ className, ...props }, ref) => (
     <ProgressPrimitive.Label
@@ -67,6 +122,21 @@ const ProgressLabel = React.forwardRef<HTMLSpanElement, ProgressPrimitive.Label.
 );
 ProgressLabel.displayName = 'ProgressLabel';
 
+/**
+ * Renders the formatted progress value from context.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ProgressValue composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose labels/value content inside Progress. The root always appends its own Track/Indicator after children; supplying another Track/Indicator adds a second bar rather than replacing the built-in one. Base UI owns range and indeterminate semantics. The host owns task progress. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Progress, ProgressTrack, ProgressIndicator, ProgressLabel, ProgressValue } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Progress value={45}><ProgressLabel>Upload</ProgressLabel><ProgressValue /></Progress>);
+ * }
+ * ```
+ */
 const ProgressValue = React.forwardRef<HTMLSpanElement, ProgressPrimitive.Value.Props>(
   ({ className, ...props }, ref) => (
     <ProgressPrimitive.Value

@@ -7,13 +7,40 @@ import { ChevronRightIcon, CheckIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 /**
- * コンテキストメニュー（右クリックメニュー）のルートコンポーネント。
+ * Coordinates popup menu state and focus behavior.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenu composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
  */
 const ContextMenu = (props: ContextMenuPrimitive.Root.Props) => (
   <ContextMenuPrimitive.Root data-slot='context-menu' {...props} />
 );
 ContextMenu.displayName = 'ContextMenu';
 
+/**
+ * Mounts menu descendants in a separate DOM container.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuPortal composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuPortal = React.forwardRef<HTMLDivElement, ContextMenuPrimitive.Portal.Props>(
   ({ ...props }, ref) => (
     <ContextMenuPrimitive.Portal ref={ref} data-slot='context-menu-portal' {...props} />
@@ -21,6 +48,21 @@ const ContextMenuPortal = React.forwardRef<HTMLDivElement, ContextMenuPrimitive.
 );
 ContextMenuPortal.displayName = 'ContextMenuPortal';
 
+/**
+ * Renders the control or context target that opens a menu.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuTrigger = React.forwardRef<
   React.ComponentRef<typeof ContextMenuPrimitive.Trigger>,
   ContextMenuPrimitive.Trigger.Props
@@ -36,6 +78,21 @@ const ContextMenuTrigger = React.forwardRef<
 ));
 ContextMenuTrigger.displayName = 'ContextMenuTrigger';
 
+/**
+ * Portals the menu popup through its positioned container.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: align='start', alignOffset=4, side='right', sideOffset=0.
+ * @returns The rendered ContextMenuContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuContent = React.forwardRef<
   HTMLDivElement,
   ContextMenuPrimitive.Popup.Props &
@@ -68,6 +125,21 @@ const ContextMenuContent = React.forwardRef<
 );
 ContextMenuContent.displayName = 'ContextMenuContent';
 
+/**
+ * Groups related menu actions.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuGroup = React.forwardRef<HTMLDivElement, ContextMenuPrimitive.Group.Props>(
   ({ ...props }, ref) => (
     <ContextMenuPrimitive.Group ref={ref} data-slot='context-menu-group' {...props} />
@@ -75,9 +147,30 @@ const ContextMenuGroup = React.forwardRef<HTMLDivElement, ContextMenuPrimitive.G
 );
 ContextMenuGroup.displayName = 'ContextMenuGroup';
 
+/**
+ * Renders the accessible label of a menu group with optional inset spacing.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuLabel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuLabel = React.forwardRef<
   HTMLDivElement,
-  ContextMenuPrimitive.GroupLabel.Props & { inset?: boolean }
+  ContextMenuPrimitive.GroupLabel.Props & { /**
+ * Adds left inset spacing when true; omitted/false uses normal alignment.
+ */
+  /**
+   * Adds left inset spacing when true; omitted/false uses normal alignment.
+   */
+  inset?: boolean }
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.GroupLabel
     ref={ref}
@@ -92,10 +185,31 @@ const ContextMenuLabel = React.forwardRef<
 ));
 ContextMenuLabel.displayName = 'ContextMenuLabel';
 
+/**
+ * Renders a menu action with optional destructive styling and inset spacing.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='default'.
+ * @returns The rendered ContextMenuItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuItem = React.forwardRef<
   HTMLDivElement,
   ContextMenuPrimitive.Item.Props & {
+    /**
+     * Adds left inset spacing when true; omitted/false uses normal alignment.
+     */
     inset?: boolean;
+    /**
+     * Visual treatment from the declared variant union; changing it does not alter host action semantics.
+     */
     variant?: 'default' | 'destructive';
   }
 >(({ className, inset, variant = 'default', ...props }, ref) => (
@@ -114,16 +228,49 @@ const ContextMenuItem = React.forwardRef<
 ContextMenuItem.displayName = 'ContextMenuItem';
 
 /**
- * コンテキストメニュー内でさらに深い階層のメニュー（サブメニュー）を作成するためのコンポーネント。
+ * Coordinates a submenu nested inside a parent menu.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuSub composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
  */
 const ContextMenuSub = (props: ContextMenuPrimitive.SubmenuRoot.Props) => (
   <ContextMenuPrimitive.SubmenuRoot data-slot='context-menu-sub' {...props} />
 );
 ContextMenuSub.displayName = 'ContextMenuSub';
 
+/**
+ * Renders a submenu opener with a trailing chevron.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuSubTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuSubTrigger = React.forwardRef<
   HTMLDivElement,
-  ContextMenuPrimitive.SubmenuTrigger.Props & { inset?: boolean }
+  ContextMenuPrimitive.SubmenuTrigger.Props & { /**
+ * Adds left inset spacing when true; omitted/false uses normal alignment.
+ */
+  /**
+   * Adds left inset spacing when true; omitted/false uses normal alignment.
+   */
+  inset?: boolean }
 >(({ className, inset, children, ...props }, ref) => (
   <ContextMenuPrimitive.SubmenuTrigger
     ref={ref}
@@ -141,6 +288,21 @@ const ContextMenuSubTrigger = React.forwardRef<
 ));
 ContextMenuSubTrigger.displayName = 'ContextMenuSubTrigger';
 
+/**
+ * Renders a positioned submenu popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuSubContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuSubContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof ContextMenuContent>
@@ -155,6 +317,21 @@ const ContextMenuSubContent = React.forwardRef<
 ));
 ContextMenuSubContent.displayName = 'ContextMenuSubContent';
 
+/**
+ * Renders a checked menu action with a checkmark indicator.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuCheckboxItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuCheckboxItem = React.forwardRef<
   HTMLDivElement,
   ContextMenuPrimitive.CheckboxItem.Props
@@ -179,6 +356,21 @@ const ContextMenuCheckboxItem = React.forwardRef<
 ));
 ContextMenuCheckboxItem.displayName = 'ContextMenuCheckboxItem';
 
+/**
+ * Coordinates mutually exclusive menu choices.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuRadioGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuRadioGroup = React.forwardRef<
   HTMLDivElement,
   ContextMenuPrimitive.RadioGroup.Props
@@ -187,6 +379,21 @@ const ContextMenuRadioGroup = React.forwardRef<
 ));
 ContextMenuRadioGroup.displayName = 'ContextMenuRadioGroup';
 
+/**
+ * Renders one value in a menu radio group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuRadioItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuRadioItem = React.forwardRef<HTMLDivElement, ContextMenuPrimitive.RadioItem.Props>(
   ({ className, children, ...props }, ref) => (
     <ContextMenuPrimitive.RadioItem
@@ -209,6 +416,21 @@ const ContextMenuRadioItem = React.forwardRef<HTMLDivElement, ContextMenuPrimiti
 );
 ContextMenuRadioItem.displayName = 'ContextMenuRadioItem';
 
+/**
+ * Draws a divider between menu sections.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuSeparator = React.forwardRef<HTMLDivElement, ContextMenuPrimitive.Separator.Props>(
   ({ className, ...props }, ref) => (
     <ContextMenuPrimitive.Separator
@@ -221,6 +443,21 @@ const ContextMenuSeparator = React.forwardRef<HTMLDivElement, ContextMenuPrimiti
 );
 ContextMenuSeparator.displayName = 'ContextMenuSeparator';
 
+/**
+ * Styles a shortcut hint without installing keyboard listeners.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ContextMenuShortcut composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Items and popup parts require the matching ContextMenu root. Put labels inside a Group and RadioItems inside RadioGroup. SubTrigger/SubContent require Sub under the parent menu. Content supplies its portal/positioner. inset adds left spacing when truthy; item variant defaults to default. Shortcut is presentational. Custom render composition follows Base UI; there is no asChild adapter. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuGroup, ContextMenuLabel, ContextMenuSeparator } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<ContextMenu><ContextMenuTrigger>Right-click here</ContextMenuTrigger><ContextMenuContent><ContextMenuGroup><ContextMenuLabel>Document</ContextMenuLabel><ContextMenuItem onClick={() => console.log("Open requested")}>Open</ContextMenuItem></ContextMenuGroup><ContextMenuSeparator /><ContextMenuItem disabled>Unavailable</ContextMenuItem></ContextMenuContent></ContextMenu>);
+ * }
+ * ```
+ */
 const ContextMenuShortcut = React.forwardRef<HTMLSpanElement, React.ComponentProps<'span'>>(
   ({ className, ...props }, ref) => (
     <span

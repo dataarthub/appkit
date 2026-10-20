@@ -1,15 +1,37 @@
 import type { EdiDocument, VatexCategoryId } from './types';
 import { PEPPOL_PARTY_ID_SCHEMES } from './types';
 
+/**
+ * One diagnostic from the represented-field Japanese EDI validation subset.
+ *
+ * @see {@link validateEdiDocument} for validation usage and scope.
+ */
 export interface EdiValidationIssue {
+
+  /** Diagnostic importance: error prevents valid=true; warning/info do not. */
   severity: 'error' | 'warning' | 'info';
+
+  /** Stable rule identifier for programmatic diagnostic handling. */
   code: string;
+
+  /** JSON-style path to the field that triggered the diagnostic. */
   path: string;
+
+  /** Human-readable Japanese diagnostic text. */
   message: string;
 }
 
+/**
+ * Validation outcome for the represented fields, without full JP PINT certification.
+ *
+ * @see {@link validateEdiDocument} for validation usage and scope.
+ */
 export interface EdiValidationResult {
+
+  /** True when no error-severity diagnostic was produced; warnings may remain. */
   valid: boolean;
+
+  /** Collected diagnostics in validation order; empty when no issues were detected. */
   issues: EdiValidationIssue[];
 }
 
@@ -36,6 +58,15 @@ function addIssue(issues: EdiValidationIssue[], severity: 'error' | 'warning' | 
  * Tax identifier scheme VAT is distinct from party/endpoint identification. See docs for the exact subset.
  * @param doc - EDI document to validate
  * @returns Validation result containing a valid flag and a list of issues
+ *
+ * @example
+ * ```typescript
+ * import { validateEdiDocument } from '@alneas/appkit-core/japan/edi';
+ *
+ * export function convert(doc: Parameters<typeof validateEdiDocument>[0]) {
+ *   return validateEdiDocument(doc);
+ * }
+ * ```
  */
 export function validateEdiDocument(doc: EdiDocument): EdiValidationResult {
   const issues: EdiValidationIssue[] = [];

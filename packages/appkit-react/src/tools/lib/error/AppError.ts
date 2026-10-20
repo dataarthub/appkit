@@ -1,69 +1,84 @@
 import * as m from '../../paraglide/messages';
 
 /**
- * エラー表示モード
- * - inline: フォーム内のフィールド近くに表示
- * - notification: 画面上部のバナー通知
- * - dialog: モーダルダイアログ
- * - page: 全画面エラーページ
+ * Requested error presentation: inline field feedback, notification banner, modal dialog or full page.
+ * @remarks This is metadata; a host renderer must display the error.
+ * @see AppError for creation.
  */
 export type ErrorDisplayMode = 'inline' | 'notification' | 'dialog' | 'page';
 
 /**
- * エラーの重要度
+ * Presentation severity from informational through critical; does not change Error behavior.
+ * @see AppError for creation.
  */
 export type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
 
 /**
- * AppError: アプリケーション全体で使用するエラークラス
- *
+ * Application Error carrying a code, display hint, severity and optional metadata/original error.
+ * @remarks Presentation hints do not render UI or enforce authorization. Metadata is retained
+ * by reference and included in toJSON; exclude secrets before displaying or serializing.
  * @example
- * ```typescript
- * // 基本的な使用法
- * throw new AppError('auth/user-not-found', 'User not found');
- *
- * // 表示モード指定
- * throw new AppError('network/timeout', 'Request timed out', {
- *   displayMode: 'notification',
- *   severity: 'warning'
- * });
- *
- * // メタデータ付き
- * throw new AppError('validation/invalid-field', 'Invalid input', {
- *   displayMode: 'inline',
- *   metadata: { field: 'email' }
- * });
+ * ```ts
+ * import { AppError } from '@alneas/appkit-react/tools/core';
+ * const error = new AppError('validation/input', 'Review the input', { displayMode: 'inline', severity: 'warning' });
  * ```
  */
 export class AppError extends Error {
-  /** エラーコード。i18n のキーとしても使用 (例: 'auth/user-not-found') */
+    /**
+   * Stable host error code, also usable for localized message lookup.
+   */
   readonly code: string;
 
-  /** 推奨される表示モード */
+    /**
+   * Recommended host display mode; defaults to notification.
+   */
   readonly displayMode: ErrorDisplayMode;
 
-  /** エラーの重要度 */
+    /**
+   * Presentation severity; defaults to error.
+   */
   readonly severity: ErrorSeverity;
 
-  /** 追加のメタデータ (フィールド名、HTTP ステータスなど) */
+    /**
+   * Optional host metadata retained by reference and included in JSON serialization.
+   */
   readonly metadata?: Record<string, unknown>;
 
-  /** 元のエラー (ラップする場合) */
+    /**
+   * Optional wrapped Error retained by reference; excluded from toJSON.
+   */
   readonly originalError?: Error;
 
   /**
-   * AppError の新しいインスタンスを生成します。
-   * @param code エラーコード
-   * @param message エラーメッセージ
-   * @param options 追加オプション
-   */
+ * Creates an Error with explicit application code and presentation metadata.
+ * @param code - Host error identifier; no format validation is applied.
+ * @param message - Error message stored by the Error base class.
+ * @param options - Optional displayMode/severity (defaults notification/error), metadata and wrapped Error.
+ * @example
+ * ```ts
+ * import { AppError } from '@alneas/appkit-react/tools/core';
+ * const error = new AppError('error/example', 'Operation failed');
+ * ```
+ */
   constructor(
     code: string,
     message: string,
     options?: {
+      /**
+       * Presentation hint, default notification.
+       */
       displayMode?: ErrorDisplayMode;
+      /**
+       * Presentation severity, default error.
+       */
       severity?: ErrorSeverity;
+      /**
+       * Optional host metadata included by toJSON.
+       */
       metadata?: Record<string, unknown>;
+      /**
+       * Optional wrapped Error, excluded from toJSON.
+       */
       originalError?: Error;
     },
   ) {
@@ -80,9 +95,20 @@ export class AppError extends Error {
   }
 
   /**
-   * 任意のエラーを AppError に変換します。
-   * Firebase, Supabase 等のエラーを自動的にコードマッピングします。
-   */
+ * Converts an unknown value to AppError, preserving an existing AppError unchanged.
+ * @param error - Error or arbitrary thrown value to normalize.
+ * @param defaultDisplayMode - Hint for newly created wrappers; defaults to notification.
+ * @returns Existing AppError identity, or a new wrapper. Error instances with a string code
+ * retain that code and map selected known auth messages; other Errors use message matching
+ * or error/unknown. Non-Error values are stringified as error/unknown.
+ * @remarks Plain objects with code/message are not interpreted as Error instances. The
+ * default display hint does not override an existing AppError. No UI is rendered.
+ * @example
+ * ```ts
+ * import { AppError } from '@alneas/appkit-react/tools/core';
+ * const error = AppError.from(new Error('Unavailable'), 'dialog');
+ * ```
+ */
   static from(error: unknown, defaultDisplayMode: ErrorDisplayMode = 'notification'): AppError {
     if (error instanceof AppError) {
       return error;
@@ -174,15 +200,28 @@ export class AppError extends Error {
   }
 
   /**
-   * 文字列表現
-   */
+ * Formats the application code and message for display/logging.
+ * @returns String in [code] message form; does not include metadata or stack.
+ * @example
+ * ```ts
+ * import { AppError } from '@alneas/appkit-react/tools/core';
+ * const error = new AppError('error/example', 'Unavailable').toString();
+ * ```
+ */
   toString(): string {
     return `[${this.code}] ${this.message}`;
   }
 
   /**
-   * JSON シリアライズ用
-   */
+ * Selects enumerable presentation fields for JSON serialization.
+ * @returns New object with name/code/message/displayMode/severity/metadata; stack and originalError are omitted.
+ * @remarks Metadata remains referenced and may itself be non-serializable or sensitive.
+ * @example
+ * ```ts
+ * import { AppError } from '@alneas/appkit-react/tools/core';
+ * const error = new AppError('error/example', 'Unavailable').toJSON();
+ * ```
+ */
   toJSON(): Record<string, unknown> {
     return {
       name: this.name,
@@ -196,14 +235,25 @@ export class AppError extends Error {
 }
 
 /**
- * ネットワークタイムアウトエラー
+ * Represents an operation timeout with notification/warning presentation.
+ * @remarks Construction does not start timers, perform a request or render error UI.
+ * @example
+ * ```ts
+ * import { TimeoutError } from '@alneas/appkit-react/tools/core';
+ * const error = new TimeoutError();
+ * ```
  */
 export class TimeoutError extends AppError {
   /**
-   * TimeoutError の新しいインスタンスを生成します。
-   * @param message エラーメッセージ
-   * @param duration タイムアウトした時間（ミリ秒）
-   */
+ * Creates an application error with code error/timeout.
+ * @param message - Message, default The operation timed out.
+ * @param duration - Optional timeout duration in milliseconds; retained in metadata.
+ * @example
+ * ```ts
+ * import { TimeoutError } from '@alneas/appkit-react/tools/core';
+ * const error = new TimeoutError();
+ * ```
+ */
   constructor(message = 'The operation timed out', duration?: number) {
     super('error/timeout', message, {
       displayMode: 'notification',
@@ -215,13 +265,24 @@ export class TimeoutError extends AppError {
 }
 
 /**
- * ネットワークエラー
+ * Represents a network failure with notification/error presentation.
+ * @remarks Construction does not start timers, perform a request or render error UI.
+ * @example
+ * ```ts
+ * import { NetworkError } from '@alneas/appkit-react/tools/core';
+ * const error = new NetworkError();
+ * ```
  */
 export class NetworkError extends AppError {
   /**
-   * NetworkError の新しいインスタンスを生成します。
-   * @param message エラーメッセージ
-   */
+ * Creates an application error with code error/network.
+ * @param message - Message, default Network error occurred.
+ * @example
+ * ```ts
+ * import { NetworkError } from '@alneas/appkit-react/tools/core';
+ * const error = new NetworkError();
+ * ```
+ */
   constructor(message = 'Network error occurred') {
     super('error/network', message, {
       displayMode: 'notification',
@@ -232,13 +293,24 @@ export class NetworkError extends AppError {
 }
 
 /**
- * 認証不足エラー
+ * Represents denied access with dialog/error presentation.
+ * @remarks Construction does not start timers, perform a request or render error UI.
+ * @example
+ * ```ts
+ * import { UnauthorizedError } from '@alneas/appkit-react/tools/core';
+ * const error = new UnauthorizedError();
+ * ```
  */
 export class UnauthorizedError extends AppError {
   /**
-   * UnauthorizedError の新しいインスタンスを生成します。
-   * @param message エラーメッセージ
-   */
+ * Creates an application error with code error/unauthorized.
+ * @param message - Message, default You are not authorized to perform this action.
+ * @example
+ * ```ts
+ * import { UnauthorizedError } from '@alneas/appkit-react/tools/core';
+ * const error = new UnauthorizedError();
+ * ```
+ */
   constructor(message = 'You are not authorized to perform this action') {
     super('error/unauthorized', message, {
       displayMode: 'dialog',
@@ -249,14 +321,25 @@ export class UnauthorizedError extends AppError {
 }
 
 /**
- * リソースが見つからないエラー
+ * Represents a missing resource with page/error presentation.
+ * @remarks Construction does not start timers, perform a request or render error UI.
+ * @example
+ * ```ts
+ * import { NotFoundError } from '@alneas/appkit-react/tools/core';
+ * const error = new NotFoundError();
+ * ```
  */
 export class NotFoundError extends AppError {
   /**
-   * NotFoundError の新しいインスタンスを生成します。
-   * @param message エラーメッセージ
-   * @param resource 見つからなかったリソース名
-   */
+ * Creates an application error with code error/not-found.
+ * @param message - Message, default The requested resource was not found.
+ * @param resource - Optional missing resource name retained in metadata.
+ * @example
+ * ```ts
+ * import { NotFoundError } from '@alneas/appkit-react/tools/core';
+ * const error = new NotFoundError();
+ * ```
+ */
   constructor(message = 'The requested resource was not found', resource?: string) {
     super('error/not-found', message, {
       displayMode: 'page',
@@ -268,14 +351,25 @@ export class NotFoundError extends AppError {
 }
 
 /**
- * バリデーションエラー
+ * Represents invalid input with inline/warning presentation.
+ * @remarks Construction does not start timers, perform a request or render error UI.
+ * @example
+ * ```ts
+ * import { ValidationError } from '@alneas/appkit-react/tools/core';
+ * const error = new ValidationError('Invalid input');
+ * ```
  */
 export class ValidationError extends AppError {
   /**
-   * ValidationError の新しいインスタンスを生成します。
-   * @param message エラーメッセージ
-   * @param fields フィールドごとのエラーマッピング
-   */
+ * Creates an application error with code error/validation.
+ * @param message - Required validation message.
+ * @param fields - Optional per-field error messages retained in metadata.
+ * @example
+ * ```ts
+ * import { ValidationError } from '@alneas/appkit-react/tools/core';
+ * const error = new ValidationError('Invalid input');
+ * ```
+ */
   constructor(message: string, fields?: Record<string, string>) {
     super('error/validation', message, {
       displayMode: 'inline',

@@ -4,72 +4,78 @@ import { useUserProfile } from './useUserProfile';
 import { useRoleCheck } from './useRoleCheck';
 import { BaseProfile } from './types';
 
+/**
+ * Route display restrictions and client redirects.
+ *
+ * @typeParam T - Profile shape extending BaseProfile; defaults to BaseProfile.
+ *
+ * @see ProtectedRoute for provider setup and semantics.
+ */
 export interface ProtectedRouteProps<T extends BaseProfile = BaseProfile> {
+  /**
+   * Content rendered only after loading and successful display checks.
+   */
   children: React.ReactNode;
-  /**
-   * ログインページへのパス
-   * @default '/login'
-   */
+    /**
+     * Unauthenticated redirect destination; defaults to /login.
+     */
   loginPath?: string;
-  /**
-   * 認可エラー時のリダイレクトパス (403)
-   * @default undefined (リダイレクトしない)
-   */
+    /**
+     * Optional denied-access destination; omission renders unauthorizedFallback.
+     */
   unauthorizedPath?: string;
-  /**
-   * 許可されるロールの配列
-   * @example ['admin', 'manager']
-   */
+    /**
+     * Any one listed role must match; omission or an empty array skips role restriction.
+     */
   roles?: string[];
-  /**
-   * プロファイル内のロールフィールド名
-   * @default 'role'
-   */
+    /**
+     * Profile scalar/array role property; defaults to role.
+     */
   roleField?: keyof T;
-  /**
-   * カスタムアクセス条件
-   * @example (profile) => profile?.subscription === 'premium'
-   */
+    /**
+     * Additional synchronous predicate receiving the profile or null; must pass after role checks. Thrown errors propagate from render.
+     */
   condition?: (profile: T | null) => boolean;
-  /**
-   * ロード中に表示するコンポーネント
-   */
+    /**
+     * Loading content; defaults to null.
+     */
   fallback?: React.ReactNode;
-  /**
-   * 認可エラー時に表示するコンポーネント (unauthorizedPath が未設定の場合)
-   */
+    /**
+     * Denied-access content when unauthorizedPath is omitted; defaults to null.
+     */
   unauthorizedFallback?: React.ReactNode;
-  /**
-   * リダイレクト処理をカスタマイズ
-   * @example (path) => navigate(path)
-   */
+    /**
+     * Optional synchronous navigation callback receiving the destination; omission assigns window.location.href.
+     */
   onRedirect?: (path: string) => void;
 }
 
 /**
- * ルート保護コンポーネント
+ * Renders or redirects according to current auth, optional roles and an optional predicate.
  *
- * 認証状態とロール/条件に基づいてページアクセスを制御します。
+ * @typeParam T - Profile shape used by roleField and condition; defaults to BaseProfile.
+ *
+ * @param props - Children, access predicates, loading/denial content and navigation settings.
+ *
+ * @returns Loading fallback, permitted children, denied fallback or null while redirecting.
+ *
+ * @throws Error without AuthProvider; condition errors propagate during rendering.
+ *
+ * @remarks Requires AuthProvider inside QueryClientProvider. UserProfileProvider is optional
+ * but needed for profile-based roles. Redirects run in effects; missing profiles fail a
+ * nonempty role restriction. This uses display user state without isSessionVerified;
+ * backend authorization is still required. No CSS is required.
  *
  * @example
  * ```tsx
- * // 認証ユーザーのみ
- * <ProtectedRoute>
- *   <DashboardPage />
- * </ProtectedRoute>
+ * import type { ReactNode } from 'react';
+ * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ * import { AuthProvider, ProtectedRoute, type AuthAdapter } from '@alneas/appkit-react/tools/auth';
  *
- * // 特定ロールのみ
- * <ProtectedRoute roles={['admin']} unauthorizedPath="/403">
- *   <AdminPage />
- * </ProtectedRoute>
- *
- * // カスタム条件
- * <ProtectedRoute
- *   condition={(profile) => profile?.plan === 'premium'}
- *   unauthorizedPath="/upgrade"
- * >
- *   <PremiumPage />
- * </ProtectedRoute>
+ * function Content() { return <ProtectedRoute><span>Account</span></ProtectedRoute>; }
+ * export function Example({ adapter, queryClient }: { adapter: AuthAdapter; queryClient: QueryClient }) {
+ *   return <QueryClientProvider client={queryClient}><AuthProvider adapter={adapter}><Content /></AuthProvider></QueryClientProvider>;
+ * }
  * ```
  */
 export function ProtectedRoute<T extends BaseProfile = BaseProfile>({
@@ -169,46 +175,55 @@ export function ProtectedRoute<T extends BaseProfile = BaseProfile>({
 }
 
 /**
- * ロールベースの表示制御フック
+ * Conditional display settings; see ShowFor for usage.
  *
- * @example
- * ```tsx
- * function MyComponent() {
- *   const { hasRole, hasAnyRole } = useRoleCheck();
+ * @typeParam T - Profile shape extending BaseProfile; defaults to BaseProfile.
  *
- *   return (
- *     <div>
- *       {hasRole('admin') && <AdminPanel />}
- *       {hasAnyRole(['admin', 'manager']) && <ManageButton />}
- *     </div>
- *   );
- * }
- * ```
- */
-/**
- * 条件付き表示コンポーネント
- *
- * @example
- * ```tsx
- * <ShowFor roles={['admin']}>
- *   <AdminOnlyContent />
- * </ShowFor>
- *
- * <ShowFor condition={(profile) => profile?.plan === 'premium'}>
- *   <PremiumContent />
- * </ShowFor>
- * ```
+ * @see ShowFor for the canonical usage example.
  */
 export interface ShowForProps<T extends BaseProfile = BaseProfile> {
+  /**
+   * Content to render when all supplied checks pass.
+   */
   children: React.ReactNode;
+  /**
+   * Any one role must match; omission or empty array imposes no restriction.
+   */
   roles?: string[];
+  /**
+   * Profile role property; defaults to role.
+   */
   roleField?: keyof T;
+  /**
+   * Optional synchronous predicate receiving the current profile or null.
+   */
   condition?: (profile: T | null) => boolean;
+  /**
+   * Content when a check fails; defaults to null.
+   */
   fallback?: React.ReactNode;
 }
 
 /**
- * ユーザーのロールやカスタム条件に基づいて、子要素の表示・非表示を切り替える条件付き表示コンポーネント。
+ * Conditionally displays children using profile roles and an optional predicate.
+ *
+ * @typeParam T - Profile shape extending BaseProfile; defaults to BaseProfile.
+ *
+ * @param props - Role checks, profile predicate, children and optional fallback.
+ *
+ * @returns Children when checks pass; otherwise fallback, defaulting to null.
+ *
+ * @throws Predicate errors propagate from render.
+ *
+ * @remarks UserProfileProvider supplies profile data but is optional; without it profile
+ * is null. With no restrictions children render even without a profile. Does not redirect,
+ * wait for loading, verify authentication or enforce backend access. No CSS is required.
+ *
+ * @example
+ * ```tsx
+ * import { ShowFor } from '@alneas/appkit-react/tools/auth';
+ * export function RoleLabel() { return <ShowFor roles={['admin']}><span>Admin controls</span></ShowFor>; }
+ * ```
  */
 export function ShowFor<T extends BaseProfile = BaseProfile>({
   children,

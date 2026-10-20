@@ -1,6 +1,22 @@
 import type { GanttDependency, GanttPlanningTask } from './types';
 
-/** Validate a dependency DAG and return stable topological order and incoming edges. */
+/**
+ * Validate a dependency DAG and return stable topological order and incoming edges.
+ *
+ * @param tasks - Task records with unique IDs and parent relationships identifying summaries.
+ * @param dependencies - Unique supported leaf-task links with integer lags and existing endpoints.
+ * @returns Stable topological task IDs and incoming dependencies grouped by successor ID; empty input gives empty collections.
+ * @throws Throws duplicate IDs, missing endpoints, summary dependencies, unsupported link types/lags or cycles.
+ *
+ * @example
+ * ```typescript
+ * import { graph } from '@alneas/appkit-core/graph/planning/graph';
+ *
+ * const tasks = [{ id: 'a', created_at: '2026-10-20', durationDays: 2 }];
+ * const dependencies: never[] = [];
+ * console.log(graph(tasks, dependencies));
+ * ```
+ */
 export function graph(tasks: GanttPlanningTask[], dependencies: GanttDependency[]) {
   const taskMap = new Map(tasks.map((task) => [task.id, task]));
   if (taskMap.size !== tasks.length) throw new Error('Task IDs must be unique.');
@@ -36,5 +52,9 @@ export function graph(tasks: GanttPlanningTask[], dependencies: GanttDependency[
     }
   }
   if (order.length !== tasks.length) throw new Error('The dependency graph contains a cycle.');
-  return { order, incoming };
+  return {
+    /** Task IDs in stable topological order, including summary tasks. */
+    order,
+    /** Incoming dependencies keyed by successor ID; tasks without incoming links have no entry. */
+    incoming };
 }

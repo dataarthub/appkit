@@ -1,51 +1,144 @@
 import { createContext, useContext } from 'react';
 import type { AuthAdapter, User } from './types';
 
+/**
+ * Current display authentication state; see useAuth for provider setup.
+ *
+ * @see useAuth for the canonical usage example.
+ */
 export interface AuthState {
+  /**
+   * Current display user or null; optimistic display is not proof of a verified session.
+   */
   user: User | null;
+  /**
+   * True during initial hydration/query loading or tracked login/register/logout/OAuth work.
+   */
   isLoading: boolean;
+  /**
+   * Last tracked action error or session-query error; null when none is present.
+   */
   error: Error | null;
 }
 
 /**
- * 認証コンテキストの値
+ * Authentication state and adapter-backed actions exposed by AuthProvider.
  *
- * AuthProvider 配下のコンポーネントで useAuth() を通じて取得できます。
- * アダプターが対応していないオプショナルメソッドは undefined になります。
+ * @remarks Optional adapter capabilities are undefined when unsupported.
+ *
+ * @see useAuth for consumption; see AuthAdapter for argument/result contracts.
  */
 export interface AuthContextValue extends AuthState {
-  /** セッションが裏で再検証され、確定した状態か。`optimisticSession` 無効時は常に true */
+    /**
+     * Whether a session query has fetched without placeholder data; false before verification even when optimistic caching is disabled.
+     */
   isSessionVerified?: boolean;
-  /** 再検証によって「未ログイン」が確定しているか。`optimisticSession` 無効時は false */
+    /**
+     * Whether backend verification completed with user null; independent of whether optimistic caching is enabled.
+     */
   isLoggedOutKnown?: boolean;
-  /** 楽観セッションキャッシュを利用中か */
+    /**
+     * Whether the provider enabled optimistic display caching.
+     */
   optimisticSession?: boolean;
-  /** メール/パスワードでログイン */
+    /**
+     * Sign in through the adapter; see AuthAdapter.login.
+     *
+     * @param email - Account email.
+     *
+     * @param password - Account password.
+     *
+     * @returns Signed-in user; adapter failures reject.
+     */
   login: AuthAdapter['login'];
-  /** 新規ユーザー登録 */
+    /**
+     * Register through the adapter; see AuthAdapter.register.
+     *
+     * @param email - New account email.
+     *
+     * @param password - New account password.
+     *
+     * @param data - Optional display name.
+     *
+     * @returns Registered user; adapter failures reject.
+     */
   register: AuthAdapter['register'];
-  /** ログアウト */
+    /**
+     * Sign out through the adapter; see AuthAdapter.logout.
+     *
+     * @returns No value after adapter sign-out; adapter failures reject.
+     */
   logout: AuthAdapter['logout'];
-  /** パスワードリセットメール送信 */
+    /**
+     * Request a reset through the adapter; see AuthAdapter.resetPassword.
+     *
+     * @param email - Account email.
+     *
+     * @returns No value after the adapter accepts the reset request; failures reject.
+     */
   resetPassword: AuthAdapter['resetPassword'];
-  /** メールアドレス変更 */
+    /**
+     * Change email through the adapter; see AuthAdapter.updateEmail.
+     *
+     * @param email - Replacement email.
+     *
+     * @returns No value after adapter completion; failures reject.
+     */
   updateEmail: AuthAdapter['updateEmail'];
-  /** パスワード変更 */
+    /**
+     * Change password through the adapter; see AuthAdapter.updatePassword.
+     *
+     * @param password - Replacement password.
+     *
+     * @returns No value after adapter completion; failures reject.
+     */
   updatePassword: AuthAdapter['updatePassword'];
-  /** 再認証（パスワード/メール変更前に必要、アダプター対応時のみ） */
+    /**
+     * Optional adapter reauthentication capability; see AuthAdapter.reauthenticate.
+     */
   reauthenticate?: AuthAdapter['reauthenticate'];
-  /** メールアドレス確認メール送信（アダプター対応時のみ） */
+    /**
+     * Optional verification-email capability; see AuthAdapter.sendVerificationEmail.
+     */
   sendVerificationEmail?: AuthAdapter['sendVerificationEmail'];
-  /** 認証トークン取得（API 連携用、アダプター対応時のみ） */
+    /**
+     * Optional token capability; see AuthAdapter.getToken.
+     */
   getToken?: AuthAdapter['getToken'];
-  /** OAuth プロバイダーでログイン（アダプター対応時のみ） */
+    /**
+     * Optional OAuth capability; see AuthAdapter.loginWithProvider.
+     */
   loginWithProvider?: AuthAdapter['loginWithProvider'];
 }
 
+/**
+ * Nullable React authentication context; AuthProvider owns its populated value.
+ *
+ * @see useAuth for supported consumption and missing-provider checks.
+ */
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
- * 現在の認証状態およびログイン・ログアウト等の認証操作関数を提供するReactフック。
+ * Reads authentication state and adapter actions from the nearest AuthProvider.
+ *
+ * @returns Current display state and provider actions; optional capabilities can be undefined.
+ *
+ * @throws Error when used outside AuthProvider.
+ *
+ * @remarks Requires AuthProvider inside QueryClientProvider; no CSS is required by the hook.
+ * Actions can reject with adapter errors. Backend authorization remains host-owned.
+ *
+ * @example
+ * ```tsx
+ * import type { ReactNode } from 'react';
+ * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ * import { AuthProvider, useAuth, type AuthAdapter } from '@alneas/appkit-react/tools/auth';
+ *
+ * function Content() { const { user } = useAuth(); return <span>{user?.email ?? 'Signed out'}</span>; }
+ * export function Example({ adapter, queryClient }: { adapter: AuthAdapter; queryClient: QueryClient }) {
+ *   return <QueryClientProvider client={queryClient}><AuthProvider adapter={adapter}><Content /></AuthProvider></QueryClientProvider>;
+ * }
+ * ```
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);

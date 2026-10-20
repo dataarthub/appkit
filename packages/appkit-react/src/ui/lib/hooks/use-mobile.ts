@@ -3,10 +3,18 @@ import * as React from 'react';
 const MOBILE_BREAKPOINT = 768;
 
 /**
- * 現在の画面幅がモバイルサイズ（768px 未満）であるかどうかを判定し、動的に変更を追従するカスタムフック。
- * `useSyncExternalStore` を使用して、再レンダリングの最適化とハイドレーションの整合性を確保します。
+ * Subscribes to whether the browser viewport is narrower than 768 CSS pixels.
  *
- * @returns モバイルサイズであれば true、それ以外は false
+ * @returns False on the server; on the client, window.innerWidth < 768.
+ *
+ * @remarks Uses a max-width:767px media-query listener and removes it on cleanup. Requires
+ * window.matchMedia in the browser; no provider or CSS import is required.
+ *
+ * @example
+ * ```tsx
+ * import { useIsMobile } from '@alneas/appkit-react/ui/hooks';
+ * export function LayoutHint() { return <span>{useIsMobile() ? 'Compact' : 'Wide'}</span>; }
+ * ```
  */
 export function useIsMobile() {
   return React.useSyncExternalStore(

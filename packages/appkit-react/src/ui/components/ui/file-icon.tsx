@@ -12,19 +12,47 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
+/**
+ * Selects folder treatment or MIME-based file icon treatment.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see FileIcon
+ */
 export type FileIconKind = 'file' | 'folder';
 
+/**
+ * Visual classification inputs for FileIcon; no file bytes are inspected.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see FileIcon
+ */
 export interface FileIconProps {
-  /** 種類（ファイルまたはフォルダ） */
+  /**
+   * folder always renders the folder icon; file selects by contentType.
+   */
   kind: FileIconKind;
-  /** MIMEタイプ */
+  /**
+   * Optional MIME text used for case-insensitive substring matching; missing/unmatched uses a generic file icon.
+   */
   contentType?: string;
-  /** クラス名 */
+  /**
+   * Additional classes merged with wrapper styling; see the component for the targeted element.
+   */
   className?: string;
 }
 
 /**
- * ファイルの種類やMIMEタイプに応じたアイコンを表示するコンポーネント
+ * Selects a folder or file-type icon using a lowercase MIME substring match.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered FileIcon composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. kind=folder takes precedence over contentType. Missing or unrecognized MIME types use the generic file icon. This is visual classification only: it does not validate file contents, read a file or enforce upload restrictions.
+ * @example
+ * ```tsx
+ * import { FileIcon } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FileIcon kind="file" contentType="application/pdf" className="size-5" />);
+ * }
+ * ```
  */
 export function FileIcon({ kind, contentType, className }: FileIconProps) {
   if (kind === 'folder') {

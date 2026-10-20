@@ -7,30 +7,55 @@ import {
   ThemeProviderContext,
 } from './theme-context';
 
+/**
+ * Initial theme settings and browser storage keys; see ThemeProvider for usage.
+ * @see ThemeProvider for the canonical usage example.
+ */
 export type ThemeProviderProps = {
+  /** Descendants that consume theme state. */
   children: React.ReactNode;
+  /** Initial mode when storage is empty; defaults to 'system'. */
   defaultTheme?: Theme;
+  /** Initial palette when storage is empty; defaults to 'default'. */
   defaultColorTheme?: ColorTheme;
+  /** Initial density when storage is empty; defaults to 'normal'. */
   defaultSpacingTheme?: SpacingTheme;
+  /** Initial custom CSS variable values; subsequent prop changes do not replace state. */
   customColors?: CustomThemeColors;
+  /** Mode localStorage key; defaults to 'vite-ui-theme'. */
   storageKey?: string;
+  /** Palette localStorage key; defaults to 'vite-ui-color-theme'. */
   colorThemeStorageKey?: string;
+  /** Density localStorage key; defaults to 'vite-ui-spacing-theme'. */
   spacingThemeStorageKey?: string;
 };
 
 /**
- * テーマプロバイダーコンポーネント
+ * Provides browser theme state and applies mode, palette and density to documentElement.
  *
- * ダークモード、カラーテーマ、スペーシングテーマを管理。
- * アプリケーションのルートで使用。
+ * @param props - Children, initial settings, custom CSS variables and storage keys.
+ *
+ * @returns Theme context for descendants.
+ *
+ * @throws Browser localStorage access failures during initialization or setter calls propagate.
+ *
+ * @remarks Import @alneas/appkit-react/styles in the host for Appkit theme styling.
+ * No query/auth provider is required. Stored values override defaults on the client;
+ * server rendering uses defaults, so stored preferences can differ at hydration.
+ * Effects update root classes and custom CSS variables after mount. System mode listens
+ * for media-query changes and removes that listener on cleanup. Custom CSS variables
+ * are removed on cleanup; root theme classes remain. Mode/palette/density setters persist
+ * to localStorage; custom colors are in-memory state. Coordinate multiple providers
+ * because they write the same document root. Stored values are cast without validation.
  *
  * @example
  * ```tsx
- * import { ThemeProvider } from "../..";
- *
- * <ThemeProvider defaultTheme="system" defaultColorTheme="blue">
- *   <App />
- * </ThemeProvider>
+ * import type { ReactNode } from 'react';
+ * import '@alneas/appkit-react/styles';
+ * import { ThemeProvider } from '@alneas/appkit-react/ui/theme';
+ * export function ThemeRoot({ children }: { children: ReactNode }) {
+ *   return <ThemeProvider defaultTheme="system" defaultColorTheme="blue">{children}</ThemeProvider>;
+ * }
  * ```
  */
 export function ThemeProvider({
@@ -169,17 +194,3 @@ export function ThemeProvider({
     </ThemeProviderContext.Provider>
   );
 }
-
-/**
- * テーマコンテキストを取得するフック
- *
- * テーマモード、カラーテーマ、スペーシングテーマの
- * 取得と変更が可能。
- *
- * @returns テーマ状態と設定関数
- *
- * @example
- * ```tsx
- * const { theme, setTheme, colorTheme, setColorTheme } = useTheme();
- * ```
- */

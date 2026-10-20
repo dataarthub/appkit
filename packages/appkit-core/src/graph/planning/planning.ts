@@ -24,13 +24,20 @@ import { exceedsCapacity, GanttCapacityIndex } from './capacity-index';
  * over-capacity demand and exhausted search bounds throw without mutating inputs.
  * CPM is dependency-only BEFORE leveling; capacity delays are reported separately.
  *
+ * @param tasks - Task records with unique IDs and release dates; inputs are not mutated.
+ * @param dependencies - Unique directed leaf-task links using FS/SS/FF/SF and integer lagDays.
+ * @param options - Optional working calendar, resource leveling and search bounds; defaults to {} for the planner. Omitting it from scheduleGanttTasks preserves legacy calendar-day/time-of-day behavior.
+ * @returns Scheduled tasks, dependency-only CPM, capacity delays and project finish; empty leaf input has empty diagnostics and null finish.
+ * @throws Throws invalid graph/date/calendar/duration inputs or exhausted search bounds; the working-day planner also rejects infeasible resource demand.
+ * @typeParam T - Consumer task shape extending the required scheduling fields; extra fields are preserved.
+ *
  * @example
- * ```ts
- * import { planGanttTasks } from "./";
- * const result = planGanttTasks(tasks, dependencies, {
- *   calendar: { workingWeekdays: [1, 2, 3, 4, 5], holidays: ['2026-09-21'] },
- *   resourceLeveling: { enabled: true },
- * });
+ * ```typescript
+ * import { planGanttTasks } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', created_at: '2026-10-20', durationDays: 2 }];
+ * const dependencies: never[] = [];
+ * console.log(planGanttTasks(tasks, dependencies, { calendar: {} }));
  * ```
  */
 export function planGanttTasks<T extends GanttPlanningTask>(
@@ -255,7 +262,24 @@ export function planGanttTasks<T extends GanttPlanningTask>(
   };
 }
 
-/** Dependency-only whole-day CPM; ignores resource capacities. Input starts are release constraints. */
+/**
+ * Dependency-only whole-day CPM; ignores resource capacities. Input starts are release constraints.
+ *
+ * @param tasks - Task records with unique IDs and release dates; inputs are not mutated.
+ * @param dependencies - Unique directed leaf-task links using FS/SS/FF/SF and integer lagDays.
+ * @param options - Optional working calendar, resource leveling and search bounds; defaults to {} for the planner. Omitting it from scheduleGanttTasks preserves legacy calendar-day/time-of-day behavior.
+ * @returns Dependency-only CPM before leveling; empty leaf input has null projectFinish.
+ * @throws Throws invalid graph/date/calendar/duration inputs or exhausted search bounds; the working-day planner also rejects infeasible resource demand.
+ *
+ * @example
+ * ```typescript
+ * import { analyzeGanttCriticalPath } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', created_at: '2026-10-20', durationDays: 2 }];
+ * const dependencies: never[] = [];
+ * console.log(analyzeGanttCriticalPath(tasks, dependencies));
+ * ```
+ */
 export function analyzeGanttCriticalPath(
   tasks: GanttPlanningTask[],
   dependencies: GanttDependency[],

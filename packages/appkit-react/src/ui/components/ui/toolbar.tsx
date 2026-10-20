@@ -7,7 +7,19 @@ import { Toggle as TogglePrimitive } from '@base-ui/react/toggle';
 import { cn } from '../../lib/utils';
 
 /**
- * ツールバーのルートコンテナ。
+ * Coordinates keyboard navigation for a horizontal action toolbar.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Toolbar composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose buttons/links/groups under Toolbar and toggle items under ToolbarToggleGroup. Base UI owns focus navigation and pressed selection. Callbacks and navigation effects remain host-owned.
+ * @example
+ * ```tsx
+ * import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSeparator, ToolbarLink, ToolbarToggleGroup, ToolbarToggleItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Toolbar aria-label="Editor"><ToolbarGroup><ToolbarButton>Save</ToolbarButton><ToolbarLink href="/help">Help</ToolbarLink></ToolbarGroup><ToolbarSeparator /><ToolbarToggleGroup defaultValue={["bold"]}><ToolbarToggleItem value="bold" aria-label="Bold">B</ToolbarToggleItem></ToolbarToggleGroup></Toolbar>);
+ * }
+ * ```
  */
 function Toolbar({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) {
   return (
@@ -23,7 +35,19 @@ function Toolbar({ className, ...props }: React.ComponentProps<typeof ToolbarPri
 }
 
 /**
- * ツールバー内のアイテムをグループ化するためのコンポーネント。
+ * Lays out a related group of toolbar controls.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToolbarGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose buttons/links/groups under Toolbar and toggle items under ToolbarToggleGroup. Base UI owns focus navigation and pressed selection. Callbacks and navigation effects remain host-owned.
+ * @example
+ * ```tsx
+ * import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSeparator, ToolbarLink, ToolbarToggleGroup, ToolbarToggleItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Toolbar aria-label="Editor"><ToolbarGroup><ToolbarButton>Save</ToolbarButton><ToolbarLink href="/help">Help</ToolbarLink></ToolbarGroup><ToolbarSeparator /><ToolbarToggleGroup defaultValue={["bold"]}><ToolbarToggleItem value="bold" aria-label="Bold">B</ToolbarToggleItem></ToolbarToggleGroup></Toolbar>);
+ * }
+ * ```
  */
 function ToolbarGroup({
   className,
@@ -39,7 +63,19 @@ function ToolbarGroup({
 }
 
 /**
- * ツールバー内に配置されるアクション実行用ボタン。
+ * Renders an action button participating in toolbar focus navigation.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToolbarButton composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose buttons/links/groups under Toolbar and toggle items under ToolbarToggleGroup. Base UI owns focus navigation and pressed selection. Callbacks and navigation effects remain host-owned.
+ * @example
+ * ```tsx
+ * import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSeparator, ToolbarLink, ToolbarToggleGroup, ToolbarToggleItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Toolbar aria-label="Editor"><ToolbarGroup><ToolbarButton>Save</ToolbarButton><ToolbarLink href="/help">Help</ToolbarLink></ToolbarGroup><ToolbarSeparator /><ToolbarToggleGroup defaultValue={["bold"]}><ToolbarToggleItem value="bold" aria-label="Bold">B</ToolbarToggleItem></ToolbarToggleGroup></Toolbar>);
+ * }
+ * ```
  */
 function ToolbarButton({
   className,
@@ -58,7 +94,19 @@ function ToolbarButton({
 }
 
 /**
- * ツールバー内のグループやアイテム同士を区切るためのセパレーター。
+ * Separates toolbar control groups with a vertical rule.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToolbarSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose buttons/links/groups under Toolbar and toggle items under ToolbarToggleGroup. Base UI owns focus navigation and pressed selection. Callbacks and navigation effects remain host-owned.
+ * @example
+ * ```tsx
+ * import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSeparator, ToolbarLink, ToolbarToggleGroup, ToolbarToggleItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Toolbar aria-label="Editor"><ToolbarGroup><ToolbarButton>Save</ToolbarButton><ToolbarLink href="/help">Help</ToolbarLink></ToolbarGroup><ToolbarSeparator /><ToolbarToggleGroup defaultValue={["bold"]}><ToolbarToggleItem value="bold" aria-label="Bold">B</ToolbarToggleItem></ToolbarToggleGroup></Toolbar>);
+ * }
+ * ```
  */
 function ToolbarSeparator({
   className,
@@ -74,7 +122,19 @@ function ToolbarSeparator({
 }
 
 /**
- * ツールバー内に配置されるナビゲーション用のリンク。
+ * Renders a navigation link participating in toolbar focus navigation.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToolbarLink composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose buttons/links/groups under Toolbar and toggle items under ToolbarToggleGroup. Base UI owns focus navigation and pressed selection. Callbacks and navigation effects remain host-owned.
+ * @example
+ * ```tsx
+ * import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSeparator, ToolbarLink, ToolbarToggleGroup, ToolbarToggleItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Toolbar aria-label="Editor"><ToolbarGroup><ToolbarButton>Save</ToolbarButton><ToolbarLink href="/help">Help</ToolbarLink></ToolbarGroup><ToolbarSeparator /><ToolbarToggleGroup defaultValue={["bold"]}><ToolbarToggleItem value="bold" aria-label="Bold">B</ToolbarToggleItem></ToolbarToggleGroup></Toolbar>);
+ * }
+ * ```
  */
 function ToolbarLink({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Link>) {
   return (
@@ -90,12 +150,30 @@ function ToolbarLink({ className, ...props }: React.ComponentProps<typeof Toolba
 }
 
 /**
- * オン・オフの状態を切り替えるトグル式のツールバーアイテム。
+ * Renders one value-bearing Base UI toggle within a toolbar toggle group.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToolbarToggleItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose buttons/links/groups under Toolbar and toggle items under ToolbarToggleGroup. Base UI owns focus navigation and pressed selection. Callbacks and navigation effects remain host-owned.
+ * @example
+ * ```tsx
+ * import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSeparator, ToolbarLink, ToolbarToggleGroup, ToolbarToggleItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Toolbar aria-label="Editor"><ToolbarGroup><ToolbarButton>Save</ToolbarButton><ToolbarLink href="/help">Help</ToolbarLink></ToolbarGroup><ToolbarSeparator /><ToolbarToggleGroup defaultValue={["bold"]}><ToolbarToggleItem value="bold" aria-label="Bold">B</ToolbarToggleItem></ToolbarToggleGroup></Toolbar>);
+ * }
+ * ```
  */
 function ToolbarToggleItem({
   className,
   ...props
-}: React.ComponentProps<typeof TogglePrimitive> & { value: string }) {
+}: React.ComponentProps<typeof TogglePrimitive> & { /**
+ * Identity for this choice within the surrounding group; provide a distinct stable string.
+ */
+/**
+ * Identity for this choice within the surrounding group; provide a distinct stable string.
+ */
+value: string }) {
   return (
     <TogglePrimitive
       data-slot='toolbar-toggle-item'
@@ -109,7 +187,19 @@ function ToolbarToggleItem({
 }
 
 /**
- * 複数のトグルアイテムをまとめて選択状態を管理するグループコンポーネント。
+ * Coordinates a value collection of toggle buttons within a toolbar.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered ToolbarToggleGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose buttons/links/groups under Toolbar and toggle items under ToolbarToggleGroup. Base UI owns focus navigation and pressed selection. Callbacks and navigation effects remain host-owned.
+ * @example
+ * ```tsx
+ * import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSeparator, ToolbarLink, ToolbarToggleGroup, ToolbarToggleItem } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Toolbar aria-label="Editor"><ToolbarGroup><ToolbarButton>Save</ToolbarButton><ToolbarLink href="/help">Help</ToolbarLink></ToolbarGroup><ToolbarSeparator /><ToolbarToggleGroup defaultValue={["bold"]}><ToolbarToggleItem value="bold" aria-label="Bold">B</ToolbarToggleItem></ToolbarToggleGroup></Toolbar>);
+ * }
+ * ```
  */
 function ToolbarToggleGroup({
   className,

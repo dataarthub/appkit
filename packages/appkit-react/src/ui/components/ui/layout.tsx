@@ -1,30 +1,64 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 
+/**
+ * Viewport regions and flex/scroll options for Layout.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see Layout
+ */
 export interface LayoutProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Fixed header content */
+  /**
+   * Content in the non-scrolling top flex region; omitted means no header.
+   */
   header?: React.ReactNode;
-  /** Fixed footer content */
+  /**
+   * Content in the non-scrolling bottom flex region; omitted means no footer.
+   */
   footer?: React.ReactNode;
-  /** Left sidebar content */
+  /**
+   * Sidebar element rendered directly; it controls its own width and collapse behavior.
+   */
   leftSidebar?: React.ReactNode;
-  /** Right pane content */
+  /**
+   * Optional content in the right aside, visible when isRightPaneVisible is true.
+   */
   rightPane?: React.ReactNode;
-  /** Whether the left sidebar is collapsed (affects width helper if used, though usually controlled by the sidebar component itself) */
+  /**
+   * Compatibility flag accepted but ignored by Layout; it does not change sidebar width.
+   */
   isLeftSidebarCollapsed?: boolean;
-  /** Whether the right pane is visible */
+  /**
+   * Whether rightPane is mounted; defaults to true.
+   */
   isRightPaneVisible?: boolean;
-  /** Whether the main area is scrollable (overflow-y-auto). Default: true */
+  /**
+   * Enables overflow-y-auto on the main area; defaults to true.
+   */
   scrollable?: boolean;
-  /** Whether the main area text is selectable. Default: true */
+  /**
+   * Allows main-area text selection; defaults to true, false adds select-none.
+   */
   selectable?: boolean;
-  /** Position of the header. 'top' (default) puts sidebar below header. 'right-of-sidebar' puts header to the right of sidebar. */
+  /**
+   * top places header above sidebar; right-of-sidebar places it beside sidebar. Defaults to top.
+   */
   headerPosition?: 'top' | 'right-of-sidebar';
 }
 
 /**
- * A flexible layout component with fixed header/footer and growing main area.
- * Uses Flexbox for layout (h-screen, flex-col, flex-1) rather than sticky positioning.
+ * Divides the viewport into fixed flex header/footer, a growing main area and optional side panes.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling. Wrapper defaults: _isLeftSidebarCollapsed=false, isRightPaneVisible=true, scrollable=true, selectable=true, headerPosition='top'.
+ * @returns The rendered Layout composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The root uses h-screen/w-screen and clips overflow. scrollable and selectable default to true; the right pane overlays content below lg and sits in normal layout from lg. headerPosition defaults to top; right-of-sidebar moves header/footer beside the sidebar. isLeftSidebarCollapsed is accepted but ignored; the supplied sidebar owns its own collapse behavior. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Layout } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Layout header={<header>Project</header>} footer={<footer>Status</footer>} leftSidebar={<nav>Navigation</nav>} rightPane={<aside>Details</aside>}><p>Main content</p></Layout>);
+ * }
+ * ```
  */
 export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
   (

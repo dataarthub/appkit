@@ -10,64 +10,61 @@ import {
   type SessionCacheOptions,
 } from './session-cache';
 
-/** 楽観セッションキャッシュの設定。`true` はデフォルト TTL で有効化、`false`/省略は無効 */
+/**
+ * Optimistic display-cache setting: true uses seven days; false/omission disables it.
+ * @see AuthProvider for the canonical usage example.
+ */
 export type OptimisticSessionOption = boolean | Omit<SessionCacheOptions, 'key'>;
 
+/**
+ * Inputs to AuthProvider; see the component for provider setup.
+ * @see AuthProvider for the canonical usage example.
+ */
 interface AuthProviderProps {
+  /** Descendants that consume authentication context. */
   children: React.ReactNode;
+  /** Stable host-owned authentication backend adapter. */
   adapter: AuthAdapter;
-  /**
-   * 楽観セッションキャッシュ（stale-while-revalidate）を有効化します。
-   *
-   * 有効時は、前回のセッション検証結果を localStorage に保持し、リロード時に即座に
-   * 最後の状態で描画します。裏で whoami 等を再検証し、クッキーが無効なら即座に
-   * ログイン画面へフォールバックします。これにより「認証確認待ち」による画面ブロック
-   * （特に初期ロード時のログイン画面遅延）を排除できます。
-   *
-   * 保存するのは表示用プロフィールのみで、トークン等の機密は含みません。未指定時は無効。
-   *
-   * @example
-   * ```tsx
-   * <AuthProvider adapter={adapter} optimisticSession />
-   * // または TTL を指定
-   * <AuthProvider adapter={adapter} optimisticSession={{ ttl: 1000 * 60 * 60 * 24 }} />
-   * ```
-   */
+  /** Enable browser display snapshots with an optional TTL in milliseconds; defaults to disabled. */
   optimisticSession?: OptimisticSessionOption;
 }
 
 /**
- * Authentication Provider Component
+ * Provides adapter-backed authentication state and actions to descendants.
  *
- * Provides authentication context to child components with SSR support.
+ * @param props - Children, stable host adapter and optional optimistic display caching.
  *
- * Each provider/adapter has an isolated session key under `['session']`. On initial verification
- * and principal changes, application queries in the shared QueryClient are cancelled and removed,
- * and children remount to discard observer/component state. Same-user refreshes preserve them.
- * Use separate QueryClients for independent authentication domains. Data keys remain a cache
- * mechanism, not authorization; enforce access in the backend. Optimistic storage reuse across
- * reloads requires an explicit, non-secret `adapter.cacheScope`.
+ * @returns Authentication context around children, remounted on principal transitions.
  *
- * **SSR Behavior:**
- * - During SSR and initial client render, auth state is `{ user: null, isLoading: true }`
- * - Auth listener is only activated after client-side mount
- * - This prevents hydration mismatches between server and client
+ * @throws When rendered without an outer TanStack QueryClientProvider.
  *
- * **Optimistic session:**
- * - `optimisticSession` が有効で、かつ直近のセッション状態が localStorage にあれば、
- *    `isLoading` は即 `false` となり `user` は最後の値（または null）で描画されます。
- *   その際 `isSessionVerified` は `false` となり、裏での再検証が完了するまで機微な
- *   画面をガードできます。
+ * @remarks Requires React and @tanstack/react-query; no CSS is required. Each mounted
+ * provider scopes its session query. Initial verification and principal changes cancel
+ * and remove application queries in the shared QueryClient and remount children;
+ * same-user refreshes preserve them. Use separate QueryClients for independent auth domains.
+ * SSR and hydration begin with user null and isLoading true. Subscriptions start after
+ * mount and are disposed on cleanup. With optimisticSession, an unexpired localStorage
+ * snapshot can appear while isSessionVerified remains false; gate sensitive UI on backend
+ * verification. Storage contains the adapter's User display fields, so exclude secrets.
+ * Cross-reload reuse requires an explicit non-secret adapter.cacheScope. Cache separation
+ * is not authorization; the backend must enforce access. Login/register/logout/OAuth
+ * failures reject and are exposed as context errors. Other adapter actions forward
+ * their failures to the caller; session reads use TanStack Query error handling.
  *
  * @example
  * ```tsx
- * import { AuthProvider, BetterAuthAdapter } from '@alneas/appkit-react/tools/auth';
- *
- * const adapter = new BetterAuthAdapter(authClient);
- *
- * <AuthProvider adapter={adapter} optimisticSession>
- *   <App />
- * </AuthProvider>
+ * import type { ReactNode } from 'react';
+ * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ * import { AuthProvider, type AuthAdapter } from '@alneas/appkit-react/tools/auth';
+ * export function AuthRoot({ adapter, queryClient, children }: {
+ *   adapter: AuthAdapter; queryClient: QueryClient; children: ReactNode;
+ * }) {
+ *   return (
+ *     <QueryClientProvider client={queryClient}>
+ *       <AuthProvider adapter={adapter} optimisticSession>{children}</AuthProvider>
+ *     </QueryClientProvider>
+ *   );
+ * }
  * ```
  */
 export function AuthProvider({ children, adapter, optimisticSession }: AuthProviderProps) {
@@ -298,11 +295,11 @@ function ScopedAuthProvider({
         user,
         isLoading,
         error,
-        /** セッションが裏で再検証され、確定した状態か。楽観表示中は false */
+        /** Whether backend verification completed; false during optimistic display. */
         isSessionVerified,
-        /** 再検証によって「未ログイン」が確定しているか */
+        /** Whether verification confirmed a logged-out state. */
         isLoggedOutKnown,
-        /** 楽観キャッシュを利用中か */
+        /** Whether optimistic display caching is enabled. */
         optimisticSession: !!sessionCache,
         login,
         register,

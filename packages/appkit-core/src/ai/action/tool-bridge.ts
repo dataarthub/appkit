@@ -39,17 +39,32 @@ const MESSAGES: Record<ActionToolErrorCode, string> = {
  * 64 levels deep, 10000 nodes and 1000000 serialized characters per value.
  * Creating a bridge does not expose data externally or contact an AI service.
  *
+ * @param registry - Application registry whose current registrations are checked at each call.
+ * @param options - Explicit tool bindings and optional positive safe-integer maxCalls (default 1000).
+ * @returns An in-memory bridge with list/execute/close; close suppresses future/in-flight results without undoing effects.
+ * @throws Throws invalid/duplicate names, invalid call limits/bindings or schema/snapshot compilation errors.
+ *
  * @example
- * ```ts
- * import { createActionToolBridge } from "./";
- * const bridge = createActionToolBridge(registry, { tools: [{
- *   kind: 'action', actionId: 'table.filter', name: 'filter_table',
- *   description: 'Filter the visible table',
- *   inputSchema: { type: 'object', properties: { query: { type: 'string' } },
- *     required: ['query'], additionalProperties: false },
- *   mapOutput: () => ({ updated: true }),
- * }] });
- * const result = await bridge.execute({ callId: 'call-1', name: 'filter_table', arguments: { query: 'Tokyo' } });
+ * ```typescript
+ * import { ActionRegistry, defineActionTool, createActionToolBridge } from '@alneas/appkit-core/ai/action';
+ *
+ * const registry = new ActionRegistry();
+ * const echo = defineActionTool<{ text: string }, { text: string }>({
+ *   id: 'echo', name: 'echo_text', description: 'Return the supplied text',
+ *   inputSchema: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'], additionalProperties: false },
+ *   parseInput: input => typeof input.text === 'string'
+ *     ? { ok: true, data: { text: input.text } } : { ok: false, error: 'Text required' },
+ *   handler: input => ({ text: input.text }),
+ *   mapOutput: value => value,
+ * });
+ * const unregister = registry.registerAction(echo.action);
+ * const bridge = createActionToolBridge(registry, { tools: [echo.tool] });
+ * try {
+ *   console.log(await bridge.execute({ callId: 'call-1', name: 'echo_text', arguments: { text: 'hello' } }));
+ * } finally {
+ *   bridge.close();
+ *   unregister();
+ * }
  * ```
  */
 export function createActionToolBridge(

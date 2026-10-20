@@ -1,20 +1,54 @@
-/** Civil date; month is zero-based, matching the data-engine HolidayCalendar contract. */
-export interface USCalendarDate { year: number; month: number; day: number }
-/** A federal holiday occurrence. Both dates use YYYY-MM-DD without a timezone. */
+/**
+ * Civil date; month is zero-based, matching the data-engine HolidayCalendar contract.
+ *
+ * @see {@link getUSFederalHolidays} for calendar-mode and selected-date usage.
+ */
+export interface USCalendarDate {
+  /** Gregorian civil year, restricted to 2021–2099 by the calendar provider. */
+  year: number;
+  /** Zero-based month, January 0 through December 11. */
+  month: number;
+  /** One-based valid day within the selected month. */
+  day: number }
+/**
+ * A federal holiday occurrence. Both dates use YYYY-MM-DD without a timezone.
+ *
+ * @see {@link getUSFederalHolidays} for calendar-mode and selected-date usage.
+ */
 export interface USFederalHoliday {
+
+  /** Display name of the federal occurrence or host-supplied closure. */
   name: string;
+
   /** Date selected by the requested calendar mode, contained in the requested year. */
   date: string;
+
   /** Statutory holiday date; may belong to the following year in observed mode. */
   actualDate: string;
 }
-/** An application-selected closure date; used exactly as supplied without automatic shifting. */
-export interface USHolidayAddition { name: string; date: string }
-/** Configure federal observance and explicit application closures; exclusions take precedence. */
+/**
+ * An application-selected closure date; used exactly as supplied without automatic shifting.
+ *
+ * @see {@link getUSFederalHolidays} for calendar-mode and selected-date usage.
+ */
+export interface USHolidayAddition {
+  /** Required nonblank display name for this explicit closure. */
+  name: string;
+  /** Exact YYYY-MM-DD closure date from 2021–2099; no observance shift is applied. */
+  date: string }
+/**
+ * Configure federal observance and explicit application closures; exclusions take precedence.
+ *
+ * @see {@link getUSFederalHolidays} for calendar-mode and selected-date usage.
+ */
 export interface USFederalHolidayOptions {
+
+  /** Apply standard Monday–Friday observance shifts when true (default); false uses statutory dates. */
   observed?: boolean;
+
   /** Additional YYYY-MM-DD closures, such as one-off announcements or company holidays. */
   additionalHolidays?: readonly USHolidayAddition[];
+
   /** Selected YYYY-MM-DD dates to remove, including observed rather than actual dates. */
   excludedDates?: readonly string[];
 }
@@ -74,12 +108,14 @@ function occurrences(year: number): USFederalHoliday[] {
  * This is a planning policy, not a private-employer working-day determination.
  * Source: https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/
  * @param year Calendar year from 2021 through 2099. Future rules can change.
- * @param options Observance mode plus explicit additional or excluded closure dates.
+ * @param options Observance mode plus explicit additional or excluded closure dates; defaults to {}.
  * @returns Fresh date-sorted records whose selected date falls within year.
  * @throws RangeError for unsupported years or invalid override dates; TypeError for unnamed additions.
  * @example
  * import { getUSFederalHolidays } from '@alneas/appkit-core/us/holidays';
  * getUSFederalHolidays(2026).find(day => day.actualDate === '2026-07-04')?.date; // '2026-07-03'
+ *
+ * @remarks Omitted options default to {}: observed=true with no added or excluded dates.
  */
 export function getUSFederalHolidays(year: number, options: USFederalHolidayOptions = {}): USFederalHoliday[] {
   checkYear(year);
@@ -118,7 +154,7 @@ export function usFederalHolidayCalendar({ year, month, day }: USCalendarDate): 
  * Creates a civil-date provider using a snapshot of application calendar overrides.
  * Use this for announced one-off closures or company policy without changing the
  * built-in federal rules. No external service is polled and no announcement is inferred.
- * @param options Observance mode, added closures and excluded dates; exclusions win.
+ * @param options Observance mode, added closures and excluded dates; exclusions win; defaults to {}.
  * @returns A structurally compatible data-engine HolidayCalendar; months are zero-based.
  * @throws RangeError for invalid override dates; TypeError for unnamed additions.
  * @example
@@ -127,6 +163,8 @@ export function usFederalHolidayCalendar({ year, month, day }: USCalendarDate): 
  *   additionalHolidays: [{ date: '2026-12-24', name: 'Company closure' }],
  * });
  * calendar({ year: 2026, month: 11, day: 24 }); // true
+ *
+ * @remarks Omitted options default to {}: observed=true with no added or excluded dates. The returned callback accepts a civil date, returns a boolean synchronously, and rejects invalid dates/years with RangeError.
  */
 export function createUSFederalHolidayCalendar(options: USFederalHolidayOptions = {}): (parts: USCalendarDate) => boolean {
   const policy = snapshot(options);

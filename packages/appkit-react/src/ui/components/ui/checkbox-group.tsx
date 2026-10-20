@@ -6,7 +6,19 @@ import { CheckboxGroup as CheckboxGroupPrimitive } from '@base-ui/react/checkbox
 import { cn } from '../../lib/utils';
 
 /**
- * 複数のチェックボックスをまとめ、グループ内の選択状態を管理するためのコンポーネント。
+ * Coordinates a set of named checkbox values using Base UI group state.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered CheckboxGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Place Checkbox descendants with distinct value strings inside the group. Base UI owns controlled/default selection and callbacks; this wrapper adds only vertical layout.
+ * @example
+ * ```tsx
+ * import { CheckboxGroup, Checkbox } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<CheckboxGroup defaultValue={["review"]} aria-label="Tasks"><Checkbox value="review" aria-label="Review" /><Checkbox value="publish" aria-label="Publish" /></CheckboxGroup>);
+ * }
+ * ```
  */
 function CheckboxGroup({
   className,

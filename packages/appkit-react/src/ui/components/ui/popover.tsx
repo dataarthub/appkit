@@ -6,14 +6,38 @@ import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 import { cn } from '../../lib/utils';
 
 /**
- * ボタンなどの操作によってトリガー付近にフローティング表示されるポップオーバーのルートコンポーネント。
+ * Coordinates open state and interaction context for the popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Popover composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Popover; the underlying primitive owns open state and focus. Content supplies its own portal and positioner. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Popover><PopoverTrigger>Open details</PopoverTrigger><PopoverContent><PopoverTitle>Details</PopoverTitle><PopoverDescription>Project information</PopoverDescription></PopoverContent></Popover>);
+ * }
+ * ```
  */
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
   return <PopoverPrimitive.Root data-slot='popover' {...props} />;
 }
 
 /**
- * ポップオーバーを表示するためのトリガーボタン。
+ * Renders the control that requests opening its popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered PopoverTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Popover; the underlying primitive owns open state and focus. Content supplies its own portal and positioner. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Popover><PopoverTrigger>Open details</PopoverTrigger><PopoverContent><PopoverTitle>Details</PopoverTitle><PopoverDescription>Project information</PopoverDescription></PopoverContent></Popover>);
+ * }
+ * ```
  */
 function PopoverTrigger({
   children,
@@ -29,6 +53,21 @@ function PopoverTrigger({
   );
 }
 
+/**
+ * Portals the popup and its positioning/backdrop composition.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: align='center', alignOffset=0, side='bottom', sideOffset=4.
+ * @returns The rendered PopoverContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Popover; the underlying primitive owns open state and focus. Content supplies its own portal and positioner. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Popover><PopoverTrigger>Open details</PopoverTrigger><PopoverContent><PopoverTitle>Details</PopoverTitle><PopoverDescription>Project information</PopoverDescription></PopoverContent></Popover>);
+ * }
+ * ```
+ */
 const PopoverContent = React.forwardRef<
   HTMLDivElement,
   PopoverPrimitive.Popup.Props &
@@ -61,6 +100,21 @@ const PopoverContent = React.forwardRef<
 );
 PopoverContent.displayName = PopoverPrimitive.Popup.displayName;
 
+/**
+ * Groups popup heading and explanatory content.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered PopoverHeader composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Popover; the underlying primitive owns open state and focus. Content supplies its own portal and positioner. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Popover><PopoverTrigger>Open details</PopoverTrigger><PopoverContent><PopoverTitle>Details</PopoverTitle><PopoverDescription>Project information</PopoverDescription></PopoverContent></Popover>);
+ * }
+ * ```
+ */
 const PopoverHeader = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -73,6 +127,21 @@ const PopoverHeader = React.forwardRef<HTMLDivElement, React.ComponentPropsWitho
 );
 PopoverHeader.displayName = 'PopoverHeader';
 
+/**
+ * Provides the accessible title of the associated popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered PopoverTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Popover; the underlying primitive owns open state and focus. Content supplies its own portal and positioner. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Popover><PopoverTrigger>Open details</PopoverTrigger><PopoverContent><PopoverTitle>Details</PopoverTitle><PopoverDescription>Project information</PopoverDescription></PopoverContent></Popover>);
+ * }
+ * ```
+ */
 const PopoverTitle = React.forwardRef<
   React.ComponentRef<typeof PopoverPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Title>
@@ -86,6 +155,21 @@ const PopoverTitle = React.forwardRef<
 ));
 PopoverTitle.displayName = PopoverPrimitive.Title.displayName;
 
+/**
+ * Provides the accessible explanatory text of the associated popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered PopoverDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Popover; the underlying primitive owns open state and focus. Content supplies its own portal and positioner. Separate lower-level exports support custom compositions, without requiring an application-level popup provider. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Popover><PopoverTrigger>Open details</PopoverTrigger><PopoverContent><PopoverTitle>Details</PopoverTitle><PopoverDescription>Project information</PopoverDescription></PopoverContent></Popover>);
+ * }
+ * ```
+ */
 const PopoverDescription = React.forwardRef<
   React.ComponentRef<typeof PopoverPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Description>

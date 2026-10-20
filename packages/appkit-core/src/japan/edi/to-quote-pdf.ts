@@ -5,6 +5,15 @@ import type { QuoteData } from "../../data/edi";
  * Converts an EDI quotation into renderer-agnostic compatible data. Use EdiPdfService for PDF generation.
  * @param doc - Source EDI quotation document
  * @returns QuoteData in existing format (rendering logic not included)
+ *
+ * @example
+ * ```typescript
+ * import { ediQuotationToQuoteData } from '@alneas/appkit-core/japan/edi';
+ *
+ * export function convert(doc: Parameters<typeof ediQuotationToQuoteData>[0]) {
+ *   return ediQuotationToQuoteData(doc);
+ * }
+ * ```
  */
 export function ediQuotationToQuoteData(doc: EdiQuotationData): QuoteData {
   return {

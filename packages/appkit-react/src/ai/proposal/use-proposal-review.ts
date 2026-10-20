@@ -17,23 +17,65 @@ import type {
 } from "@alneas/appkit-core/ai";
 import type { ProposalReviewCardProps, UseProposalReviewReturn } from './types';
 
-/** Options for useProposalReview hook. */
+/**
+ * Host inputs for one immutable change proposal.
+ *
+ * @typeParam TRecord - Record shape; defaults to a string-keyed record.
+ *
+ * @see useProposalReview for complete usage.
+ */
 export interface UseProposalReviewOptions<
   TRecord extends Record<string, any> = Record<string, any>,
 > {
+  /**
+   * Validated immutable proposal; a new id starts a new review generation.
+   */
   proposal: RecordProposal<TRecord>;
+  /**
+   * Latest record to compare and compose with accepted changes.
+   */
   currentRecord: TRecord;
+  /**
+   * Current host version used for consistency checks.
+   */
   currentVersion: string | number;
+  /**
+   * Optional pure synchronous full-record validator; render-time exceptions propagate.
+   */
   validateCandidate?: (candidate: TRecord) => CandidateValidationResult;
+  /**
+   * Optional async host persistence/form-application handler; absence prevents apply.
+   */
   onApply?: ProposalReviewCardProps<TRecord>['onApply'];
 }
 
 /**
- * 変更提案のレビュー状態を管理するカスタムフック
+ * Manages explicit field decisions and candidate consistency for a single proposal.
  *
- * @template TRecord レコード型
- * @param options フックオプション
- * @returns レビュー状態と操作ハンドラ
+ * @typeParam TRecord - Current record shape; defaults to a string-keyed record.
+ *
+ * @param options - Immutable proposal, latest record/version, optional candidate validator and host apply handler.
+ *
+ * @returns Review decisions, composed candidate, validation state and explicit apply controls.
+ *
+ * @throws Host validateCandidate errors propagate from render.
+ *
+ * @remarks Requires React; no context or CSS. Changing proposal.id resets choices, error
+ * and displayed submission state. A synchronous lock blocks duplicate apply calls.
+ * Late results from an older displayed generation do not update the current review;
+ * this does not cancel or roll back host effects. onApply errors become saveError and
+ * handleApply returns false. No backend authorization or persistence is provided.
+ *
+ * @example
+ * ```tsx
+ * import { useProposalReview, type UseProposalReviewOptions } from '@alneas/appkit-react/ai/proposal';
+ * type RecordData = { title: string };
+ * // The host supplies a validated proposal, current record/version and real onApply.
+ * export function Review({ options }: { options: UseProposalReviewOptions<RecordData> }) {
+ *   const review = useProposalReview(options);
+ *   return <button disabled={!review.canApply || review.isSubmitting} onClick={() => { void review.handleApply(); }}>Apply reviewed changes</button>;
+ * }
+ * ```
  */
 export function useProposalReview<
   TRecord extends Record<string, any> = Record<string, any>,

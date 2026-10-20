@@ -12,11 +12,19 @@ import addFormats from 'ajv-formats';
 import localizeJa from 'ajv-i18n/localize/ja/index.js';
 import localizeEn from 'ajv-i18n/localize/en/index.js';
 
+/**
+ * JSON Schema draft selection, Ajv configuration and diagnostic locale.
+ *
+ * @see {@link createAjvValidator} for canonical public-import usage and setup.
+ */
 export interface AjvValidatorOptions {
+
   /** Draft when $schema is not specified. Defaults to draft-07. If explicitly specified, different $schema declarations are rejected. */
   draft?: 'draft-07' | '2020-12';
+
   /** Ajv configuration options */
   ajvOptions?: Record<string, any>;
+
   /** Language configuration. Defaults to Ajv default messages when omitted. */
   locale?: 'ja' | 'en';
 }
@@ -35,6 +43,17 @@ export interface AjvValidatorOptions {
  * not business validation rules merely because strict mode is disabled.
  * Compilation/configuration failures throw; invalid data returns valid: false.
  * Runtime compilation requires a host that permits AJV's generated functions.
+ *
+ * @throws Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator.
+ * @remarks Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used.
+ *
+ * @example
+ * ```typescript
+ * import { createAjvValidator } from '@alneas/appkit-core/ai/validation';
+ *
+ * const validate = createAjvValidator({ locale: 'en' });
+ * console.log(validate({ type: 'object', properties: { name: { type: 'string' } }, required: ['name'] }, { name: 'Ada' }));
+ * ```
  */
 export function createAjvValidator(options: AjvValidatorOptions = {}) {
   const instances = new Map<string, Ajv | Ajv2020>();
@@ -55,11 +74,35 @@ export function createAjvValidator(options: AjvValidatorOptions = {}) {
   };
   const ajv = getInstance(options.draft ?? 'draft-07');
 
+
+  /**
+   * Compiles/caches a supported schema and synchronously validates one value.
+   *
+   * @param schema - Schema object, optionally declaring draft-07 or 2020-12; use a new object after editing a compiled schema.
+   * @param data - Value to validate; explicit ajvOptions can enable mutation, while defaults do not coerce/insert/remove.
+   * @param overrides - Optional per-call locale override, default {}; draft/ajvOptions overrides are not used here.
+   * @returns Valid flag and formatted errors, with raw Ajv errors for failures; success contains an empty error array.
+   * @throws Throws schema/configuration compilation errors, unsupported/conflicting dialects or asynchronous schemas.
+   *
+   * @example
+   * ```typescript
+   * import { createAjvValidator } from '@alneas/appkit-core/ai/validation';
+   *
+   * const validate = createAjvValidator({ locale: 'en' });
+   * console.log(validate({ type: 'object', properties: { name: { type: 'string' } }, required: ['name'] }, { name: 'Ada' }));
+   * ```
+   */
   const validateFn = (
     schema: object,
     data: unknown,
     overrides: Partial<AjvValidatorOptions> = {},
-  ): { valid: boolean; errors: string[]; rawErrors?: any[] } => {
+  ): {
+    /** Whether validation passed; see errors for diagnostic details when false. */
+    valid: boolean;
+    /** Collected validation diagnostics; successful results contain no errors. */
+    errors: string[];
+    /** Optional underlying Ajv error array; absent on successful validation. */
+    rawErrors?: any[] } => {
     const uri = (schema as { $schema?: string }).$schema;
     let draft = options.draft ?? 'draft-07';
     if (uri !== undefined) {
@@ -97,7 +140,9 @@ export function createAjvValidator(options: AjvValidatorOptions = {}) {
     return { valid: false, errors, rawErrors: validate.errors ?? undefined };
   };
 
-  return Object.assign(validateFn, { ajv: ajv as any });
+  return Object.assign(validateFn, {
+    /** Default-draft Ajv instance for explicit host configuration; other schema drafts use separate instances. */
+    ajv: ajv as any });
 }
 
 

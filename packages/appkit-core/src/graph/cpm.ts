@@ -16,10 +16,34 @@ import type {
 
 /**
  * Builds adjacency lists (successors and predecessors) from dependency edges.
+ *
+ * @param edges - Directed edges; omitted lagHours becomes zero. IDs and dependency types are not validated here.
+ * @returns New successor/predecessor maps containing entries only for nodes participating in edges.
+ *
+ * @example
+ * ```typescript
+ * import { buildAdjacencyList } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', title: 'Draft', status: 'TODO', durationHours: 2 }];
+ * const edges: never[] = [];
+ * console.log(buildAdjacencyList(edges));
+ * ```
  */
 export function buildAdjacencyList(edges: TaskEdge[]): {
-  successors: Map<string, Array<{ targetId: string; lag: number }>>;
-  predecessors: Map<string, Array<{ targetId: string; lag: number }>>;
+
+  /** Outgoing edges grouped by predecessor task ID. */
+  successors: Map<string, Array<{
+    /** Successor task ID in this outgoing edge. */
+    targetId: string;
+    /** Dependency lag or lead in hours, using zero when omitted. */
+    lag: number }>>;
+
+  /** Incoming edges grouped by successor task ID. */
+  predecessors: Map<string, Array<{
+    /** Predecessor task ID in this incoming edge. */
+    targetId: string;
+    /** Dependency lag or lead in hours, using zero when omitted. */
+    lag: number }>>;
 } {
   const successors = new Map<string, Array<{ targetId: string; lag: number }>>();
   const predecessors = new Map<string, Array<{ targetId: string; lag: number }>>();
@@ -45,6 +69,19 @@ export function buildAdjacencyList(edges: TaskEdge[]): {
  * Detects whether circular references (cycles) exist in the dependency graph.
  *
  * @returns An array of detected cycle paths, or an empty array if acyclic.
+ *
+ * @param tasks - Nodes from which depth-first traversal starts.
+ * @param edges - Directed dependencies to traverse; this helper does not validate endpoints.
+ * @remarks Returned paths reflect DFS back edges, not an enumeration of all possible simple cycles.
+ *
+ * @example
+ * ```typescript
+ * import { detectCycles } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', title: 'Draft', status: 'TODO', durationHours: 2 }];
+ * const edges: never[] = [];
+ * console.log(detectCycles(tasks, edges));
+ * ```
  */
 export function detectCycles(tasks: TaskNode[], edges: TaskEdge[]): string[][] {
   const { successors } = buildAdjacencyList(edges);
@@ -87,6 +124,19 @@ export function detectCycles(tasks: TaskNode[], edges: TaskEdge[]): string[][] {
  * Executes topological sort on the task graph using Kahn's algorithm.
  *
  * @throws Error If a cycle exists in the graph.
+ *
+ * @param tasks - Nodes to order with unique IDs.
+ * @param edges - Directed dependencies whose endpoints should exist in tasks.
+ * @returns Task IDs in dependency order; empty input returns an empty array. This helper does not fully validate the graph.
+ *
+ * @example
+ * ```typescript
+ * import { topologicalSort } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', title: 'Draft', status: 'TODO', durationHours: 2 }];
+ * const edges: never[] = [];
+ * console.log(topologicalSort(tasks, edges));
+ * ```
  */
 export function topologicalSort(tasks: TaskNode[], edges: TaskEdge[]): string[] {
   const inDegree = new Map<string, number>();
@@ -136,6 +186,21 @@ export function topologicalSort(tasks: TaskNode[], edges: TaskEdge[]): string[] 
 
 /**
  * Schedules tasks and determines the critical path using the Critical Path Method (CPM).
+ *
+ * @param tasks - Task nodes; CPM requires unique IDs and finite nonnegative durations (hours, default 1).
+ * @param edges - Directed finish-to-start dependencies; CPM accepts FS/FINISH_TO_START and finite lagHours (default 0).
+ * @returns Hour-based schedule metrics, project duration and all rounded-zero-slack IDs in topological order; empty input yields zero duration and empty collections.
+ * @throws Throws for duplicate IDs, invalid durations/lags, unknown endpoints, unsupported dependency types or cycles.
+ * @remarks This is dependency-only analysis; resources, due dates and execution status do not constrain the schedule. Tied critical branches need not form one connected path.
+ *
+ * @example
+ * ```typescript
+ * import { calculateCriticalPath } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', title: 'Draft', status: 'TODO', durationHours: 2 }];
+ * const edges: never[] = [];
+ * console.log(calculateCriticalPath(tasks, edges));
+ * ```
  */
 export function calculateCriticalPath(
   tasks: TaskNode[],
@@ -267,6 +332,20 @@ export function calculateCriticalPath(
 
 /**
  * Analyzes blockers across tasks (centrality ranking by number of blocked downstream tasks).
+ *
+ * @param tasks - Nodes to rank; statuses are carried into results, not filtered.
+ * @param edges - Directed dependencies used for downstream reachability.
+ * @returns Every input task ranked by descending unblock score; empty input returns an empty array.
+ * @remarks Critical flags are false if CPM rejects the graph, but reachability analysis continues. On cyclic input a node can be reachable from itself.
+ *
+ * @example
+ * ```typescript
+ * import { analyzeBlockers } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', title: 'Draft', status: 'TODO', durationHours: 2 }];
+ * const edges: never[] = [];
+ * console.log(analyzeBlockers(tasks, edges));
+ * ```
  */
 export function analyzeBlockers(tasks: TaskNode[], edges: TaskEdge[]): BlockerAnalysis[] {
   const { successors } = buildAdjacencyList(edges);
@@ -330,6 +409,22 @@ export function analyzeBlockers(tasks: TaskNode[], edges: TaskEdge[]): BlockerAn
 
 /**
  * Simulates the project-wide ripple effect of delaying a specific task (What-If analysis).
+ *
+ * @param tasks - Task nodes; CPM requires unique IDs and finite nonnegative durations (hours, default 1).
+ * @param edges - Directed finish-to-start dependencies; CPM accepts FS/FINISH_TO_START and finite lagHours (default 0).
+ * @param sourceTaskId - Existing task whose duration is increased.
+ * @param delayHours - Finite nonnegative duration increase, in hours.
+ * @returns Recomputed project delay, other tasks with later early starts, and all updated critical IDs; input arrays are not mutated.
+ * @throws Throws for invalid delay, missing source ID or any CPM validation failure.
+ *
+ * @example
+ * ```typescript
+ * import { simulateDelayImpact } from '@alneas/appkit-core/graph';
+ *
+ * const tasks = [{ id: 'a', title: 'Draft', status: 'TODO', durationHours: 2 }];
+ * const edges: never[] = [];
+ * console.log(simulateDelayImpact(tasks, edges, 'a', 1));
+ * ```
  */
 export function simulateDelayImpact(
   tasks: TaskNode[],

@@ -2,7 +2,21 @@ import { realpathSync } from 'node:fs';
 import { lstat } from 'node:fs/promises';
 import * as path from 'node:path';
 
-/** Reject ambiguous/non-relative paths before normalization. @internal */
+/**
+ * Rejects ambiguous or escaping relative storage paths before normalization.
+ *
+ * @param value - Relative slash-separated path with no dot/empty segments, backslashes, NUL or drive prefix.
+ * @param allowEmpty - Whether the empty root-relative path is accepted; defaults to false.
+ * @returns No value; normal completion means the lexical path checks passed.
+ * @throws Throws when the value violates the path rules.
+ * @remarks This check does not access the filesystem or establish containment against symlinks; use ContainedPathRoot for those checks.
+ * @example
+ * ```typescript
+ * import { validateRelativePath } from "@alneas/appkit-core/storage/contained-path";
+ *
+ * validateRelativePath("invoices/report.pdf");
+ * ```
+ */
 export function validateRelativePath(value: string, allowEmpty = false): void {
   if (
     typeof value !== 'string' ||
@@ -28,11 +42,39 @@ export function validateRelativePath(value: string, allowEmpty = false): void {
  * provide an atomic openat-style directory walk. Hard links are also outside
  * this boundary; provision an application-owned directory with suitable ACLs.
  * @internal
+ *
+ * @example
+ * ```typescript
+ * import { ContainedPathRoot } from '@alneas/appkit-core/storage/contained-path';
+ *
+ * export async function example(baseDir: string) {
+ *   const root = new ContainedPathRoot(baseDir);
+ *   return root;
+ * }
+ * ```
  */
 export class ContainedPathRoot {
+
+  /** Pinned absolute root path, with existing ancestor aliases resolved at construction. */
   readonly root: string;
 
-  /** Snapshot the physical root, resolving any existing ancestor once. */
+
+  /**
+   * Snapshot the physical root, resolving any existing ancestor once.
+   *
+   * @param root - Application-owned root path; existing ancestors are physically resolved once.
+   * @throws Throws for an empty/NUL-containing root or filesystem errors resolving existing ancestors.
+   *
+   * @example
+   * ```typescript
+   * import { ContainedPathRoot } from '@alneas/appkit-core/storage/contained-path';
+   *
+   * export async function example(baseDir: string) {
+   *   const root = new ContainedPathRoot(baseDir);
+   *   return root;
+   * }
+   * ```
+   */
   constructor(root: string) {
     if (typeof root !== 'string' || !root || root.includes('\0')) {
       throw new Error('Unsafe path: a root directory is required');
@@ -53,7 +95,26 @@ export class ContainedPathRoot {
     }
   }
 
-  /** Validate containment and reject symlinks before returning a filesystem path. */
+
+  /**
+   * Validate containment and reject symlinks before returning a filesystem path.
+   *
+   * @param relativePath - Valid relative path inside the pinned root.
+   * @param allowEmpty - Accept an empty path for the root itself; defaults to false.
+   * @returns The checked absolute physical-root-relative path; missing suffixes are permitted.
+   * @throws Rejects invalid paths, symbolic links, non-directory ancestors or filesystem inspection errors.
+   * @remarks Validation does not atomically open the path; the host must prevent untrusted concurrent root/ancestor mutation and hard-link attacks.
+   *
+   * @example
+   * ```typescript
+   * import { ContainedPathRoot } from '@alneas/appkit-core/storage/contained-path';
+   *
+   * export async function example(baseDir: string) {
+   *   const root = new ContainedPathRoot(baseDir);
+   *   return root.resolve("invoices/report.pdf");
+   * }
+   * ```
+   */
   async resolve(relativePath: string, allowEmpty = false): Promise<string> {
     validateRelativePath(relativePath, allowEmpty);
     const target = path.resolve(this.root, relativePath);

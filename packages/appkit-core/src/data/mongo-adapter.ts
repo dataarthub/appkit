@@ -8,29 +8,51 @@ import {
 } from './types';
 
 /**
- * Configuration for MongoDB API adapter.
+ * Host API endpoint and optional authentication/transport for MongoApiAdapter. This is a custom HTTP protocol, not a direct MongoDB driver connection.
+ * @see {@link MongoApiAdapter} for construction.
  */
 export interface MongoApiConfig {
-  /** Connection base URL */
+  /**
+   * HTTP endpoint receiving POST JSON tuples of the form ["mongo/client", operation]. The host must implement this protocol and enforce authorization.
+   */
   baseUrl: string;
-  /** Optional function to retrieve authentication token */
+  /**
+   * Optional token supplier invoked before every request.
+   * @returns A token added as Bearer authorization when truthy; an empty string omits that header. Rejections prevent the request.
+   */
   getToken?: () => Promise<string>;
-  /** Optional custom fetch implementation */
+  /**
+   * Optional host transport; defaults to global fetch when falsy. No cancellation signal or retry policy is added.
+   */
   fetch?: FetchLike;
 }
 
 /**
- * DataAccess adapter performing data operations via MongoDB API.
- *
- * Communicates with server-side MongoDB Client, supporting standard MongoDB queries,
- * aggregation pipelines, and joins via populate.
+ * Sends Mongo-style operations to a host-defined HTTP API. Every call POSTs ["mongo/client", operation] and trusts the parsed JSON result without validation or Extended JSON/ObjectId conversion. The host owns authentication, authorization, Mongo execution and response shapes.
+ * @remarks QueryOptions.signal is not passed to fetch. Nested option values are JSON-serialized; nonserializable values are not normalized. Atomicity is a server property, not guaranteed by this transport wrapper.
+ * @example
+ * ```ts
+ * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+ * import type { MongoApiConfig } from '@alneas/appkit-core/data/mongodb';
+ * export function connectMongoApi(config: MongoApiConfig) {
+ *   return new MongoApiAdapter(config);
+ * }
+ * ```
  */
 export class MongoApiAdapter implements DataAccessAdapter {
   private config: MongoApiConfig;
 
   /**
-   * Creates a new instance of MongoApiAdapter.
-   * @param config Configuration for MongoDB API adapter
+   * Stores the supplied configuration by reference without validating or contacting its endpoint.
+   * @param config - Host endpoint implementing the documented tuple protocol, with optional token supplier and fetch.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * import type { MongoApiConfig } from '@alneas/appkit-core/data/mongodb';
+   * export function connectMongoApi(config: MongoApiConfig) {
+   *   return new MongoApiAdapter(config);
+   * }
+   * ```
    */
   constructor(config: MongoApiConfig) {
     this.config = config;
@@ -73,7 +95,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Searches for multiple records. Automatically switches to aggregation pipeline if populate is specified.
+   * Lists records, using a generated aggregation pipeline when populate is nonempty.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T[]. Standard find forwards sort, truthy limit/skip and projection. Populate splits top-level filter keys by joined alias and adds lookup/unwind/sort/pagination/projection stages; it is not a general recursive filter rewrite.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function findTasks(adapter: MongoApiAdapter) {
+   *   return adapter.find('tasks', { status: 'open' }, { limit: 20 });
+   * }
+   * ```
    */
   async find<T = unknown>(
     collection: string,
@@ -192,7 +227,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Searches for a single record by ID.
+   * Requests findOne with an _id equality filter.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param id - String matched against _id; conversion belongs to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to a record or null; id is sent as a string without ObjectId conversion.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function findOneTasks(adapter: MongoApiAdapter) {
+   *   return adapter.findOne('tasks', 'task-1');
+   * }
+   * ```
    */
   async findOne<T = unknown>(
     collection: string,
@@ -209,7 +257,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Creates a new record.
+   * Sends insertOne with the input document unchanged.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T. The endpoint must return a record for create even though insertOne expects operation metadata for the same wire operation.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function createTasks(adapter: MongoApiAdapter) {
+   *   return adapter.create('tasks', { title: 'Draft' });
+   * }
+   * ```
    */
   async create<T = unknown>(
     collection: string,
@@ -223,7 +284,21 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Updates a record and returns the updated document.
+   * Sends findOneAndUpdate for a string _id.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param id - String matched against _id; conversion belongs to the endpoint.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T. returnDocument defaults to after but may be overridden by options. Data without any $-prefixed key is wrapped in $set; otherwise it is forwarded as an operator document.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function updateTasks(adapter: MongoApiAdapter) {
+   *   return adapter.update('tasks', 'task-1', { title: 'Reviewed' });
+   * }
+   * ```
    */
   async update<T = unknown>(
     collection: string,
@@ -242,7 +317,21 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Replaces a record.
+   * Sends replaceOne for a string _id without wrapping data in $set.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param id - String matched against _id; conversion belongs to the endpoint.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T; this wrapper does not read back a replacement or normalize Mongo result metadata.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function replaceTasks(adapter: MongoApiAdapter) {
+   *   return adapter.replace('tasks', 'task-1', { title: 'Reviewed' });
+   * }
+   * ```
    */
   async replace<T = unknown>(
     collection: string,
@@ -261,7 +350,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Deletes a record and returns the deleted document.
+   * Sends findOneAndDelete for a string _id.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param id - String matched against _id; conversion belongs to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T; missing-row and returned-document behavior are owned by the endpoint.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function deleteTasks(adapter: MongoApiAdapter) {
+   *   return adapter.delete('tasks', 'task-1');
+   * }
+   * ```
    */
   async delete<T = unknown>(collection: string, id: string, options?: QueryOptions): Promise<T> {
     return this.request<T>({
@@ -274,7 +376,19 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Counts the number of records.
+   * Requests countDocuments using the supplied filter or an empty filter.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns The count property from server JSON, without numeric validation.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function countTasks(adapter: MongoApiAdapter) {
+   *   return adapter.count('tasks', { status: 'open' });
+   * }
+   * ```
    */
   async count(collection: string, filter?: Filter, options?: QueryOptions): Promise<number> {
     const result = await this.request<{ count: number }>({
@@ -288,7 +402,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk creates multiple records.
+   * Sends all input documents in one insertMany operation.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T[]; no transaction, ordering or document reread is added.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function createManyTasks(adapter: MongoApiAdapter) {
+   *   return adapter.createMany('tasks', [{ title: 'Draft' }]);
+   * }
+   * ```
    */
   async createMany<T = unknown>(
     collection: string,
@@ -302,7 +429,21 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk updates multiple records.
+   * Sends updateMany with an operator document or an automatic $set wrapper.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T[]; this adapter does not convert standard Mongo update result metadata into rows.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function updateManyTasks(adapter: MongoApiAdapter) {
+   *   return adapter.updateMany('tasks', { status: 'open' }, { status: 'closed' });
+   * }
+   * ```
    */
   async updateMany<T = unknown>(
     collection: string,
@@ -321,7 +462,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Bulk deletes multiple records.
+   * Sends deleteMany with the supplied filter.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T[]; this adapter does not convert standard Mongo delete result metadata into rows.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function deleteManyTasks(adapter: MongoApiAdapter) {
+   *   return adapter.deleteMany('tasks', { status: 'archived' });
+   * }
+   * ```
    */
   async deleteMany<T = unknown>(
     collection: string,
@@ -337,7 +491,19 @@ export class MongoApiAdapter implements DataAccessAdapter {
   // --- Explicit Mongo-Style Operations ---
 
   /**
-   * Executes a single insert.
+   * Sends the same insertOne wire operation used by create.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to OperationResult without normalization; the host must provide the expected metadata.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function insertOneTasks(adapter: MongoApiAdapter) {
+   *   return adapter.insertOne('tasks', { title: 'Draft' });
+   * }
+   * ```
    */
   async insertOne(
     collection: string,
@@ -351,7 +517,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Executes a single update.
+   * Sends updateOne, wrapping data in $set only when no top-level $ key exists.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to OperationResult without normalization.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function updateOneTasks(adapter: MongoApiAdapter) {
+   *   return adapter.updateOne('tasks', { _id: 'task-1' }, { title: 'Reviewed' });
+   * }
+   * ```
    */
   async updateOne(
     collection: string,
@@ -370,7 +549,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Executes a single replace.
+   * Sends a filtered replaceOne operation using data as replacement.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to OperationResult without normalization.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function replaceOneTasks(adapter: MongoApiAdapter) {
+   *   return adapter.replaceOne('tasks', { _id: 'task-1' }, { title: 'Reviewed' });
+   * }
+   * ```
    */
   async replaceOne(
     collection: string,
@@ -389,7 +581,19 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Executes a single delete.
+   * Sends a filtered deleteOne operation.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to OperationResult without normalization.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function deleteOneTasks(adapter: MongoApiAdapter) {
+   *   return adapter.deleteOne('tasks', { _id: 'task-1' });
+   * }
+   * ```
    */
   async deleteOne(
     collection: string,
@@ -403,7 +607,21 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Finds and updates a record atomically.
+   * Requests a filtered findOneAndUpdate with automatic $set for plain data.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T or null. returnDocument defaults to after, with caller options overriding it; server owns atomicity.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function findOneAndUpdateTasks(adapter: MongoApiAdapter) {
+   *   return adapter.findOneAndUpdate('tasks', { _id: 'task-1' }, { title: 'Reviewed' });
+   * }
+   * ```
    */
   async findOneAndUpdate<T = unknown>(
     collection: string,
@@ -422,7 +640,21 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Finds and replaces a record atomically.
+   * Requests a filtered findOneAndReplace using the whole replacement document.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param data - Document(s) serialized as JSON; validation and persistence belong to the endpoint.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T or null. returnDocument defaults to after, with caller options overriding it; server owns atomicity.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function findOneAndReplaceTasks(adapter: MongoApiAdapter) {
+   *   return adapter.findOneAndReplace('tasks', { _id: 'task-1' }, { title: 'Reviewed' });
+   * }
+   * ```
    */
   async findOneAndReplace<T = unknown>(
     collection: string,
@@ -441,7 +673,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Finds and deletes a record atomically.
+   * Requests a filtered findOneAndDelete operation.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param filter - Mongo-style filter serialized as JSON; empty filters may select every record.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T or null; server owns atomicity and missing-row handling.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function findOneAndDeleteTasks(adapter: MongoApiAdapter) {
+   *   return adapter.findOneAndDelete('tasks', { _id: 'task-1' });
+   * }
+   * ```
    */
   async findOneAndDelete<T = unknown>(
     collection: string,
@@ -455,7 +700,20 @@ export class MongoApiAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Executes an aggregation pipeline.
+   * Forwards an aggregation pipeline without inspecting or rewriting stages.
+   * @typeParam T - Expected server result shape; defaults to unknown and is not runtime-validated.
+   * @param collection - Collection name sent unchanged to the host API.
+   * @param pipeline - Mongo aggregation stages serialized unchanged.
+   * @param options - Options serialized to the operation body, except find constructs its own supported option subset. signal does not cancel the HTTP request.
+   * @returns Server JSON cast to T[]; stage support and execution policy belong to the endpoint.
+   * @throws Rejects for token/transport/JSON failures or a non-OK HTTP response. Successful HTTP JSON is trusted even if it represents an application error.
+   * @example
+   * ```ts
+   * import { MongoApiAdapter } from '@alneas/appkit-core/data/mongodb';
+   * export async function aggregateTasks(adapter: MongoApiAdapter) {
+   *   return adapter.aggregate('tasks', [{ $match: { status: 'open' } }]);
+   * }
+   * ```
    */
   async aggregate<T = unknown>(
     collection: string,

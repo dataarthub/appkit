@@ -33,38 +33,37 @@ import type {
  *
  * @example
  * ```typescript
- * const storage = new R2StorageAdapter({
- *   accountId: 'your-account-id',
- *   bucket: 'my-bucket',
- *   accessKeyId: 'your-access-key',
- *   secretAccessKey: 'your-secret-key',
- *   publicUrl: 'https://pub-xxx.r2.dev', // For public bucket (optional)
- * });
+ * import { R2StorageAdapter, type R2StorageConfig } from '@alneas/appkit-core/storage';
  *
- * // Upload
- * await storage.upload('invoices/inv-001.pdf', pdfBuffer, { public: true });
- *
- * // Signed URL (private)
- * const signedUrl = await storage.getUrl('invoices/inv-001.pdf', {
- *   expiresIn: 3600,
- * });
- *
- * // Unsigned URL (public bucket)
- * const publicUrl = await storage.getUrl('invoices/inv-001.pdf', {
- *   signed: false,
- * });
+ * // The host supplies storage configuration and enforces its access policy.
+ * export function createStorage(config: R2StorageConfig) {
+ *   return new R2StorageAdapter(config);
+ * }
  * ```
  */
 export class R2StorageAdapter implements StorageAdapter {
+
   /** S3 runtime instance */
   private client: S3CompatibleRuntime;
+
   /** Adapter configuration */
   private config: R2StorageConfig;
+
 
   /**
    * Creates an instance of R2StorageAdapter.
    *
    * @param config - R2 configuration (account ID, bucket, credentials)
+   *
+   * @example
+   * ```typescript
+   * import { R2StorageAdapter, type R2StorageConfig } from '@alneas/appkit-core/storage';
+   *
+   * // The host supplies storage configuration and enforces its access policy.
+   * export function createStorage(config: R2StorageConfig) {
+   *   return new R2StorageAdapter(config);
+   * }
+   * ```
    */
   constructor(config: R2StorageConfig) {
     this.config = config;
@@ -82,13 +81,24 @@ export class R2StorageAdapter implements StorageAdapter {
     });
   }
 
+
   /**
-   * Uploads a file to R2.
+   * Writes file data to the configured storage backend.
    *
-   * @param key - Object key (path)
-   * @param data - File data
-   * @param options - Upload options
-   * @returns Metadata of the uploaded object
+   * @param key - Destination object key, relative to the configured storage namespace.
+   * @param data - Bytes or text to store; strings use UTF-8 and streams are buffered in memory.
+   * @param options - Optional MIME type, metadata and cache settings; public is ignored.
+   * @returns Metadata reported for the uploaded object.
+   * @throws Rejects signing, network or non-success backend responses unless the method documents a false/null fallback.
+   * @remarks Strings and streams are materialized in memory. MIME detection is local-only; remote uploads require contentType to send that header. Host access policy is external.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.upload("reports/note.txt", "hello", { contentType: "text/plain" });
+   * }
+   * ```
    */
   async upload(
     key: string,
@@ -136,46 +146,86 @@ export class R2StorageAdapter implements StorageAdapter {
     return (await this.head(key)) || { key };
   }
 
+
   /**
-   * Downloads a file from R2.
+   * Reads the complete stored object into memory.
    *
-   * @param key - Object key (path)
-   * @returns File data as Uint8Array, or null if not found
+   * @param key - Object key to retrieve.
+   * @returns The downloaded bytes, or null when the object is absent.
+   * @throws Rejects signing, network or non-success backend responses unless the method documents a false/null fallback.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.download("reports/note.txt");
+   * }
+   * ```
    */
   async download(key: string): Promise<Uint8Array | null> {
     return this.client.getObject(key);
   }
 
+
   /**
-   * Retrieves a URL to access the object.
+   * Signs a URL for a direct HTTP PUT upload.
    *
-   * @param key - Object key (path)
-   * @param options - URL generation options
-   * @returns URL string (signed or unsigned)
-   *
+   * @param key - Destination object key.
+   * @param options - Optional expiry in seconds, defaulting to the configured value or 3600; valid range 1–604800.
+   * @returns A signed PUT URL; no object is uploaded by this call.
+   * @throws Rejects invalid expiry (outside 1–604800 whole seconds) or malformed endpoint configuration.
    * @example
    * ```typescript
-   * // Signed URL (valid for 1 hour)
-   * const signedUrl = await storage.getUrl('private/doc.pdf', {
-   *   expiresIn: 3600,
-   * });
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
    *
-   * // Unsigned URL (requires publicUrl setting)
-   * const publicUrl = await storage.getUrl('public/logo.png', {
-   *   signed: false,
-   * });
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.getUploadUrl("reports/note.txt", { expiresIn: 300 });
+   * }
    * ```
    */
-  /** Create a signed PUT URL for direct uploads. */
   async getUploadUrl(key: string, options?: Pick<StorageURLOptions, 'expiresIn'>): Promise<string> {
     return this.client.getSignedPutUrl(key, options);
   }
 
-  /** Create a signed download URL. */
+
+  /**
+   * Signs a URL for an HTTP GET download.
+   *
+   * @param key - Object key to retrieve.
+   * @param options - Optional expiry in seconds (1–604800) and download filename; signing is always performed.
+   * @returns A signed GET URL; no object is fetched by this call.
+   * @throws Rejects invalid expiry (outside 1–604800 whole seconds) or malformed endpoint configuration.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.getDownloadUrl("reports/note.txt", { expiresIn: 300 });
+   * }
+   * ```
+   */
   async getDownloadUrl(key: string, options?: StorageURLOptions): Promise<string> {
     return this.client.getSignedGetUrl(key, options);
   }
 
+
+  /**
+   * Builds a URL for reading the configured object key.
+   *
+   * @param key - Object key to address.
+   * @param options - Optional expiry and download filename; remote signing defaults to enabled.
+   * @returns A URL string; generating it does not verify object existence or access policy.
+   * @throws Rejects invalid expiry (outside 1–604800 whole seconds) or malformed endpoint configuration.
+   * @remarks With signed:false and a publicUrl, returns an unsigned URL; otherwise signs a GET URL. Bucket access policy remains external.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.getUrl("reports/note.txt", { expiresIn: 300 });
+   * }
+   * ```
+   */
   async getUrl(key: string, options?: StorageURLOptions): Promise<string> {
     const signed = options?.signed !== false;
 
@@ -187,55 +237,79 @@ export class R2StorageAdapter implements StorageAdapter {
     return this.client.getSignedGetUrl(key, options);
   }
 
+
   /**
-   * Deletes an object from R2.
+   * Requests deletion of the object key.
    *
-   * @param key - Object key (path)
-   * @returns True if deleted successfully
+   * @param key - Object key to delete.
+   * @returns Whether deletion was acknowledged; false also covers caught transport failures.
+   * @remarks For versioned storage this deletes a key, not a particular retained version.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.delete("reports/note.txt");
+   * }
+   * ```
    */
   async delete(key: string): Promise<boolean> {
     return this.client.deleteObject(key);
   }
 
+
   /**
-   * Checks whether an object exists.
+   * Checks whether object metadata can be retrieved.
    *
-   * @param key - Object key (path)
-   * @returns True if the object exists
+   * @param key - Object key to inspect.
+   * @returns True when a metadata lookup finds the key; false when absent.
+   * @throws Rejects signing, network or non-success backend responses unless the method documents a false/null fallback.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.exists("reports/note.txt");
+   * }
+   * ```
    */
   async exists(key: string): Promise<boolean> {
     return (await this.head(key)) !== null;
   }
 
+
   /**
-   * Retrieves object metadata without downloading the content.
+   * Retrieves metadata without downloading the object body.
    *
-   * @param key - Object key (path)
-   * @returns Object metadata, or null if not found
+   * @param key - Object key to inspect.
+   * @returns Object metadata, or null when the key is absent.
+   * @throws Rejects signing, network or non-success backend responses unless the method documents a false/null fallback.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.head("reports/note.txt");
+   * }
+   * ```
    */
   async head(key: string): Promise<StorageObject | null> {
     return this.client.headObject(key);
   }
 
+
   /**
-   * Lists objects in R2.
+   * Lists one provider page of object keys and optional common prefixes.
    *
-   * @param options - List options (prefix, limit, cursor)
-   * @returns Paginated list result
-   *
+   * @param options - Optional prefix, delimiter, page limit and continuation token; a missing or zero limit uses 1000.
+   * @returns Objects and prefixes with provider continuation state; includeMetadata is ignored.
+   * @throws Rejects signing, network or non-success backend responses unless the method documents a false/null fallback.
    * @example
    * ```typescript
-   * const result = await storage.list({
-   *   prefix: 'invoices/2026/',
-   *   limit: 100,
-   * });
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
    *
-   * // Retrieve next page
-   * if (result.hasMore) {
-   *   const nextPage = await storage.list({
-   *     prefix: 'invoices/2026/',
-   *     cursor: result.nextCursor,
-   *   });
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.list({ prefix: "reports/", limit: 100 });
    * }
    * ```
    */
@@ -243,23 +317,44 @@ export class R2StorageAdapter implements StorageAdapter {
     return this.client.listObjects(options);
   }
 
+
   /**
-   * Copies an object to a new key.
+   * Copies an object into a destination key.
    *
-   * @param sourceKey - Source object key
-   * @param destinationKey - Destination object key
-   * @returns Metadata of the copied object
+   * @param sourceKey - Existing source object key.
+   * @param destinationKey - Destination key to create or overwrite.
+   * @returns Metadata confirming the destination, or source metadata for a same-key copy.
+   * @throws Rejects signing, network or non-success backend responses unless the method documents a false/null fallback.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.copy("reports/note.txt", "archive/note.txt");
+   * }
+   * ```
    */
   async copy(sourceKey: string, destinationKey: string): Promise<StorageObject> {
     return this.client.copyObject(sourceKey, destinationKey);
   }
 
+
   /**
-   * Moves an object to a new key (copy + delete).
+   * Copies an object and then deletes the source key.
    *
-   * @param sourceKey - Source object key
-   * @param destinationKey - Destination object key
-   * @returns Metadata of the moved object
+   * @param sourceKey - Existing source object key.
+   * @param destinationKey - Destination key to create or overwrite.
+   * @returns Destination metadata after source deletion, or existing metadata for a same-key move.
+   * @throws Rejects copy errors, missing same-key source, or source deletion failure after copying.
+   * @remarks Copy and delete are separate operations: failure can leave both source and destination. Bucket versioning/retention controls remote deletion.
+   * @example
+   * ```typescript
+   * import type { R2StorageAdapter } from '@alneas/appkit-core/storage';
+   *
+   * export async function example(storage: R2StorageAdapter) {
+   *   return storage.move("reports/note.txt", "archive/note.txt");
+   * }
+   * ```
    */
   async move(sourceKey: string, destinationKey: string): Promise<StorageObject> {
     const result = await this.copy(sourceKey, destinationKey);

@@ -7,7 +7,19 @@ import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
 
 /**
- * ユーザーの重要な確認や操作を必要とする警告ダイアログのルートコンポーネント。
+ * Coordinates an alert dialog that requests an explicit user decision.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialog composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
  */
 const AlertDialog = (props: AlertDialogPrimitive.Root.Props) => (
   <AlertDialogPrimitive.Root data-slot='alert-dialog' {...props} />
@@ -15,7 +27,19 @@ const AlertDialog = (props: AlertDialogPrimitive.Root.Props) => (
 AlertDialog.displayName = 'AlertDialog';
 
 /**
- * 警告ダイアログを開くためのトリガーボタン。
+ * Renders the control that requests opening its alert dialog.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
  */
 function AlertDialogTrigger({
   children,
@@ -32,6 +56,21 @@ function AlertDialogTrigger({
 }
 AlertDialogTrigger.displayName = 'AlertDialogTrigger';
 
+/**
+ * Mounts alert-dialog descendants into the Base UI portal target.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogPortal composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogPortal = React.forwardRef<HTMLDivElement, AlertDialogPrimitive.Portal.Props>(
   ({ ...props }, ref) => (
     <AlertDialogPrimitive.Portal ref={ref} data-slot='alert-dialog-portal' {...props} />
@@ -39,6 +78,21 @@ const AlertDialogPortal = React.forwardRef<HTMLDivElement, AlertDialogPrimitive.
 );
 AlertDialogPortal.displayName = 'AlertDialogPortal';
 
+/**
+ * Renders the fixed backdrop for an alert dialog.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogOverlay composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogOverlay = React.forwardRef<HTMLDivElement, AlertDialogPrimitive.Backdrop.Props>(
   ({ className, ...props }, ref) => (
     <AlertDialogPrimitive.Backdrop
@@ -54,9 +108,30 @@ const AlertDialogOverlay = React.forwardRef<HTMLDivElement, AlertDialogPrimitive
 );
 AlertDialogOverlay.displayName = 'AlertDialogOverlay';
 
+/**
+ * Portals an alert popup with its backdrop and default or small sizing.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: size='default'.
+ * @returns The rendered AlertDialogContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogContent = React.forwardRef<
   HTMLDivElement,
-  AlertDialogPrimitive.Popup.Props & { size?: 'default' | 'sm' }
+  AlertDialogPrimitive.Popup.Props & { /**
+ * Visual size preset; defaults to default unless the owning component states otherwise.
+ */
+  /**
+   * Visual size preset; defaults to default unless the owning component states otherwise.
+   */
+  size?: 'default' | 'sm' }
 >(({ className, size = 'default', children, ...props }, ref) => (
   <AlertDialogPortal>
     <AlertDialogOverlay />
@@ -76,6 +151,21 @@ const AlertDialogContent = React.forwardRef<
 ));
 AlertDialogContent.displayName = 'AlertDialogContent';
 
+/**
+ * Groups alert-dialog heading, description and optional media.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogHeader composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -91,6 +181,21 @@ const AlertDialogHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<
 );
 AlertDialogHeader.displayName = 'AlertDialogHeader';
 
+/**
+ * Lays out alert-dialog decision controls at the popup footer.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogFooter composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -106,6 +211,21 @@ const AlertDialogFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<
 );
 AlertDialogFooter.displayName = 'AlertDialogFooter';
 
+/**
+ * Styles an icon or illustration placed in the alert-dialog header.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogMedia composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogMedia = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -121,6 +241,21 @@ const AlertDialogMedia = React.forwardRef<HTMLDivElement, React.ComponentProps<'
 );
 AlertDialogMedia.displayName = 'AlertDialogMedia';
 
+/**
+ * Provides the accessible heading for its alert popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogTitle = React.forwardRef<HTMLHeadingElement, AlertDialogPrimitive.Title.Props>(
   ({ className, ...props }, ref) => (
     <AlertDialogPrimitive.Title
@@ -136,6 +271,21 @@ const AlertDialogTitle = React.forwardRef<HTMLHeadingElement, AlertDialogPrimiti
 );
 AlertDialogTitle.displayName = 'AlertDialogTitle';
 
+/**
+ * Provides the accessible explanatory text for its alert popup.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogDescription = React.forwardRef<
   HTMLParagraphElement,
   AlertDialogPrimitive.Description.Props
@@ -152,6 +302,21 @@ const AlertDialogDescription = React.forwardRef<
 ));
 AlertDialogDescription.displayName = 'AlertDialogDescription';
 
+/**
+ * Renders an Appkit button for a host-owned alert-dialog action.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AlertDialogAction composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type. This is a Button wrapper, not a Base UI close primitive; clicking it does not automatically close the dialog.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogAction = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
   ({ className, ...props }, ref) => (
     <Button ref={ref} data-slot='alert-dialog-action' className={cn(className)} {...props} />
@@ -159,6 +324,21 @@ const AlertDialogAction = React.forwardRef<HTMLButtonElement, React.ComponentPro
 );
 AlertDialogAction.displayName = 'AlertDialogAction';
 
+/**
+ * Renders a close control styled as an outline button.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='outline', size='default'.
+ * @returns The rendered AlertDialogCancel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Keep popup, trigger and close controls under AlertDialog. Content supplies its own portal/backdrop; separate Portal/Overlay exports are for custom compositions. Base UI owns dialog state and focus. The host owns action effects. The ref prop forwards to the rendered control or container declared by the component ref type. variant defaults to outline and size to default; the Base UI Close primitive is rendered through Button.
+ * @example
+ * ```tsx
+ * import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<AlertDialog><AlertDialogTrigger>Review</AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Apply changes?</AlertDialogTitle><AlertDialogDescription>Review your changes before applying them.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => console.log("Apply requested")}>Apply</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>);
+ * }
+ * ```
+ */
 const AlertDialogCancel = React.forwardRef<
   HTMLButtonElement,
   AlertDialogPrimitive.Close.Props & Pick<React.ComponentProps<typeof Button>, 'variant' | 'size'>

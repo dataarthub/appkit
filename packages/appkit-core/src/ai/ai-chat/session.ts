@@ -3,7 +3,13 @@ import type { AIChatAdapter, AIChatEvent, AIChatRequest } from './types';
 import { snapshotRequest } from './stream';
 import { normalizeAIChatEvent } from './conversation';
 
+/**
+ * Serialized-event character budget for the shared chat stream lifecycle.
+ *
+ * @see {@link streamAIChat} for canonical public-import usage and setup.
+ */
 export interface AIChatStreamOptions {
+
   /** Sum of serialized normalized event characters, not bytes. Default 1,000,000; maximum 10,000,000. */
   maxResponseChars?: number;
 }
@@ -14,6 +20,27 @@ export interface AIChatStreamOptions {
  * Cancellation settles promptly; an adapter must honor its signal to release I/O.
  * Iterator cleanup is requested, but never awaited behind an uncooperative next().
  * No storage, retry, resumption, tool execution or browser/SDK dependency.
+ *
+ * @param adapter - Host-supplied transport whose iterator must honor cancellation and release its network resources.
+ * @param request - Conversation request snapshotted before demand for createAIChatStream, or on first iteration for streamAIChat.
+ * @param options - Optional serialized-event character budget; defaults to {} and maxResponseChars 1000000 (maximum 10000000).
+ * @returns A lazy ReadableStream; consume or cancel it to release the adapter iterator.
+ * @throws Throws/rejects invalid configuration/history, aborts, invalid events, response limits or EOF without finish; events after finish also fail.
+ *
+ * @example
+ * ```typescript
+ * import { createAIChatStream, type AIChatAdapter } from '@alneas/appkit-core/ai/ai-chat';
+ *
+ * export async function consume(adapter: AIChatAdapter) {
+ *   const reader = createAIChatStream(adapter, { messages: [{ id: 'message-1', role: 'user', parts: [{ type: 'text', text: 'hello' }] }] }).getReader();
+ *   try {
+ *     return await reader.read();
+ *   } finally {
+ *     await reader.cancel();
+ *     reader.releaseLock();
+ *   }
+ * }
+ * ```
  */
 export function createAIChatStream(adapter: AIChatAdapter, request: AIChatRequest, options: AIChatStreamOptions = {}): ReadableStream<AIChatEvent> {
   const snapshot = snapshotRequest(request);
@@ -70,7 +97,26 @@ export function createAIChatStream(adapter: AIChatAdapter, request: AIChatReques
     },
   }, { highWaterMark: 0 });
 }
-/** Async-iterable form; snapshots on first iteration and cleans its reader on early return. */
+/**
+ * Async-iterable form; snapshots on first iteration and cleans its reader on early return.
+ *
+ * @param adapter - Host-supplied transport whose iterator must honor cancellation and release its network resources.
+ * @param request - Conversation request snapshotted before demand for createAIChatStream, or on first iteration for streamAIChat.
+ * @param options - Optional serialized-event character budget; defaults to {} and maxResponseChars 1000000 (maximum 10000000).
+ * @returns A lazy async generator; early return cancels/releases its reader.
+ * @throws Throws/rejects invalid configuration/history, aborts, invalid events, response limits or EOF without finish; events after finish also fail.
+ *
+ * @example
+ * ```typescript
+ * import { streamAIChat, type AIChatAdapter } from '@alneas/appkit-core/ai/ai-chat';
+ *
+ * export async function consume(adapter: AIChatAdapter) {
+ *   for await (const event of streamAIChat(adapter, { messages: [{ id: 'message-1', role: 'user', parts: [{ type: 'text', text: 'hello' }] }] })) {
+ *     console.log(event);
+ *   }
+ * }
+ * ```
+ */
 export async function* streamAIChat(adapter: AIChatAdapter, request: AIChatRequest, options?: AIChatStreamOptions): AsyncGenerator<AIChatEvent> {
   const reader = createAIChatStream(adapter, request, options).getReader();
   try {

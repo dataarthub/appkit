@@ -1,14 +1,39 @@
 import { useEffect, useState } from 'react';
-/** Browser location in decimal degrees, with accuracy in metres. */
+/**
+ * Browser location in decimal degrees, with accuracy in metres.
+ * @see useGPS for the canonical usage example.
+ */
 export interface GPSCoordinates {
+  /**
+   * Latitude in decimal degrees as supplied by browser geolocation.
+   */
   latitude: number;
+  /**
+   * Longitude in decimal degrees as supplied by browser geolocation.
+   */
   longitude: number;
+  /**
+   * Estimated horizontal accuracy in metres reported by the browser.
+   */
   accuracy: number;
 }
 /**
- * Request one position after mount. Returns undefined before success, on denial,
- * or when geolocation is unavailable. Requires the host's secure context/permission.
- * Never requests during SSR and ignores late callbacks after unmount. Errors are logged.
+ * Requests one browser position after mounting.
+ *
+ * @returns Coordinates after success, otherwise undefined while pending, denied or unavailable.
+ *
+ * @remarks Requires a secure context and browser location permission. No SSR request is
+ * made. Late callbacks are ignored after unmount; underlying geolocation is not cancelled.
+ * Errors are logged to console; no providers or styles are required.
+ *
+ * @example
+ * ```tsx
+ * import { useGPS } from '@alneas/appkit-react/ui/hooks';
+ * export function Location() {
+ *   const position = useGPS();
+ *   return <output>{position ? `${position.latitude}, ${position.longitude}` : 'Location unavailable'}</output>;
+ * }
+ * ```
  */
 export function useGPS(): GPSCoordinates | undefined {
   const [location, setLocation] = useState<GPSCoordinates>();

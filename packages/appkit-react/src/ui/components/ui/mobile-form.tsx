@@ -1,12 +1,4 @@
-/**
- * モバイル最適化フォームコンポーネント
- *
- * shadcn/ui パターンに準拠:
- * - CVA でバリアント管理
- * - @base-ui/react プリミティブ使用
- * - テーマトークン使用
- * - testId prop 対応
- */
+/** Mobile-sized native and Base UI form controls with linked labels and Appkit variants. */
 
 import * as React from 'react';
 import { Input as InputPrimitive } from '@base-ui/react/input';
@@ -21,10 +13,33 @@ import { mobileButtonVariants, fabVariants } from './mobile-form-variants';
 // Mobile Form Container
 // ============================================================================
 
+/**
+ * Native form attributes and a stable selector for MobileForm.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see MobileForm
+ */
 export interface MobileFormProps extends React.FormHTMLAttributes<HTMLFormElement> {
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
+/**
+ * Renders a mobile-spaced native form without adding a form-state provider.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MobileForm composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns submit effects and values. Input/Select use the caller id or React useId and append -description for help/errors; error text takes precedence over helperText. testId targets the control/form/button. MobileInput uses Base UI Input directly, not Appkit Input numeric normalization. MobileButton loading disables it and replaces icon with a spinner. FAB label forces extended styling even if extended=false; an icon-only FAB needs an accessible name. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { MobileForm, MobileFormSection, MobileInput, MobileSelect, MobileButton, FAB } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><MobileForm onSubmit={event => event.preventDefault()}><MobileFormSection title="Contact"><MobileInput label="Name" /><MobileSelect label="Method" defaultValue="email" options={[{ value: "email", label: "Email" }]} /><MobileButton type="submit">Save</MobileButton></MobileFormSection></MobileForm><FAB icon={<span>+</span>} label="Create" /></>);
+ * }
+ * ```
+ */
 const MobileForm = React.forwardRef<HTMLFormElement, MobileFormProps>(
   ({ className, testId, ...props }, ref) => (
     <form
@@ -42,11 +57,37 @@ MobileForm.displayName = 'MobileForm';
 // Mobile Form Section
 // ============================================================================
 
+/**
+ * Native div attributes and optional section heading/description.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see MobileFormSection
+ */
 export interface MobileFormSectionProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Optional section heading rendered before its content.
+   */
   title?: string;
+  /**
+   * Supporting text displayed by the owning component.
+   */
   description?: string;
 }
 
+/**
+ * Groups mobile form controls under an optional title and description.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MobileFormSection composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns submit effects and values. Input/Select use the caller id or React useId and append -description for help/errors; error text takes precedence over helperText. testId targets the control/form/button. MobileInput uses Base UI Input directly, not Appkit Input numeric normalization. MobileButton loading disables it and replaces icon with a spinner. FAB label forces extended styling even if extended=false; an icon-only FAB needs an accessible name. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { MobileForm, MobileFormSection, MobileInput, MobileSelect, MobileButton, FAB } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><MobileForm onSubmit={event => event.preventDefault()}><MobileFormSection title="Contact"><MobileInput label="Name" /><MobileSelect label="Method" defaultValue="email" options={[{ value: "email", label: "Email" }]} /><MobileButton type="submit">Save</MobileButton></MobileFormSection></MobileForm><FAB icon={<span>+</span>} label="Create" /></>);
+ * }
+ * ```
+ */
 const MobileFormSection = React.forwardRef<HTMLDivElement, MobileFormSectionProps>(
   ({ title, description, className, children, ...props }, ref) => (
     <div
@@ -71,14 +112,49 @@ MobileFormSection.displayName = 'MobileFormSection';
 // Mobile Input (uses @base-ui/react Input)
 // ============================================================================
 
+/**
+ * Base UI input attributes with required visible label and linked helper/error content.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see MobileInput
+ */
 export interface MobileInputProps extends React.ComponentProps<typeof InputPrimitive> {
+  /**
+   * Visible control/option text or content; does not perform persistence or validation.
+   */
   label: string;
+  /**
+   * Error text displayed and used to mark the control invalid; the host supplies validation results.
+   */
   error?: string;
+  /**
+   * Supporting text linked through aria-describedby when no error is present.
+   */
   helperText?: string;
+  /**
+   * Leading visual content; provide an accessible name separately when it is the only button content.
+   */
   icon?: React.ReactNode;
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
+/**
+ * Renders a labeled large-touch input with generated IDs and linked helper/error text.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MobileInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns submit effects and values. Input/Select use the caller id or React useId and append -description for help/errors; error text takes precedence over helperText. testId targets the control/form/button. MobileInput uses Base UI Input directly, not Appkit Input numeric normalization. MobileButton loading disables it and replaces icon with a spinner. FAB label forces extended styling even if extended=false; an icon-only FAB needs an accessible name. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { MobileForm, MobileFormSection, MobileInput, MobileSelect, MobileButton, FAB } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><MobileForm onSubmit={event => event.preventDefault()}><MobileFormSection title="Contact"><MobileInput label="Name" /><MobileSelect label="Method" defaultValue="email" options={[{ value: "email", label: "Email" }]} /><MobileButton type="submit">Save</MobileButton></MobileFormSection></MobileForm><FAB icon={<span>+</span>} label="Create" /></>);
+ * }
+ * ```
+ */
 const MobileInput = React.forwardRef<HTMLInputElement, MobileInputProps>(
   ({ label, error, helperText, icon, className, testId, ...props }, ref) => {
     const generatedId = React.useId();
@@ -140,14 +216,61 @@ MobileInput.displayName = 'MobileInput';
 // Mobile Select
 // ============================================================================
 
+/**
+ * Native select attributes with required label and option data.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see MobileSelect
+ */
 export interface MobileSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  /**
+   * Visible control/option text or content; does not perform persistence or validation.
+   */
   label: string;
-  options: Array<{ value: string; label: string }>;
+  /**
+   * Native option entries in display order; each value must be a stable unique string and label is its visible text.
+   */
+  options: Array<{ /**
+ * Identity for this choice within the surrounding group; provide a distinct stable string.
+ */
+  /**
+   * Identity for this choice within the surrounding group; provide a distinct stable string.
+   */
+  value: string; /**
+ * Visible control/option text or content; does not perform persistence or validation.
+ */
+  /**
+   * Visible control/option text or content; does not perform persistence or validation.
+   */
+  label: string }>;
+  /**
+   * Error text displayed and used to mark the control invalid; the host supplies validation results.
+   */
   error?: string;
+  /**
+   * Text displayed while no value is selected/entered; omitted means no placeholder.
+   */
   placeholder?: string;
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
+/**
+ * Renders a labeled native select with generated IDs and linked error text.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MobileSelect composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns submit effects and values. Input/Select use the caller id or React useId and append -description for help/errors; error text takes precedence over helperText. testId targets the control/form/button. MobileInput uses Base UI Input directly, not Appkit Input numeric normalization. MobileButton loading disables it and replaces icon with a spinner. FAB label forces extended styling even if extended=false; an icon-only FAB needs an accessible name. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { MobileForm, MobileFormSection, MobileInput, MobileSelect, MobileButton, FAB } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><MobileForm onSubmit={event => event.preventDefault()}><MobileFormSection title="Contact"><MobileInput label="Name" /><MobileSelect label="Method" defaultValue="email" options={[{ value: "email", label: "Email" }]} /><MobileButton type="submit">Save</MobileButton></MobileFormSection></MobileForm><FAB icon={<span>+</span>} label="Create" /></>);
+ * }
+ * ```
+ */
 const MobileSelect = React.forwardRef<HTMLSelectElement, MobileSelectProps>(
   ({ label, options, error, placeholder, className, testId, ...props }, ref) => {
     const generatedId = React.useId();
@@ -200,13 +323,42 @@ MobileSelect.displayName = 'MobileSelect';
 // Mobile Button (CVA variants + @base-ui/react Button)
 // ============================================================================
 
+/**
+ * Base UI button attributes with mobile variants, loading state and optional icon.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see MobileButton
+ */
 export interface MobileButtonProps
   extends ButtonPrimitive.Props, VariantProps<typeof mobileButtonVariants> {
+  /**
+   * Shows the loading spinner and disables activation when true; omitted means not loading. This does not manage an asynchronous task.
+   */
   loading?: boolean;
+  /**
+   * Leading visual content; provide an accessible name separately when it is the only button content.
+   */
   icon?: React.ReactNode;
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
+/**
+ * Renders a large-touch Base UI button with optional loading spinner or leading icon.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered MobileButton composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns submit effects and values. Input/Select use the caller id or React useId and append -description for help/errors; error text takes precedence over helperText. testId targets the control/form/button. MobileInput uses Base UI Input directly, not Appkit Input numeric normalization. MobileButton loading disables it and replaces icon with a spinner. FAB label forces extended styling even if extended=false; an icon-only FAB needs an accessible name. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { MobileForm, MobileFormSection, MobileInput, MobileSelect, MobileButton, FAB } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><MobileForm onSubmit={event => event.preventDefault()}><MobileFormSection title="Contact"><MobileInput label="Name" /><MobileSelect label="Method" defaultValue="email" options={[{ value: "email", label: "Email" }]} /><MobileButton type="submit">Save</MobileButton></MobileFormSection></MobileForm><FAB icon={<span>+</span>} label="Create" /></>);
+ * }
+ * ```
+ */
 const MobileButton = React.forwardRef<HTMLElement, MobileButtonProps>(
   ({ className, variant, size, loading, icon, disabled, children, testId, ...props }, ref) => {
     const isDisabled = disabled || loading;
@@ -234,12 +386,41 @@ MobileButton.displayName = 'MobileButton';
 // Floating Action Button (FAB)
 // ============================================================================
 
+/**
+ * Base UI button attributes and fixed-position floating-action styling.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see FAB
+ */
 export interface FABProps extends ButtonPrimitive.Props, VariantProps<typeof fabVariants> {
+  /**
+   * Required visual content in the floating action button; provide aria-label for icon-only use.
+   */
   icon: React.ReactNode;
+  /**
+   * Optional visible text; a truthy label forces extended styling even when extended=false.
+   */
   label?: string;
+  /**
+   * Stable data-testid assigned to the rendered control/container; omitted means no selector.
+   */
   testId?: string;
 }
 
+/**
+ * Renders a fixed floating action button that expands when label content is supplied.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FAB composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. The host owns submit effects and values. Input/Select use the caller id or React useId and append -description for help/errors; error text takes precedence over helperText. testId targets the control/form/button. MobileInput uses Base UI Input directly, not Appkit Input numeric normalization. MobileButton loading disables it and replaces icon with a spinner. FAB label forces extended styling even if extended=false; an icon-only FAB needs an accessible name. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { MobileForm, MobileFormSection, MobileInput, MobileSelect, MobileButton, FAB } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<><MobileForm onSubmit={event => event.preventDefault()}><MobileFormSection title="Contact"><MobileInput label="Name" /><MobileSelect label="Method" defaultValue="email" options={[{ value: "email", label: "Email" }]} /><MobileButton type="submit">Save</MobileButton></MobileFormSection></MobileForm><FAB icon={<span>+</span>} label="Create" /></>);
+ * }
+ * ```
+ */
 const FAB = React.forwardRef<HTMLElement, FABProps>(
   ({ icon, label, position, extended, className, testId, ...props }, ref) => (
     <ButtonPrimitive

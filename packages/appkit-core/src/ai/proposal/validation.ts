@@ -15,46 +15,75 @@ import type {
   SupportedPrimitive,
 } from './types';
 
-/**
- * Dangerous property names with prototype pollution risks.
- */
+/** Dangerous property names with prototype pollution risks. */
 const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
 /**
  * Validation error details.
+ *
+ * @see {@link validateProposalInput} for canonical public-import usage and setup.
  */
 export type ProposalValidationError = {
+
+  /** Field/input path associated with the validation diagnostic. */
   readonly path: string;
+
+  /** Diagnostic text describing the rejected proposal field or value. */
   readonly message: string;
 };
 
 /**
  * Validation result type.
+ *
+ * @typeParam TRecord - Consumer record shape whose string keys and primitive field values are reviewed; defaults to a general record where permitted.
+ * @see {@link validateProposalInput} for canonical public-import usage and setup.
  */
 export type ProposalValidationResult<
   TRecord extends Record<string, unknown> = Record<string, unknown>,
 > =
   | {
-      readonly ok: true;
-      readonly data: RecordProposal<TRecord>;
+
+  /** Discriminant indicating whether this operation succeeded. */
+  readonly ok: true;
+
+  /** Validated or projected result data carried by the successful variant. */
+  readonly data: RecordProposal<TRecord>;
     }
   | {
-      readonly ok: false;
-      readonly errors: readonly ProposalValidationError[];
+
+  /** Discriminant indicating whether this operation succeeded. */
+  readonly ok: false;
+
+  /** Collected validation diagnostics; successful results contain no errors. */
+  readonly errors: readonly ProposalValidationError[];
     };
 
 /**
  * Guard function for validating value types of each field.
+ *
+ * @typeParam TValue - Value shape established by this runtime type guard; defaults to unknown.
+ * @see {@link validateProposalInput} for canonical public-import usage and setup.
+ * @param value - Untrusted before/after value; called synchronously after primitive checks.
+ * @returns Whether the value has TValue; the host-supplied guard must establish the claimed type.
+ *
+ * @example
+ * ```typescript
+ * import type { FieldTypeValidator } from '@alneas/appkit-core/ai/proposal';
+ *
+ * const isName: FieldTypeValidator<string> = value => typeof value === 'string';
+ * console.log(isName('Ada'));
+ * ```
  */
 export type FieldTypeValidator<TValue = unknown> = (value: unknown) => value is TValue;
 
 /**
- * Validation options (field definitions are required).
+ * Explicit allowed-field map and host guards for proposal primitive values.
  *
- * Explicitly specifying allowed fields and value type validation functions eliminates ambiguous
- * type assertions from generic primitive checks and guarantees runtime type safety.
+ * @typeParam TRecord - Consumer record shape whose string keys and primitive field values are reviewed; defaults to a general record where permitted.
+ * @see {@link validateProposalInput} for canonical public-import usage and setup.
  */
 export type ValidateProposalOptions<TRecord extends Record<string, unknown>> = {
+
   /**
    * Definition map of fields allowed to be modified (required).
    * Unregistered fields are rejected as not modifiable.
@@ -66,15 +95,127 @@ export type ValidateProposalOptions<TRecord extends Record<string, unknown>> = {
 
 /**
  * Collection of helper type guards for commonly used primitive types.
+ *
+ * @see {@link validateProposalInput} for canonical public-import usage and setup.
+ *
+ * @example
+ * ```typescript
+ * import { validateProposalInput, proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+ *
+ * const checked = validateProposalInput<{ name: string }>({
+ *   id: 'proposal-1', targetId: 'row-1', baseVersion: 1,
+ *   changes: [{ field: 'name', before: 'Old', after: 'New' }],
+ *   createdAt: '2026-10-20T00:00:00Z',
+ * }, { fields: { name: proposalFieldTypes.string } });
+ * console.log(checked);
+ * ```
  */
 export const proposalFieldTypes = {
+
+  /**
+   * Checks whether an untrusted value is string.
+   *
+   * @param val - Arbitrary before/after input value to inspect synchronously.
+   * @returns Whether the value is string; no coercion is performed.
+   *
+   * @example
+   * ```typescript
+   * import { proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+   *
+   * console.log(proposalFieldTypes.string('Ada'));
+   * ```
+   */
   string: (val: unknown): val is string => typeof val === 'string',
+
+  /**
+   * Checks whether an untrusted value is finite number.
+   *
+   * @param val - Arbitrary before/after input value to inspect synchronously.
+   * @returns Whether the value is finite number; no coercion is performed.
+   *
+   * @example
+   * ```typescript
+   * import { proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+   *
+   * console.log(proposalFieldTypes.finiteNumber(12));
+   * ```
+   */
   finiteNumber: (val: unknown): val is number => typeof val === 'number' && Number.isFinite(val),
+
+  /**
+   * Checks whether an untrusted value is boolean.
+   *
+   * @param val - Arbitrary before/after input value to inspect synchronously.
+   * @returns Whether the value is boolean; no coercion is performed.
+   *
+   * @example
+   * ```typescript
+   * import { proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+   *
+   * console.log(proposalFieldTypes.boolean(true));
+   * ```
+   */
   boolean: (val: unknown): val is boolean => typeof val === 'boolean',
+
+  /**
+   * Checks whether an untrusted value is null.
+   *
+   * @param val - Arbitrary before/after input value to inspect synchronously.
+   * @returns Whether the value is null; no coercion is performed.
+   *
+   * @example
+   * ```typescript
+   * import { proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+   *
+   * console.log(proposalFieldTypes.null(null));
+   * ```
+   */
   null: (val: unknown): val is null => val === null,
+
+  /**
+   * Checks whether an untrusted value is string or null.
+   *
+   * @param val - Arbitrary before/after input value to inspect synchronously.
+   * @returns Whether the value is string or null; no coercion is performed.
+   *
+   * @example
+   * ```typescript
+   * import { proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+   *
+   * console.log(proposalFieldTypes.nullableString(null));
+   * ```
+   */
   nullableString: (val: unknown): val is string | null => val === null || typeof val === 'string',
+
+  /**
+   * Checks whether an untrusted value is finite number or null.
+   *
+   * @param val - Arbitrary before/after input value to inspect synchronously.
+   * @returns Whether the value is finite number or null; no coercion is performed.
+   *
+   * @example
+   * ```typescript
+   * import { proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+   *
+   * console.log(proposalFieldTypes.nullableFiniteNumber(null));
+   * ```
+   */
   nullableFiniteNumber: (val: unknown): val is number | null =>
     val === null || (typeof val === 'number' && Number.isFinite(val)),
+
+  /**
+   * Checks whether an untrusted value is boolean or null.
+   *
+   * @param val - Arbitrary before/after input value to inspect synchronously.
+   * @returns Whether the value is boolean or null; no coercion is performed.
+   *
+   * @example
+   * ```typescript
+   * import { proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+   *
+   * console.log(proposalFieldTypes.nullableBoolean(null));
+   * ```
+   */
   nullableBoolean: (val: unknown): val is boolean | null => val === null || typeof val === 'boolean',
 } as const;
 
@@ -83,6 +224,13 @@ export const proposalFieldTypes = {
  *
  * @param value Value to check
  * @returns true if valid primitive
+ *
+ * @example
+ * ```typescript
+ * import { isSupportedPrimitive } from '@alneas/appkit-core/ai';
+ *
+ * console.log(isSupportedPrimitive(Number.POSITIVE_INFINITY));
+ * ```
  */
 export function isSupportedPrimitive(value: unknown): value is SupportedPrimitive {
   if (value === null) return true;
@@ -101,6 +249,21 @@ export function isSupportedPrimitive(value: unknown): value is SupportedPrimitiv
  * @param input External input data
  * @param options Validation options (allowed fields and value validators are required)
  * @returns Validation result
+ *
+ * @throws Propagates host field-validator exceptions and errors from non-JSON object property access; ordinary invalid proposal data is returned as validation errors.
+ * @remarks Success clones/freezes declared primitive change/metadata fields. Unknown extra fields are not copied; dangerous names and duplicate/unregistered fields are rejected. This is not a persistence or authorization boundary.
+ *
+ * @example
+ * ```typescript
+ * import { validateProposalInput, proposalFieldTypes } from '@alneas/appkit-core/ai/proposal';
+ *
+ * const checked = validateProposalInput<{ name: string }>({
+ *   id: 'proposal-1', targetId: 'row-1', baseVersion: 1,
+ *   changes: [{ field: 'name', before: 'Old', after: 'New' }],
+ *   createdAt: '2026-10-20T00:00:00Z',
+ * }, { fields: { name: proposalFieldTypes.string } });
+ * console.log(checked);
+ * ```
  */
 export function validateProposalInput<
   TRecord extends Record<string, unknown> = Record<string, unknown>,

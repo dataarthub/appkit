@@ -5,30 +5,41 @@ import { cn } from "../../lib/utils";
 import { useIsClient } from "../../lib/hooks/use-is-client";
 
 /**
- * テーマスイッチャーのプロップス
+ * Display settings shared by the theme switchers; see ThemeModeSwitcher for setup.
+ *
+ * @see ThemeModeSwitcher for the canonical usage example.
  */
 export interface ThemeSwitcherProps {
-  /** 追加CSS */
+  /** Additional classes on the rendered control. */
   className?: string;
-  /** 表示形式 */
+  /** Presentation style; defaults to 'select'. Both 'toggle' and 'cycle' cycle values. */
   variant?: 'select' | 'toggle' | 'icon-group' | 'cycle';
   /**
-   * アイコンに背景を表示するか
-   * 暗い背景に配置する場合、trueにすると視認性が向上します
+   * Add a background to icon controls; defaults to false.
+   * Select controls ignore this setting.
    */
   withBackground?: boolean;
 }
 
 /**
- * テーマモードスイッチャー
+ * Switches between light, dark and system modes from theme context.
  *
- * ライト/ダーク/システムを切り替えるUI。
+ * @param props - Control classes, presentation variant and optional icon background.
+ *
+ * @returns A select, cycling button or group of mode buttons.
+ *
+ * @remarks Use inside ThemeProvider and import @alneas/appkit-react/styles. Defaults to
+ * select with no background; toggle/cycle advances light, dark, system. Before mount,
+ * controls use stable system/light placeholders, then reflect the provider state.
+ * The provider's storage setter may throw when browser storage is unavailable.
  *
  * @example
  * ```tsx
- * import { ThemeModeSwitcher } from "../..";
- *
- * <ThemeModeSwitcher variant="toggle" />
+ * import '@alneas/appkit-react/styles';
+ * import { ThemeProvider, ThemeModeSwitcher } from '@alneas/appkit-react/ui/theme';
+ * export function ThemeControl() {
+ *   return <ThemeProvider><ThemeModeSwitcher variant="toggle" /></ThemeProvider>;
+ * }
  * ```
  */
 export function ThemeModeSwitcher({
@@ -140,7 +151,24 @@ export function ThemeModeSwitcher({
 }
 
 /**
- * カラーテーマ（プライマリ色）を切り替えるUIコンポーネント
+ * Switches the provider palette among default, blue, green, rose, orange and future.
+ *
+ * @param props - Control classes, variant (default select) and icon background (default false).
+ *
+ * @returns A palette select, cycling button or group of color buttons.
+ *
+ * @remarks Requires ThemeProvider and @alneas/appkit-react/styles. Toggle/cycle advances
+ * through the available values. Custom palette names are not listed. An unknown current
+ * palette displays Default in toggle/cycle, highlights no icon-group swatch and remains
+ * an unmatched select value.
+ * Provider localStorage setter errors propagate from interactions.
+ *
+ * @example
+ * ```tsx
+ * import '@alneas/appkit-react/styles';
+ * import { ThemeProvider, ColorThemeSwitcher } from '@alneas/appkit-react/ui/theme';
+ * export function Control() { return <ThemeProvider><ColorThemeSwitcher /></ThemeProvider>; }
+ * ```
  */
 export function ColorThemeSwitcher({
   className,
@@ -257,7 +285,22 @@ export function ColorThemeSwitcher({
 }
 
 /**
- * 表示の密度（余白など）をコンパクト、ノーマル、コンフォタブルに切り替えるUIコンポーネント
+ * Switches provider density among compact, normal and comfortable.
+ *
+ * @param props - Control classes, variant (default select) and icon background (default false).
+ *
+ * @returns A density select, cycling button or group of density buttons.
+ *
+ * @remarks Requires ThemeProvider and @alneas/appkit-react/styles. Toggle/cycle advances
+ * through the available values. Before mount the displayed density is normal.
+ * Provider localStorage setter errors propagate from interactions.
+ *
+ * @example
+ * ```tsx
+ * import '@alneas/appkit-react/styles';
+ * import { ThemeProvider, SpacingThemeSwitcher } from '@alneas/appkit-react/ui/theme';
+ * export function Control() { return <ThemeProvider><SpacingThemeSwitcher /></ThemeProvider>; }
+ * ```
  */
 export function SpacingThemeSwitcher({
   className,
@@ -348,19 +391,45 @@ export function SpacingThemeSwitcher({
   );
 }
 
+/**
+ * Visibility and presentation for ThemeSwitcherGroup; see its usage example.
+ * @see ThemeSwitcherGroup for the canonical usage example.
+ */
 export interface ThemeSwitcherGroupProps {
+  /** Classes on the outer group. */
   className?: string;
+  /** Classes passed to select controls; defaults to the styled input classes. */
   selectClassName?: string;
+  /** Show the mode control; defaults to true. */
   showThemeMode?: boolean;
+  /** Show the palette control; defaults to true. */
   showColorTheme?: boolean;
+  /** Show the density control; defaults to true. */
   showSpacingTheme?: boolean;
+  /** Mode presentation; defaults to select. */
   modeVariant?: 'select' | 'toggle' | 'icon-group';
+  /** Palette presentation; defaults to select. */
   colorVariant?: 'select' | 'toggle' | 'icon-group';
+  /** Density presentation; defaults to select. */
   spacingVariant?: 'select' | 'toggle' | 'icon-group';
 }
 
 /**
- * モード、カラー、表示密度の複数のテーマ設定をまとめて変更できるグループコンポーネント
+ * Groups optional mode, palette and density controls with visible labels.
+ *
+ * @param props - Group/select classes, visibility flags and per-control variants.
+ *
+ * @returns A vertical group; all three controls are visible as selects by default.
+ *
+ * @remarks Requires ThemeProvider and @alneas/appkit-react/styles. Each control persists
+ * through the provider; browser storage errors can propagate from interactions.
+ *
+ * @example
+ * ```tsx
+ * import '@alneas/appkit-react/styles';
+ * import { ThemeProvider, ThemeSwitcherGroup } from '@alneas/appkit-react/ui/theme';
+ * export function ThemeSettings() { return <ThemeProvider><ThemeSwitcherGroup /></ThemeProvider>; }
+ * ```
  */
 export function ThemeSwitcherGroup({
   className,

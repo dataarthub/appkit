@@ -14,7 +14,19 @@ import { Separator } from './separator';
 // ============================================================================
 
 /**
- * フォーム内で関連する入力フィールドをグループ化するためのコンテナ。
+ * Groups related form fields using the Base UI fieldset root.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FieldSet composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
  */
 function FieldSet({ className, ...props }: FieldsetPrimitive.Root.Props) {
   return (
@@ -34,13 +46,31 @@ function FieldSet({ className, ...props }: FieldsetPrimitive.Root.Props) {
 // ============================================================================
 
 /**
- * FieldSet グループのタイトル（見出し）を指定するコンポーネント。
+ * Labels the fieldset with legend or compact label styling.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: variant='legend'.
+ * @returns The rendered FieldLegend composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values. variant defaults to legend; label selects smaller typography.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
  */
 function FieldLegend({
   className,
   variant = 'legend',
   ...props
-}: FieldsetPrimitive.Legend.Props & { variant?: 'legend' | 'label' }) {
+}: FieldsetPrimitive.Legend.Props & { /**
+ * Visual treatment from the declared variant union; changing it does not alter host action semantics.
+ */
+/**
+ * Visual treatment from the declared variant union; changing it does not alter host action semantics.
+ */
+variant?: 'legend' | 'label' }) {
   return (
     <FieldsetPrimitive.Legend
       data-slot='field-legend'
@@ -59,7 +89,19 @@ function FieldLegend({
 // ============================================================================
 
 /**
- * 複数のフィールドをまとめて配置・整理するためのグループコンテナ。
+ * Lays out a vertical group of fields and nested field groups.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FieldGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
  */
 function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -81,6 +123,12 @@ function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
 
 const fieldVariants = cva('data-[invalid]:text-destructive gap-2 group/field flex w-full', {
   variants: {
+    /**
+     * Axis used to join/group controls or arrange field content.
+     * Accepted values: vertical, horizontal, responsive.
+     * @defaultValue 'vertical'
+     * @see fieldVariants
+     */
     orientation: {
       vertical: 'flex-col [&>*]:w-full [&>.sr-only]:w-auto',
       horizontal:
@@ -94,6 +142,21 @@ const fieldVariants = cva('data-[invalid]:text-destructive gap-2 group/field fle
   },
 });
 
+/**
+ * Coordinates one field control, label, description and validation state.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: orientation='vertical'.
+ * @returns The rendered Field composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values. The ref prop forwards to the rendered control or container declared by the component ref type. orientation defaults to vertical; horizontal/responsive change layout rather than field validation.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
+ */
 const Field = React.forwardRef<
   HTMLDivElement,
   FieldPrimitive.Root.Props & VariantProps<typeof fieldVariants>
@@ -115,7 +178,19 @@ Field.displayName = 'Field';
 // ============================================================================
 
 /**
- * フィールド内のコントロールや説明、エラーメッセージを囲むコンテンツ領域。
+ * Groups the textual content adjacent to a field control.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FieldContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
  */
 function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -131,6 +206,21 @@ function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
 // FieldLabel (Field.Label)
 // ============================================================================
 
+/**
+ * Associates a visible label with its Base UI field control.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FieldLabel composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
+ */
 const FieldLabel = React.forwardRef<HTMLLabelElement, FieldPrimitive.Label.Props>(
   ({ className, ...props }, ref) => {
     return (
@@ -155,7 +245,19 @@ FieldLabel.displayName = 'FieldLabel';
 // ============================================================================
 
 /**
- * フィールドのタイトル（ラベル）用のコンポーネント。
+ * Styles label-like title content without creating a label association.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FieldTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
  */
 function FieldTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -174,6 +276,21 @@ function FieldTitle({ className, ...props }: React.ComponentProps<'div'>) {
 // FieldDescription (Field.Description)
 // ============================================================================
 
+/**
+ * Provides descriptive text associated with the surrounding field.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FieldDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
+ */
 const FieldDescription = React.forwardRef<HTMLParagraphElement, FieldPrimitive.Description.Props>(
   ({ className, ...props }, ref) => {
     return (
@@ -198,13 +315,28 @@ FieldDescription.displayName = 'FieldDescription';
 // ============================================================================
 
 /**
- * フォームセクションやフィールド間を区切るためのセパレーター（区切り線）。
+ * Draws a divider with optional centered text between field groups.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FieldSeparator composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
  */
 function FieldSeparator({
   children,
   className,
   ...props
 }: React.ComponentProps<'div'> & {
+  /**
+   * Content rendered in the wrapper's child region.
+   */
   children?: React.ReactNode;
 }) {
   return (
@@ -234,10 +366,34 @@ function FieldSeparator({
 // FieldError (Field.Error)
 // ============================================================================
 
+/**
+ * Renders supplied children or deduplicated error messages when content exists.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered FieldError composition, or null when it has no visible content.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
+ */
 const FieldError = React.forwardRef<
   HTMLDivElement,
   FieldPrimitive.Error.Props & {
-    errors?: Array<{ message?: string } | undefined>;
+    /**
+     * Explicit validation messages; duplicate message strings are collapsed and missing/empty messages may yield no content.
+     */
+    errors?: Array<{ /**
+ * Optional error message used for deduplication and display; missing messages do not render a list item.
+ */
+    /**
+     * Optional error message used for deduplication and display; missing messages do not render a list item.
+     */
+    message?: string } | undefined>;
   }
 >(({ className, children, errors, ...props }, ref) => {
   const content = useMemo(() => {
@@ -283,12 +439,42 @@ FieldError.displayName = 'FieldError';
 // FieldValidity (Field.Validity)
 // ============================================================================
 
+/**
+ * Exposes the surrounding Base UI field validity state to its child renderer.
+ * @param props - Inherited primitive configuration, children and controlled/default state; the upstream prop type remains authoritative.
+ * @returns The rendered FieldValidity composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
+ */
 const FieldValidity = FieldPrimitive.Validity;
 
 // ============================================================================
 // FieldControl (Helper for Smart Field / Legacy)
 // ============================================================================
 
+/**
+ * Renders a Base UI control bound to its surrounding field context.
+ * @param props - Inherited primitive configuration, children and controlled/default state; the upstream prop type remains authoritative.
+ * @returns The rendered FieldControl composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Label, Control, Description, Error and Validity require the surrounding Field context. FieldSet/Legend provide related-field semantics. FieldError prefers truthy children; otherwise it deduplicates errors by message and returns null when empty. These wrappers do not persist form values.
+ * @example
+ * ```tsx
+ * import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<FieldSet><FieldLegend>Contact</FieldLegend><FieldGroup><Field name="email"><FieldLabel>Email</FieldLabel><FieldControl type="email" /><FieldDescription>Used for replies</FieldDescription><FieldError /></Field></FieldGroup></FieldSet>);
+ * }
+ * ```
+ */
 const FieldControl = FieldPrimitive.Control;
 
 

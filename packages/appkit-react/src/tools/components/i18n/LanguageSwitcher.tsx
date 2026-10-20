@@ -3,39 +3,43 @@ import { Globe } from 'lucide-react';
 import { getLocale, setLocale, Locale } from '../../paraglide/runtime.js';
 
 /**
- * Props for LanguageSwitcher
+ * Host inputs and presentation settings for LanguageSwitcher.
+ * @see LanguageSwitcher
  */
 export interface LanguageSwitcherProps {
   /**
-   * Optional callback when language changes.
-   * If provided, the internal state update is skipped (controlled mode).
-   * If not provided, it updates the global paraglide state.
+   * Called with en when the current locale is ja, otherwise ja. When supplied, suppresses the built-in global setLocale call; the host must update controlled state.
+   * @param lang - Host callback input described above.
+   * @returns No value; complete the host callback action.
    */
   onLanguageChange?: (lang: Locale) => void;
 
   /**
-   * Current language (for controlled mode).
-   * Defaults to global paraglide state if not provided.
+   * Current locale; omitted reads getLocale from the configured Paraglide runtime.
    */
   currentLanguage?: Locale;
 
   /**
-   * Optional className for the button.
+   * Additional classes on the language toggle button.
    */
   className?: string;
 }
 
 /**
- * 言語切り替えボタン
- *
- * Paraglide.js と連携して動作します。現在のen/ja/zhをそれぞれEnglish/日本語/中文で表示します。
- * 切替先は従来どおりjaからen、それ以外からjaです。
- * SSR also reads currentLanguage or the host runtime. Hosts must isolate request
- * locale state and initialize the same locale before hydration.
+ * Displays the current locale and toggles Japanese to English or any other locale to Japanese.
+ * @param props - Optional controlled locale, change callback and button classes; see LanguageSwitcherProps.
+ * @returns The rendered LanguageSwitcher composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Import Appkit CSS. currentLanguage overrides getLocale; onLanguageChange suppresses the built-in setLocale call, so the host must update controlled locale state. Without the callback the Paraglide runtime performs its configured locale update/navigation. Locale state during SSR is host-owned and must be isolated per request and initialized consistently before hydration. The label displays Japanese/Chinese/English, but the toggle does not cycle through Chinese.
  * @example
  * ```tsx
+ * import { useState } from 'react';
  * import { LanguageSwitcher } from '@alneas/appkit-react/tools/i18n';
- * <LanguageSwitcher currentLanguage="zh" onLanguageChange={locale => console.log(locale)} />;
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   const [locale, setLocale] = useState<"en" | "ja" | "zh">("en");
+ *   return (<LanguageSwitcher currentLanguage={locale} onLanguageChange={setLocale} />);
+ * }
  * ```
  */
 export function LanguageSwitcher({

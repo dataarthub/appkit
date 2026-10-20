@@ -10,7 +10,16 @@ interface FieldTree {
 }
 
 /**
- * DataAccessAdapter implementation for Supabase GraphQL API using pg_graphql extension.
+ * Provides partial read support for Supabase pg_graphql. Only find and count execute GraphQL; findOne always resolves null, and mutations reject as unimplemented. The host must enable pg_graphql and supply a compatible schema, session and authorization policy.
+ * @remarks Queries assume camel-cased collection names ending in Collection. There is no schema introspection, automatic pagination, cancellation or HTTP status validation. JSON GraphQL errors reject; other response shape errors may surface during result access.
+ * @example
+ * ```ts
+ * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+ * import type { SupabaseClient } from '@supabase/supabase-js';
+ * export function graphqlAdapter(client: SupabaseClient, url: string, publicKey: string) {
+ *   return new SupabaseGraphQLAdapter(client, { supabaseUrl: url, supabaseKey: publicKey });
+ * }
+ * ```
  */
 export class SupabaseGraphQLAdapter implements DataAccessAdapter {
   private client: SupabaseClient;
@@ -19,11 +28,32 @@ export class SupabaseGraphQLAdapter implements DataAccessAdapter {
   private fetchFn: FetchLike;
 
   /**
-   * Creates a new instance of SupabaseGraphQLAdapter.
-   * @param client SupabaseClient instance
-   * @param config Configuration object for explicitly specifying URL or API key
+   * Configures the GraphQL endpoint and transport without making a request.
+   * @param client - Host Supabase client used to obtain a session before each request.
+   * @param config - Optional URL/key overrides and fetch; missing URL/key fall back to client metadata, and fetch defaults to bound global fetch. Session access_token is used when truthy, otherwise the configured key becomes the bearer token.
+   * @throws An error when URL or key cannot be resolved.
+   * @example
+   * ```ts
+   * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+   * import type { SupabaseClient } from '@supabase/supabase-js';
+   * export function graphqlAdapter(client: SupabaseClient, url: string, publicKey: string) {
+   *   return new SupabaseGraphQLAdapter(client, { supabaseUrl: url, supabaseKey: publicKey });
+   * }
+   * ```
    */
-  constructor(client: SupabaseClient, config?: { supabaseUrl?: string; supabaseKey?: string; fetch?: FetchLike }) {
+  constructor(client: SupabaseClient, config?: {
+    /**
+     * Base project URL; truthy override takes precedence over client metadata. The adapter appends /graphql/v1 without trimming slashes.
+     */
+    supabaseUrl?: string;
+    /**
+     * API key used for apikey and bearer fallback when no session access token exists. Use credentials appropriate to the runtime and its authorization boundary.
+     */
+    supabaseKey?: string;
+    /**
+     * Optional host transport, defaulting to bound global fetch. QueryOptions.signal is not forwarded.
+     */
+    fetch?: FetchLike }) {
     this.client = client;
     this.fetchFn = config?.fetch ?? globalThis.fetch.bind(globalThis);
 
@@ -269,11 +299,20 @@ export class SupabaseGraphQLAdapter implements DataAccessAdapter {
   }
 
   /**
-   * Retrieves a list of documents matching the criteria using a GraphQL query.
-   * @param collection Collection name
-   * @param filter Filter criteria
-   * @param options Query options
-   * @returns Array of retrieved documents
+   * Queries one connection page using generated selection/filter text.
+   * @typeParam T - Expected node shape; defaults to unknown and is not validated.
+   * @param collection - Schema-compatible collection name converted from snake_case to camelCase, then suffixed with Collection.
+   * @param filter - Supported comparisons without logical operators or $nin. Dotted keys become nested fields; unsupported operators reject.
+   * @param options - Projection/populate shape for selection. With neither, only id is selected and a warning is logged. Relation names must match the schema; sort, limit, skip and signal are ignored.
+   * @returns Connection edge nodes, or [] when edges is absent. No later pages are fetched and empty projections can produce invalid GraphQL selections.
+   * @throws Rejects on filter validation, transport/session/JSON failure, GraphQL errors or incompatible response shape. Collection/selection names must be trusted schema identifiers.
+   * @example
+   * ```ts
+   * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+   * export async function taskTitles(adapter: SupabaseGraphQLAdapter) {
+   *   return adapter.find<{ id: string; title: string }>('tasks', { status: 'open' }, { projection: ['id', 'title'] });
+   * }
+   * ```
    */
   async find<T = unknown>(
     collection: string,
@@ -313,11 +352,19 @@ export class SupabaseGraphQLAdapter implements DataAccessAdapter {
 
   // ... Stubs for other methods ...
   /**
-   * Retrieves the document corresponding to the specified ID (not implemented).
-   * @param _collection Collection name
-   * @param _id Document ID
-   * @param _options Query options
-   * @returns Retrieved document, or null
+   * Unimplemented lookup stub that performs no request.
+   * @typeParam T - Reserved expected record shape; no record is fetched.
+   * @param _collection - Ignored.
+   * @param _id - Ignored.
+   * @param _options - Ignored.
+   * @returns Always resolves null, regardless of whether the record exists.
+   * @example
+   * ```ts
+   * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+   * export async function lookupStub(adapter: SupabaseGraphQLAdapter) {
+   *   return adapter.findOne('tasks', 'task-1'); // Always null; use a supported adapter for lookup.
+   * }
+   * ```
    */
   async findOne<T = unknown>(
     _collection: string,
@@ -327,11 +374,25 @@ export class SupabaseGraphQLAdapter implements DataAccessAdapter {
     return null;
   }
   /**
-   * Creates a document (not implemented).
-   * @param _collection Collection name
-   * @param _data Data to create
-   * @param _options Query options
-   * @returns Created document
+   * Unimplemented mutation stub that performs no request or write.
+   * @typeParam T - Reserved result shape; this stub never resolves with a value.
+   * @param _collection - Ignored.
+   * @param _data - Ignored.
+   * @param _options - Ignored.
+   * @returns A promise that always rejects.
+   * @throws Always rejects with Error("Not impl").
+   * @example
+   * ```ts
+   * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+   * export async function unsupportedWrite(adapter: SupabaseGraphQLAdapter) {
+   *   try {
+   *     await adapter.create('tasks', { title: 'Draft' });
+   *   } catch (error) {
+   *     // Expected for this unimplemented operation; select a supported write adapter.
+   *     return error;
+   *   }
+   * }
+   * ```
    */
   async create<T = unknown>(
     _collection: string,
@@ -341,12 +402,26 @@ export class SupabaseGraphQLAdapter implements DataAccessAdapter {
     throw new Error('Not impl');
   }
   /**
-   * Updates a document (not implemented).
-   * @param _collection Collection name
-   * @param _id Document ID to update
-   * @param _data Update data
-   * @param _options Query options
-   * @returns Updated document
+   * Unimplemented mutation stub that performs no request or write.
+   * @typeParam T - Reserved result shape; this stub never resolves with a value.
+   * @param _collection - Ignored.
+   * @param _id - Ignored.
+   * @param _data - Ignored.
+   * @param _options - Ignored.
+   * @returns A promise that always rejects.
+   * @throws Always rejects with Error("Not impl").
+   * @example
+   * ```ts
+   * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+   * export async function unsupportedWrite(adapter: SupabaseGraphQLAdapter) {
+   *   try {
+   *     await adapter.update('tasks', 'task-1', { title: 'Draft' });
+   *   } catch (error) {
+   *     // Expected for this unimplemented operation; select a supported write adapter.
+   *     return error;
+   *   }
+   * }
+   * ```
    */
   async update<T = unknown>(
     _collection: string,
@@ -357,12 +432,26 @@ export class SupabaseGraphQLAdapter implements DataAccessAdapter {
     throw new Error('Not impl');
   }
   /**
-   * Replaces a document (not implemented).
-   * @param _collection Collection name
-   * @param _id Document ID to replace
-   * @param _data Replacement data
-   * @param _options Query options
-   * @returns Replaced document
+   * Unimplemented mutation stub that performs no request or write.
+   * @typeParam T - Reserved result shape; this stub never resolves with a value.
+   * @param _collection - Ignored.
+   * @param _id - Ignored.
+   * @param _data - Ignored.
+   * @param _options - Ignored.
+   * @returns A promise that always rejects.
+   * @throws Always rejects with Error("Not impl").
+   * @example
+   * ```ts
+   * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+   * export async function unsupportedWrite(adapter: SupabaseGraphQLAdapter) {
+   *   try {
+   *     await adapter.replace?.('tasks', 'task-1', { title: 'Draft' });
+   *   } catch (error) {
+   *     // Expected for this unimplemented operation; select a supported write adapter.
+   *     return error;
+   *   }
+   * }
+   * ```
    */
   async replace?<T = unknown>(
     _collection: string,
@@ -373,22 +462,44 @@ export class SupabaseGraphQLAdapter implements DataAccessAdapter {
     throw new Error('Not impl');
   }
   /**
-   * Deletes a document (not implemented).
-   * @param _collection Collection name
-   * @param _id Document ID to delete
-   * @param _options Query options
-   * @returns Deleted document
+   * Unimplemented mutation stub that performs no request or write.
+   * @typeParam T - Reserved result shape; this stub never resolves with a value.
+   * @param _collection - Ignored.
+   * @param _id - Ignored.
+   * @param _options - Ignored.
+   * @returns A promise that always rejects.
+   * @throws Always rejects with Error("Not impl").
+   * @example
+   * ```ts
+   * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+   * export async function unsupportedWrite(adapter: SupabaseGraphQLAdapter) {
+   *   try {
+   *     await adapter.delete('tasks', 'task-1');
+   *   } catch (error) {
+   *     // Expected for this unimplemented operation; select a supported write adapter.
+   *     return error;
+   *   }
+   * }
+   * ```
    */
   async delete<T = unknown>(_collection: string, _id: string, _options?: QueryOptions): Promise<T> {
     throw new Error('Not impl');
   }
 
   /**
-   * Retrieves the total count of documents matching the criteria.
-   * @param collection Collection name
-   * @param filter Filter criteria
-   * @param _options Query options
-   * @returns Number of matching documents
+   * Queries the connection totalCount field for a supported filter.
+   * @param collection - Schema-compatible collection name converted to camelCase and suffixed with Collection.
+   * @param filter - Supported comparison filter; no logical operators or $nin.
+   * @param _options - Ignored, including signal.
+   * @returns totalCount or zero when absent/falsy; the field must be exposed by the host schema and is not runtime-validated.
+   * @throws Rejects on filter validation, transport/session/JSON failure, GraphQL errors or incompatible response shape.
+   * @example
+   * ```ts
+   * import { SupabaseGraphQLAdapter } from '@alneas/appkit-core/data/supabase-graphql';
+   * export async function openTaskCount(adapter: SupabaseGraphQLAdapter) {
+   *   return adapter.count('tasks', { status: 'open' });
+   * }
+   * ```
    */
   async count(collection: string, filter?: Filter, _options?: QueryOptions): Promise<number> {
     const camelCollection = this.toCamelCase(collection);

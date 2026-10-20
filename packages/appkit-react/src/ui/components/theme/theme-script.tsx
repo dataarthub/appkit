@@ -1,5 +1,20 @@
 /**
- * 初期レンダリング時の画面のちらつき（FOUC）を防ぐため、HTMLの読み込み直後にローカルストレージやシステム設定からテーマ（ダーク/ライト、カラー、スペース等）を読み込み、適用するためのインラインスクリプトコンポーネント。
+ * Emits an inline script that applies stored theme classes before client rendering.
+ *
+ * @returns Script element whose contents read localStorage and prefers-color-scheme.
+ *
+ * @remarks Uses only the fixed default vite-ui-theme, vite-ui-color-theme and
+ * vite-ui-spacing-theme keys, even if ThemeProvider uses custom keys. It adds root
+ * classes without first removing existing classes; failures are swallowed. It does not
+ * apply custom colors. Place early in server HTML and allow this script under the host
+ * CSP; no nonce prop is accepted. Import Appkit styles in the host.
+ *
+ * @example
+ * ```tsx
+ * import '@alneas/appkit-react/styles';
+ * import { ThemeScript } from '@alneas/appkit-react/ui/theme';
+ * export function DocumentHead() { return <head><ThemeScript /></head>; }
+ * ```
  */
 export function ThemeScript() {
   const script = `

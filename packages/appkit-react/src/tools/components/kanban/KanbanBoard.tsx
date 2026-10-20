@@ -1,40 +1,3 @@
-/**
- * Kanban Board Component
- *
- * カンバンボードメインコンポーネント。@dnd-kit を使用したドラッグ&ドロップ対応。
- *
- * ## Features
- * - ドラッグ&ドロップによるタスク移動
- * - カラムごとのWIP制限
- * - ソート機能（優先度、期限、タイトル）
- * - 楽観的UIアップデート
- * - カスタムカードレンダラー
- *
- * ## AI/Automation Attributes
- * - `data-testid`: Container element
- * - `data-task-count`: Number of tasks
- *
- * @example
- * ```tsx
- * import { KanbanBoard, DEFAULT_KANBAN_COLUMNS } from '@alneas/appkit-react/tools/kanban';
- *
- * const tasks = [
- *   { id: '1', title: 'Task 1', status: 'todo', priority: 'high' },
- *   { id: '2', title: 'Task 2', status: 'in_progress', priority: 'medium' },
- * ];
- *
- * <KanbanBoard
- *   tasks={tasks}
- *   columns={DEFAULT_KANBAN_COLUMNS}
- *   onTaskClick={(task) => openDetail(task.id)}
- *   onStatusChange={(taskId, newStatus) => updateTaskStatus(taskId, newStatus)}
- * />
- * ```
- *
- * @param props - {@link KanbanBoardProps}
- * @returns カンバンボードコンポーネント
- */
-
 import * as React from 'react';
 import { ArrowUpDown } from 'lucide-react';
 
@@ -75,7 +38,25 @@ const PRIORITY_MAP: Record<string, number> = {
 };
 
 /**
- * カンバンボード。Compound版とD&D処理を共有し、ソートと楽観的更新を追加します。
+ * Renders sortable task columns with optional drag-and-drop status changes and optimistic state.
+ * @param props - Task/column arrays and callbacks; see {@link KanbanBoardProps}.
+ * @returns The board with optional sorting controls and one column per supplied column definition.
+ * @remarks The ref prop forwards to the rendered div. Import Appkit CSS. statusField defaults to status, showSort to true, initialSort to
+ *  default and readOnly to false. Local optimistic status changes are enabled unless
+ *  disableOptimisticUpdates is true; receiving a different tasks array resets optimistic state.
+ * onStatusChange receives the task ID and target column status; the host owns persistence.
+ * The root exposes data-slot="kanban-board" and data-testid only when testId is supplied.
+ * It does not render data-task-count. No external drag-and-drop provider is required.
+ * @example
+ * ```tsx
+ * import { KanbanBoard, DEFAULT_KANBAN_COLUMNS, type KanbanTask } from '@alneas/appkit-react/tools/kanban';
+ * import '@alneas/appkit-react/styles';
+ *
+ * const tasks: KanbanTask[] = [{ id: 'task-1', title: 'Review', status: 'todo', priority: 'high' }];
+ * export function ReviewBoard() {
+ *   return <KanbanBoard testId="review-board" tasks={tasks} columns={DEFAULT_KANBAN_COLUMNS} readOnly />;
+ * }
+ * ```
  */
 export const KanbanBoard = React.forwardRef<HTMLDivElement, KanbanBoardProps>(
   (

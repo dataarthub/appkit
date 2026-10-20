@@ -6,35 +6,95 @@ import { Drawer as DrawerPrimitive } from 'vaul-base';
 import { cn } from '../../lib/utils';
 
 /**
- * ドロワー（画面端からスライドして表示されるパネル）のルートコンポーネント。
+ * Coordinates open state and interaction context for the popup.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered Drawer composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function Drawer({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
   return <DrawerPrimitive.Root data-slot='drawer' {...props} />;
 }
 
 /**
- * ドロワーを開くためのトリガーボタン。
+ * Renders the control that requests opening its popup.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerTrigger({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
   return <DrawerPrimitive.Trigger data-slot='drawer-trigger' {...props} />;
 }
 
 /**
- * ドロワーの要素をポータル経由でDOMの別の場所に描画するコンポーネント。
+ * Mounts popup descendants in a separate DOM container.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerPortal composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerPortal({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
   return <DrawerPrimitive.Portal data-slot='drawer-portal' {...props} />;
 }
 
 /**
- * ドロワーを閉じるためのトリガーボタン。
+ * Renders a control that requests closing its popup.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerClose composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerClose({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
   return <DrawerPrimitive.Close data-slot='drawer-close' {...props} />;
 }
 
 /**
- * ドロワーの背景に表示される半透明のオーバーレイ。
+ * Renders the popup backdrop with open/closed animation classes.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerOverlay composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerOverlay({
   className,
@@ -53,7 +113,19 @@ function DrawerOverlay({
 }
 
 /**
- * ドロワーのコンテンツ本体を格納するコンテナ。
+ * Portals the popup and its positioning/backdrop composition.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerContent({
   className,
@@ -79,7 +151,19 @@ function DrawerContent({
 }
 
 /**
- * ドロワー上部に表示するタイトルや説明用のヘッダー領域。
+ * Groups popup heading and explanatory content.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerHeader composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -95,7 +179,19 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * ドロワー下部のアクションボタンなどを配置するフッター領域。
+ * Lays out popup actions below its content.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerFooter composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -108,7 +204,19 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 /**
- * ドロワーのタイトルテキスト。
+ * Provides the accessible title of the associated popup.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerTitle composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerTitle({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Title>) {
   return (
@@ -121,7 +229,19 @@ function DrawerTitle({ className, ...props }: React.ComponentProps<typeof Drawer
 }
 
 /**
- * ドロワーの詳細な説明や補足情報を表示するテキストコンポーネント。
+ * Provides the accessible explanatory text of the associated popup.
+ * @param props - Component attributes and children accepted by the declared native/underlying prop type; className customizes wrapper styling.
+ * @returns The rendered DrawerDescription composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose trigger, content, title and description inside Drawer; the underlying primitive owns open state and focus. Content supplies its own portal and overlay. Separate lower-level exports support custom compositions, without requiring an application-level popup provider.
+ * @example
+ * ```tsx
+ * import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Drawer><DrawerTrigger>Open details</DrawerTrigger><DrawerContent><DrawerTitle>Details</DrawerTitle><DrawerDescription>Project information</DrawerDescription></DrawerContent></Drawer>);
+ * }
+ * ```
  */
 function DrawerDescription({
   className,

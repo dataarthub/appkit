@@ -6,6 +6,21 @@ import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 import { cn } from '../../lib/utils';
 
+/**
+ * Coordinates expansion state for a collection of disclosure items.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Accordion composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose triggers and content inside an AccordionItem under Accordion. Base UI owns selection, focus and keyboard behavior; the wrapper adds no expansion defaults. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Accordion defaultValue={["details"]}><AccordionItem value="details"><AccordionTrigger>Details</AccordionTrigger><AccordionContent>Project details</AccordionContent></AccordionItem></Accordion>);
+ * }
+ * ```
+ */
 const Accordion = React.forwardRef<HTMLDivElement, AccordionPrimitive.Root.Props>(
   ({ className, ...props }, ref) => (
     <AccordionPrimitive.Root
@@ -18,6 +33,21 @@ const Accordion = React.forwardRef<HTMLDivElement, AccordionPrimitive.Root.Props
 );
 Accordion.displayName = 'Accordion';
 
+/**
+ * Associates one disclosure value with its trigger and collapsible panel.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AccordionItem composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose triggers and content inside an AccordionItem under Accordion. Base UI owns selection, focus and keyboard behavior; the wrapper adds no expansion defaults. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Accordion defaultValue={["details"]}><AccordionItem value="details"><AccordionTrigger>Details</AccordionTrigger><AccordionContent>Project details</AccordionContent></AccordionItem></Accordion>);
+ * }
+ * ```
+ */
 const AccordionItem = React.forwardRef<HTMLDivElement, AccordionPrimitive.Item.Props>(
   ({ className, ...props }, ref) => (
     <AccordionPrimitive.Item
@@ -30,6 +60,21 @@ const AccordionItem = React.forwardRef<HTMLDivElement, AccordionPrimitive.Item.P
 );
 AccordionItem.displayName = 'AccordionItem';
 
+/**
+ * Renders a disclosure button inside a heading with open/closed chevron indicators.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AccordionTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose triggers and content inside an AccordionItem under Accordion. Base UI owns selection, focus and keyboard behavior; the wrapper adds no expansion defaults. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Accordion defaultValue={["details"]}><AccordionItem value="details"><AccordionTrigger>Details</AccordionTrigger><AccordionContent>Project details</AccordionContent></AccordionItem></Accordion>);
+ * }
+ * ```
+ */
 const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionPrimitive.Trigger.Props>(
   ({ className, children, ...props }, ref) => (
     <AccordionPrimitive.Header className='flex'>
@@ -57,6 +102,21 @@ const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionPrimitive.
 );
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 
+/**
+ * Renders an animated disclosure panel with an inner content wrapper.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered AccordionContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Compose triggers and content inside an AccordionItem under Accordion. Base UI owns selection, focus and keyboard behavior; the wrapper adds no expansion defaults. The ref prop forwards to the rendered control or container declared by the component ref type. className styles the inner content div, while remaining panel props target the Base UI panel.
+ * @example
+ * ```tsx
+ * import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Accordion defaultValue={["details"]}><AccordionItem value="details"><AccordionTrigger>Details</AccordionTrigger><AccordionContent>Project details</AccordionContent></AccordionItem></Accordion>);
+ * }
+ * ```
+ */
 const AccordionContent = React.forwardRef<HTMLDivElement, AccordionPrimitive.Panel.Props>(
   ({ className, children, ...props }, ref) => (
     <AccordionPrimitive.Panel

@@ -6,14 +6,38 @@ import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip';
 import { cn } from '../../lib/utils';
 
 /**
- * ツールチップの表示遅延時間などの設定を子コンポーネントに提供するプロバイダー。
+ * Provides shared Base UI tooltip timing configuration with a zero-millisecond default delay.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: delay=0.
+ * @returns The rendered TooltipProvider composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Trigger and Content require Tooltip context. Tooltip inserts its own Provider with delay=0, so wrapping it in a separate TooltipProvider does not pass a different delay through that inner provider. Content supplies portal/positioner. Timing offsets are milliseconds; positional offsets are CSS pixels.
+ * @example
+ * ```tsx
+ * import { Tooltip, TooltipTrigger, TooltipContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Tooltip><TooltipTrigger>Help</TooltipTrigger><TooltipContent>Learn about this field</TooltipContent></Tooltip>);
+ * }
+ * ```
  */
 function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Props) {
   return <TooltipPrimitive.Provider data-slot='tooltip-provider' delay={delay} {...props} />;
 }
 
 /**
- * 要素をホバーまたはフォーカスした際、補足テキスト（ツールチップ）を表示するルートコンポーネント。
+ * Creates a tooltip root inside its own zero-delay TooltipProvider.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered Tooltip composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Trigger and Content require Tooltip context. Tooltip inserts its own Provider with delay=0, so wrapping it in a separate TooltipProvider does not pass a different delay through that inner provider. Content supplies portal/positioner. Timing offsets are milliseconds; positional offsets are CSS pixels.
+ * @example
+ * ```tsx
+ * import { Tooltip, TooltipTrigger, TooltipContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Tooltip><TooltipTrigger>Help</TooltipTrigger><TooltipContent>Learn about this field</TooltipContent></Tooltip>);
+ * }
+ * ```
  */
 function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
   return (
@@ -24,7 +48,19 @@ function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
 }
 
 /**
- * ツールチップを表示するためのトリガー要素（ホバー対象）。
+ * Renders the target that opens its surrounding tooltip on the upstream interactions.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered TooltipTrigger composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Trigger and Content require Tooltip context. Tooltip inserts its own Provider with delay=0, so wrapping it in a separate TooltipProvider does not pass a different delay through that inner provider. Content supplies portal/positioner. Timing offsets are milliseconds; positional offsets are CSS pixels.
+ * @example
+ * ```tsx
+ * import { Tooltip, TooltipTrigger, TooltipContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Tooltip><TooltipTrigger>Help</TooltipTrigger><TooltipContent>Learn about this field</TooltipContent></Tooltip>);
+ * }
+ * ```
  */
 function TooltipTrigger({
   children,
@@ -40,6 +76,21 @@ function TooltipTrigger({
   );
 }
 
+/**
+ * Portals and positions supplemental tooltip content relative to its trigger.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling. Wrapper defaults: side='top', sideOffset=4, align='center', alignOffset=0.
+ * @returns The rendered TooltipContent composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Trigger and Content require Tooltip context. Tooltip inserts its own Provider with delay=0, so wrapping it in a separate TooltipProvider does not pass a different delay through that inner provider. Content supplies portal/positioner. Timing offsets are milliseconds; positional offsets are CSS pixels. The ref prop forwards to the rendered control or container declared by the component ref type.
+ * @example
+ * ```tsx
+ * import { Tooltip, TooltipTrigger, TooltipContent } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<Tooltip><TooltipTrigger>Help</TooltipTrigger><TooltipContent>Learn about this field</TooltipContent></Tooltip>);
+ * }
+ * ```
+ */
 const TooltipContent = React.forwardRef<
   HTMLDivElement,
   TooltipPrimitive.Popup.Props &

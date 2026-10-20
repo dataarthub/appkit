@@ -4,47 +4,57 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 
 /**
- * シンプルな棒グラフのプロップス
+ * Input data, keys and presentation options for the chart wrapper.
+ * @see SimpleBarChart
  */
 interface SimpleBarChartProps {
-  /** グラフデータ配列 */
+  /**
+   * Already-loaded records in plot order; required numeric values and category keys must be present.
+   */
   data: Array<Record<string, unknown>>;
-  /** X軸に使用するデータキー */
+  /**
+   * Record key used for the horizontal axis; category charts format ticks to the first five characters.
+   */
   xAxisKey: string;
-  /** 棒グラフとして表示するデータキー */
+  /**
+   * Record key containing the single numeric bar metric.
+   */
   barKey: string;
-  /** カードのタイトル */
+  /**
+   * Visible card heading.
+   */
   title: string;
-  /** カードの説明（オプション） */
+  /**
+   * Optional supporting card text; omitted means no description.
+   */
   description?: string;
-  /** チャート設定 */
+  /**
+   * Optional ChartConfig replacing the generated config; keys should match plotted series. The wrapper does not merge missing entries.
+   */
   config?: ChartConfig;
-  /** グラフの高さ */
+  /**
+   * Requested chart height/minimum height. See the owning component: only SimpleBarChart applies inline style; other wrappers build a dynamic min-height utility class.
+   */
   height?: number | string;
-  /** 棒グラフの色 */
+  /**
+   * Bar fill CSS color; defaults to var(--color-bar), independently of barKey.
+   */
   barColor?: string;
 }
 
 /**
- * シンプルな棒グラフ
- *
- * カテゴリ別の値を比較するための棒グラフコンポーネント。
- *
+ * Renders one numeric series as a rounded bar chart.
+ * @param props - Loaded chart data, series/axis keys and card/presentation settings; see SimpleBarChartProps. Wrapper defaults: height='200px', barColor='var(--color-bar)'.
+ * @returns The rendered SimpleBarChart composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Import Appkit CSS and install the optional recharts peer. The wrapper supplies ChartContainer context; no external query or chart provider is required. The host supplies already-loaded numeric data and a container with measurable dimensions. config replaces the generated series config rather than merging it. Series configuration emits --color-KEY variables; provide valid CSS colors when overriding defaults. This component does not fetch, aggregate or persist data. height defaults to 200px and is applied as an inline style (numbers are React CSS pixel values). barColor defaults to var(--color-bar), which does not automatically match a differently named barKey; provide a matching variable or literal color.
  * @example
  * ```tsx
  * import { SimpleBarChart } from '@alneas/appkit-react/tools/chart';
+ * import '@alneas/appkit-react/styles';
  *
- * const data = [
- *   { month: '1月', sales: 100 },
- *   { month: '2月', sales: 150 },
- * ];
- *
- * <SimpleBarChart
- *   data={data}
- *   xAxisKey="month"
- *   barKey="sales"
- *   title="月別売上"
- * />
+ * export function Example() {
+ *   return (<SimpleBarChart title="Monthly sales" data={[{ month: "January", sales: 100, x: 1, size: 60, fill: "#2563eb" }, { month: "February", sales: 150, x: 2, size: 90, fill: "#7c3aed" }]} barKey="sales" xAxisKey="month" barColor="var(--color-sales)" config={{ sales: { label: "Sales", color: "#2563eb" } }} />);
+ * }
  * ```
  */
 export function SimpleBarChart({

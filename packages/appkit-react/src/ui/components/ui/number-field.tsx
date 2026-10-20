@@ -7,7 +7,19 @@ import { Minus, Plus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 /**
- * 数値入力フィールド全体のルートコンポーネント。
+ * Coordinates an accessible numeric value and its editing controls.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NumberField composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All editing parts require NumberField context. Base UI owns parsing, value constraints, stepping and pointer/keyboard behavior; this wrapper does not implement additional numeric defaults. Buttons render fixed plus/minus children.
+ * @example
+ * ```tsx
+ * import { NumberField, NumberFieldInput, NumberFieldGroup, NumberFieldScrubArea, NumberFieldIncrement, NumberFieldDecrement } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NumberField defaultValue={1} min={0}><NumberFieldScrubArea>Quantity</NumberFieldScrubArea><NumberFieldGroup><NumberFieldDecrement aria-label="Decrease" /><NumberFieldInput aria-label="Quantity" /><NumberFieldIncrement aria-label="Increase" /></NumberFieldGroup></NumberField>);
+ * }
+ * ```
  */
 function NumberField({
   className,
@@ -23,7 +35,19 @@ function NumberField({
 }
 
 /**
- * 数値を直接入力するためのテキストフィールド。
+ * Renders the numeric text input for its NumberField root.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NumberFieldInput composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All editing parts require NumberField context. Base UI owns parsing, value constraints, stepping and pointer/keyboard behavior; this wrapper does not implement additional numeric defaults. Buttons render fixed plus/minus children.
+ * @example
+ * ```tsx
+ * import { NumberField, NumberFieldInput, NumberFieldGroup, NumberFieldScrubArea, NumberFieldIncrement, NumberFieldDecrement } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NumberField defaultValue={1} min={0}><NumberFieldScrubArea>Quantity</NumberFieldScrubArea><NumberFieldGroup><NumberFieldDecrement aria-label="Decrease" /><NumberFieldInput aria-label="Quantity" /><NumberFieldIncrement aria-label="Increase" /></NumberFieldGroup></NumberField>);
+ * }
+ * ```
  */
 function NumberFieldInput({
   className,
@@ -42,7 +66,19 @@ function NumberFieldInput({
 }
 
 /**
- * ドラッグ操作によって数値を増減させることができるスクラブ操作領域。
+ * Renders a draggable region that adjusts its NumberField value.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NumberFieldScrubArea composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All editing parts require NumberField context. Base UI owns parsing, value constraints, stepping and pointer/keyboard behavior; this wrapper does not implement additional numeric defaults. Buttons render fixed plus/minus children.
+ * @example
+ * ```tsx
+ * import { NumberField, NumberFieldInput, NumberFieldGroup, NumberFieldScrubArea, NumberFieldIncrement, NumberFieldDecrement } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NumberField defaultValue={1} min={0}><NumberFieldScrubArea>Quantity</NumberFieldScrubArea><NumberFieldGroup><NumberFieldDecrement aria-label="Decrease" /><NumberFieldInput aria-label="Quantity" /><NumberFieldIncrement aria-label="Increase" /></NumberFieldGroup></NumberField>);
+ * }
+ * ```
  */
 function NumberFieldScrubArea({
   className,
@@ -61,7 +97,19 @@ function NumberFieldScrubArea({
 }
 
 /**
- * 入力フィールドと増減用のボタンなどの子要素をまとめるグループコンテナ。
+ * Visually groups the numeric input and increment/decrement controls.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NumberFieldGroup composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All editing parts require NumberField context. Base UI owns parsing, value constraints, stepping and pointer/keyboard behavior; this wrapper does not implement additional numeric defaults. Buttons render fixed plus/minus children.
+ * @example
+ * ```tsx
+ * import { NumberField, NumberFieldInput, NumberFieldGroup, NumberFieldScrubArea, NumberFieldIncrement, NumberFieldDecrement } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NumberField defaultValue={1} min={0}><NumberFieldScrubArea>Quantity</NumberFieldScrubArea><NumberFieldGroup><NumberFieldDecrement aria-label="Decrease" /><NumberFieldInput aria-label="Quantity" /><NumberFieldIncrement aria-label="Increase" /></NumberFieldGroup></NumberField>);
+ * }
+ * ```
  */
 function NumberFieldGroup({
   className,
@@ -80,7 +128,19 @@ function NumberFieldGroup({
 }
 
 /**
- * 数値を増加させるためのボタン（＋）。
+ * Renders a numeric increment control with a plus icon.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NumberFieldIncrement composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All editing parts require NumberField context. Base UI owns parsing, value constraints, stepping and pointer/keyboard behavior; this wrapper does not implement additional numeric defaults. Buttons render fixed plus/minus children.  children are replaced by the fixed plus/minus icon.
+ * @example
+ * ```tsx
+ * import { NumberField, NumberFieldInput, NumberFieldGroup, NumberFieldScrubArea, NumberFieldIncrement, NumberFieldDecrement } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NumberField defaultValue={1} min={0}><NumberFieldScrubArea>Quantity</NumberFieldScrubArea><NumberFieldGroup><NumberFieldDecrement aria-label="Decrease" /><NumberFieldInput aria-label="Quantity" /><NumberFieldIncrement aria-label="Increase" /></NumberFieldGroup></NumberField>);
+ * }
+ * ```
  */
 function NumberFieldIncrement({
   className,
@@ -101,7 +161,19 @@ function NumberFieldIncrement({
 }
 
 /**
- * 数値を減少させるためのボタン（ー）。
+ * Renders a numeric decrement control with a minus icon.
+ * @param props - Component attributes and children accepted by the declared Base UI or native prop type; className customizes wrapper styling.
+ * @returns The rendered NumberFieldDecrement composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. All editing parts require NumberField context. Base UI owns parsing, value constraints, stepping and pointer/keyboard behavior; this wrapper does not implement additional numeric defaults. Buttons render fixed plus/minus children.  children are replaced by the fixed plus/minus icon.
+ * @example
+ * ```tsx
+ * import { NumberField, NumberFieldInput, NumberFieldGroup, NumberFieldScrubArea, NumberFieldIncrement, NumberFieldDecrement } from '@alneas/appkit-react/ui';
+ * import '@alneas/appkit-react/styles';
+ *
+ * export function Example() {
+ *   return (<NumberField defaultValue={1} min={0}><NumberFieldScrubArea>Quantity</NumberFieldScrubArea><NumberFieldGroup><NumberFieldDecrement aria-label="Decrease" /><NumberFieldInput aria-label="Quantity" /><NumberFieldIncrement aria-label="Increase" /></NumberFieldGroup></NumberField>);
+ * }
+ * ```
  */
 function NumberFieldDecrement({
   className,

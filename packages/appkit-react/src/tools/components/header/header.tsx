@@ -24,43 +24,129 @@ import { SidebarTrigger } from "../sidebar/sidebar";
 import type { Locale } from '../../paraglide/runtime.js';
 
 /**
- * ヘッダーのプロップス
+ * Host inputs and presentation settings for Header.
+ * @remarks Inherited native or primitive props keep their upstream types and behavior; this declaration documents only the wrapper-owned options.
+ * @see Header
  */
 export interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
-  /** ロゴ要素 */
+  /**
+   * Optional logo content shown beside title.
+   */
   logo?: React.ReactNode;
-  /** タイトル */
+  /**
+   * Application title; hidden below md when logo is present.
+   */
   title?: string;
-  /** メニュー位置 */
+  /**
+   * Sheet-menu placement; defaults to right.
+   */
   menuPosition?: 'left' | 'right';
-  /** メニューアイテム */
-  menuItems?: { label: string; onClick?: () => void; href?: string; icon?: React.ReactNode }[];
-  /** ナビゲーションアイテム */
-  navItems?: { label: string; onClick?: () => void; href?: string; active?: boolean }[];
-  /** ユーザー情報 */
+  /**
+   * Sheet-menu entries; empty/omitted means no sheet trigger. href entries use anchors, otherwise Buttons.
+   */
+  menuItems?: { /**
+   * Visible text for the navigation/menu entry.
+   */
+  label: string; /**
+   * Host action invoked when this entry is clicked; the host owns any navigation or asynchronous work.
+   * @returns No value; complete the host callback action.
+   */
+  onClick?: () => void; /**
+   * Optional anchor destination; no router integration or authorization checks are installed.
+   */
+  href?: string; /**
+   * Optional leading sheet-menu icon; user-menu icon fields are currently ignored.
+   */
+  icon?: React.ReactNode }[];
+  /**
+   * Desktop-only navigation anchors; the host supplies href/onClick and active state.
+   */
+  navItems?: { /**
+   * Visible text for the navigation/menu entry.
+   */
+  label: string; /**
+   * Host action invoked when this entry is clicked; the host owns any navigation or asynchronous work.
+   * @returns No value; complete the host callback action.
+   */
+  onClick?: () => void; /**
+   * Optional anchor destination; no router integration or authorization checks are installed.
+   */
+  href?: string; /**
+   * Adds desktop navigation active styling when true; omitted/false uses inactive styling.
+   */
+  active?: boolean }[];
+  /**
+   * Host-supplied profile display data; omitted hides the avatar menu. It is not validated as authenticated identity.
+   */
   user?: {
+    /**
+     * User display name; also supplies the two-character uppercase avatar fallback.
+     */
     name: string;
+    /**
+     * Optional user email shown in the avatar menu.
+     */
     email?: string;
+    /**
+     * Optional avatar image URL; missing/failing images use the fallback.
+     */
     image?: string;
+    /**
+     * Optional avatar fallback text; falsy values use the first two name characters.
+     */
     initials?: string;
   };
-  /** ユーザーメニューアイテム */
-  userMenuItems?: { label: string; onClick?: () => void; href?: string; icon?: React.ReactNode }[];
-  /** ログアウトコールバック */
+  /**
+   * Avatar dropdown entries; href creates an anchor and onClick is attached to the menu item. Accepted icon fields are currently ignored.
+   */
+  userMenuItems?: { /**
+   * Visible text for the navigation/menu entry.
+   */
+  label: string; /**
+   * Host action invoked when this entry is clicked; the host owns any navigation or asynchronous work.
+   * @returns No value; complete the host callback action.
+   */
+  onClick?: () => void; /**
+   * Optional anchor destination; no router integration or authorization checks are installed.
+   */
+  href?: string; /**
+   * Optional leading sheet-menu icon; user-menu icon fields are currently ignored.
+   */
+  icon?: React.ReactNode }[];
+  /**
+   * Called from the optional logout menu item; the host performs logout and invalidates its own session/cache.
+   * @returns No value; complete the host callback action.
+   */
   onLogout?: () => void;
-  /** ダーク/ライトモード切替ボタン表示 */
+  /**
+   * Shows the main and sheet theme-mode controls; defaults to true.
+   */
   showThemeToggle?: boolean;
-  /** カラーテーマ切替ボタン表示 */
+  /**
+   * Shows the main and sheet palette controls; defaults to true.
+   */
   showColorToggle?: boolean;
-  /** スペーシング切替ボタン表示 */
+  /**
+   * Shows the main and sheet spacing controls; defaults to true.
+   */
   showSpaceToggle?: boolean;
-  /** 言語切替ボタン表示 */
+  /**
+   * Shows the main and sheet locale toggles; defaults to true.
+   */
   showLanguageToggle?: boolean;
-  /** 言語変更時のコールバック */
+  /**
+   * Controlled locale callback forwarded only to the main header toggle; the sheet toggle uses global runtime behavior.
+   * @param lang - Host callback input described above.
+   * @returns No value; complete the host callback action.
+   */
   onLanguageChange?: (lang: Locale) => void;
-  /** 現在の言語 */
+  /**
+   * Locale override forwarded only to the main header toggle; omitted reads runtime state.
+   */
   currentLanguage?: Locale;
-  /** 追加アクション */
+  /**
+   * Additional action content displayed in the right action group.
+   */
   actions?: React.ReactNode;
 }
 
@@ -136,25 +222,20 @@ const MobileMenu: React.FC<{
 );
 
 /**
- * ヘッダーコンポーネント
- *
- * ロゴ、ナビゲーション、テーマ切り替え、ユーザーメニューを含む
- * レスポンシブなヘッダーコンポーネント。
- *
+ * Renders a sticky application header with navigation, theme/locale controls and an optional user menu.
+ * @param props - Header configuration and native header attributes; className customizes styling, and children are replaced by the built-in layout. Wrapper defaults: menuPosition='right', menuItems=[], navItems=[], userMenuItems=[], showThemeToggle=true, showColorToggle=true, showSpaceToggle=true, showLanguageToggle=true.
+ * @returns The rendered Header composition.
+ * @remarks Import @alneas/appkit-react/styles in the rendering host. Import Appkit CSS. SidebarProvider is required because the header always renders SidebarTrigger, even when hidden by desktop CSS. ThemeProvider supplies working theme controls; locale updates follow LanguageSwitcher. The host owns routing, identity data and logout effects; user is display data, not proof of an authenticated session. Header children are replaced by its built-in layout. navItems are desktop-only anchors; menuItems populate the sheet menu. The sheet language switcher does not receive currentLanguage/onLanguageChange, so those props control only the main header switcher. userMenuItems.icon is accepted but not rendered.
  * @example
  * ```tsx
+ * import { ThemeProvider } from '@alneas/appkit-react/ui/theme';
+ * import { SidebarProvider } from '@alneas/appkit-react/tools/sidebar';
  * import { Header } from '@alneas/appkit-react/tools/header';
+ * import '@alneas/appkit-react/styles';
  *
- * <Header
- *   logo={<img src="/logo.svg" alt="Logo" />}
- *   title="My App"
- *   navItems={[
- *     { label: 'ホーム', href: '/', active: true },
- *     { label: '設定', href: '/settings' },
- *   ]}
- *   user={{ name: '山田太郎', email: 'yamada@example.com' }}
- *   onLogout={() => handleLogout()}
- * />
+ * export function Example() {
+ *   return (<ThemeProvider><SidebarProvider><Header title="Project" navItems={[{ label: "Home", href: "/", active: true }]} menuItems={[{ label: "Help", href: "/help" }]} /></SidebarProvider></ThemeProvider>);
+ * }
  * ```
  */
 export function Header({

@@ -1,8 +1,18 @@
 import { create, StateCreator } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+/**
+ * Persistence namespace and version passed to Zustand middleware.
+ * @see createPersistedStore for usage.
+ */
 type StoreFactoryOptions = {
+  /**
+   * Required localStorage key; use a unique non-secret host namespace.
+   */
   name: string;
+  /**
+   * Persisted state version; defaults to 1, including when supplied as 0. No migration callback is configured.
+   */
   version?: number;
 };
 
@@ -26,10 +36,21 @@ const getStorage = () => {
 };
 
 /**
- * ローカルストレージ（localStorage）への永続化機能を持つ SSR 安全な Zustand ストアを生成します。
- * @param initializer ストアの初期ステートとアクションを定義する StateCreator
- * @param options ストア名やバージョンを設定するオプション
- * @returns Zustand の useStore フック
+ * Creates a Zustand store with JSON localStorage persistence and server no-op storage.
+ * @typeParam T - Store state and action shape.
+ * @param initializer - Zustand state creator defining initial values and actions.
+ * @param options - Storage key and optional version; falsy version uses 1.
+ * @returns Zustand bound store hook with persistence controls supplied by the middleware.
+ * @remarks The server skips hydration and uses inert storage; the browser reads localStorage.
+ * Persisted values can differ from server-rendered defaults. No migration or partialize
+ * is configured; JSON serializable state is persisted under the supplied key. Storage,
+ * serialization and hydration behavior follow Zustand middleware; do not persist secrets.
+ * No React context or CSS is required.
+ * @example
+ * ```ts
+ * import { createPersistedStore } from '@alneas/appkit-react/tools/core';
+ * const usePreferences = createPersistedStore<{ compact: boolean }>(() => ({ compact: false }), { name: 'example-preferences' });
+ * ```
  */
 export function createPersistedStore<T>(
   initializer: StateCreator<T>,

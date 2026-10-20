@@ -23,26 +23,26 @@ const registerSchema = z.object({
 });
 
 /**
- * ソーシャルログインプロバイダーの設定
+ * OAuth button configuration rendered by LoginForm.
  *
- * @example
- * ```tsx
- * const providers: SocialProviderConfig[] = [
- *   { provider: 'google', label: 'Login with Google' },
- *   { provider: 'line-oidc', label: 'LINEでログイン', icon: <LineIcon /> },
- * ];
- * ```
+ * @see LoginForm for complete provider setup.
  */
 export interface SocialProviderConfig {
-  /** プロバイダー識別子（組み込みまたはカスタム OIDC プロバイダー名） */
+    /**
+     * Identifier passed to adapter.loginWithProvider; actual support is host-configured.
+     */
   provider: OAuthProvider;
-  /** ボタンに表示するラベル */
+    /**
+     * Visible button text.
+     */
   label: string;
-  /** アイコン（ReactNode）。省略時はデフォルトアイコンを使用 */
+    /**
+     * Optional icon; omission uses Apple/Google artwork or a generic globe.
+     */
   icon?: React.ReactNode;
 }
 
-/** Apple のデフォルトアイコン */
+/** Default Apple icon. */
 const AppleIcon = () => (
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' className='mr-2 h-4 w-4'>
     <path
@@ -52,7 +52,7 @@ const AppleIcon = () => (
   </svg>
 );
 
-/** Google のデフォルトアイコン */
+/** Default Google icon. */
 const GoogleIcon = () => (
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' className='mr-2 h-4 w-4'>
     <path
@@ -62,7 +62,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-/** カスタムプロバイダー用のデフォルトアイコン（Globe） */
+/** Generic globe for custom providers. */
 const DefaultProviderIcon = () => (
   <svg
     xmlns='http://www.w3.org/2000/svg'
@@ -80,35 +80,40 @@ const DefaultProviderIcon = () => (
   </svg>
 );
 
-/** 組み込みプロバイダーのデフォルトアイコンマップ */
+/** Default artwork for known provider names. */
 const builtInIcons: Record<string, React.ReactNode> = {
   apple: <AppleIcon />,
   google: <GoogleIcon />,
 };
 
-/** デフォルトのソーシャルプロバイダー設定（後方互換用） */
+/** Default Apple and Google button definitions. */
 const defaultSocialProviders: SocialProviderConfig[] = [
   { provider: 'apple', label: m.auth_loginWithApple() },
   { provider: 'google', label: m.auth_loginWithGoogle() },
 ];
 
 /**
- * ログイン用のフォームコンポーネント。メールアドレスとパスワードによる認証、およびソーシャルログインに対応します。
+ * Renders email/password login and optional OAuth provider buttons.
  *
- * @param props - コンポーネントのプロパティ
- * @param props.onSuccess - ログイン成功時のコールバック
- * @param props.socialProviders - ソーシャルログインプロバイダーの設定（省略時は Apple + Google）
- * @param props.showRegisterLink - 新規登録リンクを表示するか（デフォルト: true）
- * @param props.showEmailLogin - メールアドレスとパスワードのログイン欄を表示するか（デフォルト: true）
- * @param props.redirectTo - ソーシャルログイン後の移動先（デフォルト: 現在のドメインの `/`）
- * @param props.onRegisterClick - 新規登録リンククリック時のコールバック（設定するとリンクが表示される）
+ * @param props - Success/navigation callbacks, provider buttons and optional visibility settings.
+ *
+ * @returns Login form with validation, pending state and an error alert.
+ *
+ * @throws Error without AuthProvider; email/OAuth action failures are caught and shown as messages.
+ *
+ * @remarks Requires AuthProvider inside QueryClientProvider, React Hook Form, Zod and Appkit
+ * styles. Email must be valid and password at least six characters before submission.
+ * Email success invokes onSuccess; OAuth success does not. OAuth buttons exist only
+ * when the adapter supplies loginWithProvider. The host configures real authentication.
  *
  * @example
  * ```tsx
- * <LoginForm
- *   onSuccess={() => navigate('/dashboard')}
- *   socialProviders={[{ provider: 'google', label: 'Googleでログイン' }]}
- * />
+ * import '@alneas/appkit-react/styles';
+ * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ * import { AuthProvider, LoginForm, type AuthAdapter } from '@alneas/appkit-react/tools/auth';
+ * export function FormExample({ adapter, queryClient }: { adapter: AuthAdapter; queryClient: QueryClient }) {
+ *   return <QueryClientProvider client={queryClient}><AuthProvider adapter={adapter}><LoginForm socialProviders={[{ provider: 'google', label: 'Google' }]} /></AuthProvider></QueryClientProvider>;
+ * }
  * ```
  */
 export function LoginForm({
@@ -119,11 +124,29 @@ export function LoginForm({
   redirectTo = '/',
   onRegisterClick,
 }: {
+  /**
+   * Optional synchronous callback after successful email/password login; thrown errors become form error messages.
+   */
   onSuccess?: () => void;
+  /**
+   * OAuth button definitions; omission uses Apple and Google, empty array hides buttons.
+   */
   socialProviders?: SocialProviderConfig[];
+  /**
+   * Show the register action only when onRegisterClick also exists; defaults to true.
+   */
   showRegisterLink?: boolean;
+  /**
+   * Show email/password fields and submit button; defaults to true.
+   */
   showEmailLogin?: boolean;
+  /**
+   * OAuth destination resolved against window.location.origin; defaults to /.
+   */
   redirectTo?: string;
+  /**
+   * Optional synchronous click handler for the register action.
+   */
   onRegisterClick?: () => void;
 }) {
   const { login, loginWithProvider } = useAuth();
@@ -242,67 +265,95 @@ export function LoginForm({
 }
 
 /**
- * ユーザー登録フォームの既存フィールド（name/email/password）の表示設定。
- * 各フィールドの表示/非表示、ラベル、プレースホルダーを個別にカスタマイズできます。
+ * Visibility, label and placeholder overrides for the three built-in registration fields.
  *
- * @example
- * ```tsx
- * // name フィールドを非表示にして、email のラベルを変更
- * <RegisterForm fields={{ name: { show: false }, email: { label: 'Email Address' } }} />
- * ```
+ * @remarks All fields default to visible; labels/placeholders are localized. Hiding email
+ * or password does not remove their required schema validation.
+ *
+ * @see RegisterForm for usage.
  */
 export interface RegisterFieldConfig {
-  /** 名前フィールドの設定 */
-  name?: { show?: boolean; label?: string; placeholder?: string };
-  /** メールアドレスフィールドの設定 */
-  email?: { show?: boolean; label?: string; placeholder?: string };
-  /** パスワードフィールドの設定 */
-  password?: { show?: boolean; label?: string; placeholder?: string };
+    /**
+     * Overrides for optional display-name input.
+     */
+  name?: {
+    /** Visibility override; defaults to true. */
+    show?: boolean;
+    /** Localized label override. */
+    label?: string;
+    /** Placeholder override. */
+    placeholder?: string;
+  };
+    /**
+     * Overrides for required email input; hiding it does not skip validation.
+     */
+  email?: {
+    /** Visibility override; defaults to true. */
+    show?: boolean;
+    /** Localized label override. */
+    label?: string;
+    /** Placeholder override. */
+    placeholder?: string;
+  };
+    /**
+     * Overrides for required password input; hiding it does not skip validation.
+     */
+  password?: {
+    /** Visibility override; defaults to true. */
+    show?: boolean;
+    /** Localized label override. */
+    label?: string;
+    /** Placeholder override. */
+    placeholder?: string;
+  };
 }
 
 /**
- * 登録フォームに追加するカスタムフィールドの設定。
- * `type` に応じて適切な入力 UI が自動選択され、`validation` で Zod スキーマを指定すると
- * 自動生成のバリデーションを上書きできます。
+ * Additional registration input rendered and validated locally by RegisterForm.
  *
- * @example
- * ```tsx
- * const extraFields: RegisterExtraField[] = [
- *   { name: 'phone', label: 'Phone', type: 'tel', required: true },
- *   { name: 'birthDate', label: 'Birth Date', type: 'date' },
- *   { name: 'company', label: 'Company', type: 'text' },
- *   { name: 'role', label: 'Role', type: 'select', required: true,
- *     options: [{ label: 'Admin', value: 'admin' }, { label: 'User', value: 'user' }] },
- *   { name: 'agreement', label: 'Agree to terms', type: 'checkbox', required: true },
- * ];
- * ```
+ * @remarks These values are not passed to AuthAdapter.register: the bundled form sends
+ * only email, password and name. Use host-owned persistence to save other fields.
+ * Custom validation overrides automatic type/required rules.
  *
- * カスタムバリデーション:
- * ```tsx
- * { name: 'phone', label: 'Phone', type: 'tel', required: true,
- *   validation: z.string().regex(/^0[0-9]{9,10}$/, 'Invalid phone number') }
- * ```
+ * @see RegisterForm for complete usage.
  */
 export interface RegisterExtraField {
-  /** フィールドのキー名（フォームデータのプロパティ名） */
+    /**
+     * Unique form-data key; avoid built-in email/password/name collisions unless intentionally replacing their schema.
+     */
   name: string;
-  /** ラベル */
+    /**
+     * Visible field label.
+     */
   label: string;
-  /** 入力 UI の種類。`date` はネイティブの日付ピッカー、`tel` はテンキー入力に対応 */
+    /**
+     * Input presentation, default text. tel/url use text input modes, date uses schema date format.
+     */
   type?: 'text' | 'email' | 'tel' | 'date' | 'number' | 'url' | 'password' | 'textarea' | 'select' | 'checkbox';
-  /** プレースホルダー */
+    /**
+     * Optional input hint passed where supported by the rendered control.
+     */
   placeholder?: string;
-  /** 必須フィールドとするか */
+    /**
+     * Add required default validation; omission is optional except optional checkbox still expects a boolean.
+     */
   required?: boolean;
-  /** autocomplete 属性 */
+    /**
+     * Optional browser autocomplete hint where supported.
+     */
   autoComplete?: string;
-  /** `type='select'` の場合の選択肢 */
-  options?: { label: string; value: string }[];
-  /**
-   * カスタム Zod バリデーション。
-   * 省略時は `type` と `required` から自動生成されます。
-   * @example z.string().regex(/^0[0-9]{9,10}$/)
-   */
+    /**
+     * Select choices; defaults to an empty list for a select without options.
+     */
+  options?: {
+    /** Display text. */
+    label: string;
+    /** Submitted choice value. */
+    value: string;
+  }[];
+    /**
+     * Optional Zod schema replacing generated validation for this field.
+     */
   validation?: z.ZodTypeAny;
 }
 
@@ -413,29 +464,28 @@ function renderExtraField(field: RegisterExtraField, control: any) {
 }
 
 /**
- * ユーザー登録用のフォームコンポーネント。メールアドレス、パスワード、および任意の氏名の入力を受け付けます。
- * `fields` で既存フィールドの表示/非表示やラベルを、`extraFields` で任意の追加項目を設定できます。
+ * Renders account registration with built-in field overrides and optional local extra inputs.
  *
- * @param props - コンポーネントのプロパティ
- * @param props.onSuccess - 登録成功時のコールバック
- * @param props.fields - 既存フィールド（name/email/password）の表示カスタマイズ
- * @param props.extraFields - 追加フィールドの定義（電話番号、生年月日など任意の項目）
- * @param props.showLoginLink - ログインページへのリンクを表示するか（デフォルト: true）
- * @param props.onLoginClick - ログインリンククリック時のコールバック
+ * @param props - Registration success/navigation callbacks and field presentation settings.
+ *
+ * @returns Validated form, pending submit button and error feedback.
+ *
+ * @throws Error without AuthProvider; registration and onSuccess failures are shown as form errors.
+ *
+ * @remarks Requires AuthProvider inside QueryClientProvider, React Hook Form, Zod and Appkit
+ * styles. Email must be valid; password requires six characters; name is optional.
+ * Extra inputs are validated and rendered but not persisted by this component: only
+ * email, password and {name} reach adapter.register. Hidden built-in fields remain in
+ * validation. Custom extra schemas can override built-in names, so avoid collisions.
  *
  * @example
  * ```tsx
- * // 基本
- * <RegisterForm onSuccess={() => navigate('/login')} />
- *
- * // name 非表示 + 追加フィールド
- * <RegisterForm
- *   fields={{ name: { show: false } }}
- *   extraFields={[
- *     { name: 'phone', label: 'Phone', type: 'tel', required: true },
- *     { name: 'birthDate', label: 'Birth Date', type: 'date' },
- *   ]}
- * />
+ * import '@alneas/appkit-react/styles';
+ * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ * import { AuthProvider, RegisterForm, type AuthAdapter } from '@alneas/appkit-react/tools/auth';
+ * export function FormExample({ adapter, queryClient }: { adapter: AuthAdapter; queryClient: QueryClient }) {
+ *   return <QueryClientProvider client={queryClient}><AuthProvider adapter={adapter}><RegisterForm fields={{ name: { label: 'Display name' } }} /></AuthProvider></QueryClientProvider>;
+ * }
  * ```
  */
 export function RegisterForm({
@@ -445,10 +495,25 @@ export function RegisterForm({
   showLoginLink = true,
   onLoginClick,
 }: {
+  /**
+   * Optional synchronous callback after registration; thrown errors become form errors.
+   */
   onSuccess?: () => void;
+  /**
+   * Optional visibility/label/placeholder overrides for name, email and password.
+   */
   fields?: RegisterFieldConfig;
+  /**
+   * Optional extra input definitions; validated locally but not forwarded to register.
+   */
   extraFields?: RegisterExtraField[];
+  /**
+   * Show login action when onLoginClick exists; defaults to true.
+   */
   showLoginLink?: boolean;
+  /**
+   * Optional synchronous click handler for the login action.
+   */
   onLoginClick?: () => void;
 }) {
   const { register } = useAuth();

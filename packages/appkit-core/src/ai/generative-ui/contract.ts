@@ -3,18 +3,65 @@ import { jsonSnapshot } from '../internal/json-snapshot';
 import { validateGenerativeUIDocument } from './validation';
 import type { GenerativeUIDocumentResult, GenerativeUIObject, GenerativeUIValue } from './types';
 
-/** Application-owned component data schema; inline draft-07 object schemas only. */
+/**
+ * Application-owned component data schema; inline draft-07 object schemas only.
+ *
+ * @see {@link createGenerativeUIContract} for canonical public-import usage and setup.
+ */
 export interface GenerativeUIComponentSchema {
+
+  /** Explicit registered component name matching an ASCII letter followed by up to 63 letters/digits/underscore/dot/hyphen characters. */
   readonly type: string;
+
+  /** Inline synchronous draft-07 schema with an object root; reference/dialect keys are rejected. */
   readonly dataSchema: GenerativeUIObject;
 }
-/** Shared response schema and non-mutating runtime validators for the same registrations. */
+/**
+ * Shared response schema and non-mutating runtime validators for the same registrations.
+ *
+ * @see {@link createGenerativeUIContract} for canonical public-import usage and setup.
+ */
 export interface GenerativeUIContract {
+
+  /** Frozen composed response schema; runtime validation also checks unique IDs and bounded JSON. */
   readonly schema: GenerativeUIObject;
+
+  /** Frozen component schema registrations used to compose this contract. */
   readonly components: readonly GenerativeUIComponentSchema[];
-  /** Also enforces envelope bounds and unique block IDs, which schema alone cannot express. */
+
+  /**
+   * Also enforces envelope bounds and unique block IDs, which schema alone cannot express.
+   *
+   * @param input - Fully assembled untrusted document to check against envelope bounds and registered schemas.
+   * @returns A frozen valid document snapshot or INVALID_DOCUMENT result; envelope validation failures are returned as data.
+   *
+   * @example
+   * ```typescript
+   * import type { GenerativeUIContract } from '@alneas/appkit-core/ai/generative-ui';
+   *
+   * export async function example(contract: GenerativeUIContract) {
+   *   return contract.validate({ version: 1, id: 'response-1', blocks: [] });
+   * }
+   * ```
+   */
   validate(input: unknown): GenerativeUIDocumentResult;
-  /** Returns false for unregistered types or invalid/beyond-limit JSON data. */
+
+  /**
+   * Returns false for unregistered types or invalid/beyond-limit JSON data.
+   *
+   * @param type - Explicit component type to look up.
+   * @param input - Untrusted component data to snapshot and validate without mutation.
+   * @returns False for unknown types, invalid schemas/data at this boundary or JSON snapshot violations; true for matching data.
+   *
+   * @example
+   * ```typescript
+   * import type { GenerativeUIContract } from '@alneas/appkit-core/ai/generative-ui';
+   *
+   * export async function example(contract: GenerativeUIContract) {
+   *   return contract.validateData('summary', { text: 'hello' });
+   * }
+   * ```
+   */
   validateData(type: string, input: unknown): boolean;
 }
 const forbidden = new Set(['$schema', '$id', '$ref', '$anchor', '$dynamicRef', '$dynamicAnchor', '$recursiveRef', '$recursiveAnchor', '$async']);
@@ -41,15 +88,22 @@ function checkInline(value: GenerativeUIValue): void {
  * authorization still belong to the app. Provider-specific schema subsets may require
  * an application adapter; this function never contacts an AI service.
  *
+ * @param components - At most 32 uniquely named component schemas, each inline synchronous draft-07 with an object root.
+ * @returns Frozen composed schema, component snapshots and local runtime validation helpers.
+ * @throws Throws duplicate/invalid names, too many components, forbidden reference/dialect keys, non-JSON snapshots or Ajv schema errors.
+ *
  * @example
- * ```ts
- * import { createGenerativeUIContract } from "./";
+ * ```typescript
+ * import { createGenerativeUIContract } from '@alneas/appkit-core/ai/generative-ui';
+ *
  * const contract = createGenerativeUIContract([{ type: 'summary', dataSchema: {
  *   type: 'object', properties: { text: { type: 'string' } },
  *   required: ['text'], additionalProperties: false,
  * } }]);
- * const schemaForModel = contract.schema;
- * const checked = contract.validate(response);
+ * const checked = contract.validate({ version: 1, id: 'response-1', blocks: [
+ *   { id: 'summary-1', type: 'summary', data: { text: 'hello' } },
+ * ] });
+ * console.log(checked);
  * ```
  */
 export function createGenerativeUIContract(components: readonly GenerativeUIComponentSchema[]): GenerativeUIContract {

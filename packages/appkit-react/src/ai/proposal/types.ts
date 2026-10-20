@@ -8,86 +8,157 @@ import type {
   ReviewDecisions,
 } from "@alneas/appkit-core/ai";
 
-/** Props for ProposalReviewCard. */
+/**
+ * Single-record review presentation and host apply inputs.
+ *
+ * @typeParam TRecord - Current record shape; defaults to a string-keyed record.
+ *
+ * @remarks These shared inputs are consumed by useProposalReview; persistence is host-owned.
+ *
+ * @see useProposalReview for a complete input example.
+ */
 export interface ProposalReviewCardProps<
   TRecord extends Record<string, any> = Record<string, any>,
 > {
-  /** 変更提案オブジェクト（イミュータブル） */
+    /**
+     * Immutable validated change proposal; changing id resets the review decisions.
+     */
   proposal: RecordProposal<TRecord>;
 
-  /** 最新の元データレコード */
+    /**
+     * Latest host record used to compose accepted changes and detect conflicts.
+     */
   currentRecord: TRecord;
 
-  /** アプリケーションが保持する元データの現在バージョン */
+    /**
+     * Current host version compared with the proposal base version.
+     */
   currentVersion: string | number;
 
-  /**
-   * レコード全体の業務検証関数（相関チェックやスキーマ検証）
-   * 候補レコード（現在値＋採用分）全体を検証します。
-   */
+    /**
+     * Optional synchronous validation of the complete composed candidate; thrown errors propagate from render.
+     */
   validateCandidate?: (candidate: TRecord) => CandidateValidationResult;
 
-  /**
-   * 適用ハンドラ（フォームへの反映、またはサーバーへの永続化リクエスト）
-   */
+    /**
+     * Optional host apply callback receiving a payload; await persistence before resolving. Rejection becomes saveError.
+     */
   onApply?: (payload: ApplyProposalPayload<TRecord>) => void | Promise<void>;
 
-  /** 提案全体の破棄・スキップハンドラ */
+    /**
+     * Optional host dismissal callback; the headless hook does not call this member.
+     */
   onDismiss?: () => void;
 
-  /** 適用ボタンのラベル（デフォルト: "適用する"） */
+    /**
+     * Optional presentation label; not used by the headless hook.
+     */
   applyLabel?: string;
 
-  /** カードの見出し（デフォルト: proposal.targetName または "変更提案の確認"） */
+    /**
+     * Optional presentation title; not used by the headless hook.
+     */
   title?: string;
 
-  /** カスタムクラス名 */
+    /**
+     * Optional presentation classes; not used by the headless hook.
+     */
   className?: string;
 
-  /** テストID */
+    /**
+     * Optional presentation test marker; not used by the headless hook.
+     */
   testId?: string;
 }
 
-/** Return type of useProposalReview hook. */
+/**
+ * Derived review state and explicit field-decision/apply controls.
+ *
+ * @typeParam TRecord - Record shape retained by candidate composition; defaults to a string-keyed record.
+ *
+ * @see useProposalReview for usage.
+ */
 export interface UseProposalReviewReturn<
   TRecord extends Record<string, any> = Record<string, any>,
 > {
-  /** 各フィールドの決定マップ */
+    /**
+     * Per-field pending/accepted/rejected choices; missing entries behave as pending.
+     */
   decisions: ReviewDecisions<TRecord>;
 
-  /** 特定フィールドの決定を更新 */
+    /**
+     * Set one field choice and clear the save error.
+     *
+     * @param field - Record key to decide.
+     *
+     * @param decision - Pending, accepted or rejected choice.
+     *
+     * @returns No value after scheduling state.
+     */
   setDecision: (field: FieldKey<TRecord>, decision: FieldDecision) => void;
 
-  /** 全フィールドを一括で採用 */
+    /**
+     * Mark every proposed change accepted.
+     *
+     * @returns No value after scheduling choices and clearing the save error.
+     */
   acceptAll: () => void;
 
-  /** 全フィールドを一括で却下 */
+    /**
+     * Mark every proposed change rejected.
+     *
+     * @returns No value after scheduling choices and clearing the save error.
+     */
   rejectAll: () => void;
 
-  /** 全フィールドの選択を初期状態（pending）にリセット */
+    /**
+     * Remove explicit choices so every change returns to pending.
+     *
+     * @returns No value after scheduling choices and clearing the save error.
+     */
   resetDecisions: () => void;
 
-  /** 合成された候補レコード */
+    /**
+     * Current record with accepted proposal changes composed into a new candidate.
+     */
   candidateRecord: TRecord;
 
-  /** 全体のレビュー決定状況 */
+    /**
+     * Derived aggregate decision status.
+     */
   reviewStatus: ProposalReviewStatus;
 
-  /** 現在値・バージョンとの整合性チェック結果 */
+    /**
+     * Current-value/version compatibility check for the selected changes.
+     */
   consistency: ReturnType<typeof import('@alneas/appkit-core/ai/proposal').verifyCurrentState<TRecord>>;
 
-  /** 候補レコード全体の検証結果 */
+    /**
+     * Optional complete-candidate validation result; undefined when no validator is supplied.
+     */
   candidateValidation?: CandidateValidationResult;
 
-  /** 適用可能かどうか */
+    /**
+     * Whether decisions/consistency/validation permit application and onApply exists.
+     */
   canApply: boolean;
 
-  /** 適用実行中フラグ */
+    /**
+     * Whether this displayed review is awaiting host apply completion.
+     */
   isSubmitting: boolean;
 
-  /** 保存/適用失敗時のエラーメッセージ */
+    /**
+     * Last current-generation apply failure message, or null.
+     */
   saveError: string | null;
 
-  /** 適用処理の実行関数 */
+    /**
+     * Apply a prepared payload through the host callback at most once concurrently per displayed generation.
+     *
+     * @returns True after current-generation success; false when blocked, failed or completed for an older generation.
+     *
+     * @remarks Errors from payload/application are caught as saveError; the host owns durable side effects and rollback.
+     */
   handleApply: () => Promise<boolean>;
 }
