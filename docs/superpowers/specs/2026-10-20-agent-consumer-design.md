@@ -1,5 +1,10 @@
 # Appkit agent discovery and evaluation design
 
+> Release-policy update (2026-10-20): the maintainer made live-model evaluation an
+> optional manual regression evaluation. Historical mandatory-release statements
+> below are superseded by [Releasing](../../../RELEASING.md#optional-coding-agent-evaluation).
+> Existing receipt qualification rules still apply when claiming evaluation results.
+
 Date: 2026-10-20
 
 Status: Detailed design for review; implementation has not started.

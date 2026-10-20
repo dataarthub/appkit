@@ -26,6 +26,15 @@ The npm scope `@alneas` and GitHub owner `dataarthub` are separate namespaces. K
 
 After publication install exact registry versions in a fresh consumer without local aliases or archive overrides. Portal ingestion and Japanese delivery are separate tasks. Do not publish credentials, private sources or operational receipts.
 
-## Coding-agent evaluation gate
+## Optional coding-agent evaluation
 
-Run the [isolated agent evaluation procedure](docs/agent-evaluation.md) against the exact finalized candidate archives after deterministic package checks. `bun run check:release` verifies package correctness; release readiness additionally requires `bun run check:agent-eval` with that run's receipt and archive manifest. Missing or stale live evidence fails the gate. Harness self-tests are not live task results. Keep raw receipts/transcripts ignored, and publish only after separate explicit authorization.
+The [isolated agent evaluation procedure](docs/agent-evaluation.md) is a manual,
+optional regression evaluation for changes to agent-facing APIs, instructions and
+discovery metadata. It is not a prerequisite for every npm release, and the publish
+workflow neither runs live models nor consumes local agent receipts. This limited
+six-task, three-repetition benchmark is not general package certification.
+
+When reporting a live evaluation, continue to run `bun run check:agent-eval` against
+that run's exact receipts and archives; missing, stale or changed evidence still
+cannot qualify. Making evaluation optional does not relax its grading or allow
+harness self-tests to be reported as real task successes. Keep raw evidence ignored.

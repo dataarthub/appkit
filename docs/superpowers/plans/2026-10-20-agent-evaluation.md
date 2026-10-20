@@ -1,5 +1,10 @@
 # Appkit Agent Evaluation Implementation Plan
 
+> Release-policy update (2026-10-20): live-model evaluation is now optional and manual.
+> Historical release-readiness requirements below are superseded by
+> [Releasing](../../../RELEASING.md#optional-coding-agent-evaluation).
+> Receipt qualification remains strict whenever an evaluation is claimed.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Measure actual coding-agent integrations against reviewed archives and reject release qualification based on unsafe, stale, incomplete, or developer-authored-only evidence.

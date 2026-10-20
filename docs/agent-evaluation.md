@@ -14,6 +14,13 @@ Use this procedure to maintain Appkit's coding-agent tasks and evaluate a review
 
 Deterministic tooling tests, authored examples and fake-runner results do not establish real agent success. Live task capability remains unverified until a qualifying real-agent batch exists for the selected archives.
 
+This is an optional manual regression evaluation for agent-facing API, instruction
+and discovery changes. It is not a mandatory npm publication gate. The Release
+publisher requires deterministic package checks instead and does not run models
+or consume local receipts. Existing qualification thresholds still apply whenever
+a live evaluation is claimed; the fixed six-task benchmark is not general package
+certification. See the [release procedure](releasing.md).
+
 ## Prerequisites
 
 Work from the public Appkit repository root with Node 24+, Bun 1.4.0 and the repository's installed development dependencies. For a live batch, provision Docker, a reviewed coding-agent runner image and a verifier image supplying Node 24+. Both images must already be available locally and pinned by digest. The runner supplies its own model connection; no particular provider SDK or agent vendor is required by Appkit.

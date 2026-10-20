@@ -1,5 +1,9 @@
 # Appkit Agent Consumer Implementation Plan
 
+> Release-policy update (2026-10-20): live-model evaluation is now optional and manual.
+> Historical mandatory-release statements below are superseded by
+> [Releasing](../../../RELEASING.md#optional-coding-agent-evaluation).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make Appkit discoverable and searchable by consuming coding agents, document safe AI integration, and measure real task performance against reviewed package archives.
