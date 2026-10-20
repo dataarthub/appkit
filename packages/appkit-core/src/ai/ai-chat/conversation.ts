@@ -1,3 +1,4 @@
+import { AIChatError } from '../errors/index';
 import { jsonSnapshot } from '../internal/json-snapshot';
 import type { AIChatEvent, AIChatMessage, AIChatPart } from './types';
 
@@ -24,20 +25,20 @@ function part(value: unknown): value is AIChatPart {
  */
 export function normalizeAIChatMessages(messages: readonly AIChatMessage[]): AIChatMessage[] {
   const snapshot = jsonSnapshot(messages);
-  if (!Array.isArray(snapshot)) throw new Error('AI history must be an array');
+  if (!Array.isArray(snapshot)) throw new AIChatError('AI_INVALID_STREAM', 'AI history must be an array');
   return snapshot.map(value => {
-    if (!object(value) || !string(value.id, true) || (typeof value.role !== 'string' || !['system', 'user', 'assistant', 'tool'].includes(value.role)) || !Array.isArray(value.parts) || !value.parts.every(part)) throw new Error('Invalid AI conversation message');
-    if (value.role === 'tool' && value.parts.some(item => item.type !== 'tool-result')) throw new Error('Tool messages may only contain tool results');
+    if (!object(value) || !string(value.id, true) || (typeof value.role !== 'string' || !['system', 'user', 'assistant', 'tool'].includes(value.role)) || !Array.isArray(value.parts) || !value.parts.every(part)) throw new AIChatError('AI_INVALID_STREAM', 'Invalid AI conversation message');
+    if (value.role === 'tool' && value.parts.some(item => item.type !== 'tool-result')) throw new AIChatError('AI_INVALID_STREAM', 'Tool messages may only contain tool results');
     return value as unknown as AIChatMessage;
   });
 }
 /** Validates and snapshots an adapter event; it performs no tool authorization or execution. */
 export function normalizeAIChatEvent(event: AIChatEvent): AIChatEvent {
   const value = jsonSnapshot(event);
-  if (!object(value)) throw new Error('Invalid AI stream event');
+  if (!object(value)) throw new AIChatError('AI_INVALID_STREAM', 'Invalid AI stream event');
   if (value.type === 'text-delta' && string(value.text)) return value as unknown as AIChatEvent;
   if (value.type === 'metadata' && Object.hasOwn(value, 'metadata')) return value as unknown as AIChatEvent;
   if (value.type === 'finish' && typeof value.reason === 'string' && ['stop', 'tool-calls', 'length', 'content-filter', 'other'].includes(value.reason)) return value as unknown as AIChatEvent;
   if (['tool-call', 'tool-result', 'data'].includes(String(value.type)) && part(value)) return value as unknown as AIChatEvent;
-  throw new Error('Invalid AI stream event');
+  throw new AIChatError('AI_INVALID_STREAM', 'Invalid AI stream event');
 }

@@ -11,14 +11,16 @@
         "!llms.txt",
         "!llms-full.txt",
         "!docs/exports.md",
-        "!docs/index.md"
+        "!docs/index.md",
+        "!docs/ai-errors.md"
       ],
       "outputs": [
         "dist/**",
         "llms.txt",
         "llms-full.txt",
         "docs/exports.md",
-        "docs/index.md"
+        "docs/index.md",
+        "docs/ai-errors.md"
       ]
     },
     "typecheck": {
@@ -73,7 +75,8 @@
   },
   "globalDependencies": [
     "scripts/turbo.mjs",
-    "scripts/generate-docs.mjs"
+    "scripts/generate-docs.mjs",
+    "scripts/agent/generate-error-guide.mjs"
   ],
   "globalEnv": [
     "NODE_ENV",

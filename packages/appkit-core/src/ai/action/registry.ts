@@ -1,3 +1,5 @@
+import {getAIErrorInfo} from '../errors/index';
+function actionRecovery(code:string){const {docsUrl,recovery}=getAIErrorInfo('action',code)!;return {docsUrl,recovery};}
 import type { ExecutionContext } from './execution';
 /**
  * @file ActionRegistry implementation for @alneas/appkit-core/ai
@@ -120,13 +122,13 @@ export class ActionRegistry {
     input: unknown,
     context?: ExecutionContext,
   ): Promise<ActionResult<unknown>> {
-    const cancelled = (): ActionResult<unknown> => ({ ok: false, code: 'CANCELLED', error: 'Execution was cancelled' });
+    const cancelled = (): ActionResult<unknown> => ({ ok: false, code: 'CANCELLED', ...actionRecovery('CANCELLED'), error: 'Execution was cancelled' });
     if (context?.signal.aborted) return cancelled();
     const entry = this.actions.get(id);
     if (!entry) {
       return {
         ok: false,
-        code: 'NOT_FOUND',
+        code: 'NOT_FOUND', ...actionRecovery('NOT_FOUND'),
         error: `Action "${id}" is not registered`,
       };
     }
@@ -139,14 +141,14 @@ export class ActionRegistry {
       if (!validation || typeof validation !== 'object' || typeof validation.ok !== 'boolean') {
         return {
           ok: false,
-          code: 'INVALID_INPUT',
+          code: 'INVALID_INPUT', ...actionRecovery('INVALID_INPUT'),
           error: `Validator for action "${id}" returned an invalid result`,
         };
       }
       if (!validation.ok) {
         return {
           ok: false,
-          code: 'INVALID_INPUT',
+          code: 'INVALID_INPUT', ...actionRecovery('INVALID_INPUT'),
           error: validation.error || `Invalid input for action "${id}"`,
         };
       }
@@ -154,7 +156,7 @@ export class ActionRegistry {
     } catch (err: any) {
       return {
         ok: false,
-        code: 'INVALID_INPUT',
+        code: 'INVALID_INPUT', ...actionRecovery('INVALID_INPUT'),
         error: err?.message || `Validator for action "${id}" threw an error`,
         cause: err,
       };
@@ -165,7 +167,7 @@ export class ActionRegistry {
     if (!current || current.token !== token) {
       return {
         ok: false,
-        code: 'NOT_FOUND',
+        code: 'NOT_FOUND', ...actionRecovery('NOT_FOUND'),
         error: `Action "${id}" was unregistered before execution`,
       };
     }
@@ -181,7 +183,7 @@ export class ActionRegistry {
       if (context?.signal.aborted && err instanceof Error && err.name === 'AbortError') return cancelled();
       return {
         ok: false,
-        code: 'EXECUTION_FAILED',
+        code: 'EXECUTION_FAILED', ...actionRecovery('EXECUTION_FAILED'),
         error: err?.message || `Execution of action "${id}" failed`,
         cause: err,
       };
