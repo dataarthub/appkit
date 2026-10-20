@@ -12,7 +12,7 @@ tags: ["appkit", "overview"]
 
 React 19 components, schema-driven forms and record views for business applications.
 
-[npm](https://www.npmjs.com/package/@alneas/appkit-react) · [Documentation](https://tech-docs.alneas.com/appkit/appkit-react/) · [GitHub](https://github.com/dataarthub/appkit)
+[npm](https://www.npmjs.com/package/@alneas/appkit-react) · [Documentation](https://tech-docs.alneas.com/appkit/appkit-react/) · [GitHub](https://github.com/dataarthub/appkit) · [Change history](https://github.com/dataarthub/appkit/blob/main/packages/appkit-react/CHANGELOG.md)
 
 ## Elevator Pitch
 
