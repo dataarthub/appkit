@@ -28,6 +28,62 @@ Use a manually dispatched workflow on a GitHub-hosted runner with Node 24+, npm 
 
 The existing 0.1.0 release has no provenance attestation. A later workflow does not retroactively attest it; use a new version for future provenance-backed releases. GitHub tags/Releases and npm publication are separate. Never dispatch npm publication from branch/tag pushes or overwrite an existing version; verify its registry integrity before resuming a partial publish.
 
+## GitHub deployment records for npm
+
+Use two GitHub environments: `npm-core` links to
+https://www.npmjs.com/package/@alneas/appkit-core and `npm-react` links to
+https://www.npmjs.com/package/@alneas/appkit-react. When the future publishing
+workflow is implemented, add these fields to its actual publishing jobs
+([GitHub environment syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idenvironment)):
+
+```yaml
+jobs:
+  publish-core:
+    environment:
+      name: npm-core
+      url: https://www.npmjs.com/package/@alneas/appkit-core
+    # Actual build, verification and npm publication steps belong in this job.
+  publish-react:
+    needs: publish-core
+    environment:
+      name: npm-react
+      url: https://www.npmjs.com/package/@alneas/appkit-react
+    # Publish React only after the required Core version exists on npm.
+```
+
+This is a configuration fragment, not an executable publishing workflow. Configure
+each npm Trusted Publisher with its matching environment name and exact workflow
+filename. Dispatch the future publishing workflow at the finalized release tag so
+the automatic deployment identifies the published source commit. Do not attach
+these environments to the quality workflow: verification alone is not publication.
+
+For versions already published, including 0.1.0, use the separate **Record existing
+npm publications** manual Action (`record-npm-deployments.yml`) after it is merged.
+Enter the existing tag, for example `v0.1.0`. The same operation can run locally with
+GitHub CLI authentication and repository Deployments write permission:
+
+```sh
+node scripts/record-npm-deployments.mjs --tag v0.1.0
+node scripts/record-npm-deployments.mjs --tag v0.1.0 --apply
+```
+
+The first command previews without writing. The second verifies both exact npm
+versions, resolves the remote tag to its commit, and creates or resumes one
+`record:npm` deployment per package with a successful status and npm page URL.
+Retries reuse matching records; conflicting registry integrity metadata requires
+manual investigation. Partial failures return an error and can be retried. The
+Action serializes its runs; avoid running the local command concurrently with it.
+It records registry integrity as metadata, disables automatic merges and leaves
+other deployment statuses active. It never invokes `npm publish`, changes a tag,
+or runs model evaluation. The manual workflow uses the API to target the selected
+tag rather than attaching an environment to the workflow's own commit.
+
+These are retrospective publication records. Their creation time is the recording
+time, and their payload explicitly marks them retrospective. They do not provide
+provenance, prove that a tarball was built from the tagged source, or certify newer
+working-tree changes. See the [Deployment API](https://docs.github.com/en/rest/deployments/deployments#create-a-deployment)
+and [status API](https://docs.github.com/en/rest/deployments/statuses#create-a-deployment-status).
+
 ## React compatibility with independently versioned Core
 
 Keep React's Core dependency at an exact version. A newer Core release does not
