@@ -71,3 +71,17 @@ Two narrow source comments suppress Biome compatibility diagnostics: TypeScript'
 a labeled resource-search loop. These suppressions do not change emitted runtime
 behavior or exclude either whole file from linting. Tailwind directives are enabled
 in the CSS parser. Review these exceptions when upgrading Biome.
+
+## Storybook development
+
+Run `bun run storybook` from the repository root, then open
+http://localhost:6006. The command builds public Core and generates React's
+translations before starting the isolated Vite workspace.
+`bun run check:storybook` checks story types and public import boundaries;
+`bun run build-storybook` creates the static preview in
+`packages/appkit-react/storybook-static/`.
+
+Stories and their in-memory providers live in `packages/appkit-react/stories/`,
+outside the library build and npm payload. Keep both individual stories and
+composed examples limited to components and dependencies owned by this public
+repository. Enterprise-only screens stay in their owning private repository.

@@ -38,7 +38,11 @@
     "test:publish-tooling": "node --test scripts/publish/*.test.mjs",
     "check:react-core": "node scripts/check-react-core.mjs",
     "check:quality": "bun run secrets:check && bun run lint && bun run test:quality-tooling && bun run test:npm-deployments && bun run test:react-core-tooling && bun run test:publish-tooling",
-    "verify:push": "bun run check:quality && bun run verify && bun run test:agent-tooling && bun run check:react-core"
+    "verify:push": "bun run check:quality && bun run verify && bun run test:agent-tooling && bun run check:react-core",
+    "storybook": "bun run storybook:prepare && bun run --cwd packages/appkit-react storybook",
+    "build-storybook": "bun run storybook:prepare && bun run --cwd packages/appkit-react build-storybook",
+    "check:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs && bun run --cwd packages/appkit-react typecheck:storybook",
+    "storybook:prepare": "bun run turbo run build --filter=@alneas/appkit-core && bun run --cwd packages/appkit-react generate:i18n"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
@@ -48,6 +52,10 @@
     "turbo": "2.11.9",
     "typescript": "6.0.3",
     "vitest": "4.1.12",
-    "yaml": "2.9.1"
+    "yaml": "2.9.1",
+    "storybook": "10.6.0",
+    "@storybook/react-vite": "10.6.0",
+    "@storybook/addon-docs": "10.6.0",
+    "@tailwindcss/vite": "^4.3.3"
   }
 }
