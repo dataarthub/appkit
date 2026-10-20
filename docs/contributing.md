@@ -54,6 +54,13 @@ pushes and PR events do not trigger it. This makes the CI confirmation post-merg
 The Node 26 job keeps the additional runtime compatibility checks. The workflow has
 no publication job.
 
+The full gate also runs `bun run check:react-core`: React types, unit tests and
+packed-consumer SSR/load checks against both its exact registry Core dependency and
+the new Core archive in separate temporary installations. Network access is required.
+For Core fixes that must reach React users, add an ID, the first required Core
+version and a reason to `react-core-policy.json`; an outdated React dependency then
+blocks CI even if compatibility tests pass. See [the release procedure](releasing.md#react-compatibility-with-independently-versioned-core).
+
 Biome starts with four blocking rules: unreachable code, unsafe finally blocks,
 debugger statements and duplicate parameter names. Broader style rules can be added
 in separately reviewed changes. Use `bun run format -- path/to/file.ts` when explicitly
