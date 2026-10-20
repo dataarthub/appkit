@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,renameSync,symlinkSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {generateCatalog} from './generate-catalog.mjs';
@@ -34,4 +34,46 @@ test('fails missing public declarations and incompatible conditions',()=>fixture
 test('rejects unknown policy peers and missing guide',()=>fixture((dir,policy)=>{
  policy.packages['@alneas/appkit-core'].rules[0].requiredPeers={missing:'1'};
  assert.throws(()=>generateCatalog({packageDir:dir,policy}),/peer/);
+}));
+function coreDependency(dir,version='0.2.0'){
+ const manifest=path.join(dir,'package.json'),pkg=JSON.parse(readFileSync(manifest,'utf8'));
+ pkg.name='@alneas/appkit-react';pkg.type='module';pkg.dependencies={'@alneas/appkit-core':'0.2.0'};
+ writeFileSync(manifest,JSON.stringify(pkg));
+ const dependency=path.join(dir,'node_modules/@alneas/appkit-core');mkdirSync(dependency,{recursive:true});
+ writeFileSync(path.join(dependency,'package.json'),JSON.stringify({name:'@alneas/appkit-core',version,type:'module',exports:{'.':{import:{types:'./index.d.ts',default:'./index.js'},require:{types:'./index.d.cts',default:'./index.cjs'}}}}));
+ for(const ext of ['d.ts','d.cts']){
+  writeFileSync(path.join(dir,'dist/index.'+ext),'export type { External } from "@alneas/appkit-core";');
+  writeFileSync(path.join(dependency,'index.'+ext),'/** Core version one. */\nexport interface External {value: string;}');
+ }
+ return dependency;
+}
+function reactPolicy(policy){return {schemaVersion:1,packages:{'@alneas/appkit-react':policy.packages['@alneas/appkit-core']}};}
+test('rejects stale or missing installed Core instead of generating a plausible catalog',()=>fixture((dir,policy)=>{
+ const dependency=coreDependency(dir,'0.1.0');
+ assert.throws(()=>generateCatalog({packageDir:dir,policy:reactPolicy(policy)}),/Core.*0\.1\.0.*0\.2\.0/);
+ rmSync(dependency,{recursive:true});
+ assert.throws(()=>generateCatalog({packageDir:dir,policy:reactPolicy(policy)}),/Core.*0\.2\.0/);
+}));
+test('dependency declaration comments affect catalog identity without leaking install paths',()=>fixture((dir,policy)=>{
+ const dependency=coreDependency(dir),options={packageDir:dir,policy:reactPolicy(policy)};
+ const before=generateCatalog(options);
+ for(const ext of ['d.ts','d.cts'])writeFileSync(path.join(dependency,'index.'+ext),'/** Core version two. */\nexport interface External {value: string;}');
+ const after=generateCatalog(options);
+ assert.notEqual(after.inputDigest,before.inputDigest);
+ assert.equal(after.symbols[0].summary,'Core version two.');
+ assert.equal(JSON.stringify(after).includes(dir),false);
+ assert.deepEqual(generateCatalog(options),after);
+}));
+test('checks the CommonJS Core resolution independently of a valid ESM target',()=>fixture((dir,policy)=>{
+ const dependency=coreDependency(dir);
+ rmSync(path.join(dependency,'index.d.cts'));
+ assert.throws(()=>generateCatalog({packageDir:dir,policy:reactPolicy(policy)}),/Core.*0\.2\.0/);
+}));
+test('registry and workspace installations give the same declaration digest',()=>fixture((dir,policy)=>{
+ const dependency=coreDependency(dir),options={packageDir:dir,policy:reactPolicy(policy)};
+ const registry=generateCatalog(options),workspace=mkdtempSync(path.join(tmpdir(),'appkit-core-workspace-'));
+ try{
+  const target=path.join(workspace,'core');renameSync(dependency,target);symlinkSync(target,dependency,'dir');
+  assert.deepEqual(generateCatalog(options),registry);
+ }finally{rmSync(workspace,{recursive:true,force:true});}
 }));
