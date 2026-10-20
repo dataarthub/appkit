@@ -5,6 +5,9 @@ import { totalmem } from 'node:os';
 import { runGuarded } from './lib/guarded-process.mjs';
 
 const projects = ['light-desktop', 'light-mobile', 'dark-desktop', 'dark-mobile'];
+// Fresh browser/Vite trees retain enough per-file state that six-file batches
+// crossed the unchanged 3 GiB process-tree budget on the Linux CI runner.
+const batchSize = 3;
 const root = fileURLToPath(new URL('../', import.meta.url));
 const budget = Math.min(3072, Math.floor(totalmem() / 1024 ** 2 / 3));
 function stories(directory) {
@@ -18,8 +21,8 @@ if (!files.length) throw new Error('No Storybook stories found; refusing an empt
 // Each small batch gets a fresh Vite/Chromium process tree. All files run in all combinations.
 let failed = false;
 for (const project of projects) {
-  for (let offset = 0; offset < files.length; offset += 6) {
-    const batch = files.slice(offset, offset + 6);
+  for (let offset = 0; offset < files.length; offset += batchSize) {
+    const batch = files.slice(offset, offset + batchSize);
     console.log(`Storybook ${project} ${offset + 1}-${offset + batch.length}/${files.length}: one worker; process-tree budget ${budget} MiB.`);
     const result = await runGuarded(process.execPath, [
       '--max-old-space-size=1536', `${root}node_modules/vitest/vitest.mjs`, 'run',

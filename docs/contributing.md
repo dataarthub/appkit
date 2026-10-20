@@ -132,7 +132,7 @@ keyboard navigation and focus return; layout checks measure containment, overflo
 tap targets, clipping and overlap. These are isolated component/host-contract tests,
 not hosted identity, database authorization or seeded-backend E2E evidence.
 
-The runner executes six story files at a time with one worker, sequentially across
+The runner executes three story files at a time with one worker, sequentially across
 the four mode/viewport combinations. Each batch gets a fresh Vite/Chromium process
 tree. Aggregate RSS is capped at the smaller of 3 GiB and one-third of physical
 memory, the Node heap at 1.5 GiB, and a batch at ten minutes. A resource limit or
