@@ -103,7 +103,10 @@ jobs:
           artifact-ids: ${{ needs.verify.outputs.artifact }}
           path: .verification/publish
           digest-mismatch: error
-      - name: Publish only the verified archive through OIDC
+      # Before 1.0.0: publish with beta, then point latest at the same version.
+      # At/after 1.0.0: require latest only; never overwrite a newer tag on retry.
+      # npm Trusted Publisher must allow both npm publish and npm dist-tag.
+      - name: Publish verified archive and confirm required npm dist-tags through OIDC
         env:
           APPKIT_NPM_PUBLISH: 'true'
           VERIFIED_INTEGRITY: ${{ needs.verify.outputs.integrity }}

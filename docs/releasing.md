@@ -22,7 +22,7 @@ Historical separate-package archives do not verify the new boundaries. Keep sour
 
 ## Publication security
 
-Use [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/) in GitHub Actions. Configure each package's npm settings with GitHub owner `dataarthub`, repository `appkit`, workflow filename `publish.yml` and, if specified, environment `npm-core` or `npm-react` respectively. The publisher must allow direct `npm publish`. Require 2FA for maintainers and enable the package setting to [require 2FA and disallow tokens](https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/); trusted publishers can still publish under that policy. These are account/package settings and are not enabled by a repository edit.
+Use [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/) in GitHub Actions. Configure each package's npm settings with GitHub owner `dataarthub`, repository `appkit`, workflow filename `publish.yml` and, if specified, environment `npm-core` or `npm-react` respectively. The publisher must allow direct `npm publish` **and Allow npm dist-tag**; these permissions are independent. OIDC dist-tag operations require npm 11.21.0+, which the publisher pins. Require 2FA for maintainers and enable the package setting to [require 2FA and disallow tokens](https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/); trusted publishers can still publish under that policy. These are account/package settings and are not enabled by a repository edit.
 
 The `publish.yml` workflow runs only when a stable package-specific GitHub Release is published. Its GitHub-hosted publisher uses Node 24, pinned npm 11.21.0 and `id-token: write`, without an npm write token. It explicitly requires [provenance](https://docs.npmjs.com/generating-provenance-statements/) and disables lifecycle scripts when publishing the verified archive. The separate verification job has no OIDC publication permission, and the publisher does not install or run package development dependencies. The existing main-update quality workflow remains verification-only.
 
@@ -66,12 +66,37 @@ and digest, then checks the npm registry before publishing. After publication it
 checks the exact registry version's integrity against the tested archive.
 
 Rerun a failed workflow from Actions. If the exact version already exists with the
-same integrity, the publisher succeeds without publishing again or changing npm
-dist-tags. A different integrity, registry outage or older version that would move
-`latest` backwards fails closed. If the seven-day archive artifact has expired,
+same integrity, the publisher skips republishing and repairs only missing required
+dist-tags. It succeeds only after confirming those tags point to that version.
+A different integrity, registry outage or older version that would move a required
+channel backwards fails closed. If the seven-day archive artifact has expired,
 rerun all jobs. Never move a tag or overwrite a version to repair a failed run.
 Concurrent publication workflows are serialized and are not cancelled mid-publish;
 publish coordinated Core and React Releases in order rather than simultaneously.
+
+### npm tags before 1.0.0
+
+Every published version below `1.0.0` must have **both `beta` and `latest` pointing
+to that exact version**. These are npm distribution tags; package version strings
+and Git tags keep the existing format. This does not enable prerelease GitHub
+Releases in the current workflow.
+
+For a new pre-1.0 version, the Action publishes the verified archive once with
+`--tag beta`, verifies registry integrity, then adds `latest` to the same version
+using `npm dist-tag add`. Both tag mappings are read back before success. A tag
+permission failure or unconfirmed mapping leaves the Action failed; rerun it to
+repair missing tags without republishing. Enable **Allow npm dist-tag** for each
+package's Trusted Publisher; the Action does not use a write-token fallback.
+
+At `1.0.0` and above, only `latest` is required. The existing `beta` channel is not
+advanced or deleted by this rule. Before publishing or repairing tags, the Action
+checks every required channel and refuses to overwrite a newer version, including
+when rerunning an old already-published version. Concurrent writers outside this
+workflow must follow the same serialization and channel-ordering policy.
+
+The same rule applies to a new package's authorized manual first publication.
+Changing tags on an older published version is a separate registry write; this
+implementation does not alter the tags or contents of the existing `0.1.0` release.
 
 ## GitHub deployment records for npm
 

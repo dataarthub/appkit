@@ -17,7 +17,8 @@ const expectedIntegrity = process.env.VERIFIED_INTEGRITY;
 if (!/^sha512-[A-Za-z0-9+/]+={0,2}$/.test(expectedIntegrity ?? '')) throw Error('Verified artifact digest is required');
 const target = {...selected, integrity: expectedIntegrity};
 async function readRegistry(name, version) {
-  const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name)}/${encodeURIComponent(version)}`, {signal: AbortSignal.timeout(30000)});
+  const suffix = version === undefined ? '' : '/' + encodeURIComponent(version);
+  const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name)}${suffix}`, {signal: AbortSignal.timeout(30000)});
   if (response.status === 404) return null;
   if (!response.ok) throw Error('Registry check failed: HTTP ' + response.status);
   return response.json();
@@ -25,7 +26,15 @@ async function readRegistry(name, version) {
 const result = await publishVerified({target, file,
   verifyArchive: () => verifyArtifact({file, manifest, target: selected, expectedIntegrity}),
   readRegistry,
-  publish: archive => execFileSync('npm', ['publish', archive, '--provenance', '--access', 'public', '--tag', 'latest',
+  readTags: async name => {
+    const metadata = await readRegistry(name);
+    if (metadata === null) return {};
+    if (metadata.name !== name || !metadata['dist-tags']) throw Error('Unexpected registry package or dist-tags response');
+    return metadata['dist-tags'];
+  },
+  setTag: (name, version, tag) => execFileSync('npm', ['dist-tag', 'add', `${name}@${version}`, tag,
+    '--registry=https://registry.npmjs.org'], {cwd: directory, stdio: 'inherit', timeout: 60000}),
+  publish: (archive, tag) => execFileSync('npm', ['publish', archive, '--provenance', '--access', 'public', '--tag', tag,
     '--ignore-scripts', '--workspaces=false', '--registry=https://registry.npmjs.org'], {cwd: directory, stdio: 'inherit', timeout: 180000}),
 });
 console.log(JSON.stringify(result));
