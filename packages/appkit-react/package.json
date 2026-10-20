@@ -1,6 +1,6 @@
 {
   "name": "@alneas/appkit-react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Unified React 19 business UI toolkit: accessible primitives, schema-driven forms, data tables, and AI chat interfaces",
   "keywords": [
     "react",
@@ -39,6 +39,7 @@
     "dist",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
     "docs",
     "llms.txt",
     "llms-full.txt",
@@ -406,7 +407,7 @@
     "test:browser": "node ../../scripts/test-storybook.mjs"
   },
   "dependencies": {
-    "@alneas/appkit-core": "0.1.0",
+    "@alneas/appkit-core": "0.2.0",
     "@base-ui/react": "^1.9.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
