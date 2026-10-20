@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "packages": {
+    "@alneas/appkit-core": {
+      "description": "Unified business logic backbone: schema validation, persistence adapters, dependency graphs, and Japanese/regional commercial presets",
+      "rules": [
+        {
+          "import": ".",
+          "guide": "docs/index.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./storage",
+          "guide": "docs/storage.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./data",
+          "guide": "docs/data.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./japan",
+          "guide": "docs/japan.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./graph",
+          "guide": "docs/graph.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./ai",
+          "guide": "docs/ai.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./us",
+          "guide": "docs/us.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./data/supabase",
+          "guide": "docs/data.md",
+          "requiredPeers": {
+            "@supabase/supabase-js": "^2.116.0"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./data/supabase-graphql",
+          "guide": "docs/data.md",
+          "requiredPeers": {
+            "@supabase/supabase-js": "^2.116.0"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./data/integrations/supabase",
+          "guide": "docs/data.md",
+          "requiredPeers": {
+            "@supabase/supabase-js": "^2.116.0"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./data/neon",
+          "guide": "docs/data.md",
+          "requiredPeers": {
+            "@neondatabase/serverless": "^1.0.0"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./data/data-access/postgres-graph-adapter",
+          "guide": "docs/data.md",
+          "requiredPeers": {
+            "pg": "^8.20.0"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./data/excel/excelize",
+          "guide": "docs/data.md",
+          "requiredPeers": {
+            "excelize-wasm": "0.1.3"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./data/excel/wasm-adapter",
+          "guide": "docs/data.md",
+          "requiredPeers": {
+            "excelize-wasm": "0.1.3"
+          },
+          "providers": [],
+          "styles": []
+        }
+      ]
+    },
+    "@alneas/appkit-react": {
+      "description": "Unified React 19 business UI toolkit: accessible primitives, schema-driven forms, data tables, and AI chat interfaces",
+      "rules": [
+        {
+          "import": ".",
+          "guide": "docs/index.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./ui",
+          "guide": "docs/ui.md",
+          "requiredPeers": {
+            "react": "^19.2.3",
+            "react-dom": "^19.2.3"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./tools",
+          "guide": "docs/tools.md",
+          "requiredPeers": {
+            "react": "^19.2.3",
+            "react-dom": "^19.2.3"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./ai",
+          "guide": "docs/ai.md",
+          "requiredPeers": {
+            "react": "^19.2.3",
+            "react-dom": "^19.2.3"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./styles",
+          "guide": "docs/ui.md",
+          "requiredPeers": {},
+          "providers": [],
+          "styles": [
+            "@alneas/appkit-react/styles"
+          ]
+        },
+        {
+          "import": "./tools/form",
+          "guide": "docs/request-form.md",
+          "requiredPeers": {
+            "react": "^19.2.3",
+            "react-dom": "^19.2.3"
+          },
+          "providers": [
+            "QueryClientProvider",
+            "DataAccessProvider"
+          ],
+          "styles": [
+            "@alneas/appkit-react/styles"
+          ]
+        },
+        {
+          "import": "./tools/chart",
+          "guide": "docs/tools.md",
+          "requiredPeers": {
+            "react": "^19.2.3",
+            "react-dom": "^19.2.3",
+            "recharts": "^3.6.0"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./tools/barcode",
+          "guide": "docs/tools.md",
+          "requiredPeers": {
+            "react": "^19.2.3",
+            "react-dom": "^19.2.3",
+            "jsbarcode": "^3.12.1",
+            "react-qr-code": "^2.0.18"
+          },
+          "providers": [],
+          "styles": []
+        },
+        {
+          "import": "./ai/ai-chat",
+          "guide": "docs/ai.md",
+          "requiredPeers": {
+            "react": "^19.2.3",
+            "react-dom": "^19.2.3",
+            "ai": "^7.0.105"
+          },
+          "providers": [],
+          "styles": []
+        }
+      ]
+    }
+  }
+}

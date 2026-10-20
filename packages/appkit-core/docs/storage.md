@@ -1,8 +1,11 @@
 ---
 title: "Store files behind explicit adapters"
 description: "Web-standard signing, hashing, ZIP and object-storage adapters"
+sidebar:
+  order: 6
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "storage"]
 ---
 
 # Store files behind explicit adapters
@@ -18,6 +21,8 @@ bun add @alneas/appkit-core
 ## Public import
 
 `@alneas/appkit-core/storage`
+
+`@alneas/appkit-core/storage/portable` is a compatibility alias for this same entry. Prefer `@alneas/appkit-core/storage` for new imports. The alias remains available for existing consumers; server-specific helpers use `@alneas/appkit-core/storage/server`.
 
 ## Step-by-Step Implementation
 

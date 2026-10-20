@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Unified React 19 business UI toolkit: accessible primitives, schema-driven forms, data tables, and AI chat interfaces",
   "type": "module",
+  "homepage": "https://tech-docs.alneas.com/appkit/appkit-react/",
   "license": "MIT",
   "author": "ALNEAS",
   "repository": {
@@ -31,7 +32,10 @@
     "docs",
     "llms.txt",
     "llms-full.txt",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "consumer-ai/SKILL.md",
+    "consumer-ai/package-context.json",
+    "consumer-ai/api-index.json"
   ],
   "exports": {
     ".": {
@@ -378,7 +382,8 @@
     "./ui/styles": "./dist/styles.css",
     "./tools/styles": "./dist/styles.css",
     "./ai-instructions": "./dist/consumer-ai/SKILL.md",
-    "./package-context.json": "./dist/consumer-ai/package-context.json"
+    "./package-context.json": "./dist/consumer-ai/package-context.json",
+    "./api-index.json": "./consumer-ai/api-index.json"
   },
   "scripts": {
     "build": "bun run generate:i18n && vite build && bun scripts/prepare-package.mjs && bun x --no-install tailwindcss -i src/styles.css -o dist/styles.css --minify && node ../../scripts/generate-docs.mjs --package appkit-react && node ../../scripts/generate-notices.mjs",
@@ -475,5 +480,15 @@
   },
   "bugs": {
     "url": "https://github.com/dataarthub/appkit/issues"
+  },
+  "appkit": {
+    "agent": {
+      "schemaVersion": 1,
+      "instructions": "./consumer-ai/SKILL.md",
+      "context": "./consumer-ai/package-context.json",
+      "catalog": "./consumer-ai/api-index.json",
+      "index": "./llms.txt",
+      "fullDocumentation": "./llms-full.txt"
+    }
   }
 }

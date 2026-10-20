@@ -2,20 +2,19 @@
 
 # Appkit Core
 
+## Elevator Pitch
+
 Framework-free schemas, record contracts, storage and reviewed AI proposals for business applications.
 
-## Why
+## Why & Value
 
 Feature subpaths keep provider decisions visible while installation uses just two npm packages. Align schemas with validation and record operations; retain application control over data writes.
 
-## Highlights
+## Key Highlights
 
-- `@alneas/appkit-core/storage`: [Store files behind explicit adapters](docs/storage.md).
-- `@alneas/appkit-core/data`: [Align schemas and record operations](docs/data.md).
-- `@alneas/appkit-core/japan`: [Apply Japanese regional defaults](docs/japan.md).
-- `@alneas/appkit-core/graph`: [Calculate dependency plans](docs/graph.md).
-- `@alneas/appkit-core/ai`: [Validate AI proposals before applying changes](docs/ai.md).
-- `@alneas/appkit-core/us`: [Format US business data](docs/us.md).
+- Storage and record contracts: [storage](docs/storage.md), [data](docs/data.md).
+- Regional formats: [Japan](docs/japan.md), [US](docs/us.md).
+- Reviewed proposals and planning: [AI](docs/ai.md), [graph](docs/graph.md).
 
 ## Quickstart
 
@@ -28,9 +27,11 @@ import {sha256Hex} from '@alneas/appkit-core/storage';
 console.log(sha256Hex('hello'));
 ```
 
-## Next steps
+## Next Steps
 
-[Public exports and optional peers](docs/exports.md) · [Contributing](../../CONTRIBUTING.md) · [Releasing](../../RELEASING.md)
+[Public exports and optional peers](docs/exports.md) · [Contributing](https://github.com/dataarthub/appkit/blob/main/CONTRIBUTING.md) · [Releasing](https://github.com/dataarthub/appkit/blob/main/RELEASING.md)
+
+Agent discovery: [instructions](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/consumer-ai/SKILL.md), [API catalog](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/consumer-ai/api-index.json), and [full documentation](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/llms-full.txt). The `appkit.agent` manifest field lists these Appkit-specific paths. Existing `ai-instructions` and `package-context.json` exports remain available.
 
 
 ---
@@ -312,8 +313,11 @@ export function createRenameApprovalExample({registry,bridge,sessionId,authorize
 ---
 title: "Align schemas and record operations"
 description: "Generic schema validation and CRUD contracts"
+sidebar:
+  order: 3
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "data"]
 ---
 
 # Align schemas and record operations
@@ -366,8 +370,11 @@ Install the additional peer separately from the Appkit package. These adapters d
 ---
 title: "Public exports and optional peers"
 description: "Exact install package, public import subpaths and optional peer requirements."
+sidebar:
+  order: 10
 archetype: reference
-project: tools
+project: appkit
+tags: ["appkit", "exports"]
 ---
 
 # Public exports and optional peers
@@ -551,6 +558,7 @@ bun add @alneas/appkit-core
 | `@alneas/appkit-core/us/documents` | ESM, CommonJS and NodeNext declarations |
 | `@alneas/appkit-core/ai-instructions` | Metadata |
 | `@alneas/appkit-core/package-context.json` | Metadata |
+| `@alneas/appkit-core/api-index.json` | Metadata |
 
 ## Optional peers
 
@@ -572,8 +580,11 @@ Install an optional peer only when using its feature. Core entry loading does no
 ---
 title: "Calculate dependency plans"
 description: "Framework-free dependency graphs, critical paths and planning helpers"
+sidebar:
+  order: 4
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "graph"]
 ---
 
 # Calculate dependency plans
@@ -613,26 +624,28 @@ Framework-free dependency graphs, critical paths and planning helpers. Calculati
 ---
 title: "Appkit Core"
 description: "Unified business logic backbone: schema validation, persistence adapters, dependency graphs, and Japanese/regional commercial presets"
+sidebar:
+  order: 1
 archetype: explanation
-project: tools
+project: appkit
+tags: ["appkit", "overview"]
 ---
 
 # Appkit Core
 
+## Elevator Pitch
+
 Framework-free schemas, record contracts, storage and reviewed AI proposals for business applications.
 
-## Why
+## Why & Value
 
 Feature subpaths keep provider decisions visible while installation uses just two npm packages. Align schemas with validation and record operations; retain application control over data writes.
 
-## Highlights
+## Key Highlights
 
-- `@alneas/appkit-core/storage`: [Store files behind explicit adapters](storage.md).
-- `@alneas/appkit-core/data`: [Align schemas and record operations](data.md).
-- `@alneas/appkit-core/japan`: [Apply Japanese regional defaults](japan.md).
-- `@alneas/appkit-core/graph`: [Calculate dependency plans](graph.md).
-- `@alneas/appkit-core/ai`: [Validate AI proposals before applying changes](ai.md).
-- `@alneas/appkit-core/us`: [Format US business data](us.md).
+- Storage and record contracts: [storage](storage.md), [data](data.md).
+- Regional formats: [Japan](japan.md), [US](us.md).
+- Reviewed proposals and planning: [AI](ai.md), [graph](graph.md).
 
 ## Quickstart
 
@@ -645,9 +658,11 @@ import {sha256Hex} from '@alneas/appkit-core/storage';
 console.log(sha256Hex('hello'));
 ```
 
-## Next steps
+## Next Steps
 
-[Public exports and optional peers](exports.md) · [Contributing](../../../CONTRIBUTING.md) · [Releasing](../../../RELEASING.md)
+[Public exports and optional peers](exports.md) · [Contributing](https://github.com/dataarthub/appkit/blob/main/CONTRIBUTING.md) · [Releasing](https://github.com/dataarthub/appkit/blob/main/RELEASING.md)
+
+Agent discovery: [instructions](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/consumer-ai/SKILL.md), [API catalog](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/consumer-ai/api-index.json), and [full documentation](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/llms-full.txt). The `appkit.agent` manifest field lists these Appkit-specific paths. Existing `ai-instructions` and `package-context.json` exports remain available.
 
 
 ---
@@ -657,8 +672,11 @@ console.log(sha256Hex('hello'));
 ---
 title: "Apply Japanese regional defaults"
 description: "Japanese calendar, formatting and business-document presets"
+sidebar:
+  order: 5
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "japan"]
 ---
 
 # Apply Japanese regional defaults
@@ -698,8 +716,11 @@ Japanese calendar, formatting and business-document presets. Tests do not certif
 ---
 title: "Store files behind explicit adapters"
 description: "Web-standard signing, hashing, ZIP and object-storage adapters"
+sidebar:
+  order: 6
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "storage"]
 ---
 
 # Store files behind explicit adapters
@@ -715,6 +736,8 @@ bun add @alneas/appkit-core
 ## Public import
 
 `@alneas/appkit-core/storage`
+
+`@alneas/appkit-core/storage/portable` is a compatibility alias for this same entry. Prefer `@alneas/appkit-core/storage` for new imports. The alias remains available for existing consumers; server-specific helpers use `@alneas/appkit-core/storage/server`.
 
 ## Step-by-Step Implementation
 
@@ -739,8 +762,11 @@ Web-standard signing, hashing, ZIP and object-storage adapters. Applications con
 ---
 title: "Format US business data"
 description: "USD formatting, federal holiday policy and English document presets"
+sidebar:
+  order: 7
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "us"]
 ---
 
 # Format US business data

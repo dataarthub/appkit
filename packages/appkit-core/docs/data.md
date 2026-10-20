@@ -1,8 +1,11 @@
 ---
 title: "Align schemas and record operations"
 description: "Generic schema validation and CRUD contracts"
+sidebar:
+  order: 3
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "data"]
 ---
 
 # Align schemas and record operations

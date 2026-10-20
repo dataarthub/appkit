@@ -19,6 +19,7 @@
     "docs:generate": "node scripts/generate-docs.mjs",
     "check:docs": "node scripts/check-docs.mjs",
     "test:consumer": "node scripts/check-consumer.mjs",
+    "test:agent-tooling": "node scripts/test-agent-tooling.mjs",
     "prepare": "husky",
     "hooks:install": "husky",
     "lint": "biome lint --no-errors-on-unmatched .",
@@ -29,7 +30,7 @@
     "secrets:staged": "node scripts/check-secrets.mjs --staged",
     "test:quality-tooling": "node --test scripts/quality-tooling.test.mjs",
     "check:quality": "bun run secrets:check && bun run lint && bun run test:quality-tooling",
-    "verify:push": "bun run check:quality && bun run verify"
+    "verify:push": "bun run check:quality && bun run verify && bun run test:agent-tooling"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

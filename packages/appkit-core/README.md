@@ -1,19 +1,18 @@
 # Appkit Core
 
+## Elevator Pitch
+
 Framework-free schemas, record contracts, storage and reviewed AI proposals for business applications.
 
-## Why
+## Why & Value
 
 Feature subpaths keep provider decisions visible while installation uses just two npm packages. Align schemas with validation and record operations; retain application control over data writes.
 
-## Highlights
+## Key Highlights
 
-- `@alneas/appkit-core/storage`: [Store files behind explicit adapters](docs/storage.md).
-- `@alneas/appkit-core/data`: [Align schemas and record operations](docs/data.md).
-- `@alneas/appkit-core/japan`: [Apply Japanese regional defaults](docs/japan.md).
-- `@alneas/appkit-core/graph`: [Calculate dependency plans](docs/graph.md).
-- `@alneas/appkit-core/ai`: [Validate AI proposals before applying changes](docs/ai.md).
-- `@alneas/appkit-core/us`: [Format US business data](docs/us.md).
+- Storage and record contracts: [storage](docs/storage.md), [data](docs/data.md).
+- Regional formats: [Japan](docs/japan.md), [US](docs/us.md).
+- Reviewed proposals and planning: [AI](docs/ai.md), [graph](docs/graph.md).
 
 ## Quickstart
 
@@ -26,6 +25,8 @@ import {sha256Hex} from '@alneas/appkit-core/storage';
 console.log(sha256Hex('hello'));
 ```
 
-## Next steps
+## Next Steps
 
-[Public exports and optional peers](docs/exports.md) · [Contributing](../../CONTRIBUTING.md) · [Releasing](../../RELEASING.md)
+[Public exports and optional peers](docs/exports.md) · [Contributing](https://github.com/dataarthub/appkit/blob/main/CONTRIBUTING.md) · [Releasing](https://github.com/dataarthub/appkit/blob/main/RELEASING.md)
+
+Agent discovery: [instructions](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/consumer-ai/SKILL.md), [API catalog](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/consumer-ai/api-index.json), and [full documentation](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/llms-full.txt). The `appkit.agent` manifest field lists these Appkit-specific paths. Existing `ai-instructions` and `package-context.json` exports remain available.

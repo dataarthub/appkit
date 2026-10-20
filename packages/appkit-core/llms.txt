@@ -2,6 +2,9 @@
 
 Install @alneas/appkit-core; import its explicit feature subpaths.
 
+- [Agent instructions](consumer-ai/SKILL.md)
+- [API catalog](consumer-ai/api-index.json)
+
 - [README.md](README.md)
 - [docs/ai-errors.md](docs/ai-errors.md)
 - [docs/ai.md](docs/ai.md)

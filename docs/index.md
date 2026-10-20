@@ -1,15 +1,24 @@
 ---
 title: "Appkit"
 description: "Schema-driven TypeScript and React forms, validation and record operations."
+sidebar:
+  order: 1
 archetype: explanation
-project: tools
+project: appkit
+tags: ["appkit", "overview"]
 ---
 
 # Appkit
 
+## Elevator Pitch
+
 TypeScript and React libraries for aligning business forms, validation and record operations around a schema.
 
+## Why & Value
+
 Define request fields once, validate input before saving, and connect the result to an application-owned data adapter. Explicit database and storage boundaries keep provider decisions visible. AI contracts let the application review proposals before applying changes.
+
+## Key Highlights
 
 - Schema forms and record tables with explicit persistence boundaries.
 - Framework-free storage, data, graph, AI and regional helpers.
@@ -55,15 +64,15 @@ export function RequestForm({ adapter }: { adapter: DataAccessAdapter }) {
 
 The adapter controls persistence. Your application owns authorization, migrations, concurrency checks and final writes.
 
-## Packages and next steps
+## Next Steps
 
 | Package | Feature imports | Documentation |
 | --- | --- | --- |
-| `@alneas/appkit-core` | `/storage`, `/data`, `/japan`, `/graph`, `/ai`, `/us` | [Core guide](../packages/appkit-core/README.md) |
-| `@alneas/appkit-react` | `/ui`, `/tools`, `/ai`, `/styles` | [React guide](../packages/appkit-react/README.md) |
+| `@alneas/appkit-core` | `/storage`, `/data`, `/japan`, `/graph`, `/ai`, `/us` | [Core guide](../packages/appkit-core/docs/index.md) |
+| `@alneas/appkit-react` | `/ui`, `/tools`, `/ai`, `/styles` | [React guide](../packages/appkit-react/docs/index.md) |
 
-[Complete form recipe](../packages/appkit-react/docs/request-form.md) · [Contributing](../CONTRIBUTING.md) · [Releasing](../RELEASING.md)
+[Migration from app-core/react-tools](../packages/appkit-react/docs/migration.md) · [Complete form recipe](../packages/appkit-react/docs/request-form.md) · [Contributing](contributing.md) · [Releasing](releasing.md)
 
-AI checks cover API metadata and developer-authored integrations. End-to-end coding-agent task evaluation remains unverified. Optional peers and public imports are listed in each package export reference.
+AI checks cover API metadata and developer-authored integrations. End-to-end coding-agent task evaluation remains unverified. See the [cross-package agent index](https://github.com/dataarthub/appkit/blob/main/llms.txt). Optional peers and public imports are listed in each package export reference.
 
 Canonical documentation is English. The documentation portal owns ingestion, Japanese translation and delivery.

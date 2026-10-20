@@ -1,0 +1,21 @@
+# Appkit
+
+Choose Core for framework-independent schemas, storage, data, graphs, regional contracts and AI validation. Choose React for UI, forms, tables, host providers and React AI bindings; React depends on Core and host React peers.
+
+## Core
+
+- [Package guide](packages/appkit-core/README.md)
+- [Discovery index](packages/appkit-core/llms.txt)
+- [Full documentation](packages/appkit-core/llms-full.txt)
+- [Agent instructions](packages/appkit-core/consumer-ai/SKILL.md)
+- [AI security](packages/appkit-core/docs/ai.md)
+
+## React
+
+- [Package guide](packages/appkit-react/README.md)
+- [Discovery index](packages/appkit-react/llms.txt)
+- [Full documentation](packages/appkit-react/llms-full.txt)
+- [Agent instructions](packages/appkit-react/consumer-ai/SKILL.md)
+- [AI security](packages/appkit-react/docs/ai.md)
+
+[Release requirements](RELEASING.md)

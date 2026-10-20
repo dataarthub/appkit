@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Unified business logic backbone: schema validation, persistence adapters, dependency graphs, and Japanese/regional commercial presets",
   "type": "module",
+  "homepage": "https://tech-docs.alneas.com/appkit/appkit-core/",
   "license": "MIT",
   "author": "ALNEAS",
   "repository": {
@@ -28,7 +29,10 @@
     "README.md",
     "docs",
     "llms.txt",
-    "llms-full.txt"
+    "llms-full.txt",
+    "consumer-ai/SKILL.md",
+    "consumer-ai/package-context.json",
+    "consumer-ai/api-index.json"
   ],
   "exports": {
     ".": {
@@ -1682,10 +1686,11 @@
       }
     },
     "./ai-instructions": "./dist/consumer-ai/SKILL.md",
-    "./package-context.json": "./dist/consumer-ai/package-context.json"
+    "./package-context.json": "./dist/consumer-ai/package-context.json",
+    "./api-index.json": "./consumer-ai/api-index.json"
   },
   "scripts": {
-    "build": "vite build && bun scripts/prepare-package.mjs && node ../../scripts/generate-docs.mjs --package appkit-core",
+    "build": "vite build && bun scripts/prepare-package.mjs && node ../../scripts/build-agent-cli.mjs && node ../../scripts/generate-docs.mjs --package appkit-core",
     "test": "node ../../scripts/test-unit.mjs",
     "typecheck": "tsc --noEmit"
   },
@@ -1752,5 +1757,18 @@
   },
   "bugs": {
     "url": "https://github.com/dataarthub/appkit/issues"
+  },
+  "appkit": {
+    "agent": {
+      "schemaVersion": 1,
+      "instructions": "./consumer-ai/SKILL.md",
+      "context": "./consumer-ai/package-context.json",
+      "catalog": "./consumer-ai/api-index.json",
+      "index": "./llms.txt",
+      "fullDocumentation": "./llms-full.txt"
+    }
+  },
+  "bin": {
+    "appkit-api": "./dist/agent-cli.mjs"
   }
 }
