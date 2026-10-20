@@ -1,5 +1,6 @@
 import {readFileSync,writeFileSync,readdirSync,mkdirSync,cpSync} from 'node:fs';
 import path from 'node:path';
+import {readErrorCatalog,renderErrorGuide} from './agent/generate-error-guide.mjs';
 const root=path.resolve(import.meta.dirname,'..'),packages=['appkit-core','appkit-react'];
 const selected=process.argv[2]==='--package'?[process.argv[3]]:packages;
 function landing(file,title,description,transform){
@@ -11,6 +12,7 @@ for(const name of selected){
  if(!packages.includes(name))throw Error('Unknown package');
  const dir=path.join(root,'packages',name),pkg=JSON.parse(readFileSync(path.join(dir,'package.json')));
  writeFileSync(path.join(dir,'docs/index.md'),landing('packages/'+name+'/README.md',name==='appkit-core'?'Appkit Core':'Appkit React',pkg.description,text=>text.replaceAll('](docs/','](').replaceAll('](../../CONTRIBUTING.md)','](../../../CONTRIBUTING.md)').replaceAll('](../../RELEASING.md)','](../../../RELEASING.md)')));
+ if(name==='appkit-core')writeFileSync(path.join(dir,'docs/ai-errors.md'),renderErrorGuide(readErrorCatalog(readFileSync(path.join(dir,'src/ai/errors/catalog.ts'),'utf8'))));
  const exports=Object.keys(pkg.exports).map(key=>key==='.'?pkg.name:pkg.name+'/'+key.slice(2));
  let reference=`---\ntitle: "Public exports and optional peers"\ndescription: "Exact install package, public import subpaths and optional peer requirements."\narchetype: reference\nproject: tools\n---\n\n# Public exports and optional peers\n\nGenerated from package.json; edit the manifest and regenerate.\n\n## Installation\n\n\`\`\`bash\nbun add ${pkg.name}\n\`\`\`\n\n## Public import\n\n| Import target | Kind |\n| --- | --- |\n`;
  for(const [key,value] of Object.entries(pkg.exports))reference+=`| \`${key==='.'?pkg.name:pkg.name+'/'+key.slice(2)}\` | ${typeof value==='object'?'ESM, CommonJS and NodeNext declarations':String(value).endsWith('.css')?'CSS':'Metadata'} |\n`;

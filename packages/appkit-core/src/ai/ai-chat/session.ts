@@ -1,3 +1,4 @@
+import { AIChatError } from '../errors/index';
 import type { AIChatAdapter, AIChatEvent, AIChatRequest } from './types';
 import { snapshotRequest } from './stream';
 import { normalizeAIChatEvent } from './conversation';
@@ -18,7 +19,7 @@ export function createAIChatStream(adapter: AIChatAdapter, request: AIChatReques
   const snapshot = snapshotRequest(request);
   const parentSignal = snapshot.signal;
   const max = options.maxResponseChars ?? 1_000_000;
-  if (!Number.isInteger(max) || max < 1 || max > 10_000_000) throw new Error('Invalid AI stream limit');
+  if (!Number.isInteger(max) || max < 1 || max > 10_000_000) throw new AIChatError('AI_INVALID_CONFIGURATION', 'Invalid AI stream limit');
   const abortController = new AbortController();
   let iterator: AsyncIterator<AIChatEvent> | undefined;
   let output: ReadableStreamDefaultController<AIChatEvent>;
@@ -49,13 +50,13 @@ export function createAIChatStream(adapter: AIChatAdapter, request: AIChatReques
         const next = await iterator.next();
         if (closed) return;
         if (next.done) {
-          if (!finished) throw new Error('AI stream ended before finish');
+          if (!finished) throw new AIChatError('AI_INCOMPLETE_STREAM', 'AI stream ended before finish');
           closed = true; cleanup(); controller.close(); return;
         }
-        if (finished) throw new Error('AI event after finish');
+        if (finished) throw new AIChatError('AI_INVALID_STREAM', 'AI event after finish');
         const event = normalizeAIChatEvent(next.value);
         total += JSON.stringify(event).length;
-        if (total > max) throw new Error('AI response exceeds the configured limit');
+        if (total > max) throw new AIChatError('AI_RESPONSE_LIMIT', 'AI response exceeds the configured limit');
         if (event.type === 'finish') finished = true;
         controller.enqueue(event);
       } catch (error) {

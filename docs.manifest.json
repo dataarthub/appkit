@@ -12,6 +12,14 @@
       "visibility": "public"
     },
     {
+      "title": "Recover from AI integration errors",
+      "slug": "appkit-core/ai-errors",
+      "source": "packages/appkit-core/docs/ai-errors.md",
+      "archetype": "reference",
+      "visibility": "public",
+      "package": "@alneas/appkit-core"
+    },
+    {
       "title": "Validate AI proposals before applying changes",
       "slug": "appkit-core/ai",
       "source": "packages/appkit-core/docs/ai.md",

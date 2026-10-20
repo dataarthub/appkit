@@ -1,3 +1,4 @@
+import {getAIErrorInfo} from '../errors/index';
 import type { ExecutionContext } from './execution';
 import { jsonSnapshot } from '../internal/json-snapshot';
 import { prepareActionToolInput } from './schema-input';
@@ -90,7 +91,7 @@ export function createActionToolBridge(
       // The public type aids application code; envelopes from transports still need runtime checks.
       const callId = typeof call?.callId === 'string' ? call.callId : '';
       const name = typeof call?.name === 'string' ? call.name : '';
-      const fail = (code: ActionToolErrorCode): ActionToolResult => Object.freeze({ callId, name, ok: false, code, error: MESSAGES[code] });
+      const fail = (code: ActionToolErrorCode): ActionToolResult => { const {docsUrl,recovery}=getAIErrorInfo('tool',code)!; return Object.freeze({ callId, name, ok: false, code, error: MESSAGES[code], docsUrl, recovery }); };
       if (closed) return fail('CLOSED');
       if (!callId.trim() || callId.length > 256 || !name || name.length > 64) return fail('INVALID_CALL');
       if (seen.has(callId)) return fail('DUPLICATE_CALL');
