@@ -49,6 +49,10 @@ For implementation and verification selection, read:
 - Policy: https://tech-docs.alneas.com/policies/development-policy.md
 - Skill: https://tech-docs.alneas.com/skills/developing-projects/SKILL.md
 
+For automated testing and verification setup (UI & non-UI):
+- UI, Storybook, Playwright & Kratos auth: https://tech-docs.alneas.com/skills/testing-ui-services/SKILL.md (Boilerplate: https://tech-docs.alneas.com/templates/testing/README.md)
+- Logic, Hono, Oracle DB & contracts: https://tech-docs.alneas.com/skills/testing-logic-services/SKILL.md (Boilerplate: https://tech-docs.alneas.com/templates/testing-logic/README.md)
+
 For release preparation, publication or partial-release recovery, read:
 - Policy: https://tech-docs.alneas.com/policies/release-policy.md
 - Skill: https://tech-docs.alneas.com/skills/preparing-releases/SKILL.md
