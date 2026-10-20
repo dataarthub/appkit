@@ -55,7 +55,7 @@ jobs:
           bun run test:agent-tooling
       - name: Verify React with declared and candidate Core
         if: steps.select.outputs.key == 'react'
-        run: bun run check:react-core
+        run: bun run check:react-core --release
       - name: Verify exact packed archives in isolated consumers
         env:
           APPKIT_RELEASE_CONSUMER: 'true'

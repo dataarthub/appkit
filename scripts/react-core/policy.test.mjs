@@ -28,3 +28,24 @@ test('all four matrix outcomes require both lanes to pass and explain the differ
   assert.equal(matrixVerdict({current: false, candidate: false}).passed, false);
   assert.equal(matrixVerdict({current: null, candidate: true}).passed, false);
 });
+test('Core preparation records a pending adoption without requiring an unpublished dependency', () => {
+  const staged = {schemaVersion: 1, requirements: [{id: 'approval-fix', coreVersion: '0.1.1', reactVersion: '0.1.2', reason: 'Adopt after publishing Core.'}]};
+  const result = checkPolicy({core, react, policy: staged});
+  assert.deepEqual(result.pendingRequirements, ['approval-fix']);
+  assert.equal(result.requiredCore, '0.1.0');
+});
+test('the React adoption deadline and every React release enforce the required Core', () => {
+  const staged = {schemaVersion: 1, requirements: [{id: 'approval-fix', coreVersion: '0.1.1', reactVersion: '0.1.2', reason: 'Adopt after publishing Core.'}]};
+  assert.throws(() => checkPolicy({core, react: {...react, version: '0.1.2'}, policy: staged}), /approval-fix.*React dependency/);
+  assert.throws(() => checkPolicy({core, react, policy: staged, release: true}), /approval-fix.*React dependency/);
+  const adopted = {...react, version: '0.1.2', dependencies: {'@alneas/appkit-core': '0.1.1'}};
+  assert.deepEqual(checkPolicy({core, react: adopted, policy: staged, release: true}).pendingRequirements, []);
+});
+test('staging never relaxes version validation or already active requirements', () => {
+  const entry = {id: 'approval-fix', coreVersion: '0.1.1', reactVersion: '0.1.2', reason: 'Adopt after publishing Core.'};
+  for (const reactVersion of ['^0.1.2', 'invalid', '0.1.2-01', null]) {
+    assert.throws(() => checkPolicy({core, react, policy: {schemaVersion: 1, requirements: [{...entry, reactVersion}]}}));
+  }
+  assert.throws(() => checkPolicy({core: {version: '0.1.0'}, react, policy: {schemaVersion: 1, requirements: [entry]}}), /Core version/);
+  assert.throws(() => checkPolicy({core, react: {...react, version: '0.1.2-rc.1'}, policy: {schemaVersion: 1, requirements: [{...entry, reactVersion: '0.1.1'}]}}), /React dependency/);
+});

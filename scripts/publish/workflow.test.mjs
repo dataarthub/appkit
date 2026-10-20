@@ -30,7 +30,7 @@ test('artifact handoff uploads only tested public bytes and binds the publisher 
   const steps = workflow.jobs.verify.steps;
   const packed = steps.find(s => s.run === 'bun run test:consumer');
   assert.equal(packed.env.APPKIT_RELEASE_CONSUMER, 'true');
-  const react = steps.find(s => s.run === 'bun run check:react-core');
+  const react = steps.find(s => s.run === 'bun run check:react-core --release');
   assert.equal(react.if, "steps.select.outputs.key == 'react'");
   const upload = steps.find(s => s.id === 'upload');
   assert.deepEqual(upload.with.path.trim().split('\n'), ['.verification/publish/package.tgz', '.verification/publish/release.json']);
