@@ -1,14 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,writeFileSync,rmSync,mkdirSync,copyFileSync,symlinkSync,readFileSync,renameSync} from 'node:fs';
+import {mkdtempSync,writeFileSync,rmSync,mkdirSync,copyFileSync,symlinkSync,readFileSync,renameSync,existsSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {randomBytes} from 'node:crypto';
+import {localGitleaks} from './quality-tools.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 function fixture(run){
  const dir=mkdtempSync(path.join(tmpdir(),'appkit-quality-'));
- const env={...process.env,APPKIT_GITLEAKS_BINARY:path.join(root,'.verification/tools/gitleaks/gitleaks')};
+ const env={...process.env,APPKIT_GITLEAKS_BINARY:process.env.APPKIT_GITLEAKS_BINARY || (existsSync(localGitleaks) ? localGitleaks : 'gitleaks')};
  for(const name of Object.keys(env))if(name.startsWith('GIT_'))delete env[name];
  const git=args=>{const r=spawnSync('git',args,{cwd:dir,env,encoding:'utf8'});assert.equal(r.status,0,'Fixture Git operation failed');};
  try{git(['init','--quiet']);copyFileSync(path.join(root,'.gitleaks.toml'),path.join(dir,'.gitleaks.toml'));writeFileSync(path.join(dir,'README.md'),'Temporary test fixture.\n');git(['add','README.md']);git(['-c','user.name=Appkit fixture','-c','user.email=fixture@example.invalid','commit','--quiet','-m','fixture']);return run({dir,env,git,scan:(extra={})=>spawnSync(process.execPath,[path.join(root,'scripts/check-secrets.mjs'),'--staged'],{cwd:dir,env:{...env,...extra},encoding:'utf8'})});}finally{rmSync(dir,{recursive:true,force:true});}
