@@ -269,7 +269,7 @@ export function Header({
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  aria-label='ユーザーメニュー'
+                  aria-label={`${user.initials || user.name.slice(0, 2).toUpperCase()} ${user.name} ユーザーメニュー`}
                   className={cn(
                     buttonVariants({ variant: 'ghost' }),
                     'relative h-8 w-8 rounded-full p-0 flex items-center justify-center',

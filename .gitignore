@@ -11,3 +11,6 @@ dist/
 # Generated from the tracked messages and inlang settings.
 packages/appkit-react/src/tools/paraglide/
 *.tgz
+
+# Local Storybook output.
+storybook-static/

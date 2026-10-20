@@ -53,6 +53,7 @@ export const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent className='flex justify-center p-6 rounded-b-lg'>
+        {/* Keep the QR and loading label on the same scanner-friendly white surface. */}
         <div className='bg-white p-4 rounded-lg flex items-center justify-center min-h-[200px]'>
           {QRCodeComponent ? (
             <QRCodeComponent
@@ -62,7 +63,7 @@ export const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
               viewBox={`0 0 256 256`}
             />
           ) : (
-            <div className='text-muted-foreground italic'>Loading QR...</div>
+            <div className='text-neutral-700 italic'>Loading QR...</div>
           )}
         </div>
       </CardContent>

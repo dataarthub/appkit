@@ -399,7 +399,10 @@
     "build": "bun run generate:i18n && vite build && bun scripts/prepare-package.mjs && bun x --no-install tailwindcss -i src/styles.css -o dist/styles.css --minify && node ../../scripts/generate-docs.mjs --package appkit-react && node ../../scripts/generate-notices.mjs",
     "test": "node ../../scripts/test-unit.mjs",
     "typecheck": "tsc --noEmit",
-    "generate:i18n": "node scripts/generate-i18n.mjs"
+    "generate:i18n": "node scripts/generate-i18n.mjs",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "build-storybook": "storybook build",
+    "typecheck:storybook": "tsc --project tsconfig.storybook.json"
   },
   "dependencies": {
     "@alneas/appkit-core": "0.1.0",

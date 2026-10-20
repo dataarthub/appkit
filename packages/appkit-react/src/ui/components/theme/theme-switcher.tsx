@@ -124,6 +124,7 @@ export function ThemeModeSwitcher({
   const selectValue = isClient ? theme : 'system';
   return (
     <select
+      aria-label='Mode'
       className={cn(
         'h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
         className,
@@ -155,6 +156,7 @@ export function ColorThemeSwitcher({
     { value: 'green', label: 'Green', color: 'bg-green-500' },
     { value: 'rose', label: 'Rose', color: 'bg-rose-500' },
     { value: 'orange', label: 'Orange', color: 'bg-orange-500' },
+    { value: 'future', label: 'Future', color: 'bg-cyan-500' },
   ];
 
   // SSR-safe: Use default for initial render
@@ -240,6 +242,7 @@ export function ColorThemeSwitcher({
 
   return (
     <select
+      aria-label='Color'
       className={className}
       value={activeColorTheme}
       onChange={(e) => setColorTheme(e.target.value)}
@@ -333,6 +336,7 @@ export function SpacingThemeSwitcher({
 
   return (
     <select
+      aria-label='Density'
       className={className}
       value={activeSpacingTheme}
       onChange={(e) => setSpacingTheme(e.target.value as 'compact' | 'normal' | 'comfortable')}

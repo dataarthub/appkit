@@ -46,7 +46,8 @@ copy; separate unfinished edits before committing.
 
 Before a push, Husky runs `bun run verify:push`: history secret scanning, source lint,
 quality-hook tests, the existing build/type/unit/release/docs checks through
-`bun run verify`, then agent-tooling tests against the fresh build. Turbo reuses matching cached build/type/unit results;
+`bun run verify`, agent-tooling and React/Core compatibility checks, then the
+Storybook browser suite. Turbo reuses matching cached build/type/unit results;
 this command does not run live-model evaluation or publish packages. Git hooks can
 be bypassed, so the Node 24 CI job runs the same gate after installing Gitleaks.
 The Action runs only when main changes or is dispatched manually; feature-branch
@@ -81,3 +82,70 @@ Two narrow source comments suppress Biome compatibility diagnostics: TypeScript'
 a labeled resource-search loop. These suppressions do not change emitted runtime
 behavior or exclude either whole file from linting. Tailwind directives are enabled
 in the CSS parser. Review these exceptions when upgrading Biome.
+
+## Storybook development
+
+Run `bun run storybook` from the repository root, then open
+http://localhost:6006. The command builds public Core and generates React's
+translations before starting the isolated Vite workspace.
+`bun run check:storybook` checks story types and public import boundaries;
+`bun run build-storybook` creates the static preview in
+`packages/appkit-react/storybook-static/`.
+
+Stories and their in-memory providers live in `packages/appkit-react/stories/`,
+outside the library build and npm payload. Keep both individual stories and
+composed examples limited to components and dependencies owned by this public
+repository. Enterprise-only screens stay in their owning private repository.
+
+The preview supplies Appkit CSS, theme state and a separate QueryClient for each
+selected story. Authentication and form stories add their own mock authentication
+and in-memory data providers. These fixtures demonstrate isolated UI states;
+they do not verify hosted authentication, durable persistence or backend access
+controls. Component descriptions identify their exact public import and required
+setup. Keep technical descriptions in English and preserve localized UI fixtures.
+
+After changing this guide, run `bun run docs:generate` and `bun run check:docs`
+to update and validate the generated portal copy. Documentation generation needs
+both package builds: run `bun run build` first in a clean checkout.
+
+### Browser verification
+
+Install the pinned Chromium once with `bunx --no-install playwright install chromium`
+(on Linux CI, add `--with-deps`). Run `bun run test:storybook` for the full suite.
+The same suite is part of `verify:push` and the Node 24 quality job; the existing
+main-push/manual workflow triggers remain unchanged.
+
+Every CSF3 story runs with fatal axe checks in Chromium at 1280×900 and 390×844,
+in both light and dark mode. The preview and browser runner compile the real
+Appkit CSS with Tailwind. Palette stories cover default, blue, green, rose, orange
+and future in both modes, assert the active classes and check semantic text-token
+contrast (including alpha compositing). Open modal/select/popover stories audit
+their real portals. Arbitrary host custom colors require host validation.
+
+The HTTP lifecycle stories use browser MSW with unhandled requests rejected,
+Fetch-based host adapters, shared Zod response schemas and the real public auth,
+profile, data and file components. Auth/profile, table, form and file-browser
+compositions cover loading, success, empty, error, signed-out, restricted and
+privileged states. Native file previews cover loading, text, zero-byte data,
+network rejection and non-2xx HTTP responses. Interaction stories use real clicks,
+keyboard navigation and focus return; layout checks measure containment, overflow,
+tap targets, clipping and overlap. These are isolated component/host-contract tests,
+not hosted identity, database authorization or seeded-backend E2E evidence.
+
+The runner executes six story files at a time with one worker, sequentially across
+the four mode/viewport combinations. Each batch gets a fresh Vite/Chromium process
+tree. Aggregate RSS is capped at the smaller of 3 GiB and one-third of physical
+memory, the Node heap at 1.5 GiB, and a batch at ten minutes. A resource limit or
+failed process inspection fails the run; no stories are skipped. The guard kills
+only its invocation's process groups, including detached browser descendants,
+on completion, failure or interruption. Do not start another browser suite in a
+parallel agent. Reduce batch size/concurrency after a limit failure; do not raise
+the limit or weaken assertions to obtain a pass. The runner prints measured peaks.
+`node --test scripts/guarded-process.test.mjs` checks guard failure and cleanup.
+The guard and its regression tests are imported github-docs templates;
+`scripts/lib/README.md` records their canonical repository, pinned revision, file
+mappings and update procedure. Maintain shared behavior in github-docs and keep
+Appkit-specific budgets and batching in this repository’s runner.
+
+Axe cannot replace assistive-technology or design review. No screenshot baselines
+are generated by this suite; intended visual changes still need human approval.

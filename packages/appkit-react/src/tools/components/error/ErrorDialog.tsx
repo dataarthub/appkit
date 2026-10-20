@@ -61,7 +61,7 @@ const severityConfig: Record<
     icon: AlertTriangle,
     iconBgClass: 'bg-amber-500',
     iconClass: 'text-white',
-    titleClass: 'text-amber-600 dark:text-amber-400',
+    titleClass: 'text-amber-800 dark:text-amber-400',
   },
   error: {
     icon: X,

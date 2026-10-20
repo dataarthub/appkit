@@ -49,6 +49,9 @@ jobs:
           path: .turbo/cache
           key: ${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: ${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-
+      - name: Install pinned Chromium for Storybook verification
+        if: matrix.node == 24
+        run: bunx --no-install playwright install --with-deps chromium
       - name: Run the same gate as local pre-push
         if: matrix.node == 24
         run: |

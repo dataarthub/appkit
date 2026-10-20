@@ -245,8 +245,8 @@ export function EditableTable<T extends Record<string, any>>({
                 {col.label}
               </TableHead>
             ))}
-            {renderRowActions && <TableHead className='px-2 py-1 h-auto'></TableHead>}
-            {onRemove && <TableHead className='px-2 py-1 h-auto'></TableHead>}
+            {renderRowActions && <TableHead className='px-2 py-1 h-auto'><span className='sr-only'>Actions</span></TableHead>}
+            {onRemove && <TableHead className='px-2 py-1 h-auto'><span className='sr-only'>Actions</span></TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -312,6 +312,7 @@ export function EditableTable<T extends Record<string, any>>({
                           variant='destructive'
                           size='sm'
                           className='h-6 w-6 p-0'
+                          aria-label={`Remove row ${index + 1}`}
                           onClick={() => onRemove(index)}
                         >
                           <Trash2 className='h-3 w-3' />

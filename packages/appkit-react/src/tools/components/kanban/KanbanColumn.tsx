@@ -30,7 +30,7 @@ export const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
             {column.color && (
               <div className='w-2 h-2 rounded-full' style={{ backgroundColor: column.color }} />
             )}
-            <h3 className='font-semibold text-sm text-foreground'>{column.title}</h3>
+            <h2 className='font-semibold text-sm text-foreground'>{column.title}</h2>
           </div>
           <Badge
             variant={isOverLimit ? 'destructive' : 'secondary'}

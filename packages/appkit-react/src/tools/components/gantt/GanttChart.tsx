@@ -672,6 +672,9 @@ export function GanttChart({
             ref={scrollContainerRef}
             {...rowEvents}
             data-gantt-chart-viewport
+            role='region'
+            aria-label='Gantt timeline'
+            tabIndex={0}
             className='flex-1 min-w-0 overflow-auto bg-muted/5 relative'
           >
             <div style={{ width: `${totalDays * cellWidth}px`, minWidth: '100%' }}>

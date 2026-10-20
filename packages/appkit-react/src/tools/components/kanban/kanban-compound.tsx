@@ -85,7 +85,7 @@ export function KanbanRoot({
       overlayClassName='rotate-2 scale-105 opacity-90 shadow-2xl'
     >
       <KanbanCompoundContext.Provider value={contextValue}>
-        <div className={cn('flex h-full w-full gap-4 overflow-x-auto pb-4', className)} {...props}>
+        <div role='region' aria-label='Kanban columns' tabIndex={0} className={cn('flex h-full w-full gap-4 overflow-x-auto pb-4', className)} {...props}>
           {children}
         </div>
       </KanbanCompoundContext.Provider>
@@ -147,7 +147,7 @@ export function KanbanColumnHeaderSlot({
     <div className={cn('flex items-center justify-between mb-3 px-1', className)} {...props}>
       <div className='flex items-center gap-2'>
         {color && <div className='w-2.5 h-2.5 rounded-full' style={{ backgroundColor: color }} />}
-        {title && <h3 className='font-semibold text-sm text-foreground'>{title}</h3>}
+        {title && <h2 className='font-semibold text-sm text-foreground'>{title}</h2>}
         {children}
       </div>
       <div className='flex items-center gap-2'>

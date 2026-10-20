@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import type { FileNode } from './types';
 import { FileIcon } from '../ui/file-icon';
 import { Loader2, Download, ExternalLink } from 'lucide-react';
-import { Button } from '../ui/button';
+import { buttonVariants } from '../ui/button';
 
 export interface FilePreviewProps {
   /** プレビュー対象のノード */
@@ -32,26 +32,36 @@ export function FilePreview({ node, url, onClose }: FilePreviewProps) {
     mime.includes('typescript');
 
   useEffect(() => {
+    const controller = new AbortController();
     if (isOpen && isText && url) {
       queueMicrotask(() => {
+        if (controller.signal.aborted) return;
         setLoading(true);
+        setTextContent(null);
       });
-      fetch(url)
-        .then((res) => res.text())
+      fetch(url, { signal: controller.signal })
+        .then((res) => {
+          if (!res.ok) throw new Error('Failed to load text content.');
+          return res.text();
+        })
         .then((text) => {
+          if (controller.signal.aborted) return;
           setTextContent(text);
           setLoading(false);
         })
         .catch(() => {
+          if (controller.signal.aborted) return;
           setTextContent('Failed to load text content.');
           setLoading(false);
         });
     } else {
       queueMicrotask(() => {
+        if (controller.signal.aborted) return;
         setLoading(false);
         setTextContent(null);
       });
     }
+    return () => controller.abort();
   }, [isOpen, isText, url]);
 
   if (!node) return null;
@@ -65,13 +75,13 @@ export function FilePreview({ node, url, onClose }: FilePreviewProps) {
             <DialogTitle className='text-base font-semibold truncate'>{node.name}</DialogTitle>
           </div>
           <div className='flex items-center gap-2'>
-            <Button variant='outline' size='sm' className='h-8 gap-2' nativeButton={false} render={<a href={url || '#'} download={node.name} />}>
+            <a className={buttonVariants({ variant: 'outline', size: 'sm', className: 'h-8 gap-2' })} href={url || '#'} download={node.name}>
                 <Download className='h-3.5 w-3.5' />
                 <span>Download</span>
-            </Button>
-            <Button variant='ghost' size='sm' className='h-8' nativeButton={false} render={<a href={url || '#'} target='_blank' rel='noreferrer' aria-label='Open in new tab' />}>
+            </a>
+            <a className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'h-8' })} href={url || '#'} target='_blank' rel='noreferrer' aria-label='Open in new tab'>
                 <ExternalLink className='h-3.5 w-3.5' />
-            </Button>
+            </a>
           </div>
         </DialogHeader>
 
