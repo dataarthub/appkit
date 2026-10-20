@@ -3,61 +3,49 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {parse} from 'yaml';
-const workflow = parse(readFileSync('.github/workflows/publish.yml', 'utf8'));
-test('only stable published package releases enter verification, never pushes or manual dispatch', () => {
-  assert.deepEqual(workflow.on, {release: {types: ['published']}});
-  assert.match(workflow.jobs.verify.if, /prerelease == false/);
-  assert.match(workflow.jobs.verify.if, /draft == false/);
-  assert.match(workflow.jobs.verify.if, /appkit-core-v/);
-  assert.match(workflow.jobs.verify.if, /appkit-react-v/);
-  assert.equal(workflow.concurrency['cancel-in-progress'], false);
+const workflow=parse(readFileSync('.github/workflows/publish.yml','utf8'));
+test('only stable releases stage; main-only manual completion requires the original run ID',()=>{
+ assert.deepEqual(Object.keys(workflow.on),['release','workflow_dispatch']);
+ assert.deepEqual(workflow.on.release,{types:['published']});
+ assert.equal(workflow.on.workflow_dispatch.inputs.staged_run.required,true);
+ assert.match(workflow.jobs.verify.if,/event_name == 'release'/);
+ assert.match(workflow.jobs.verify.if,/prerelease == false/);
+ assert.match(workflow.jobs.resolve.if,/refs\/heads\/main/);
+ assert.equal(workflow.concurrency['cancel-in-progress'],false);
 });
-test('only the publisher has OIDC and the selected package deployment environment', () => {
-  assert.deepEqual(workflow.permissions, {contents: 'read'});
-  assert.equal(workflow.jobs.verify.permissions?.['id-token'], undefined);
-  const publisher = workflow.jobs.publish;
-  assert.equal(publisher.needs, 'verify');
-  assert.equal(publisher.permissions['id-token'], 'write');
-  assert.equal(publisher.environment.name, '${{ needs.verify.outputs.environment }}');
-  assert.equal(publisher.environment.url, '${{ needs.verify.outputs.url }}');
-  assert.equal(publisher.steps.some(s => /bun install|npm ci/.test(s.run ?? '')), false);
-  assert.equal(publisher.steps.find(s => s.uses?.startsWith('actions/checkout@')).with.ref, '${{ needs.verify.outputs.sha }}');
-  // setup-node's registry-url injects a placeholder NODE_AUTH_TOKEN, conflicting
-  // with the publisher's deliberate refusal to fall back to a write token.
-  assert.equal(publisher.steps.find(s => s.uses?.startsWith('actions/setup-node@')).with['registry-url'], undefined);
+test('verification and resume resolution have no OIDC; staging does not create a public Deployment',()=>{
+ for(const key of ['verify','resolve']) assert.equal(workflow.jobs[key].permissions['id-token'],undefined);
+ for(const key of ['stage','complete']) {
+   const job=workflow.jobs[key];
+   assert.equal(job.permissions['id-token'],'write');
+   assert.equal(job.environment.deployment,false);
+   assert.equal(job.steps.some(s=>/bun install|npm ci/.test(s.run??'')),false);
+   assert.equal(job.steps.find(s=>s.uses?.startsWith('actions/setup-node@')).with['registry-url'],undefined);
+ }
+ assert.equal(workflow.jobs.stage.permissions.deployments,undefined);
+ assert.equal(workflow.jobs.complete.permissions.deployments,'write');
 });
-test('artifact handoff uploads only tested public bytes and binds the publisher to immutable ID/digest', () => {
-  const steps = workflow.jobs.verify.steps;
-  const packed = steps.find(s => s.run === 'bun run test:consumer');
-  assert.equal(packed.env.APPKIT_RELEASE_CONSUMER, 'true');
-  const react = steps.find(s => s.run === 'bun run check:react-core --release');
-  assert.equal(react.if, "steps.select.outputs.key == 'react'");
-  const upload = steps.find(s => s.id === 'upload');
-  assert.deepEqual(upload.with.path.trim().split('\n'), ['.verification/publish/package.tgz', '.verification/publish/release.json']);
-  const download = workflow.jobs.publish.steps.find(s => s.uses?.startsWith('actions/download-artifact@'));
-  assert.equal(download.with['artifact-ids'], '${{ needs.verify.outputs.artifact }}');
-  assert.equal(download.with['digest-mismatch'], 'error');
-  assert.equal(workflow.jobs.publish.steps.at(-1).env.VERIFIED_INTEGRITY, '${{ needs.verify.outputs.integrity }}');
+test('both phases use immutable verified artifacts, and completion never rebuilds or restages',()=>{
+ const verify=workflow.jobs.verify;
+ assert.equal(verify.steps.find(s=>s.run==='bun run test:consumer').env.APPKIT_RELEASE_CONSUMER,'true');
+ assert.equal(verify.steps.find(s=>s.run==='bun run check:react-core --release').if,"steps.select.outputs.key == 'react'");
+ assert.deepEqual(verify.steps.find(s=>s.id==='upload').with.path.trim().split('\n'),['.verification/publish/package.tgz','.verification/publish/release.json']);
+ for(const [key,source] of [['stage','verify'],['complete','resolve']]) {
+   const job=workflow.jobs[key];assert.equal(job.needs,source);
+   const download=job.steps.find(s=>s.uses?.startsWith('actions/download-artifact@'));
+   assert.equal(download.with['artifact-ids'], '${{ needs.'+source+'.outputs.artifact }}');
+   assert.equal(download.with['digest-mismatch'],'error');
+   assert.equal(job.steps.find(s=>s.uses?.startsWith('actions/checkout@')).with.ref,'${{ needs.'+source+'.outputs.sha }}');
+   assert.ok(job.steps.some(s=>s.run==='node scripts/publish/require-quality.mjs'));
+ }
+ const complete=JSON.stringify(workflow.jobs.complete.steps);
+ assert.doesNotMatch(complete,/bun run|test:storybook|stage approve|stage publish/);
+ assert.equal(workflow.jobs.complete.steps.find(s=>s.uses?.startsWith('actions/download-artifact@')).with['run-id'],'${{ inputs.staged_run }}');
 });
-test('the real publisher entry point refuses local execution before any registry or npm operation', () => {
-  const result = spawnSync(process.execPath, ['scripts/publish/publish.mjs'], {encoding: 'utf8', env: {...process.env, APPKIT_NPM_PUBLISH: 'false'}});
-  assert.equal(result.status, 1);
-  assert.match(result.stderr, /OIDC publication job is required/);
-});
-test('exact-commit Public quality is required before preparation and immediately before publication', () => {
-  const verify = workflow.jobs.verify;
-  const publish = workflow.jobs.publish;
-  assert.equal(verify.permissions.actions, 'read');
-  assert.equal(publish.permissions.actions, 'read');
-  for (const job of [verify,publish]) {
-    const gate = job.steps.findIndex(step => step.run === 'node scripts/publish/require-quality.mjs');
-    assert.ok(gate >= 0);
-    assert.equal(job.steps[gate].env.GITHUB_TOKEN, '${{ github.token }}');
-    assert.ok(gate > job.steps.findIndex(step => step.uses?.startsWith('actions/checkout@')));
-  }
-  const firstGate = verify.steps.findIndex(step => step.run === 'node scripts/publish/require-quality.mjs');
-  assert.ok(firstGate < verify.steps.findIndex(step => step.uses?.startsWith('oven-sh/setup-bun@')));
-  assert.equal(publish.steps.at(-2).run, 'node scripts/publish/require-quality.mjs');
-  assert.equal(publish.needs, 'verify');
-  for (const job of [verify,publish]) assert.doesNotMatch(JSON.stringify(job.steps), /test:storybook|verify:push|continue-on-error/);
+test('publisher refuses local execution and has no direct publication or automated approval command',()=>{
+ const result=spawnSync(process.execPath,['scripts/publish/publish.mjs'],{encoding:'utf8',env:{...process.env,APPKIT_NPM_PUBLISH:'false'}});
+ assert.equal(result.status,1);assert.match(result.stderr,/OIDC publication job is required/);
+ const source=readFileSync('scripts/publish/publish.mjs','utf8');
+ assert.match(source,/\['stage', 'publish', archive/);
+ assert.doesNotMatch(source,/\['publish', archive|\['stage', 'approve'/);
 });

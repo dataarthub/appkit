@@ -17,7 +17,11 @@ function stories(directory) {
     return entry.isDirectory() ? stories(file) : file.endsWith('.stories.tsx') ? [file] : [];
   }).sort();
 }
-const files = selectStoryFiles(root, stories(`${root}packages/appkit-react/stories`), process.argv.slice(2));
+const args = process.argv.slice(2);
+const selection = process.env.APPKIT_STORY_FILES;
+if (selection && args.length) throw Error('Choose one browser selection source');
+const files = selectStoryFiles(root, stories(`${root}packages/appkit-react/stories`), selection ? ['--plan','environment'] : args,
+  selection ? () => ({version:1,stories:JSON.parse(selection)}) : undefined);
 if (!files.length) throw new Error('No Storybook stories found; refusing an empty pass.');
 // Each small batch gets a fresh Vite/Chromium process tree. All files run in all combinations.
 let failed = false;

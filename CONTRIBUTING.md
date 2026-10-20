@@ -57,13 +57,19 @@ also runs the full gate; it cannot substitute for main-push release evidence.
 | Prose or source comments/JSDoc with unchanged parsed code | Documentation checks and their build prerequisites; no browser or package unit tests |
 | Story or its local helper | Importing stories, plus Storybook contract/type checks |
 | React implementation | Package contracts, builds/types/unit tests, docs, Core compatibility and transitively importing stories |
-| Core implementation | Package contracts, builds/types/unit tests, docs, Core compatibility and all stories (cross-package boundary) |
+| Core implementation | Package contracts, builds/types/unit tests, docs, Core compatibility and transitively importing stories; no browser test when no Story/preview imports the changed Core module |
 | Package unit tests only | Package builds/types/unit tests |
-| Publish or Deployment helper | Its tooling tests |
+| Publish/Deployment helpers or their workflows | Their tooling tests; no browser suite |
+| Known verification orchestration | Verification tooling tests; no browser suite |
+| Quality workflow/runtime configuration | Full gate, because Node/Bun/runner/install changes can affect execution |
+| Package version-only change, or lockfile workspace versions with identical resolved dependencies | Release/docs checks and build prerequisites; no browser or unit suite |
+| Actual dependency/lock resolution changes | Full gate; not treated as release metadata |
 | Global CSS/assets, dependencies, shared configuration, deleted UI modules or unknown inputs | Full gate |
 
 Story selection follows relative imports/re-exports, literal dynamic imports and
-React's public self-import exports. Preview decorators/loaders/setup are shared by
+React and Core public subpath exports, including NodeNext `.js` specifiers that
+resolve to TypeScript sources. Explicit `import type`/`export type` declarations
+are erased at runtime and covered by package typechecks. Preview decorators/loaders/setup are shared by
 all stories. Generated Paraglide modules are opaque dependencies; changing their
 locale/configuration inputs selects the full gate. JSX/TypeScript/Vite compiler
 directives are code inputs even when written in comments.
@@ -74,6 +80,20 @@ accessibility checks. The selector does not use test-name guesses or silently dr
 unknown files. Each CI job summarizes its baseline and selection; the local plan
 is recorded in ignored `.verification/quality-plan.json`.
 
+Selected Storybook suites run as the React `test:browser` Turbo task. Its key
+includes the canonical sorted Story selection, React/Core sources and built
+entries, Storybook/Vitest configuration, translations/assets, memory-guard helpers,
+lockfile, Node/Bun/platform/architecture, CI image and relevant environment. A partial
+suite cannot satisfy another selection or the full suite; only successful task
+execution is cached. Cache hits suppress old browser output so replayed logs do
+not look like a fresh browser run. A cache miss runs the unchanged four browser conditions with
+one worker and three-file batches. Core-only changes still run relevant unit/types
+and the two-Core matrix; import analysis determines whether UI tests are needed.
+Unknown inputs, unreadable metadata and changed resolved dependencies remain
+conservative. Version-only detection compares file contents, not commit messages
+or filenames. Source quality from a successful ancestor remains usable only when
+all accumulated changes are covered by the selector.
+
 Use `bun run verify:full` to request every normal check, or
 `bun run verify:push --dry-run` to inspect the local selection and commands.
 `bun run test:consumer` remains an explicit packed-consumer check and a mandatory
@@ -82,7 +102,8 @@ it does not claim that every story was rerun for every prose change.
 
 Package-specific stable GitHub Releases use the separate `publish.yml` workflow.
 Publishing an `appkit-core-vX.Y.Z` or `appkit-react-vX.Y.Z` Release starts verification
-and then publishes only that package. See [Releasing](RELEASING.md) before publishing
+and stages only that package for npm maintainer approval with 2FA. A manual
+completion dispatch confirms approved bytes/tags and records the Deployment. See [Releasing](RELEASING.md) before publishing
 a Release; tag pushes alone do not publish npm packages.
 
 The full gate also runs `bun run check:react-core`: React types, unit tests and

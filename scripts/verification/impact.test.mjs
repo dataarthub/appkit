@@ -30,7 +30,7 @@ test('story-only change selects that story without package unit tests or Core ma
   assert.equal(plan.packages, false); assert.equal(plan.compatibility, false);
 }));
 test('global boundaries, unknown files and deletions conservatively run all stories', () => fixture(root => {
-  for (const file of ['bun.lock','packages/appkit-react/src/ui.css','packages/appkit-react/.storybook/preview.tsx','packages/appkit-core/src/data/index.ts','scripts/verification/impact.mjs','unexpected.config','packages/appkit-react/public/image.png','packages/appkit-react/public/example.txt']) {
+  for (const file of ['bun.lock','packages/appkit-react/src/ui.css','packages/appkit-react/.storybook/preview.tsx','scripts/verification/impact.mjs','unexpected.config','packages/appkit-react/public/image.png','packages/appkit-react/public/example.txt']) {
     assert.equal(selectChecks({root, changes:[change(file)]}).stories.length, 2, file);
   }
   assert.equal(selectChecks({root, changes:[change('packages/appkit-react/src/ui/button.tsx', {status:'D'})]}).stories.length, 2);
@@ -79,4 +79,42 @@ test('ES module helpers are followed and glob imports fall back to full coverage
   assert.deepEqual(selectChecks({root,changes:[change('packages/appkit-react/src/ui/button.tsx')]}).stories,['packages/appkit-react/stories/button.stories.tsx']);
   put('packages/appkit-react/stories/button.stories.tsx', "const modules = import.meta.glob('./*.ts');");
   assert.equal(selectChecks({root,changes:[change('packages/appkit-react/src/ui/button.tsx')]}).stories.length,2);
+}));
+test('release metadata changes skip browser work; dependencies do not get that exemption',()=>fixture(root=>{
+ const before=JSON.stringify({name:'@alneas/appkit-core',version:'0.2.0',dependencies:{zod:'4.2.1'}});
+ const after=JSON.stringify({name:'@alneas/appkit-core',version:'0.2.1',dependencies:{zod:'4.2.1'}});
+ const plan=selectChecks({root,changes:[change('packages/appkit-core/package.json',{before,after})]});
+ assert.deepEqual(plan.stories,[]); assert.equal(plan.release,true);assert.equal(plan.packages,false);
+ assert.equal(selectChecks({root,changes:[change('packages/appkit-core/package.json',{before,after:after.replace('4.2.1','4.2.2')})]}).stories.length,2);
+}));
+test('lockfile version-only updates skip browsers, resolved dependency changes do not',()=>fixture(root=>{
+ const before='{"workspaces":{"packages/appkit-core":{"version":"0.2.0",},},"packages":{"zod":["zod@4.2.1"]}}';
+ const after=before.replace('0.2.0','0.2.1');
+ assert.deepEqual(selectChecks({root,changes:[change('bun.lock',{before,after})]}).stories,[]);
+ assert.equal(selectChecks({root,changes:[change('bun.lock',{before,after:after.replace('4.2.1','4.2.2')})]}).stories.length,2);
+}));
+test('known publication and CI tooling do not execute browser suites',()=>fixture(root=>{
+ for(const file of ['.github/workflows/publish.yml','scripts/verification/commands.mjs','react-core-policy.json','scripts/check-release.mjs']) {
+   assert.deepEqual(selectChecks({root,changes:[change(file)]}).stories,[],file);
+ }
+}));
+test('Core changes follow public imports to only the affected stories',()=>fixture((root,put)=>{
+ put('packages/appkit-core/package.json',JSON.stringify({exports:{'./data':{import:{default:'./dist/data/index.js'}}}}));
+ put('packages/appkit-core/src/data/index.ts',"export {value} from './value.js';");
+ put('packages/appkit-core/src/data/value.ts','export const value=1;');
+ put('packages/appkit-react/src/ui/button.tsx',"import {value} from '@alneas/appkit-core/data'; export const Button=value;");
+ assert.deepEqual(selectChecks({root,changes:[change('packages/appkit-core/src/data/value.ts')]}).stories,['packages/appkit-react/stories/button.stories.tsx']);
+ assert.deepEqual(selectChecks({root,changes:[change('packages/appkit-core/src/storage/unrelated.ts')]}).stories,[]);
+}));
+
+test('quality execution-environment edits require runtime verification',()=>fixture(root=>{
+ const plan=selectChecks({root,changes:[change('.github/workflows/quality.yml')]});
+ assert.equal(plan.packages,true);assert.equal(plan.stories.length,2);
+}));
+test('erased import type in a shared preview does not make Core a runtime dependency of all stories',()=>fixture((root,put)=>{
+ put('packages/appkit-core/package.json',JSON.stringify({exports:{'./data':{import:{default:'./dist/data/index.js'}}}}));
+ put('packages/appkit-core/src/data/index.ts','export const value=1;');
+ put('packages/appkit-react/.storybook/preview.tsx',"import type {Value} from '@alneas/appkit-core/data'; export default {};");
+ const plan=selectChecks({root,changes:[change('packages/appkit-core/src/data/index.ts')]});
+ assert.deepEqual(plan.stories,[]);assert.equal(plan.packages,true);assert.equal(plan.compatibility,true);
 }));

@@ -37,7 +37,7 @@ export async function createPlan({ci = false, full = false, env = process.env, d
       for (const file of git(['ls-files', '--others', '--exclude-standard', '-z']).split('\0').filter(Boolean)) changes.push({status:'A', file});
     }
     for (const change of changes) {
-      if (change.status !== 'M' || !/\.[cm]?[jt]sx?$/.test(change.file)) continue;
+      if (change.status !== 'M' || !(/\.[cm]?[jt]sx?$/.test(change.file) || change.file.endsWith('/package.json') || change.file === 'bun.lock')) continue;
       try {
         change.before = git(['show', `${base}:${change.file}`]);
         change.after = ci ? git(['show', `${sha}:${change.file}`]) : readFileSync(path.join(root, change.file), 'utf8');

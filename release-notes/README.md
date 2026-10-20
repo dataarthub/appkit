@@ -12,7 +12,9 @@ The current sequence is:
    to 0.2.0. Its `CHANGELOG.md` is the canonical Core release body source.
 3. After an authorized preparation commit/PR is merged, wait for successful main
    Public quality on the selected commit. Only separately authorized tag/Release
-   actions may start Core publication. Before 1.0.0 both npm `beta` and `latest`
+   actions may start Core staging. After merging the staged-publication workflow,
+   approve the npm stage with 2FA and manually complete it with the original staging
+   run ID; a successful staging run alone does not mean publication is complete. Before 1.0.0 both npm `beta` and `latest`
    must resolve to the verified version; existing 0.1.0 archives stay immutable.
 4. After Core 0.2.0 exists in npm, prepare React 0.2.0 from its
    [unreleased draft](appkit-react-0.2.0.draft.md), adopting the exact Core version

@@ -43,7 +43,7 @@
     "build-storybook": "bun run storybook:prepare && bun run --cwd packages/appkit-react build-storybook",
     "check:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs scripts/guarded-process.test.mjs && bun run --cwd packages/appkit-react typecheck:storybook",
     "storybook:prepare": "bun run turbo run build --filter=@alneas/appkit-core && bun run --cwd packages/appkit-react generate:i18n",
-    "test:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs scripts/guarded-process.test.mjs && node scripts/test-storybook.mjs",
+    "test:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs scripts/guarded-process.test.mjs && node scripts/verification/browser.mjs",
     "verify:full": "node scripts/verification/run.mjs --full",
     "test:verification-tooling": "node --test scripts/verification/*.test.mjs"
   },

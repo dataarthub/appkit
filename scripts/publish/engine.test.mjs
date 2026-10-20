@@ -1,93 +1,70 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {publishVerified} from './engine.mjs';
-const target = {name: '@alneas/appkit-core', version: '0.1.1', integrity: 'sha512-reviewed'};
-const metadata = {name: target.name, version: target.version, dist: {integrity: target.integrity}};
-function fixture({existing = null, failRead = false, badAfter = false, tagState} = {}) {
-  const calls = []; let published = false;
-  const tags = tagState ?? (existing ? {beta: target.version, latest: target.version} : {latest: '0.1.0'});
-  const tagCalls = [], publishTags = [];
-  return {calls, tags, tagCalls, publishTags, verifyArchive: async () => calls.push('archive'), wait: async () => {},
-    readRegistry: async (name, version) => {
-      if (failRead) throw Error('registry HTTP 503');
-      if (version === 'latest') return {name, version: '0.1.0'};
-      return published ? (badAfter ? {...metadata, dist: {integrity: 'sha512-wrong'}} : metadata) : existing;
-    },
-    readTags: async () => ({...tags}),
-    setTag: async (name, version, tag) => {tagCalls.push(tag); tags[tag] = version;},
-    publish: async (file, tag) => {calls.push(file); publishTags.push(tag); published = true; tags[tag] = target.version;}};
+import {stageVerified, finalizeVerified} from './engine.mjs';
+const target = {name:'@alneas/appkit-core', version:'0.2.1', integrity:'sha512-reviewed'};
+const metadata = {...target, dist:{integrity:target.integrity}};
+function fixture(existing = null) {
+  const calls = [], tags = {latest:'0.2.0'};
+  return {calls, tags, target, file:'/verified/package.tgz', wait:async()=>{},
+    verifyArchive:async()=>calls.push('verify'), readRegistry:async()=>existing,
+    readTags:async()=>({...tags}), stage:async(file, tag)=>calls.push(['stage',file,tag]),
+    setTag:async(name,version,tag)=>{calls.push(['tag',tag]); tags[tag]=version;}};
 }
-test('publishes only the verified archive once and checks registry integrity afterwards', async () => {
-  const f = fixture();
-  assert.equal((await publishVerified({target, file: '/reviewed/package.tgz', ...f})).status, 'published');
-  assert.deepEqual(f.calls, ['archive', 'archive', '/reviewed/package.tgz']);
-  assert.deepEqual(f.publishTags, ['beta']);
-  assert.deepEqual(f.tagCalls, ['latest']);
-  assert.deepEqual(f.tags, {beta: target.version, latest: target.version});
+test('staging submits verified bytes on an isolated tag without public-tag writes or claiming publication',async()=>{
+  const f=fixture(); const result=await stageVerified(f);
+  assert.equal(result.status,'awaiting-approval');
+  assert.deepEqual(f.calls,['verify','verify',['stage','/verified/package.tgz','staged']]);
+  assert.deepEqual(f.tags,{latest:'0.2.0'});
 });
-test('matching existing versions skip publish and do not move dist-tags', async () => {
-  const f = fixture({existing: metadata});
-  assert.equal((await publishVerified({target, file: '/reviewed/package.tgz', ...f})).status, 'already-published');
-  assert.deepEqual(f.calls, ['archive']);
+test('completion waits for approval and never stages when the public version is missing',async()=>{
+  const f=fixture(); await assert.rejects(finalizeVerified({...f,attempts:2}),/approval|visible/);
+  assert.deepEqual(f.calls,['verify']);
 });
-test('different existing content and registry outages cannot trigger publication', async () => {
-  for (const options of [{existing: {...metadata, dist: {integrity: 'different'}}}, {failRead: true}]) {
-    const f = fixture(options);
-    await assert.rejects(publishVerified({target, file: '/reviewed/package.tgz', ...f}));
-    assert.deepEqual(f.calls, ['archive']);
+test('completion verifies the approved archive before repairing both required tags',async()=>{
+  const f=fixture(metadata); const result=await finalizeVerified(f);
+  assert.equal(result.status,'published');
+  assert.deepEqual(f.calls,['verify',['tag','beta'],['tag','latest']]);
+});
+test('mismatched public bytes and newer channels block all stage/tag writes',async()=>{
+  for(const run of [stageVerified,finalizeVerified]) {
+    const f=fixture({...metadata,dist:{integrity:'different'}});
+    await assert.rejects(run(f),/integrity/);
+    assert.deepEqual(f.calls,['verify']);
+    const g=fixture(metadata);g.tags.latest='0.3.0';
+    await assert.rejects(run(g),/backwards/);
+    assert.deepEqual(g.calls,['verify']);
   }
 });
-test('post-publication mismatch is an error, and archive mutation blocks before publish', async () => {
-  const f = fixture({badAfter: true});
-  await assert.rejects(publishVerified({target, file: '/reviewed/package.tgz', ...f}), /integrity/);
-  let verified = 0; const g = fixture();
-  await assert.rejects(publishVerified({target, file: '/reviewed/package.tgz', ...g,
-    verifyArchive: async () => {if (++verified === 2) throw Error('archive changed');}}), /archive changed/);
-  assert.deepEqual(g.calls, []);
+test('registry propagation may take longer than the previous twelve-second window',async()=>{
+  const f=fixture(metadata);let reads=0;
+  const result=await finalizeVerified({...f,readRegistry:async()=>++reads<10?null:metadata});
+  assert.equal(result.status,'published');assert.equal(reads,10);
 });
-test('existing bytes with a missing tag repair the tag without republishing', async () => {
-  const f = fixture({existing: metadata, tagState: {latest: target.version}});
-  const result = await publishVerified({target, file: '/reviewed/package.tgz', ...f});
-  assert.equal(result.status, 'already-published');
-  assert.deepEqual(f.calls, ['archive']);
-  assert.deepEqual(f.tagCalls, ['beta']);
-  assert.deepEqual(result.tags, ['beta','latest']);
+test('already public matching version is not staged again; failures do not retry the upload',async()=>{
+  const f=fixture(metadata);assert.equal((await stageVerified(f)).status,'already-published');
+  assert.deepEqual(f.calls,['verify']);
+  const g=fixture();let uploads=0;
+  await assert.rejects(stageVerified({...g,stage:async()=>{uploads++;throw Error('ambiguous upload');}}),/ambiguous/);
+  assert.equal(uploads,1);
 });
-test('tag failure stops success and retries repair only missing metadata', async () => {
-  const f = fixture(); let fail = true;
-  const setTag = async (...args) => {if(fail) throw Error('dist-tag permission denied'); return f.setTag(...args);};
-  await assert.rejects(publishVerified({target, file: '/reviewed/package.tgz', ...f, setTag}), /permission denied/);
-  assert.deepEqual(f.tags, {beta: target.version, latest: '0.1.0'});
-  fail = false;
-  const result = await publishVerified({target, file: '/reviewed/package.tgz', ...f, setTag});
-  assert.equal(result.status, 'already-published');
-  assert.equal(f.publishTags.length, 1);
-  assert.deepEqual(f.tags, {beta: target.version, latest: target.version});
+test('archive mutation blocks staging, and incomplete tag writes can be retried without upload',async()=>{
+ const f=fixture();let checks=0;
+ await assert.rejects(stageVerified({...f,verifyArchive:async()=>{if(++checks===2)throw Error('archive changed');}}),/archive changed/);
+ assert.deepEqual(f.calls,[]);
+ const g=fixture(metadata);let fail=true;
+ const setTag=async(...args)=>{if(fail&&args[2]==='latest')throw Error('permission denied');return g.setTag(...args);};
+ await assert.rejects(finalizeVerified({...g,setTag}),/permission denied/);
+ assert.equal(g.tags.beta,target.version);assert.equal(g.tags.latest,'0.2.0');
+ fail=false;await finalizeVerified({...g,setTag});
+ assert.deepEqual(g.calls.filter(c=>Array.isArray(c)),[['tag','beta'],['tag','latest']]);
+ const h=fixture(metadata);
+ await assert.rejects(finalizeVerified({...h,attempts:2,setTag:async()=>{}}),/not confirmed/);
 });
-test('newer beta or latest blocks all writes, including retries of an existing version', async () => {
-  for(const existing of [null, metadata]) for(const tagState of [{beta:'0.2.0',latest:'0.1.0'},{beta:'0.1.0',latest:'1.0.0'}]) {
-    const f=fixture({existing,tagState});
-    await assert.rejects(publishVerified({target,file:'/reviewed/package.tgz',...f}),/backwards/);
-    assert.deepEqual(f.calls,['archive']);
-    assert.deepEqual(f.tagCalls,[]);
-  }
-});
-test('tag read failure and unconfirmed tag writes cannot be reported as success', async () => {
-  const f=fixture();
-  await assert.rejects(publishVerified({target,file:'/reviewed/package.tgz',...f,readTags:async()=>{throw Error('tag registry unavailable');}}),/unavailable/);
-  assert.deepEqual(f.calls,['archive']);
-  const g=fixture({existing:metadata,tagState:{beta:target.version,latest:'0.1.0'}});
-  await assert.rejects(publishVerified({target,file:'/reviewed/package.tgz',...g,setTag:async()=>{}}),/not confirmed/);
-});
-test('1.0.0 publishes on latest without advancing or removing the earlier beta channel', async () => {
-  const major={...target,version:'1.0.0'}, tags={beta:'0.9.0',latest:'0.9.0'};
-  let published=false; const publishTags=[];
-  const result=await publishVerified({target:major,file:'/reviewed/package.tgz',verifyArchive:async()=>{},wait:async()=>{},
-    readRegistry:async()=>published?{...metadata,version:major.version}:null,
-    readTags:async()=>({...tags}),
-    publish:async(file,tag)=>{published=true;publishTags.push(tag);tags[tag]=major.version;},
-    setTag:async()=>{throw Error('No beta tag write is expected');}});
-  assert.deepEqual(publishTags,['latest']);
-  assert.deepEqual(result.tags,['latest']);
-  assert.equal(tags.beta,'0.9.0');
+test('1.0.0 also stages in isolation; completion advances latest while preserving beta',async()=>{
+ const f=fixture();f.target={...target,version:'1.0.0'};
+ assert.equal((await stageVerified(f)).status,'awaiting-approval');
+ assert.deepEqual(f.calls.at(-1),['stage','/verified/package.tgz','staged']);
+ f.tags.beta='0.9.0';
+ const result=await finalizeVerified({...f,readRegistry:async()=>({...metadata,version:'1.0.0'})});
+ assert.deepEqual(result.tags,['latest']);assert.equal(f.tags.beta,'0.9.0');
 });
