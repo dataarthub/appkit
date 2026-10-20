@@ -1,8 +1,11 @@
 ---
 title: "Public exports and optional peers"
 description: "Exact install package, public import subpaths and optional peer requirements."
+sidebar:
+  order: 10
 archetype: reference
-project: tools
+project: appkit
+tags: ["appkit", "exports"]
 ---
 
 # Public exports and optional peers
@@ -186,6 +189,7 @@ bun add @alneas/appkit-core
 | `@alneas/appkit-core/us/documents` | ESM, CommonJS and NodeNext declarations |
 | `@alneas/appkit-core/ai-instructions` | Metadata |
 | `@alneas/appkit-core/package-context.json` | Metadata |
+| `@alneas/appkit-core/api-index.json` | Metadata |
 
 ## Optional peers
 

@@ -1,8 +1,11 @@
 ---
 title: "Public exports and optional peers"
 description: "Exact install package, public import subpaths and optional peer requirements."
+sidebar:
+  order: 10
 archetype: reference
-project: tools
+project: appkit
+tags: ["appkit", "exports"]
 ---
 
 # Public exports and optional peers
@@ -58,6 +61,7 @@ bun add @alneas/appkit-react
 | `@alneas/appkit-react/tools/styles` | CSS |
 | `@alneas/appkit-react/ai-instructions` | Metadata |
 | `@alneas/appkit-react/package-context.json` | Metadata |
+| `@alneas/appkit-react/api-index.json` | Metadata |
 
 ## Optional peers
 

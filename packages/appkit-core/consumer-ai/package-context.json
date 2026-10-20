@@ -1,0 +1,1697 @@
+{
+  "schemaVersion": 1,
+  "name": "@alneas/appkit-core",
+  "version": "0.1.0",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./storage": {
+      "import": {
+        "types": "./dist/storage/index.d.ts",
+        "default": "./dist/storage/index.js"
+      },
+      "require": {
+        "types": "./dist/storage/index.d.cts",
+        "default": "./dist/storage/index.cjs"
+      }
+    },
+    "./data": {
+      "import": {
+        "types": "./dist/data/index.d.ts",
+        "default": "./dist/data/index.js"
+      },
+      "require": {
+        "types": "./dist/data/index.d.cts",
+        "default": "./dist/data/index.cjs"
+      }
+    },
+    "./japan": {
+      "import": {
+        "types": "./dist/japan/index.d.ts",
+        "default": "./dist/japan/index.js"
+      },
+      "require": {
+        "types": "./dist/japan/index.d.cts",
+        "default": "./dist/japan/index.cjs"
+      }
+    },
+    "./graph": {
+      "import": {
+        "types": "./dist/graph/index.d.ts",
+        "default": "./dist/graph/index.js"
+      },
+      "require": {
+        "types": "./dist/graph/index.d.cts",
+        "default": "./dist/graph/index.cjs"
+      }
+    },
+    "./ai": {
+      "import": {
+        "types": "./dist/ai/index.d.ts",
+        "default": "./dist/ai/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/index.d.cts",
+        "default": "./dist/ai/index.cjs"
+      }
+    },
+    "./us": {
+      "import": {
+        "types": "./dist/us/index.d.ts",
+        "default": "./dist/us/index.js"
+      },
+      "require": {
+        "types": "./dist/us/index.d.cts",
+        "default": "./dist/us/index.cjs"
+      }
+    },
+    "./storage/server": {
+      "import": {
+        "types": "./dist/storage/server.d.ts",
+        "default": "./dist/storage/server.js"
+      },
+      "require": {
+        "types": "./dist/storage/server.d.cts",
+        "default": "./dist/storage/server.cjs"
+      }
+    },
+    "./storage/portable": {
+      "import": {
+        "types": "./dist/storage/index.d.ts",
+        "default": "./dist/storage/index.js"
+      },
+      "require": {
+        "types": "./dist/storage/index.d.cts",
+        "default": "./dist/storage/index.cjs"
+      }
+    },
+    "./storage/crypto": {
+      "import": {
+        "types": "./dist/storage/crypto.d.ts",
+        "default": "./dist/storage/crypto.js"
+      },
+      "require": {
+        "types": "./dist/storage/crypto.d.cts",
+        "default": "./dist/storage/crypto.cjs"
+      }
+    },
+    "./storage/zip": {
+      "import": {
+        "types": "./dist/storage/zip.d.ts",
+        "default": "./dist/storage/zip.js"
+      },
+      "require": {
+        "types": "./dist/storage/zip.d.cts",
+        "default": "./dist/storage/zip.cjs"
+      }
+    },
+    "./storage/contained-path": {
+      "import": {
+        "types": "./dist/storage/contained-path.d.ts",
+        "default": "./dist/storage/contained-path.js"
+      },
+      "require": {
+        "types": "./dist/storage/contained-path.d.cts",
+        "default": "./dist/storage/contained-path.cjs"
+      }
+    },
+    "./data/types": {
+      "import": {
+        "types": "./dist/data/types.d.ts",
+        "default": "./dist/data/types.js"
+      },
+      "require": {
+        "types": "./dist/data/types.d.cts",
+        "default": "./dist/data/types.cjs"
+      }
+    },
+    "./data/common-types": {
+      "import": {
+        "types": "./dist/data/common-types.d.ts",
+        "default": "./dist/data/common-types.js"
+      },
+      "require": {
+        "types": "./dist/data/common-types.d.cts",
+        "default": "./dist/data/common-types.cjs"
+      }
+    },
+    "./data/cache-scope": {
+      "import": {
+        "types": "./dist/data/cache-scope.d.ts",
+        "default": "./dist/data/cache-scope.js"
+      },
+      "require": {
+        "types": "./dist/data/cache-scope.d.cts",
+        "default": "./dist/data/cache-scope.cjs"
+      }
+    },
+    "./data/resource-service": {
+      "import": {
+        "types": "./dist/data/resource-service.d.ts",
+        "default": "./dist/data/resource-service.js"
+      },
+      "require": {
+        "types": "./dist/data/resource-service.d.cts",
+        "default": "./dist/data/resource-service.cjs"
+      }
+    },
+    "./data/search-handlers": {
+      "import": {
+        "types": "./dist/data/search-handlers.d.ts",
+        "default": "./dist/data/search-handlers.js"
+      },
+      "require": {
+        "types": "./dist/data/search-handlers.d.cts",
+        "default": "./dist/data/search-handlers.cjs"
+      }
+    },
+    "./data/bignumber-adapter": {
+      "import": {
+        "types": "./dist/data/bignumber-adapter.d.ts",
+        "default": "./dist/data/bignumber-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/bignumber-adapter.d.cts",
+        "default": "./dist/data/bignumber-adapter.cjs"
+      }
+    },
+    "./data/sqlite": {
+      "import": {
+        "types": "./dist/data/sqlite.d.ts",
+        "default": "./dist/data/sqlite.js"
+      },
+      "require": {
+        "types": "./dist/data/sqlite.d.cts",
+        "default": "./dist/data/sqlite.cjs"
+      }
+    },
+    "./data/d1": {
+      "import": {
+        "types": "./dist/data/d1.d.ts",
+        "default": "./dist/data/d1.js"
+      },
+      "require": {
+        "types": "./dist/data/d1.d.cts",
+        "default": "./dist/data/d1.cjs"
+      }
+    },
+    "./data/supabase": {
+      "import": {
+        "types": "./dist/data/supabase-adapter.d.ts",
+        "default": "./dist/data/supabase-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/supabase-adapter.d.cts",
+        "default": "./dist/data/supabase-adapter.cjs"
+      }
+    },
+    "./data/supabase-graphql": {
+      "import": {
+        "types": "./dist/data/supabase-graphql-adapter.d.ts",
+        "default": "./dist/data/supabase-graphql-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/supabase-graphql-adapter.d.cts",
+        "default": "./dist/data/supabase-graphql-adapter.cjs"
+      }
+    },
+    "./data/mongodb": {
+      "import": {
+        "types": "./dist/data/mongo-adapter.d.ts",
+        "default": "./dist/data/mongo-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/mongo-adapter.d.cts",
+        "default": "./dist/data/mongo-adapter.cjs"
+      }
+    },
+    "./data/convex": {
+      "import": {
+        "types": "./dist/data/convex-adapter.d.ts",
+        "default": "./dist/data/convex-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/convex-adapter.d.cts",
+        "default": "./dist/data/convex-adapter.cjs"
+      }
+    },
+    "./data/neon": {
+      "import": {
+        "types": "./dist/data/neon-adapter.d.ts",
+        "default": "./dist/data/neon-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/neon-adapter.d.cts",
+        "default": "./dist/data/neon-adapter.cjs"
+      }
+    },
+    "./data/server": {
+      "import": {
+        "types": "./dist/data/server.d.ts",
+        "default": "./dist/data/server.js"
+      },
+      "require": {
+        "types": "./dist/data/server.d.cts",
+        "default": "./dist/data/server.cjs"
+      }
+    },
+    "./data/schema": {
+      "import": {
+        "types": "./dist/data/schema/index.d.ts",
+        "default": "./dist/data/schema/index.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/index.d.cts",
+        "default": "./dist/data/schema/index.cjs"
+      }
+    },
+    "./data/csv": {
+      "import": {
+        "types": "./dist/data/csv/index.d.ts",
+        "default": "./dist/data/csv/index.js"
+      },
+      "require": {
+        "types": "./dist/data/csv/index.d.cts",
+        "default": "./dist/data/csv/index.cjs"
+      }
+    },
+    "./data/encoding": {
+      "import": {
+        "types": "./dist/data/encoding/index.d.ts",
+        "default": "./dist/data/encoding/index.js"
+      },
+      "require": {
+        "types": "./dist/data/encoding/index.d.cts",
+        "default": "./dist/data/encoding/index.cjs"
+      }
+    },
+    "./data/pdf": {
+      "import": {
+        "types": "./dist/data/pdf/index.d.ts",
+        "default": "./dist/data/pdf/index.js"
+      },
+      "require": {
+        "types": "./dist/data/pdf/index.d.cts",
+        "default": "./dist/data/pdf/index.cjs"
+      }
+    },
+    "./data/excel": {
+      "import": {
+        "types": "./dist/data/excel/index.d.ts",
+        "default": "./dist/data/excel/index.js"
+      },
+      "require": {
+        "types": "./dist/data/excel/index.d.cts",
+        "default": "./dist/data/excel/index.cjs"
+      }
+    },
+    "./data/finance": {
+      "import": {
+        "types": "./dist/data/finance/index.d.ts",
+        "default": "./dist/data/finance/index.js"
+      },
+      "require": {
+        "types": "./dist/data/finance/index.d.cts",
+        "default": "./dist/data/finance/index.cjs"
+      }
+    },
+    "./data/edi": {
+      "import": {
+        "types": "./dist/data/edi/index.d.ts",
+        "default": "./dist/data/edi/index.js"
+      },
+      "require": {
+        "types": "./dist/data/edi/index.d.cts",
+        "default": "./dist/data/edi/index.cjs"
+      }
+    },
+    "./data/content": {
+      "import": {
+        "types": "./dist/data/content/index.d.ts",
+        "default": "./dist/data/content/index.js"
+      },
+      "require": {
+        "types": "./dist/data/content/index.d.cts",
+        "default": "./dist/data/content/index.cjs"
+      }
+    },
+    "./data/google-calendar": {
+      "import": {
+        "types": "./dist/data/google-calendar/index.d.ts",
+        "default": "./dist/data/google-calendar/index.js"
+      },
+      "require": {
+        "types": "./dist/data/google-calendar/index.d.cts",
+        "default": "./dist/data/google-calendar/index.cjs"
+      }
+    },
+    "./data/editor": {
+      "import": {
+        "types": "./dist/data/editor/index.d.ts",
+        "default": "./dist/data/editor/index.js"
+      },
+      "require": {
+        "types": "./dist/data/editor/index.d.cts",
+        "default": "./dist/data/editor/index.cjs"
+      }
+    },
+    "./data/notifications": {
+      "import": {
+        "types": "./dist/data/notifications/index.d.ts",
+        "default": "./dist/data/notifications/index.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/index.d.cts",
+        "default": "./dist/data/notifications/index.cjs"
+      }
+    },
+    "./data/date-utils": {
+      "import": {
+        "types": "./dist/data/date-utils.d.ts",
+        "default": "./dist/data/date-utils.js"
+      },
+      "require": {
+        "types": "./dist/data/date-utils.d.cts",
+        "default": "./dist/data/date-utils.cjs"
+      }
+    },
+    "./data/schema/core": {
+      "import": {
+        "types": "./dist/data/schema/core.d.ts",
+        "default": "./dist/data/schema/core.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/core.d.cts",
+        "default": "./dist/data/schema/core.cjs"
+      }
+    },
+    "./data/schema/compiler": {
+      "import": {
+        "types": "./dist/data/schema/compiler.d.ts",
+        "default": "./dist/data/schema/compiler.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/compiler.d.cts",
+        "default": "./dist/data/schema/compiler.cjs"
+      }
+    },
+    "./data/schema/inference": {
+      "import": {
+        "types": "./dist/data/schema/inference.d.ts",
+        "default": "./dist/data/schema/inference.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/inference.d.cts",
+        "default": "./dist/data/schema/inference.cjs"
+      }
+    },
+    "./data/schema/server": {
+      "import": {
+        "types": "./dist/data/schema/server.d.ts",
+        "default": "./dist/data/schema/server.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/server.d.cts",
+        "default": "./dist/data/schema/server.cjs"
+      }
+    },
+    "./data/integrations/ai": {
+      "import": {
+        "types": "./dist/data/integrations/ai.d.ts",
+        "default": "./dist/data/integrations/ai.js"
+      },
+      "require": {
+        "types": "./dist/data/integrations/ai.d.cts",
+        "default": "./dist/data/integrations/ai.cjs"
+      }
+    },
+    "./data/integrations/task-graph": {
+      "import": {
+        "types": "./dist/data/integrations/task-graph.d.ts",
+        "default": "./dist/data/integrations/task-graph.js"
+      },
+      "require": {
+        "types": "./dist/data/integrations/task-graph.d.cts",
+        "default": "./dist/data/integrations/task-graph.cjs"
+      }
+    },
+    "./data/notifications/messages": {
+      "import": {
+        "types": "./dist/data/notifications/messages.d.ts",
+        "default": "./dist/data/notifications/messages.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/messages.d.cts",
+        "default": "./dist/data/notifications/messages.cjs"
+      }
+    },
+    "./data/notifications/slack": {
+      "import": {
+        "types": "./dist/data/notifications/slack/index.d.ts",
+        "default": "./dist/data/notifications/slack/index.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/slack/index.d.cts",
+        "default": "./dist/data/notifications/slack/index.cjs"
+      }
+    },
+    "./data/notifications/line": {
+      "import": {
+        "types": "./dist/data/notifications/line/index.d.ts",
+        "default": "./dist/data/notifications/line/index.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/line/index.d.cts",
+        "default": "./dist/data/notifications/line/index.cjs"
+      }
+    },
+    "./data/notifications/google-chat": {
+      "import": {
+        "types": "./dist/data/notifications/google-chat/index.d.ts",
+        "default": "./dist/data/notifications/google-chat/index.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/google-chat/index.d.cts",
+        "default": "./dist/data/notifications/google-chat/index.cjs"
+      }
+    },
+    "./data/excel/excelize": {
+      "import": {
+        "types": "./dist/data/excel/excelize.d.ts",
+        "default": "./dist/data/excel/excelize.js"
+      },
+      "require": {
+        "types": "./dist/data/excel/excelize.d.cts",
+        "default": "./dist/data/excel/excelize.cjs"
+      }
+    },
+    "./data/schema/cast": {
+      "import": {
+        "types": "./dist/data/schema/cast.d.ts",
+        "default": "./dist/data/schema/cast.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/cast.d.cts",
+        "default": "./dist/data/schema/cast.cjs"
+      }
+    },
+    "./data/workflow": {
+      "import": {
+        "types": "./dist/data/workflow/index.d.ts",
+        "default": "./dist/data/workflow/index.js"
+      },
+      "require": {
+        "types": "./dist/data/workflow/index.d.cts",
+        "default": "./dist/data/workflow/index.cjs"
+      }
+    },
+    "./data/csv/parser": {
+      "import": {
+        "types": "./dist/data/csv/parser.d.ts",
+        "default": "./dist/data/csv/parser.js"
+      },
+      "require": {
+        "types": "./dist/data/csv/parser.d.cts",
+        "default": "./dist/data/csv/parser.cjs"
+      }
+    },
+    "./data/data-access/graph/postgres-ddl": {
+      "import": {
+        "types": "./dist/data/data-access/graph/postgres-ddl.d.ts",
+        "default": "./dist/data/data-access/graph/postgres-ddl.js"
+      },
+      "require": {
+        "types": "./dist/data/data-access/graph/postgres-ddl.d.cts",
+        "default": "./dist/data/data-access/graph/postgres-ddl.cjs"
+      }
+    },
+    "./data/data-access/graph/sql-identifier": {
+      "import": {
+        "types": "./dist/data/data-access/graph/sql-identifier.d.ts",
+        "default": "./dist/data/data-access/graph/sql-identifier.js"
+      },
+      "require": {
+        "types": "./dist/data/data-access/graph/sql-identifier.d.cts",
+        "default": "./dist/data/data-access/graph/sql-identifier.cjs"
+      }
+    },
+    "./data/data-access/graph/web-handler": {
+      "import": {
+        "types": "./dist/data/data-access/graph/web-handler.d.ts",
+        "default": "./dist/data/data-access/graph/web-handler.js"
+      },
+      "require": {
+        "types": "./dist/data/data-access/graph/web-handler.d.cts",
+        "default": "./dist/data/data-access/graph/web-handler.cjs"
+      }
+    },
+    "./data/data-access/http-graph-adapter": {
+      "import": {
+        "types": "./dist/data/data-access/http-graph-adapter.d.ts",
+        "default": "./dist/data/data-access/http-graph-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/data-access/http-graph-adapter.d.cts",
+        "default": "./dist/data/data-access/http-graph-adapter.cjs"
+      }
+    },
+    "./data/data-access/postgres-graph-adapter": {
+      "import": {
+        "types": "./dist/data/data-access/postgres-graph-adapter.d.ts",
+        "default": "./dist/data/data-access/postgres-graph-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/data-access/postgres-graph-adapter.d.cts",
+        "default": "./dist/data/data-access/postgres-graph-adapter.cjs"
+      }
+    },
+    "./data/editor/storage-adapter": {
+      "import": {
+        "types": "./dist/data/editor/storage-adapter.d.ts",
+        "default": "./dist/data/editor/storage-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/editor/storage-adapter.d.cts",
+        "default": "./dist/data/editor/storage-adapter.cjs"
+      }
+    },
+    "./data/encoding/html": {
+      "import": {
+        "types": "./dist/data/encoding/html.d.ts",
+        "default": "./dist/data/encoding/html.js"
+      },
+      "require": {
+        "types": "./dist/data/encoding/html.d.cts",
+        "default": "./dist/data/encoding/html.cjs"
+      }
+    },
+    "./data/excel/csv-adapter": {
+      "import": {
+        "types": "./dist/data/excel/csv-adapter.d.ts",
+        "default": "./dist/data/excel/csv-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/excel/csv-adapter.d.cts",
+        "default": "./dist/data/excel/csv-adapter.cjs"
+      }
+    },
+    "./data/excel/http-adapter": {
+      "import": {
+        "types": "./dist/data/excel/http-adapter.d.ts",
+        "default": "./dist/data/excel/http-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/excel/http-adapter.d.cts",
+        "default": "./dist/data/excel/http-adapter.cjs"
+      }
+    },
+    "./data/excel/mock-adapter": {
+      "import": {
+        "types": "./dist/data/excel/mock-adapter.d.ts",
+        "default": "./dist/data/excel/mock-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/excel/mock-adapter.d.cts",
+        "default": "./dist/data/excel/mock-adapter.cjs"
+      }
+    },
+    "./data/excel/types": {
+      "import": {
+        "types": "./dist/data/excel/types.d.ts",
+        "default": "./dist/data/excel/types.js"
+      },
+      "require": {
+        "types": "./dist/data/excel/types.d.cts",
+        "default": "./dist/data/excel/types.cjs"
+      }
+    },
+    "./data/excel/utils": {
+      "import": {
+        "types": "./dist/data/excel/utils.d.ts",
+        "default": "./dist/data/excel/utils.js"
+      },
+      "require": {
+        "types": "./dist/data/excel/utils.d.cts",
+        "default": "./dist/data/excel/utils.cjs"
+      }
+    },
+    "./data/excel/wasm-adapter": {
+      "import": {
+        "types": "./dist/data/excel/wasm-adapter.d.ts",
+        "default": "./dist/data/excel/wasm-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/excel/wasm-adapter.d.cts",
+        "default": "./dist/data/excel/wasm-adapter.cjs"
+      }
+    },
+    "./data/finance/cost-calculation": {
+      "import": {
+        "types": "./dist/data/finance/cost-calculation.d.ts",
+        "default": "./dist/data/finance/cost-calculation.js"
+      },
+      "require": {
+        "types": "./dist/data/finance/cost-calculation.d.cts",
+        "default": "./dist/data/finance/cost-calculation.cjs"
+      }
+    },
+    "./data/google-calendar/api-client": {
+      "import": {
+        "types": "./dist/data/google-calendar/api-client.d.ts",
+        "default": "./dist/data/google-calendar/api-client.js"
+      },
+      "require": {
+        "types": "./dist/data/google-calendar/api-client.d.cts",
+        "default": "./dist/data/google-calendar/api-client.cjs"
+      }
+    },
+    "./data/google-calendar/calendar-event": {
+      "import": {
+        "types": "./dist/data/google-calendar/calendar-event.d.ts",
+        "default": "./dist/data/google-calendar/calendar-event.js"
+      },
+      "require": {
+        "types": "./dist/data/google-calendar/calendar-event.d.cts",
+        "default": "./dist/data/google-calendar/calendar-event.cjs"
+      }
+    },
+    "./data/google-calendar/event-mapper": {
+      "import": {
+        "types": "./dist/data/google-calendar/event-mapper.d.ts",
+        "default": "./dist/data/google-calendar/event-mapper.js"
+      },
+      "require": {
+        "types": "./dist/data/google-calendar/event-mapper.d.cts",
+        "default": "./dist/data/google-calendar/event-mapper.cjs"
+      }
+    },
+    "./data/google-calendar/types": {
+      "import": {
+        "types": "./dist/data/google-calendar/types.d.ts",
+        "default": "./dist/data/google-calendar/types.js"
+      },
+      "require": {
+        "types": "./dist/data/google-calendar/types.d.cts",
+        "default": "./dist/data/google-calendar/types.cjs"
+      }
+    },
+    "./data/min-heap": {
+      "import": {
+        "types": "./dist/data/min-heap.d.ts",
+        "default": "./dist/data/min-heap.js"
+      },
+      "require": {
+        "types": "./dist/data/min-heap.d.cts",
+        "default": "./dist/data/min-heap.cjs"
+      }
+    },
+    "./data/notifications/line/webhook-handler": {
+      "import": {
+        "types": "./dist/data/notifications/line/webhook-handler.d.ts",
+        "default": "./dist/data/notifications/line/webhook-handler.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/line/webhook-handler.d.cts",
+        "default": "./dist/data/notifications/line/webhook-handler.cjs"
+      }
+    },
+    "./data/notifications/types": {
+      "import": {
+        "types": "./dist/data/notifications/types.d.ts",
+        "default": "./dist/data/notifications/types.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/types.d.cts",
+        "default": "./dist/data/notifications/types.cjs"
+      }
+    },
+    "./data/pdf/business-document-types": {
+      "import": {
+        "types": "./dist/data/pdf/business-document-types.d.ts",
+        "default": "./dist/data/pdf/business-document-types.js"
+      },
+      "require": {
+        "types": "./dist/data/pdf/business-document-types.d.cts",
+        "default": "./dist/data/pdf/business-document-types.cjs"
+      }
+    },
+    "./data/pdf/viewer-worker": {
+      "import": {
+        "types": "./dist/data/pdf/viewer-worker.d.ts",
+        "default": "./dist/data/pdf/viewer-worker.js"
+      },
+      "require": {
+        "types": "./dist/data/pdf/viewer-worker.d.cts",
+        "default": "./dist/data/pdf/viewer-worker.cjs"
+      }
+    },
+    "./data/schema/codelists": {
+      "import": {
+        "types": "./dist/data/schema/codelists.d.ts",
+        "default": "./dist/data/schema/codelists.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/codelists.d.cts",
+        "default": "./dist/data/schema/codelists.cjs"
+      }
+    },
+    "./data/schema/converter": {
+      "import": {
+        "types": "./dist/data/schema/converter.d.ts",
+        "default": "./dist/data/schema/converter.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/converter.d.cts",
+        "default": "./dist/data/schema/converter.cjs"
+      }
+    },
+    "./data/schema/db-mapping": {
+      "import": {
+        "types": "./dist/data/schema/db-mapping.d.ts",
+        "default": "./dist/data/schema/db-mapping.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/db-mapping.d.cts",
+        "default": "./dist/data/schema/db-mapping.cjs"
+      }
+    },
+    "./data/schema/exporter": {
+      "import": {
+        "types": "./dist/data/schema/exporter.d.ts",
+        "default": "./dist/data/schema/exporter.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/exporter.d.cts",
+        "default": "./dist/data/schema/exporter.cjs"
+      }
+    },
+    "./data/schema/geo-data": {
+      "import": {
+        "types": "./dist/data/schema/geo-data.d.ts",
+        "default": "./dist/data/schema/geo-data.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/geo-data.d.cts",
+        "default": "./dist/data/schema/geo-data.cjs"
+      }
+    },
+    "./data/schema/json-extensions": {
+      "import": {
+        "types": "./dist/data/schema/json-extensions.d.ts",
+        "default": "./dist/data/schema/json-extensions.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/json-extensions.d.cts",
+        "default": "./dist/data/schema/json-extensions.cjs"
+      }
+    },
+    "./data/schema/json-schema": {
+      "import": {
+        "types": "./dist/data/schema/json-schema.d.ts",
+        "default": "./dist/data/schema/json-schema.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/json-schema.d.cts",
+        "default": "./dist/data/schema/json-schema.cjs"
+      }
+    },
+    "./data/schema/jsonpath": {
+      "import": {
+        "types": "./dist/data/schema/jsonpath.d.ts",
+        "default": "./dist/data/schema/jsonpath.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/jsonpath.d.cts",
+        "default": "./dist/data/schema/jsonpath.cjs"
+      }
+    },
+    "./data/schema/loaders": {
+      "import": {
+        "types": "./dist/data/schema/loaders.d.ts",
+        "default": "./dist/data/schema/loaders.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/loaders.d.cts",
+        "default": "./dist/data/schema/loaders.cjs"
+      }
+    },
+    "./data/schema/registry": {
+      "import": {
+        "types": "./dist/data/schema/registry.d.ts",
+        "default": "./dist/data/schema/registry.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/registry.d.cts",
+        "default": "./dist/data/schema/registry.cjs"
+      }
+    },
+    "./data/schema/schema-converter": {
+      "import": {
+        "types": "./dist/data/schema/schema-converter.d.ts",
+        "default": "./dist/data/schema/schema-converter.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/schema-converter.d.cts",
+        "default": "./dist/data/schema/schema-converter.cjs"
+      }
+    },
+    "./data/schema/sql-column-inventory": {
+      "import": {
+        "types": "./dist/data/schema/sql-column-inventory.d.ts",
+        "default": "./dist/data/schema/sql-column-inventory.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/sql-column-inventory.d.cts",
+        "default": "./dist/data/schema/sql-column-inventory.cjs"
+      }
+    },
+    "./data/schema/typegen": {
+      "import": {
+        "types": "./dist/data/schema/typegen.d.ts",
+        "default": "./dist/data/schema/typegen.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/typegen.d.cts",
+        "default": "./dist/data/schema/typegen.cjs"
+      }
+    },
+    "./data/schema/types": {
+      "import": {
+        "types": "./dist/data/schema/types.d.ts",
+        "default": "./dist/data/schema/types.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/types.d.cts",
+        "default": "./dist/data/schema/types.cjs"
+      }
+    },
+    "./data/schema/verifier": {
+      "import": {
+        "types": "./dist/data/schema/verifier.d.ts",
+        "default": "./dist/data/schema/verifier.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/verifier.d.cts",
+        "default": "./dist/data/schema/verifier.cjs"
+      }
+    },
+    "./data/server/contained-path": {
+      "import": {
+        "types": "./dist/data/server/contained-path.d.ts",
+        "default": "./dist/data/server/contained-path.js"
+      },
+      "require": {
+        "types": "./dist/data/server/contained-path.d.cts",
+        "default": "./dist/data/server/contained-path.cjs"
+      }
+    },
+    "./data/notifications/line/client": {
+      "import": {
+        "types": "./dist/data/notifications/line/client.d.ts",
+        "default": "./dist/data/notifications/line/client.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/line/client.d.cts",
+        "default": "./dist/data/notifications/line/client.cjs"
+      }
+    },
+    "./data/notifications/line/adapter": {
+      "import": {
+        "types": "./dist/data/notifications/line/adapter.d.ts",
+        "default": "./dist/data/notifications/line/adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/line/adapter.d.cts",
+        "default": "./dist/data/notifications/line/adapter.cjs"
+      }
+    },
+    "./data/notifications/slack/client": {
+      "import": {
+        "types": "./dist/data/notifications/slack/client.d.ts",
+        "default": "./dist/data/notifications/slack/client.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/slack/client.d.cts",
+        "default": "./dist/data/notifications/slack/client.cjs"
+      }
+    },
+    "./data/notifications/slack/adapter": {
+      "import": {
+        "types": "./dist/data/notifications/slack/adapter.d.ts",
+        "default": "./dist/data/notifications/slack/adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/slack/adapter.d.cts",
+        "default": "./dist/data/notifications/slack/adapter.cjs"
+      }
+    },
+    "./data/notifications/google-chat/client": {
+      "import": {
+        "types": "./dist/data/notifications/google-chat/client.d.ts",
+        "default": "./dist/data/notifications/google-chat/client.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/google-chat/client.d.cts",
+        "default": "./dist/data/notifications/google-chat/client.cjs"
+      }
+    },
+    "./data/notifications/google-chat/adapter": {
+      "import": {
+        "types": "./dist/data/notifications/google-chat/adapter.d.ts",
+        "default": "./dist/data/notifications/google-chat/adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/notifications/google-chat/adapter.d.cts",
+        "default": "./dist/data/notifications/google-chat/adapter.cjs"
+      }
+    },
+    "./data/async": {
+      "import": {
+        "types": "./dist/data/async.d.ts",
+        "default": "./dist/data/async.js"
+      },
+      "require": {
+        "types": "./dist/data/async.d.cts",
+        "default": "./dist/data/async.cjs"
+      }
+    },
+    "./data/google-calendar/watch": {
+      "import": {
+        "types": "./dist/data/google-calendar/watch.d.ts",
+        "default": "./dist/data/google-calendar/watch.js"
+      },
+      "require": {
+        "types": "./dist/data/google-calendar/watch.d.cts",
+        "default": "./dist/data/google-calendar/watch.cjs"
+      }
+    },
+    "./data/integrations/files": {
+      "import": {
+        "types": "./dist/data/integrations/files/index.d.ts",
+        "default": "./dist/data/integrations/files/index.js"
+      },
+      "require": {
+        "types": "./dist/data/integrations/files/index.d.cts",
+        "default": "./dist/data/integrations/files/index.cjs"
+      }
+    },
+    "./data/schema/introspection": {
+      "import": {
+        "types": "./dist/data/schema/introspection.d.ts",
+        "default": "./dist/data/schema/introspection.js"
+      },
+      "require": {
+        "types": "./dist/data/schema/introspection.d.cts",
+        "default": "./dist/data/schema/introspection.cjs"
+      }
+    },
+    "./data/content/git-markdown": {
+      "import": {
+        "types": "./dist/data/content/git-markdown-adapter.d.ts",
+        "default": "./dist/data/content/git-markdown-adapter.js"
+      },
+      "require": {
+        "types": "./dist/data/content/git-markdown-adapter.d.cts",
+        "default": "./dist/data/content/git-markdown-adapter.cjs"
+      }
+    },
+    "./data/integrations/supabase": {
+      "import": {
+        "types": "./dist/data/integrations/supabase.d.ts",
+        "default": "./dist/data/integrations/supabase.js"
+      },
+      "require": {
+        "types": "./dist/data/integrations/supabase.d.cts",
+        "default": "./dist/data/integrations/supabase.cjs"
+      }
+    },
+    "./ai/action": {
+      "import": {
+        "types": "./dist/ai/action/index.d.ts",
+        "default": "./dist/ai/action/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/index.d.cts",
+        "default": "./dist/ai/action/index.cjs"
+      }
+    },
+    "./ai/proposal": {
+      "import": {
+        "types": "./dist/ai/proposal/index.d.ts",
+        "default": "./dist/ai/proposal/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/proposal/index.d.cts",
+        "default": "./dist/ai/proposal/index.cjs"
+      }
+    },
+    "./ai/generative-ui": {
+      "import": {
+        "types": "./dist/ai/generative-ui/index.d.ts",
+        "default": "./dist/ai/generative-ui/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/generative-ui/index.d.cts",
+        "default": "./dist/ai/generative-ui/index.cjs"
+      }
+    },
+    "./ai/ai-chat": {
+      "import": {
+        "types": "./dist/ai/ai-chat/index.d.ts",
+        "default": "./dist/ai/ai-chat/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/ai-chat/index.d.cts",
+        "default": "./dist/ai/ai-chat/index.cjs"
+      }
+    },
+    "./ai/agent-output": {
+      "import": {
+        "types": "./dist/ai/agent-output/index.d.ts",
+        "default": "./dist/ai/agent-output/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/agent-output/index.d.cts",
+        "default": "./dist/ai/agent-output/index.cjs"
+      }
+    },
+    "./ai/validation": {
+      "import": {
+        "types": "./dist/ai/validation/index.d.ts",
+        "default": "./dist/ai/validation/index.js"
+      },
+      "require": {
+        "types": "./dist/ai/validation/index.d.cts",
+        "default": "./dist/ai/validation/index.cjs"
+      }
+    },
+    "./ai/ai-chat/stream": {
+      "import": {
+        "types": "./dist/ai/ai-chat/stream.d.ts",
+        "default": "./dist/ai/ai-chat/stream.js"
+      },
+      "require": {
+        "types": "./dist/ai/ai-chat/stream.d.cts",
+        "default": "./dist/ai/ai-chat/stream.cjs"
+      }
+    },
+    "./ai/ai-chat/types": {
+      "import": {
+        "types": "./dist/ai/ai-chat/types.d.ts",
+        "default": "./dist/ai/ai-chat/types.js"
+      },
+      "require": {
+        "types": "./dist/ai/ai-chat/types.d.cts",
+        "default": "./dist/ai/ai-chat/types.cjs"
+      }
+    },
+    "./ai/ai-chat/openai-compatible": {
+      "import": {
+        "types": "./dist/ai/ai-chat/openai-compatible.d.ts",
+        "default": "./dist/ai/ai-chat/openai-compatible.js"
+      },
+      "require": {
+        "types": "./dist/ai/ai-chat/openai-compatible.d.cts",
+        "default": "./dist/ai/ai-chat/openai-compatible.cjs"
+      }
+    },
+    "./ai/ai-chat/ai-sdk": {
+      "import": {
+        "types": "./dist/ai/ai-chat/ai-sdk.d.ts",
+        "default": "./dist/ai/ai-chat/ai-sdk.js"
+      },
+      "require": {
+        "types": "./dist/ai/ai-chat/ai-sdk.d.cts",
+        "default": "./dist/ai/ai-chat/ai-sdk.cjs"
+      }
+    },
+    "./ai/action/tool-bridge": {
+      "import": {
+        "types": "./dist/ai/action/tool-bridge.d.ts",
+        "default": "./dist/ai/action/tool-bridge.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/tool-bridge.d.cts",
+        "default": "./dist/ai/action/tool-bridge.cjs"
+      }
+    },
+    "./ai/action/tool-types": {
+      "import": {
+        "types": "./dist/ai/action/tool-types.d.ts",
+        "default": "./dist/ai/action/tool-types.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/tool-types.d.cts",
+        "default": "./dist/ai/action/tool-types.cjs"
+      }
+    },
+    "./ai/action/define-action-tool": {
+      "import": {
+        "types": "./dist/ai/action/define-action-tool.d.ts",
+        "default": "./dist/ai/action/define-action-tool.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/define-action-tool.d.cts",
+        "default": "./dist/ai/action/define-action-tool.cjs"
+      }
+    },
+    "./ai/action/schema-input": {
+      "import": {
+        "types": "./dist/ai/action/schema-input.d.ts",
+        "default": "./dist/ai/action/schema-input.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/schema-input.d.cts",
+        "default": "./dist/ai/action/schema-input.cjs"
+      }
+    },
+    "./ai/action/types": {
+      "import": {
+        "types": "./dist/ai/action/types.d.ts",
+        "default": "./dist/ai/action/types.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/types.d.cts",
+        "default": "./dist/ai/action/types.cjs"
+      }
+    },
+    "./ai/action/registry": {
+      "import": {
+        "types": "./dist/ai/action/registry.d.ts",
+        "default": "./dist/ai/action/registry.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/registry.d.cts",
+        "default": "./dist/ai/action/registry.cjs"
+      }
+    },
+    "./ai/action/execution": {
+      "import": {
+        "types": "./dist/ai/action/execution.d.ts",
+        "default": "./dist/ai/action/execution.js"
+      },
+      "require": {
+        "types": "./dist/ai/action/execution.d.cts",
+        "default": "./dist/ai/action/execution.cjs"
+      }
+    },
+    "./ai/proposal/validation": {
+      "import": {
+        "types": "./dist/ai/proposal/validation.d.ts",
+        "default": "./dist/ai/proposal/validation.js"
+      },
+      "require": {
+        "types": "./dist/ai/proposal/validation.d.cts",
+        "default": "./dist/ai/proposal/validation.cjs"
+      }
+    },
+    "./ai/proposal/engine": {
+      "import": {
+        "types": "./dist/ai/proposal/engine.d.ts",
+        "default": "./dist/ai/proposal/engine.js"
+      },
+      "require": {
+        "types": "./dist/ai/proposal/engine.d.cts",
+        "default": "./dist/ai/proposal/engine.cjs"
+      }
+    },
+    "./ai/proposal/types": {
+      "import": {
+        "types": "./dist/ai/proposal/types.d.ts",
+        "default": "./dist/ai/proposal/types.js"
+      },
+      "require": {
+        "types": "./dist/ai/proposal/types.d.cts",
+        "default": "./dist/ai/proposal/types.cjs"
+      }
+    },
+    "./ai/proposal/batch": {
+      "import": {
+        "types": "./dist/ai/proposal/batch.d.ts",
+        "default": "./dist/ai/proposal/batch.js"
+      },
+      "require": {
+        "types": "./dist/ai/proposal/batch.d.cts",
+        "default": "./dist/ai/proposal/batch.cjs"
+      }
+    },
+    "./ai/generative-ui/validation": {
+      "import": {
+        "types": "./dist/ai/generative-ui/validation.d.ts",
+        "default": "./dist/ai/generative-ui/validation.js"
+      },
+      "require": {
+        "types": "./dist/ai/generative-ui/validation.d.cts",
+        "default": "./dist/ai/generative-ui/validation.cjs"
+      }
+    },
+    "./ai/generative-ui/contract": {
+      "import": {
+        "types": "./dist/ai/generative-ui/contract.d.ts",
+        "default": "./dist/ai/generative-ui/contract.js"
+      },
+      "require": {
+        "types": "./dist/ai/generative-ui/contract.d.cts",
+        "default": "./dist/ai/generative-ui/contract.cjs"
+      }
+    },
+    "./ai/generative-ui/types": {
+      "import": {
+        "types": "./dist/ai/generative-ui/types.d.ts",
+        "default": "./dist/ai/generative-ui/types.js"
+      },
+      "require": {
+        "types": "./dist/ai/generative-ui/types.d.cts",
+        "default": "./dist/ai/generative-ui/types.cjs"
+      }
+    },
+    "./ai/ai-chat/conversation": {
+      "import": {
+        "types": "./dist/ai/ai-chat/conversation.d.ts",
+        "default": "./dist/ai/ai-chat/conversation.js"
+      },
+      "require": {
+        "types": "./dist/ai/ai-chat/conversation.d.cts",
+        "default": "./dist/ai/ai-chat/conversation.cjs"
+      }
+    },
+    "./ai/ai-chat/session": {
+      "import": {
+        "types": "./dist/ai/ai-chat/session.d.ts",
+        "default": "./dist/ai/ai-chat/session.js"
+      },
+      "require": {
+        "types": "./dist/ai/ai-chat/session.d.cts",
+        "default": "./dist/ai/ai-chat/session.cjs"
+      }
+    },
+    "./graph/types": {
+      "import": {
+        "types": "./dist/graph/types.d.ts",
+        "default": "./dist/graph/types.js"
+      },
+      "require": {
+        "types": "./dist/graph/types.d.cts",
+        "default": "./dist/graph/types.cjs"
+      }
+    },
+    "./graph/cpm": {
+      "import": {
+        "types": "./dist/graph/cpm.d.ts",
+        "default": "./dist/graph/cpm.js"
+      },
+      "require": {
+        "types": "./dist/graph/cpm.d.cts",
+        "default": "./dist/graph/cpm.cjs"
+      }
+    },
+    "./graph/in-memory-adapter": {
+      "import": {
+        "types": "./dist/graph/in-memory-adapter.d.ts",
+        "default": "./dist/graph/in-memory-adapter.js"
+      },
+      "require": {
+        "types": "./dist/graph/in-memory-adapter.d.cts",
+        "default": "./dist/graph/in-memory-adapter.cjs"
+      }
+    },
+    "./graph/planning": {
+      "import": {
+        "types": "./dist/graph/planning/index.d.ts",
+        "default": "./dist/graph/planning/index.js"
+      },
+      "require": {
+        "types": "./dist/graph/planning/index.d.cts",
+        "default": "./dist/graph/planning/index.cjs"
+      }
+    },
+    "./graph/planning/graph": {
+      "import": {
+        "types": "./dist/graph/planning/graph.d.ts",
+        "default": "./dist/graph/planning/graph.js"
+      },
+      "require": {
+        "types": "./dist/graph/planning/graph.d.cts",
+        "default": "./dist/graph/planning/graph.cjs"
+      }
+    },
+    "./graph/planning/capacity-index": {
+      "import": {
+        "types": "./dist/graph/planning/capacity-index.d.ts",
+        "default": "./dist/graph/planning/capacity-index.js"
+      },
+      "require": {
+        "types": "./dist/graph/planning/capacity-index.d.cts",
+        "default": "./dist/graph/planning/capacity-index.cjs"
+      }
+    },
+    "./japan/date-utils": {
+      "import": {
+        "types": "./dist/japan/date-utils.d.ts",
+        "default": "./dist/japan/date-utils.js"
+      },
+      "require": {
+        "types": "./dist/japan/date-utils.d.cts",
+        "default": "./dist/japan/date-utils.cjs"
+      }
+    },
+    "./japan/finance": {
+      "import": {
+        "types": "./dist/japan/finance/invoice.d.ts",
+        "default": "./dist/japan/finance/invoice.js"
+      },
+      "require": {
+        "types": "./dist/japan/finance/invoice.d.cts",
+        "default": "./dist/japan/finance/invoice.cjs"
+      }
+    },
+    "./japan/csv": {
+      "import": {
+        "types": "./dist/japan/csv/index.d.ts",
+        "default": "./dist/japan/csv/index.js"
+      },
+      "require": {
+        "types": "./dist/japan/csv/index.d.cts",
+        "default": "./dist/japan/csv/index.cjs"
+      }
+    },
+    "./japan/pdf": {
+      "import": {
+        "types": "./dist/japan/pdf/index.d.ts",
+        "default": "./dist/japan/pdf/index.js"
+      },
+      "require": {
+        "types": "./dist/japan/pdf/index.d.cts",
+        "default": "./dist/japan/pdf/index.cjs"
+      }
+    },
+    "./japan/edi": {
+      "import": {
+        "types": "./dist/japan/edi/index.d.ts",
+        "default": "./dist/japan/edi/index.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/index.d.cts",
+        "default": "./dist/japan/edi/index.cjs"
+      }
+    },
+    "./japan/excel": {
+      "import": {
+        "types": "./dist/japan/excel/index.d.ts",
+        "default": "./dist/japan/excel/index.js"
+      },
+      "require": {
+        "types": "./dist/japan/excel/index.d.cts",
+        "default": "./dist/japan/excel/index.cjs"
+      }
+    },
+    "./japan/legal-document": {
+      "import": {
+        "types": "./dist/japan/legal-document/index.d.ts",
+        "default": "./dist/japan/legal-document/index.js"
+      },
+      "require": {
+        "types": "./dist/japan/legal-document/index.d.cts",
+        "default": "./dist/japan/legal-document/index.cjs"
+      }
+    },
+    "./japan/edi/ubl": {
+      "import": {
+        "types": "./dist/japan/edi/ubl.d.ts",
+        "default": "./dist/japan/edi/ubl.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/ubl.d.cts",
+        "default": "./dist/japan/edi/ubl.cjs"
+      }
+    },
+    "./japan/edi/to-quote-pdf": {
+      "import": {
+        "types": "./dist/japan/edi/to-quote-pdf.d.ts",
+        "default": "./dist/japan/edi/to-quote-pdf.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/to-quote-pdf.d.cts",
+        "default": "./dist/japan/edi/to-quote-pdf.cjs"
+      }
+    },
+    "./japan/edi/to-business-document": {
+      "import": {
+        "types": "./dist/japan/edi/to-business-document.d.ts",
+        "default": "./dist/japan/edi/to-business-document.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/to-business-document.d.cts",
+        "default": "./dist/japan/edi/to-business-document.cjs"
+      }
+    },
+    "./japan/edi/code-lists": {
+      "import": {
+        "types": "./dist/japan/edi/code-lists.d.ts",
+        "default": "./dist/japan/edi/code-lists.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/code-lists.d.cts",
+        "default": "./dist/japan/edi/code-lists.cjs"
+      }
+    },
+    "./japan/edi/types": {
+      "import": {
+        "types": "./dist/japan/edi/types.d.ts",
+        "default": "./dist/japan/edi/types.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/types.d.cts",
+        "default": "./dist/japan/edi/types.cjs"
+      }
+    },
+    "./japan/edi/to-invoice-pdf": {
+      "import": {
+        "types": "./dist/japan/edi/to-invoice-pdf.d.ts",
+        "default": "./dist/japan/edi/to-invoice-pdf.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/to-invoice-pdf.d.cts",
+        "default": "./dist/japan/edi/to-invoice-pdf.cjs"
+      }
+    },
+    "./japan/edi/validator": {
+      "import": {
+        "types": "./dist/japan/edi/validator.d.ts",
+        "default": "./dist/japan/edi/validator.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/validator.d.cts",
+        "default": "./dist/japan/edi/validator.cjs"
+      }
+    },
+    "./japan/excel/invoice-template": {
+      "import": {
+        "types": "./dist/japan/excel/invoice-template.d.ts",
+        "default": "./dist/japan/excel/invoice-template.js"
+      },
+      "require": {
+        "types": "./dist/japan/excel/invoice-template.d.cts",
+        "default": "./dist/japan/excel/invoice-template.cjs"
+      }
+    },
+    "./japan/pdf/business-document-presets": {
+      "import": {
+        "types": "./dist/japan/pdf/business-document-presets.d.ts",
+        "default": "./dist/japan/pdf/business-document-presets.js"
+      },
+      "require": {
+        "types": "./dist/japan/pdf/business-document-presets.d.cts",
+        "default": "./dist/japan/pdf/business-document-presets.cjs"
+      }
+    },
+    "./japan/pdf/legal-document-pdfmake": {
+      "import": {
+        "types": "./dist/japan/pdf/legal-document-pdfmake.d.ts",
+        "default": "./dist/japan/pdf/legal-document-pdfmake.js"
+      },
+      "require": {
+        "types": "./dist/japan/pdf/legal-document-pdfmake.d.cts",
+        "default": "./dist/japan/pdf/legal-document-pdfmake.cjs"
+      }
+    },
+    "./japan/legal-document/parser": {
+      "import": {
+        "types": "./dist/japan/legal-document/parser.d.ts",
+        "default": "./dist/japan/legal-document/parser.js"
+      },
+      "require": {
+        "types": "./dist/japan/legal-document/parser.d.cts",
+        "default": "./dist/japan/legal-document/parser.cjs"
+      }
+    },
+    "./japan/legal-document/types": {
+      "import": {
+        "types": "./dist/japan/legal-document/types.d.ts",
+        "default": "./dist/japan/legal-document/types.js"
+      },
+      "require": {
+        "types": "./dist/japan/legal-document/types.d.cts",
+        "default": "./dist/japan/legal-document/types.cjs"
+      }
+    },
+    "./japan/legal-document/constants": {
+      "import": {
+        "types": "./dist/japan/legal-document/constants.d.ts",
+        "default": "./dist/japan/legal-document/constants.js"
+      },
+      "require": {
+        "types": "./dist/japan/legal-document/constants.d.cts",
+        "default": "./dist/japan/legal-document/constants.cjs"
+      }
+    },
+    "./japan/edi/factory": {
+      "import": {
+        "types": "./dist/japan/edi/factory.d.ts",
+        "default": "./dist/japan/edi/factory.js"
+      },
+      "require": {
+        "types": "./dist/japan/edi/factory.d.cts",
+        "default": "./dist/japan/edi/factory.cjs"
+      }
+    },
+    "./japan/finance/invoice": {
+      "import": {
+        "types": "./dist/japan/finance/invoice.d.ts",
+        "default": "./dist/japan/finance/invoice.js"
+      },
+      "require": {
+        "types": "./dist/japan/finance/invoice.d.cts",
+        "default": "./dist/japan/finance/invoice.cjs"
+      }
+    },
+    "./japan/pdf/stamp": {
+      "import": {
+        "types": "./dist/japan/pdf/stamp.d.ts",
+        "default": "./dist/japan/pdf/stamp.js"
+      },
+      "require": {
+        "types": "./dist/japan/pdf/stamp.d.cts",
+        "default": "./dist/japan/pdf/stamp.cjs"
+      }
+    },
+    "./japan/notifications": {
+      "import": {
+        "types": "./dist/japan/notifications/index.d.ts",
+        "default": "./dist/japan/notifications/index.js"
+      },
+      "require": {
+        "types": "./dist/japan/notifications/index.d.cts",
+        "default": "./dist/japan/notifications/index.cjs"
+      }
+    },
+    "./japan/holidays": {
+      "import": {
+        "types": "./dist/japan/holidays.d.ts",
+        "default": "./dist/japan/holidays.js"
+      },
+      "require": {
+        "types": "./dist/japan/holidays.d.cts",
+        "default": "./dist/japan/holidays.cjs"
+      }
+    },
+    "./japan/integrations/data-engine": {
+      "import": {
+        "types": "./dist/japan/integrations/data-engine.d.ts",
+        "default": "./dist/japan/integrations/data-engine.js"
+      },
+      "require": {
+        "types": "./dist/japan/integrations/data-engine.d.cts",
+        "default": "./dist/japan/integrations/data-engine.cjs"
+      }
+    },
+    "./japan/holidays/calculated": {
+      "import": {
+        "types": "./dist/japan/holidays-calculated.d.ts",
+        "default": "./dist/japan/holidays-calculated.js"
+      },
+      "require": {
+        "types": "./dist/japan/holidays-calculated.d.cts",
+        "default": "./dist/japan/holidays-calculated.cjs"
+      }
+    },
+    "./us/holidays": {
+      "import": {
+        "types": "./dist/us/holidays.d.ts",
+        "default": "./dist/us/holidays.js"
+      },
+      "require": {
+        "types": "./dist/us/holidays.d.cts",
+        "default": "./dist/us/holidays.cjs"
+      }
+    },
+    "./us/format": {
+      "import": {
+        "types": "./dist/us/format.d.ts",
+        "default": "./dist/us/format.js"
+      },
+      "require": {
+        "types": "./dist/us/format.d.cts",
+        "default": "./dist/us/format.cjs"
+      }
+    },
+    "./us/documents": {
+      "import": {
+        "types": "./dist/us/documents/index.d.ts",
+        "default": "./dist/us/documents/index.js"
+      },
+      "require": {
+        "types": "./dist/us/documents/index.d.cts",
+        "default": "./dist/us/documents/index.cjs"
+      }
+    },
+    "./ai-instructions": "./dist/consumer-ai/SKILL.md",
+    "./package-context.json": "./dist/consumer-ai/package-context.json",
+    "./api-index.json": "./consumer-ai/api-index.json"
+  },
+  "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^16.0.5",
+    "@holiday-jp/holiday_jp": "^2.5.1",
+    "jsonpath-plus": "^11.2.1",
+    "papaparse": "^5.7.0",
+    "pluralize": "^8.0.0",
+    "semver": "^7.8.5",
+    "yaml": "^2.9.1",
+    "zod": "^4.2.1",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "ajv-i18n": "^4.2.0"
+  },
+  "peers": {
+    "@supabase/supabase-js": "^2.116.0",
+    "@neondatabase/serverless": "^1.0.0",
+    "excelize-wasm": "0.1.3",
+    "pg": "^8.20.0",
+    "hono": "^4.12.3"
+  },
+  "optionalPeers": {
+    "@supabase/supabase-js": {
+      "optional": true
+    },
+    "@neondatabase/serverless": {
+      "optional": true
+    },
+    "excelize-wasm": {
+      "optional": true
+    },
+    "pg": {
+      "optional": true
+    },
+    "hono": {
+      "optional": true
+    }
+  }
+}

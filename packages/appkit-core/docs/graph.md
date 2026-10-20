@@ -1,8 +1,11 @@
 ---
 title: "Calculate dependency plans"
 description: "Framework-free dependency graphs, critical paths and planning helpers"
+sidebar:
+  order: 4
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "graph"]
 ---
 
 # Calculate dependency plans

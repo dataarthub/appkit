@@ -32,7 +32,7 @@ copy; separate unfinished edits before committing.
 
 Before a push, Husky runs `bun run verify:push`: history secret scanning, source lint,
 quality-hook tests, the existing build/type/unit/release/docs checks through
-`bun run verify`. Turbo reuses matching cached build/type/unit results;
+`bun run verify`, then agent-tooling tests against the fresh build. Turbo reuses matching cached build/type/unit results;
 this command does not run live-model evaluation or publish packages. Git hooks can
 be bypassed, so the Node 24 CI job runs the same gate after installing Gitleaks.
 The Action runs only when main changes or is dispatched manually; feature-branch

@@ -1,8 +1,11 @@
 ---
 title: "Build schema forms and record tables"
 description: "Schema-driven forms, tables, filters and CRUD views"
+sidebar:
+  order: 4
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "tools"]
 ---
 
 # Build schema forms and record tables

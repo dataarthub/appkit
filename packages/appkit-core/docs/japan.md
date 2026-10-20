@@ -1,8 +1,11 @@
 ---
 title: "Apply Japanese regional defaults"
 description: "Japanese calendar, formatting and business-document presets"
+sidebar:
+  order: 5
 archetype: how-to
-project: tools
+project: appkit
+tags: ["appkit", "japan"]
 ---
 
 # Apply Japanese regional defaults
