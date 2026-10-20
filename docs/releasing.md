@@ -22,40 +22,66 @@ Historical separate-package archives do not verify the new boundaries. Keep sour
 
 ## Publication security
 
-For future releases, migrate from local CLI publication to [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/) in GitHub Actions. Configure each package's npm settings with GitHub owner `dataarthub`, repository `appkit`, the exact publishing workflow filename and, if used, its protected environment name. Require 2FA for maintainers and enable the package setting to [require 2FA and disallow tokens](https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/); trusted publishers can still publish under that policy. These are account/package settings and are not enabled by a repository edit.
+Use [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/) in GitHub Actions. Configure each package's npm settings with GitHub owner `dataarthub`, repository `appkit`, workflow filename `publish.yml` and, if specified, environment `npm-core` or `npm-react` respectively. The publisher must allow direct `npm publish`. Require 2FA for maintainers and enable the package setting to [require 2FA and disallow tokens](https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/); trusted publishers can still publish under that policy. These are account/package settings and are not enabled by a repository edit.
 
-Use a manually dispatched workflow on a GitHub-hosted runner with Node 24+, npm 11.5.1+ and `id-token: write` permission for the publishing job. Build and verify the selected commit, then publish the exact reviewed core archive before the React archive. Authenticate through OIDC without an npm write token. Trusted Publishing generates [provenance](https://docs.npmjs.com/generating-provenance-statements/) automatically for public packages from public repositories; `npm publish --provenance --access public <archive>` can also explicitly require it. Review and authorize the workflow before enabling publication, including the publisher's allowed publish action. The current quality workflow only verifies; no publishing workflow is configured here yet.
+The `publish.yml` workflow runs only when a stable package-specific GitHub Release is published. Its GitHub-hosted publisher uses Node 24, pinned npm 11.21.0 and `id-token: write`, without an npm write token. It explicitly requires [provenance](https://docs.npmjs.com/generating-provenance-statements/) and disables lifecycle scripts when publishing the verified archive. The separate verification job has no OIDC publication permission, and the publisher does not install or run package development dependencies. The existing main-update quality workflow remains verification-only.
 
 The existing 0.1.0 release has no provenance attestation. A later workflow does not retroactively attest it; use a new version for future provenance-backed releases. GitHub tags/Releases and npm publication are separate. Never dispatch npm publication from branch/tag pushes or overwrite an existing version; verify its registry integrity before resuming a partial publish.
+
+## Publish a package-specific Release
+
+Versions, tags and GitHub Releases are independent for the two packages:
+
+| GitHub tag | Only package published | Deployment environment |
+| --- | --- | --- |
+| `appkit-core-vX.Y.Z` | `@alneas/appkit-core` | `npm-core` |
+| `appkit-react-vX.Y.Z` | `@alneas/appkit-react` | `npm-react` |
+
+The original `v0.1.0` remains the initial shared release tag. It does not trigger
+the new publisher. Draft Releases, prereleases, unrelated tags, tag pushes and
+manual workflow dispatches never publish npm packages through this workflow.
+
+1. Update only the intended package version and relevant lockfile/generated
+   metadata. If React adopts a new Core, update React's exact dependency and its
+   own version. Commit and merge the reviewed changes into main.
+2. Create the package-specific tag on that exact reviewed commit. The version in
+   the tag must match the selected package's `package.json`; the other package's
+   version can differ. The workflow rejects commits outside main and moved tags.
+3. Prepare a draft GitHub Release for that tag. Publishing the Release authorizes
+   the automatic npm publication; do not publish it until ready to release.
+4. Inspect the **Publish package release** workflow. It checks secrets, lint, the
+   build, source/declaration types, unit tests, release/docs contracts and agent
+   tooling. It packs both candidates and tests those exact archives in isolated
+   consumers, but selects and publishes only the tagged package's tested archive.
+5. React releases additionally require the two-Core compatibility matrix and the
+   mandatory-fix dependency policy. Core releases do not wait for React to adopt
+   an unpublished dependency: for coordinated updates, publish Core's Release,
+   wait for its successful npm publication, then publish React's Release.
+
+The verified archive is handed to the publisher through an immutable artifact ID,
+its SHA-512 digest and a sanitized source/package identity manifest. Only that
+archive and sanitized manifest are uploaded; raw consumer receipts, agent evidence
+and logs remain excluded. The publisher rechecks source identity, archive contents
+and digest, then checks the npm registry before publishing. After publication it
+checks the exact registry version's integrity against the tested archive.
+
+Rerun a failed workflow from Actions. If the exact version already exists with the
+same integrity, the publisher succeeds without publishing again or changing npm
+dist-tags. A different integrity, registry outage or older version that would move
+`latest` backwards fails closed. If the seven-day archive artifact has expired,
+rerun all jobs. Never move a tag or overwrite a version to repair a failed run.
+Concurrent publication workflows are serialized and are not cancelled mid-publish;
+publish coordinated Core and React Releases in order rather than simultaneously.
 
 ## GitHub deployment records for npm
 
 Use two GitHub environments: `npm-core` links to
 https://www.npmjs.com/package/@alneas/appkit-core and `npm-react` links to
-https://www.npmjs.com/package/@alneas/appkit-react. When the future publishing
-workflow is implemented, add these fields to its actual publishing jobs
-([GitHub environment syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idenvironment)):
-
-```yaml
-jobs:
-  publish-core:
-    environment:
-      name: npm-core
-      url: https://www.npmjs.com/package/@alneas/appkit-core
-    # Actual build, verification and npm publication steps belong in this job.
-  publish-react:
-    needs: publish-core
-    environment:
-      name: npm-react
-      url: https://www.npmjs.com/package/@alneas/appkit-react
-    # Publish React only after the required Core version exists on npm.
-```
-
-This is a configuration fragment, not an executable publishing workflow. Configure
-each npm Trusted Publisher with its matching environment name and exact workflow
-filename. Dispatch the future publishing workflow at the finalized release tag so
-the automatic deployment identifies the published source commit. Do not attach
-these environments to the quality workflow: verification alone is not publication.
+https://www.npmjs.com/package/@alneas/appkit-react. The `publish.yml` publishing job
+selects its environment and npm page URL from the validated package tag using
+[GitHub's job environment fields](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idenvironment).
+The job targets the release commit, so the deployment identifies the published
+source. Do not attach these environments to verification-only jobs.
 
 For versions already published, including 0.1.0, use the separate **Record existing
 npm publications** manual Action (`record-npm-deployments.yml`) after it is merged.

@@ -35,8 +35,9 @@
     "test:quality-tooling": "node --test scripts/quality-tooling.test.mjs",
     "test:npm-deployments": "node --test scripts/record-npm-deployments.test.mjs",
     "test:react-core-tooling": "node --test scripts/react-core/*.test.mjs",
+    "test:publish-tooling": "node --test scripts/publish/*.test.mjs",
     "check:react-core": "node scripts/check-react-core.mjs",
-    "check:quality": "bun run secrets:check && bun run lint && bun run test:quality-tooling && bun run test:npm-deployments && bun run test:react-core-tooling",
+    "check:quality": "bun run secrets:check && bun run lint && bun run test:quality-tooling && bun run test:npm-deployments && bun run test:react-core-tooling && bun run test:publish-tooling",
     "verify:push": "bun run check:quality && bun run verify && bun run test:agent-tooling && bun run check:react-core"
   },
   "devDependencies": {
@@ -46,6 +47,7 @@
     "lint-staged": "17.6.0",
     "turbo": "2.11.9",
     "typescript": "6.0.3",
-    "vitest": "4.1.12"
+    "vitest": "4.1.12",
+    "yaml": "2.9.1"
   }
 }

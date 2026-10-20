@@ -44,6 +44,11 @@ pushes and PR events do not trigger it. This makes the CI confirmation post-merg
 The Node 26 job keeps the additional runtime compatibility checks. The workflow has
 no publication job.
 
+Package-specific stable GitHub Releases use the separate `publish.yml` workflow.
+Publishing an `appkit-core-vX.Y.Z` or `appkit-react-vX.Y.Z` Release starts verification
+and then publishes only that package. See [Releasing](RELEASING.md) before publishing
+a Release; tag pushes alone do not publish npm packages.
+
 The full gate also runs `bun run check:react-core`: React types, unit tests and
 packed-consumer SSR/load checks against both its exact registry Core dependency and
 the new Core archive in separate temporary installations. Network access is required.
