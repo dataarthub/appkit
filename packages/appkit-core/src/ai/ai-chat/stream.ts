@@ -1,3 +1,4 @@
+import { AIChatError } from '../errors/index';
 import { normalizeAIChatMessages } from './conversation';
 import { jsonSnapshot } from '../internal/json-snapshot';
 import type { ActionToolObject, ActionToolValue } from '../action/tool-types';
@@ -7,7 +8,7 @@ import type { AIChatEvent, AIChatHTTPOptions, AIChatRequest } from './types';
 export function object(value: unknown): value is Record<string, unknown> { return value !== null && typeof value === 'object' && !Array.isArray(value); }
 /** @internal */
 export function jsonObject(value: unknown): ActionToolObject {
-  const data = jsonSnapshot(value); if (!object(data)) throw new Error('Expected a JSON object'); return data as ActionToolObject;
+  const data = jsonSnapshot(value); if (!object(data)) throw new AIChatError('AI_INVALID_STREAM', 'Expected a JSON object'); return data as ActionToolObject;
 }
 /** @internal */
 export function jsonValue(value: unknown): ActionToolValue { return jsonSnapshot(value); }
@@ -20,14 +21,14 @@ export function finishReason(value: unknown): Extract<AIChatEvent, { type: 'fini
 }
 /** @internal */
 export function httpConfiguration(options: AIChatHTTPOptions) {
-  if (!options.api?.trim()) throw new Error('An AI endpoint is required');
+  if (!options.api?.trim()) throw new AIChatError('AI_INVALID_CONFIGURATION', 'An AI endpoint is required');
   const max = options.maxResponseChars ?? 1000000;
-  if (!Number.isInteger(max) || max < 1 || max > 10000000) throw new Error('Invalid AI stream limit');
+  if (!Number.isInteger(max) || max < 1 || max > 10000000) throw new AIChatError('AI_INVALID_CONFIGURATION', 'Invalid AI stream limit');
   const api = options.api; const headers = { ...options.headers }; const fetcher = options.fetch;
   return { max, async send(body: unknown, signal?: AbortSignal) {
     signal?.throwIfAborted();
     const response = await (fetcher ?? globalThis.fetch)(api, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body), signal });
-    if (!response.ok || !response.body) { await response.body?.cancel(); throw new Error(`AI request failed (HTTP ${response.status})`); }
+    if (!response.ok || !response.body) { await response.body?.cancel(); throw new AIChatError('AI_HTTP_FAILURE', `AI request failed (HTTP ${response.status})`); }
     return response;
   } };
 }
@@ -47,7 +48,7 @@ export async function* readAIEvents(response: Response, max: number, signal?: Ab
       signal?.throwIfAborted();
       const { done, value } = await reader.read(); signal?.throwIfAborted();
       const text = decoder.decode(value, { stream: !done }); total += text.length;
-      if (total > max) throw new Error('AI response exceeds the configured limit');
+      if (total > max) throw new AIChatError('AI_RESPONSE_LIMIT', 'AI response exceeds the configured limit');
       pending += text;
       if (done && pending && !/[\r\n]$/.test(pending)) pending += '\n';
       while (true) {
@@ -58,12 +59,12 @@ export async function* readAIEvents(response: Response, max: number, signal?: Ab
             const raw = data.join('\n'); data = [];
             if (raw === '[DONE]') return;
             if (raw === '[START]') continue;
-            try { yield JSON.parse(raw); } catch { throw new Error('Invalid AI stream event'); }
+            try { yield JSON.parse(raw); } catch { throw new AIChatError('AI_INVALID_STREAM', 'Invalid AI stream event'); }
           }
         } else if (line.startsWith('data:')) data.push(line.slice(5).replace(/^ /, ''));
       }
       if (done) {
-        if (data.length) { const raw = data.join('\n'); if (raw !== '[DONE]' && raw !== '[START]') { try { yield JSON.parse(raw); } catch { throw new Error('Invalid AI stream event'); } } }
+        if (data.length) { const raw = data.join('\n'); if (raw !== '[DONE]' && raw !== '[START]') { try { yield JSON.parse(raw); } catch { throw new AIChatError('AI_INVALID_STREAM', 'Invalid AI stream event'); } } }
         return;
       }
     }

@@ -16,6 +16,8 @@ export type ActionResult<TOutput = unknown> =
       ok: false;
       code: 'NOT_FOUND' | 'INVALID_INPUT' | 'EXECUTION_FAILED' | 'CANCELLED';
       error: string;
+      readonly docsUrl?: string;
+      readonly recovery?: string;
       cause?: unknown;
     };
 

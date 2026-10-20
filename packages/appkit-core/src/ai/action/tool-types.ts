@@ -49,7 +49,7 @@ export type ActionToolErrorCode =
 /** JSON-serializable result correlated to the original call. */
 export type ActionToolResult = { readonly callId: string; readonly name: string } & (
   | { readonly ok: true; readonly data: ActionToolValue }
-  | { readonly ok: false; readonly code: ActionToolErrorCode; readonly error: string }
+  | { readonly ok: false; readonly code: ActionToolErrorCode; readonly error: string; readonly docsUrl?: string; readonly recovery?: string }
 );
 
 /** One bounded tool session. Start a new bridge for a new conversation/session. */

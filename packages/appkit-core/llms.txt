@@ -3,6 +3,7 @@
 Install @alneas/appkit-core; import its explicit feature subpaths.
 
 - [README.md](README.md)
+- [docs/ai-errors.md](docs/ai-errors.md)
 - [docs/ai.md](docs/ai.md)
 - [docs/data.md](docs/data.md)
 - [docs/exports.md](docs/exports.md)
