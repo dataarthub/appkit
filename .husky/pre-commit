@@ -1,0 +1,3 @@
+set -eu
+bun run secrets:staged
+bun run lint:staged
