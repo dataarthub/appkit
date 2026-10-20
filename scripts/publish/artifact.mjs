@@ -14,11 +14,16 @@ export function verifyArtifact({file, manifest, target, expectedIntegrity = mani
   for (const entry of members) {
     if (entry === 'package/') continue;
     if (entry.split('/').some(p => p === '..') || /\.env|node_modules|\.verification|\.(test|spec)\./.test(entry) ||
-        !/^package\/(dist\/|docs\/|consumer-ai\/|README.md$|LICENSE$|THIRD_PARTY_NOTICES.md$|package.json$|llms(?:-full)?\.txt$)/.test(entry)) throw Error('Unexpected release archive member: ' + entry);
+        !/^package\/(dist\/|docs\/|consumer-ai\/|README.md$|CHANGELOG.md$|LICENSE$|THIRD_PARTY_NOTICES.md$|package.json$|llms(?:-full)?\.txt$)/.test(entry)) throw Error('Unexpected release archive member: ' + entry);
   }
   const pkg = JSON.parse(tar(['-xOf', file, 'package/package.json']));
   if (pkg.name !== target.name || pkg.version !== target.version || pkg.publishConfig?.access !== 'public' ||
       pkg.publishConfig.registry !== 'https://registry.npmjs.org') throw Error('Packed package identity or registry mismatch');
+  if (pkg.files?.includes('CHANGELOG.md') && !members.includes('package/CHANGELOG.md')) throw Error('Missing packed changelog');
+  if (members.includes('package/CHANGELOG.md')) {
+    const heading = `## [${pkg.version}]`;
+    if (!tar(['-xOf', file, 'package/CHANGELOG.md']).split('\n').some(line => line === heading || line.startsWith(heading + ' - '))) throw Error('Packed changelog version mismatch');
+  }
   function exported(value) {
     if (typeof value === 'string') {
       if (!members.includes('package/' + value.replace(/^\.\//, ''))) throw Error('Missing packed export: ' + value);

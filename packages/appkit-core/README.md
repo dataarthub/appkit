@@ -68,6 +68,8 @@ With these default validator options, input is not coerced, defaults are not ins
 
 ## Next Steps
 
+- [Change history](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/CHANGELOG.md): additions, fixes and upgrade notes by version.
+
 - [Data and schema guide](docs/data.md): record contracts and database adapters.
 - [Public exports and optional peers](docs/exports.md): exact import paths and SDK requirements.
 - [AI security and approval boundaries](docs/ai.md): validation, permissions and tool execution.

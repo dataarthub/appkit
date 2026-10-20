@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "packageName": "@alneas/appkit-core",
-  "packageVersion": "0.1.0",
-  "inputDigest": "8b4924adeb12c8ce4b6ac4964067c13d6460bb7778a3584e6799b47ff68334d9",
+  "packageVersion": "0.2.0",
+  "inputDigest": "d8c4b227ceb1008202127a3f94d6ad7e027fd5e1f8827be9ee954b9bfd255c05",
   "entries": [
     {
       "importPath": "@alneas/appkit-core",
