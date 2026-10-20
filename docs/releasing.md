@@ -88,12 +88,21 @@ manual workflow dispatches never publish npm packages through this workflow.
    metadata. If React adopts a new Core, first publish that Core successfully,
    then update React's exact dependency and its own version in a follow-up PR.
    Commit and merge the reviewed changes into main.
-2. Create the package-specific tag on that exact reviewed commit. The version in
+2. Wait for **Public quality** to finish successfully for that exact main commit.
+   Do not tag a later, unverified commit or use a feature/manual run as a substitute.
+   Create the package-specific tag on that exact reviewed commit. The version in
    the tag must match the selected package's `package.json`; the other package's
    version can differ. The workflow rejects commits outside main and moved tags.
 3. Prepare a draft GitHub Release for that tag. Publishing the Release authorizes
    the automatic npm publication; do not publish it until ready to release.
-4. Inspect the **Publish package release** workflow. It checks secrets, lint, the
+4. Inspect the **Publish package release** workflow. Before preparing any archive,
+   it requires a completed successful main-push run of `.github/workflows/quality.yml`
+   (`Public quality`) for the release's exact SHA in this repository. Missing,
+   queued, running, failed, cancelled or skipped evidence blocks publication.
+   A newer unsuccessful run cannot fall back to an older successful run for the
+   same SHA. Finish/rerun main quality, then retry the release workflow; it does
+   not wait indefinitely or start publication optimistically.
+   The publication workflow checks secrets, lint, the
    build, source/declaration types, unit tests, release/docs contracts and agent
    tooling. It packs both candidates and tests those exact archives in isolated
    consumers, but selects and publishes only the tagged package's tested archive.
@@ -101,6 +110,16 @@ manual workflow dispatches never publish npm packages through this workflow.
    mandatory-fix dependency policy. Core releases do not wait for React to adopt
    an unpublished dependency: for coordinated updates, publish Core's Release,
    wait for its successful npm publication, then publish React's Release.
+
+Storybook runs only through affected main quality verification (or an explicit
+full/manual check), not again during publication. Quality selection accumulates
+changes since a successful ancestor, so a documentation-only target may legitimately
+skip unchanged UI tests. The publication job depends on successful release
+verification and rechecks exact-SHA quality evidence immediately before the npm
+step; an unavailable evidence API also blocks publication. Only the publication
+job has OIDC permission. This orders source verification, archive verification,
+and registry writes without duplicating browser work. GitHub Release publication
+starts this process; the Release page alone does not mean npm publication succeeded.
 
 The verified archive is handed to the publisher through an immutable artifact ID,
 its SHA-512 digest and a sanitized source/package identity manifest. Only that

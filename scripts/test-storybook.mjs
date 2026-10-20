@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { totalmem } from 'node:os';
+import { selectStoryFiles } from './verification/story-selection.mjs';
 import { runGuarded } from './lib/guarded-process.mjs';
 
 const projects = ['light-desktop', 'light-mobile', 'dark-desktop', 'dark-mobile'];
@@ -16,7 +17,7 @@ function stories(directory) {
     return entry.isDirectory() ? stories(file) : file.endsWith('.stories.tsx') ? [file] : [];
   }).sort();
 }
-const files = stories(`${root}packages/appkit-react/stories`);
+const files = selectStoryFiles(root, stories(`${root}packages/appkit-react/stories`), process.argv.slice(2));
 if (!files.length) throw new Error('No Storybook stories found; refusing an empty pass.');
 // Each small batch gets a fresh Vite/Chromium process tree. All files run in all combinations.
 let failed = false;

@@ -18,6 +18,9 @@ jobs:
        startsWith(github.event.release.tag_name, 'appkit-react-v'))
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
     outputs:
       sha: ${{ steps.select.outputs.sha }}
       key: ${{ steps.select.outputs.key }}
@@ -37,6 +40,10 @@ jobs:
       - name: Validate package tag, version and source commit
         id: select
         run: node scripts/publish/select.mjs
+      - name: Require successful Public quality for the exact release commit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/publish/require-quality.mjs
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.0
@@ -81,6 +88,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+      actions: read
       deployments: write
       id-token: write
     environment:
@@ -106,6 +114,10 @@ jobs:
       # Before 1.0.0: publish with beta, then point latest at the same version.
       # At/after 1.0.0: require latest only; never overwrite a newer tag on retry.
       # npm Trusted Publisher must allow both npm publish and npm dist-tag.
+      - name: Recheck Public quality immediately before publication
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/publish/require-quality.mjs
       - name: Publish verified archive and confirm required npm dist-tags through OIDC
         env:
           APPKIT_NPM_PUBLISH: 'true'

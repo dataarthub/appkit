@@ -19,7 +19,7 @@ Install Node 24+ and Bun 1.4.0, then run `bun install --frozen-lockfile --ignore
 
 `bun run check:release` checks public entry loading, root APIs and packaged files. `bun run check:docs` checks selected sources, subpaths and relative links. Builds generate the export reference and AI indexes; do not hand-edit generated files.
 
-Routine CI uses Turbo caching for builds, types and unit tests. Browser/database checks are selected when their integration boundaries change or a finalized release needs fresh evidence. Cache hits are prior passing results for matching source, helpers, dependencies and Node/Bun/platform runtime.
+Routine CI uses Turbo caching for builds, types and unit tests. Browser/database checks are selected when their integration boundaries change. Releases reuse the exact source commit's successful main quality run for browser evidence. Cache hits are prior passing results for matching source, helpers, dependencies and Node/Bun/platform runtime.
 
 Keep temporary fixtures in .verification/tmp and logs in .verification/logs. Packed consumers use a disposable system-temp directory so undeclared imports cannot resolve through checkout node_modules. Both are excluded from Git and public manifests. Public and private remain independent repositories with separate lockfiles; private uses exact published public versions. Only explicitly selected disposable consumer fixtures replace registry versions with reviewed tarballs.
 
@@ -44,16 +44,51 @@ JavaScript, TypeScript and JSON files. Neither command automatically formats fil
 Unstaged changes stay untouched. For partially staged files, lint checks the working
 copy; separate unfinished edits before committing.
 
-Before a push, Husky runs `bun run verify:push`: history secret scanning, source lint,
-quality-hook tests, the existing build/type/unit/release/docs checks through
-`bun run verify`, agent-tooling and React/Core compatibility checks, then the
-Storybook browser suite. Turbo reuses matching cached build/type/unit results;
-this command does not run live-model evaluation or publish packages. Git hooks can
-be bypassed, so the Node 24 CI job runs the same gate after installing Gitleaks.
-The Action runs only when main changes or is dispatched manually; feature-branch
-pushes and PR events do not trigger it. This makes the CI confirmation post-merge.
-The Node 26 job keeps the additional runtime compatibility checks. The workflow has
-no publication job.
+Before a push, Husky runs `bun run verify:push`. This always scans history for
+secrets and runs source lint, then selects package, documentation, tooling,
+React/Core compatibility and browser checks from changed inputs. Turbo reuses
+matching build/type/unit results. This command does not run live-model evaluation
+or publish packages. Git hooks can be bypassed, so the Node 24 CI job uses the same
+selector and runner after installing Gitleaks. Node 26 checks affected package
+builds, types and unit tests. CI still runs only on main updates or manual dispatch.
+
+### Selecting verification by impact
+
+Local selection compares the merge base of HEAD and `origin/main` with the working
+copy, including staged, unstaged and untracked files. Fetch main before starting
+work. CI compares its exact commit with the latest successful **main-push** Public
+quality run that is an ancestor. Failed, cancelled and superseded runs do not
+advance that baseline: the next run includes all outstanding changes. If history
+or API evidence cannot establish a baseline, run the full gate. Manual dispatch
+also runs the full gate; it cannot substitute for main-push release evidence.
+
+| Changed inputs | Selected checks |
+| --- | --- |
+| Prose or source comments/JSDoc with unchanged parsed code | Documentation checks and their build prerequisites; no browser or package unit tests |
+| Story or its local helper | Importing stories, plus Storybook contract/type checks |
+| React implementation | Package contracts, builds/types/unit tests, docs, Core compatibility and transitively importing stories |
+| Core implementation | Package contracts, builds/types/unit tests, docs, Core compatibility and all stories (cross-package boundary) |
+| Package unit tests only | Package builds/types/unit tests |
+| Publish or Deployment helper | Its tooling tests |
+| Global CSS/assets, dependencies, shared configuration, deleted UI modules or unknown inputs | Full gate |
+
+Story selection follows relative imports/re-exports, literal dynamic imports and
+React's public self-import exports. Preview decorators/loaders/setup are shared by
+all stories. Generated Paraglide modules are opaque dependencies; changing their
+locale/configuration inputs selects the full gate. JSX/TypeScript/Vite compiler
+directives are code inputs even when written in comments.
+Unresolved imports, computed dynamic imports, glob imports and unsupported mappings
+fall back to all stories. Cyclic imports are traversed safely. Every selected story
+still runs in all four browser conditions with the same memory guards and fatal
+accessibility checks. The selector does not use test-name guesses or silently drop
+unknown files. Each CI job summarizes its baseline and selection; the local plan
+is recorded in ignored `.verification/quality-plan.json`.
+
+Use `bun run verify:full` to request every normal check, or
+`bun run verify:push --dry-run` to inspect the local selection and commands.
+`bun run test:consumer` remains an explicit packed-consumer check and a mandatory
+publication check. Public quality success proves the selected changes were checked;
+it does not claim that every story was rerun for every prose change.
 
 Package-specific stable GitHub Releases use the separate `publish.yml` workflow.
 Publishing an `appkit-core-vX.Y.Z` or `appkit-react-vX.Y.Z` Release starts verification
@@ -104,6 +139,7 @@ they do not verify hosted authentication, durable persistence or backend access
 controls. Component descriptions identify their exact public import and required
 setup. Keep technical descriptions in English and preserve localized UI fixtures.
 
+
 After changing this guide, run `bun run docs:generate` and `bun run check:docs`
 to update and validate the generated portal copy. Documentation generation needs
 both package builds: run `bun run build` first in a clean checkout.
@@ -112,8 +148,10 @@ both package builds: run `bun run build` first in a clean checkout.
 
 Install the pinned Chromium once with `bunx --no-install playwright install chromium`
 (on Linux CI, add `--with-deps`). Run `bun run test:storybook` for the full suite.
-The same suite is part of `verify:push` and the Node 24 quality job; the existing
-main-push/manual workflow triggers remain unchanged.
+The affected subset is selected by `verify:push` and the Node 24 quality job.
+Use `bun run verify:full` or a manual quality dispatch for full coverage.
+Publication requires the target commit's successful main-push Public quality run
+and does not rerun this browser suite.
 
 Every CSF3 story runs with fatal axe checks in Chromium at 1280×900 and 390×844,
 in both light and dark mode. The preview and browser runner compile the real
