@@ -21,6 +21,10 @@ for(const file of files){
  for(const match of text.matchAll(/\]\(([^)]+)\)/g)){
   const target=match[1].split('#')[0];if(!target||/^[a-z]+:/.test(target)||target.startsWith('/'))continue;
   assert(existsSync(path.resolve(path.dirname(path.join(root,file)),target)),file+': missing link '+target);
+  if(selected.has(file)){
+   const registeredTarget=path.posix.normalize(path.posix.join(path.posix.dirname(file),target));
+   assert(selected.has(registeredTarget),file+': link target not registered in docs.manifest.json: '+match[1]);
+  }
  }
 }
 console.log(`PASS: ${selected.size} approved Public documents, public subpaths and relative links`);

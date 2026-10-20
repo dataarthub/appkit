@@ -17,7 +17,7 @@
     "verify": "node scripts/turbo.mjs run build typecheck test && bun run check:release && bun run check:docs",
     "check:release": "node --test scripts/release.test.mjs",
     "docs:generate": "node scripts/generate-docs.mjs",
-    "check:docs": "bun run docs:generated && bun run docs:readmes && node scripts/check-docs.mjs",
+    "check:docs": "bun run docs:generated && bun run docs:readmes && node --test scripts/check-docs.test.mjs && node scripts/check-docs.mjs",
     "test:consumer": "node scripts/check-consumer.mjs",
     "docs:readmes": "node --test scripts/check-readmes.test.mjs && node scripts/check-readmes.mjs",
     "docs:generated": "node --test scripts/check-generated.test.mjs scripts/generated-integration.test.mjs scripts/generate-docs-output.test.mjs && node scripts/check-generated.mjs",
