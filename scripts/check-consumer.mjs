@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
+import {candidateArtifactDirectory} from './consumer-artifacts.mjs';
 import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync,readdirSync,existsSync,lstatSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 const root=path.resolve(import.meta.dirname,'..'),names=['appkit-core','appkit-react'];
-const artifacts=path.join(root,'.verification/artifacts/two-package-0.1.0'),logs=path.join(root,'.verification/logs');mkdirSync(artifacts,{recursive:true});mkdirSync(logs,{recursive:true});
+const artifacts=candidateArtifactDirectory(root),logs=path.join(root,'.verification/logs');mkdirSync(artifacts,{recursive:true});mkdirSync(logs,{recursive:true});
 const env={...process.env};delete env.NODE_PATH;
 function run(command,args,cwd=root){const out=execFileSync(command,args,{cwd,env,encoding:'utf8',maxBuffer:20*1024*1024,stdio:['ignore','pipe','pipe']});console.log('PASS:',command,...args);return out;}
 function sourceSelection(){return execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(file=>file&&existsSync(path.join(root,file))&&lstatSync(path.join(root,file)).isFile()).sort().map(file=>({file,sha256:createHash('sha256').update(readFileSync(path.join(root,file))).digest('hex')}));}
@@ -14,7 +15,7 @@ writeFileSync(path.join(artifacts,'archives.json'),JSON.stringify(records,null,2
 for(const name of names){
  const dir=path.join(root,'packages',name),info=JSON.parse(run('npm',['pack','--json','--ignore-scripts','--workspaces=false','--pack-destination',artifacts],dir))[0],file=path.join(artifacts,info.filename);
  const pkg=JSON.parse(run('tar',['-xOf',file,'package/package.json']));
- assert.equal(pkg.name,'@alneas/'+name);assert.equal(pkg.version,'0.1.0');assert.equal(pkg.publishConfig.access,'public');
+ assert.equal(pkg.name,'@alneas/'+name);assert.equal(pkg.version,JSON.parse(readFileSync(path.join(dir,'package.json'))).version);assert.equal(pkg.publishConfig.access,'public');
  for(const spec of Object.values({...pkg.dependencies,...pkg.optionalDependencies,...pkg.peerDependencies}))assert(!/^(workspace:|file:|link:)/.test(spec),'Local production dependency');
  const entries=new Set(run('tar',['-tzf',file]).trim().split('\n'));
  for(const entry of entries)assert(!/\.env|node_modules|\.verification|\.(test|spec)\./.test(entry)&&/^package\/(dist\/|docs\/|consumer-ai\/(?:SKILL\.md|package-context\.json|api-index\.json)$|README.md$|LICENSE$|THIRD_PARTY_NOTICES.md$|package.json$|llms(?:-full)?\.txt$)/.test(entry),'Unexpected archive member '+entry);

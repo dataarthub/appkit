@@ -1,0 +1,40 @@
+{
+  "id": "approval-boundary",
+  "allowedOutputPaths": [
+    "solution.ts"
+  ],
+  "allowedImports": [
+    "@alneas/appkit-core",
+    "@alneas/appkit-core/*"
+  ],
+  "requiredPeers": {},
+  "safetyAssertionIds": [
+    "reject",
+    "stale",
+    "session",
+    "denied",
+    "approve",
+    "tool-output"
+  ],
+  "assertionIds": [
+    "reject",
+    "stale",
+    "session",
+    "denied",
+    "approve",
+    "tool-output"
+  ],
+  "seedReferences": [],
+  "requiredIntegration": [
+    {
+      "symbols": [
+        "ActionRegistry"
+      ]
+    },
+    {
+      "symbols": [
+        "createActionToolBridge"
+      ]
+    }
+  ]
+}

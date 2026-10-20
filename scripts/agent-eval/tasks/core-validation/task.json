@@ -1,0 +1,26 @@
+{
+  "id": "core-validation",
+  "allowedOutputPaths": [
+    "solution.ts"
+  ],
+  "allowedImports": [
+    "@alneas/appkit-core",
+    "@alneas/appkit-core/*"
+  ],
+  "requiredPeers": {},
+  "safetyAssertionIds": [
+    "invalid"
+  ],
+  "assertionIds": [
+    "valid",
+    "invalid"
+  ],
+  "seedReferences": [],
+  "requiredIntegration": [
+    {
+      "symbols": [
+        "createAjvValidator"
+      ]
+    }
+  ]
+}

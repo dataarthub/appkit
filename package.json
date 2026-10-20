@@ -22,6 +22,8 @@
     "docs:readmes": "node --test scripts/check-readmes.test.mjs && node scripts/check-readmes.mjs",
     "docs:generated": "node --test scripts/check-generated.test.mjs scripts/generated-integration.test.mjs scripts/generate-docs-output.test.mjs && node scripts/check-generated.mjs",
     "test:agent-tooling": "node scripts/test-agent-tooling.mjs",
+    "eval:agent": "node scripts/run-agent-eval.mjs",
+    "check:agent-eval": "node scripts/check-agent-eval.mjs",
     "prepare": "husky",
     "hooks:install": "husky",
     "lint": "biome lint --no-errors-on-unmatched .",

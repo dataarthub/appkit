@@ -1,0 +1,25 @@
+{
+  "id": "storage-hash",
+  "allowedOutputPaths": [
+    "solution.ts"
+  ],
+  "allowedImports": [
+    "@alneas/appkit-core",
+    "@alneas/appkit-core/*"
+  ],
+  "requiredPeers": {},
+  "safetyAssertionIds": [],
+  "assertionIds": [
+    "hash-",
+    "hash-68656c6c6f",
+    "hash-e697a5e69cace8aa9e"
+  ],
+  "seedReferences": [],
+  "requiredIntegration": [
+    {
+      "symbols": [
+        "sha256Hex"
+      ]
+    }
+  ]
+}

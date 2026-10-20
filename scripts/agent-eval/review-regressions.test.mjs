@@ -1,0 +1,21 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,mkdirSync,writeFileSync,rmSync,readFileSync} from 'node:fs';import path from 'node:path';import {tmpdir} from 'node:os';import {gradeTask} from './graders.mjs';import {prepareOutputFiles,evaluationDependencies} from './workspace.mjs';import {candidateArtifactDirectory} from '../consumer-artifacts.mjs';
+async function solution(source,run){const dir=mkdtempSync(path.join(tmpdir(),'appkit-spoof-'));try{mkdirSync(path.join(dir,'compiled'));writeFileSync(path.join(dir,'package.json'),'{"type":"module"}');writeFileSync(path.join(dir,'compiled/solution.js'),source);await run(dir);}finally{rmSync(dir,{recursive:true,force:true});}}
+test('submitted JSON tampering and early stdout/exit cannot forge grader completion',async()=>{
+ for(const attack of ["Object.defineProperty(JSON,'stringify',{value:()=>JSON_FORGERY});", "globalThis['process'].stdout.write(JSON_FORGERY+'\\n');globalThis['process'].exit(0);"]){
+ const forged=JSON.stringify({typecheckPassed:true,behavior:{passed:true,assertions:['hash-','hash-68656c6c6f','hash-e697a5e69cace8aa9e'].map(id=>({id,passed:true}))}});
+ await solution(`const JSON_FORGERY=${JSON.stringify(forged)}; export function hashText(){return 'wrong';} ${attack}`,async solutionDir=>{const result=await gradeTask('storage-hash',{solutionDir});assert.equal(result.passed,false);assert(!result.assertions.some(a=>a.passed));});
+ }
+});
+test('remote results are API observations rather than assertion objects',async()=>solution("export function hashText(){return {passed:true,assertions:[{id:'hash-',passed:true}]};}",async solutionDir=>assert.equal((await gradeTask('storage-hash',{solutionDir})).passed,false)));
+test('strict validation rejects extra keys and all declared field constraints',async()=>{
+ const result=await gradeTask('core-validation',{fixture:{solution:{validateRecord:x=>({valid:!!x&&typeof x.name==='string'&&x.name.length>=2&&typeof x.amount==='number'&&x.amount>=0,errors:[]})}}});assert.equal(result.passed,false);
+});
+test('starter and repair output files are writable by the isolated UID',()=>{const dir=mkdtempSync(path.join(tmpdir(),'appkit-output-'));try{mkdirSync(path.join(dir,'nested'));writeFileSync(path.join(dir,'nested/solution.ts'),'original',{mode:0o644});prepareOutputFiles(dir,['nested/solution.ts']);assert.equal((awaitStat(path.join(dir,'nested/solution.ts')).mode&0o666),0o666);}finally{rmSync(dir,{recursive:true,force:true});}});
+import {statSync as awaitStat} from 'node:fs';
+test('candidate consumers never target retained publication archives',()=>{const dir=candidateArtifactDirectory('/repo');assert.match(dir,/candidate-/);assert(!dir.includes('two-package-0.1.0'));});
+test('clean React grading has its explicit testing-library DOM peer',()=>assert(evaluationDependencies.includes('@testing-library/dom@10.4.1')));
+test('separate executor still supports correct values and parent-owned effects',async()=>{
+ await solution("import {createHash} from 'node:crypto';export const hashText=text=>createHash('sha256').update(text).digest('hex');",async solutionDir=>assert.equal((await gradeTask('storage-hash',{solutionDir})).passed,true));
+ await solution("export function createApprovalScenario(write,authorize){let p=null;return {ingest(e){if(e.type==='tool-call')p={approvalId:e.callId,...e.input};},pending(){return p;},reject(){p=null;},setSession(){p=null;},async approve(id){if(p&&p.approvalId===id){const selected=p;p=null;if(await authorize({...selected,sessionId:'session-1'}))await write(selected);}},close(){p=null;}};}",async solutionDir=>assert.equal((await gradeTask('approval-boundary',{solutionDir})).passed,true));
+});
+test('closed scenarios cannot execute retained effect callbacks',async()=>solution("export function createApprovalScenario(write,authorize){let p=null;return {ingest(e){if(e.type==='tool-call')p={approvalId:e.callId,...e.input};},pending(){return p;},reject(){p=null;},setSession(){p=null;},async approve(id){if(p&&p.approvalId===id){const selected=p;p=null;if(await authorize({...selected,sessionId:'session-1'}))await write(selected);}},async close(){await write({recordId:'r1',name:'Unauthorized close'});}};}",async solutionDir=>assert.equal((await gradeTask('approval-boundary',{solutionDir})).passed,false)));

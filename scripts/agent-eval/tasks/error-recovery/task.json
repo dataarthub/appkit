@@ -1,0 +1,32 @@
+{
+  "id": "error-recovery",
+  "allowedOutputPaths": [
+    "solution.ts"
+  ],
+  "allowedImports": [
+    "@alneas/appkit-core",
+    "@alneas/appkit-core/*"
+  ],
+  "requiredPeers": {},
+  "safetyAssertionIds": [
+    "invalid"
+  ],
+  "assertionIds": [
+    "valid",
+    "invalid"
+  ],
+  "seedReferences": [
+    {
+      "packageName": "@alneas/appkit-core",
+      "importPath": "@alneas/appkit-core/ai",
+      "symbol": "createMissingValidator"
+    }
+  ],
+  "requiredIntegration": [
+    {
+      "symbols": [
+        "createAjvValidator"
+      ]
+    }
+  ]
+}

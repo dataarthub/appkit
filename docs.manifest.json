@@ -26,6 +26,13 @@
       "visibility": "public"
     },
     {
+      "title": "Evaluate consuming coding agents",
+      "slug": "agent-evaluation",
+      "source": "docs/agent-evaluation.md",
+      "archetype": "how-to",
+      "visibility": "public"
+    },
+    {
       "title": "Recover from AI integration errors",
       "slug": "appkit-core/ai-errors",
       "source": "packages/appkit-core/docs/ai-errors.md",

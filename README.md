@@ -75,6 +75,6 @@ The form renders Name and Reason fields, rejects names shorter than two characte
 
 [Migration from app-core/react-tools](packages/appkit-react/docs/migration.md) · [Complete form recipe](packages/appkit-react/docs/request-form.md) · [Contributing](CONTRIBUTING.md) · [Releasing](RELEASING.md)
 
-AI checks cover API metadata and developer-authored integrations. End-to-end coding-agent task evaluation remains unverified. See the [cross-package agent index](https://github.com/dataarthub/appkit/blob/main/llms.txt). Optional peers and public imports are listed in each package export reference.
+Deterministic checks cover API catalogs, metadata, developer-authored integrations and the evaluation harness. End-to-end coding-agent task evaluation remains unverified until a qualifying live batch exists for the selected archives. See the [agent evaluation procedure](docs/agent-evaluation.md) and [cross-package agent index](https://github.com/dataarthub/appkit/blob/main/llms.txt). Optional peers and public imports are listed in each package export reference.
 
 Canonical documentation is English. The documentation portal owns ingestion, Japanese translation and delivery.
