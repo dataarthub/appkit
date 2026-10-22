@@ -28,7 +28,7 @@
     "hooks:install": "husky",
     "lint": "biome lint --no-errors-on-unmatched .",
     "format": "biome format --write",
-    "lint:staged": "lint-staged --no-stash --no-hide-partially-staged",
+    "lint:staged": "node scripts/workflow-supply/public/staged-gate.mjs lint",
     "secrets:setup": "node scripts/setup-gitleaks.mjs",
     "secrets:check": "node scripts/check-secrets.mjs",
     "secrets:staged": "node scripts/check-secrets.mjs --staged",
@@ -49,11 +49,12 @@
     "workflow:generate": "node scripts/workflow-supply/public/supply.mjs generate --project-root .",
     "workflow:check": "node scripts/workflow-supply/public/supply.mjs check --project-root .",
     "test:workflow": "node --test scripts/workflow-supply/public/*.test.mjs",
-    "quality:commit": "bun run secrets:staged && bun run lint:staged",
+    "quality:commit": "node scripts/workflow-supply/public/staged-gate.mjs commit",
     "quality:push": "node scripts/workflow-adapter.mjs source",
     "quality:ci": "node scripts/workflow-adapter.mjs source",
     "conformance:check": "node scripts/workflow-supply/public/conformance.mjs check --project-root .",
-    "conformance:verify": "node scripts/workflow-supply/public/conformance.mjs verify --project-root ."
+    "conformance:verify": "node scripts/workflow-supply/public/conformance.mjs verify --project-root .",
+    "conformance:audit": "node scripts/workflow-supply/public/policy-report.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

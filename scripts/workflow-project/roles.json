@@ -571,6 +571,11 @@
       "test:publish-tooling": [
         "scripts/publish/"
       ]
-    }
+    },
+    "toolSetup": "secrets:setup",
+    "selectionTests": [
+      "scripts/verification/impact.test.mjs",
+      "scripts/verification/story-selection.test.mjs"
+    ]
   }
 }

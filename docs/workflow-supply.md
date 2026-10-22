@@ -58,3 +58,19 @@ Release impact: no package version bump; this change owns maintainer workflow to
 Conformance has three independent levels: shared implementation regressions, installed project wiring, and local behavioral probes. GitHub event execution remains unverified until an authorized remote run. Mandatory outcomes are catalogued centrally in the supplied `requirements.json`; hook-manager choice is a recommendation. The central supply owns adoption status and exception review; local guides describe only this project's implementation.
 
 Conformance probes are selected from changed governance inputs, not run in full for every change. Use `bun run conformance:verify --base <reviewed-ref>` for an explicit committed range. The report distinguishes executed probes, exact-input reused probes and out-of-scope probes. Existing Turbo tasks keep their own actual success cache; this adoption adds no new task orchestrator.
+
+## Development policy inventory
+
+The pinned `development-requirements.json` maps every clause of the reviewed shared development policy. It is descriptive evidence mapping, not a project policy profile or permission to omit a mandatory gate. `conformance:check` inspects active dependency groups, literal imports, TypeScript aliases, ignored evidence paths and declared documentation/artifact inputs. Computed module resolution and untested UI, database, authorization and human-review contracts remain explicitly unverified.
+
+Run `bun run conformance:audit` for the complete clause inventory, existing test candidates, current source/environment identity and read-only hook status. Add `--probe-commit` to exercise the actual commit command in disposable repositories: clean and invalid index contents, a synthetic secret, missing scanner configuration and missing scanner binary. The probe preserves working files and index bytes and does not activate hooks. Existing secret/history scans remain fresh outside deterministic task caches.
+
+The shared commit gate scans staged bytes and lints an isolated index snapshot. Hook files call the maintained commands; having hook files does not establish local activation. Inspect the audit result before claiming hooks run automatically. The source workflow performs dependency-free supply preflight, then critical inspection through its maintained selector after dependency restoration. Required failures stop the gate; inventory entries without behavioral proof are never reported as a full policy pass.
+
+Conformance verification selects bounded tooling/commit probes for relevant verifier, hook or configuration changes. Ordinary prose and unrelated package changes do not select browser or database suites. Actual archive inspection is available with `node scripts/workflow-supply/public/policy-critical.mjs --archive <archive.tgz>`; it checks member paths/types and identity, and does not replace the existing isolated consumers, license/notices, scanner or fresh registry checks.
+
+### Bounded GitHub policy diagnostics
+
+Manually dispatch `ci.yml` on the reviewed branch with `verification_mode=conformance` to exercise shared/owning selector regressions and the actual commit gate on Node 24 and 26. An identical second deterministic task must reuse success; ordinary prose selects no extra probes. Use `verification_mode=negative` separately to run a clean control and then stage a synthetic secret in disposable repositories. The required step must fail with `indexed-secret-blocked`, and the downstream success sentinel must be skipped. Diagnostic concurrency is isolated from normal source verification.
+
+The default `full` mode and normal PR/main gates retain existing checks. Diagnostics do not run product/browser/DB suites, save remote task caches or issue authoritative source evidence. Their artifacts record scoped results, not full policy compliance. Before merging, satisfy the normal required PR checks independently.
