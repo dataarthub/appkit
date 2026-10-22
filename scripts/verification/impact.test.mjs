@@ -118,3 +118,9 @@ test('erased import type in a shared preview does not make Core a runtime depend
  const plan=selectChecks({root,changes:[change('packages/appkit-core/src/data/index.ts')]});
  assert.deepEqual(plan.stories,[]);assert.equal(plan.packages,true);assert.equal(plan.compatibility,true);
 }));
+test('unit runner changes select package execution and tooling without unrelated browsers',()=>fixture(root=>{
+ for(const file of ['scripts/test-unit.mjs','scripts/unit-report.mjs','scripts/verification/unit-runner.test.mjs']){
+  const plan=selectChecks({root,changes:[change(file)]});
+  assert.equal(plan.packages,true);assert(plan.tooling.includes('verification'));assert.deepEqual(plan.stories,[]);
+ }
+}));

@@ -52,7 +52,8 @@
         "$TURBO_ROOT$/scripts/test-unit.mjs",
         "$TURBO_ROOT$/scripts/vitest.config.ts",
         "!consumer-ai/package-context.json",
-        "!consumer-ai/api-index.json"
+        "!consumer-ai/api-index.json",
+        "$TURBO_ROOT$/scripts/unit-report.mjs"
       ]
     },
     "@alneas/appkit-react#build": {

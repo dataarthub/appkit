@@ -143,6 +143,7 @@ export function selectChecks({root, changes, full = false}) {
     if (/^packages\/appkit-(core|react)\/(?:consumer-ai\/(?:api-index|package-context)\.json)$/.test(file)) {
       plan.docs = plan.agent = true; continue;
     }
+    if (/^scripts\/(?:(?:test-unit|unit-report)\.mjs|verification\/unit-runner\.test\.mjs)$/.test(file)) {plan.packages = true; tooling.add('verification'); continue;}
     if (/^scripts\/verification\/(?:commands|plan|quality-runs|run|workflow).*\.(?:mjs)$/.test(file)) {tooling.add('verification'); continue;}
     if (['.github/workflows/publish.yml','.github/workflows/complete-approved.yml'].includes(file)) {tooling.add('publish'); continue;}
     if (file === '.github/workflows/record-npm-deployments.yml') {tooling.add('deployments'); continue;}
