@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 2,
+  "distribution": "npm",
+  "upstream": "github-docs/public/templates/private-actions/public",
+  "reviewedRevision": "ec4ae8b46d5f9df5e2e196a8a753b9457813e4f6",
+  "sourceState": "local-reviewed",
+  "files": {
+    "adapter.mjs": "5daa12f8d3fa39f4b3c9b696d9ef50b2c51f2de22e0f1a52159bf1309f5c0dd0",
+    "public/render.mjs": "b22f7d17e05a18989711a37384d11e727908b533b4098a666ab939e81b941727",
+    "public/supply.mjs": "e0ddbc72b63588d03344fca443d896918e602eace7f9de16bfaad7f9296e2ae2",
+    "public/quality.mjs": "9138f73ce3807f3fbee94ec1f90170944c4e4b5f02d8ba8b596ff3f7c7748553",
+    "public/evidence.mjs": "90a0571c7b42c70c4d898a206ae9d09a74ab26304791b10eb1b4e5b555cec04a",
+    "public/supply.test.mjs": "54035db63129500a902de74d06bddb5047242527d6904ff3bcb6fc53bc522779",
+    "public/quality.test.mjs": "81ec67c300a53b489d13e76c3bb924ef9e8f8f9470fe495fc8ddbf9c289b11cb",
+    "public/evidence.test.mjs": "337e540336ff0d68c9e53e2398c917122575c33a0ae814bfe8640a28838aed12",
+    "public/approval.mjs": "d8f392c81bab5492b9399cabfae874a674e2de571ed08e61c981efb9a511c780",
+    "public/approval.test.mjs": "c00eb515dda9943bef837edcd7d4de5a1e778a7abcecbca7d2a89535ecdbb302",
+    "public/conformance.mjs": "de0aefaf2d8cb3fbc32ece6091ec781c4c014489ecf1b5e0e6c46633c7c8b4c2",
+    "public/conformance.test.mjs": "323a746e37656a7f9d2d24637e7517e9c7c850ebc0dbc9758c126d003f177db3",
+    "public/requirements.json": "b072f5fefae5f4ce4dbb73c700d4629c790c7a6e6f56beb527a05ab42a48166a",
+    "public/fixtures.mjs": "c342f0773f28685c015ccaa29ac1a6f3d2dc61659b7572df99db3c6c090dac0c",
+    "public/impact.mjs": "46ce7944ebc3657157ccdebbd67b1ae5230f1d62a950bc716ab6225d014e5942",
+    "public/impact.test.mjs": "16623e17bcd0db595322027fc6b6e52dadf7826bc32ea496ed365781431f16e5"
+  },
+  "bundleSha256": "8c36f617e0b10cc15e3bf514e3bb6fb12b6da91d3da5d8e1b8f20c4bd546ef13",
+  "outputs": {
+    ".github/workflows/ci.yml": "f9817bd18feab1aa982fc3fec2ab3312269d2fdf448be40149736ef1de48cb44",
+    ".github/workflows/package-quality.yml": "25f4b8134e097cbe6a7344d3ab0b40e48a457350cbc62ea5f3346fdb0e4e9ca9",
+    ".github/workflows/publish.yml": "39b2ae29f6adc46035ef39f3ee9281ee58fa8d93a08911b1727247e40f75f4c2",
+    ".github/workflows/complete-approved.yml": "94e0c4ebdf1930cbbfc2904bb2a8cbcdad792f6e42f418233929abc595225494",
+    ".github/workflows/record-npm-deployments.yml": "542dd31e863b6441c139fcd25c494fbe2493f1382146852d83523f8e8f0d62c8"
+  }
+}

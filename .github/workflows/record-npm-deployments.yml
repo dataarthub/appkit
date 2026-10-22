@@ -1,31 +1,42 @@
-name: Record existing npm publications
+# Generated: github-docs/public/templates/private-actions/public; reviewed base ec4ae8b46d5f9df5e2e196a8a753b9457813e4f6 (local-reviewed).
+# Bundle SHA-256: 8c36f617e0b10cc15e3bf514e3bb6fb12b6da91d3da5d8e1b8f20c4bd546ef13
+# Project adapter: .github/workflow-adapter.json; source: scripts/workflow-project/roles.json
+# Run workflow:generate explicitly; workflow:check never repairs output.
+name: "Record npm deployments"
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Published version tag (for example v0.1.0); does not publish npm packages
-        type: string
+        description: "Published version tag (for example v0.1.0); does not publish npm packages"
+        type: "string"
         required: true
 permissions:
-  contents: read
+  contents: "read"
 concurrency:
-  group: appkit-npm-deployment-records
+  group: "appkit-npm-deployment-records"
   cancel-in-progress: false
 jobs:
   record:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     permissions:
-      contents: read
-      deployments: write
+      contents: "read"
+      deployments: "write"
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      -
+        uses: "actions/checkout@v6"
+        with:
+          persist-credentials: false
+        name: "Shared: actions/checkout@v6"
+      -
+        uses: "actions/setup-node@v6"
         with:
           node-version: 24
-      # API ref is the selected tag's commit, not this workflow's current ref.
-      # Do not set job.environment here: that would create an unrelated deployment.
-      - name: Verify registry versions and record both package deployments
+          package-manager-cache: false
+        name: "Shared: actions/setup-node@v6"
+      -
+        name: "Project: Verify registry versions and record both package deployments"
         env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.tag }}
-        run: node scripts/record-npm-deployments.mjs --tag "$RELEASE_TAG" --apply
+          GH_TOKEN: "${{ github.token }}"
+          RELEASE_TAG: "${{ inputs.tag }}"
+        run: "node scripts/record-npm-deployments.mjs --tag \"$RELEASE_TAG\" --apply"
+    timeout-minutes: 35

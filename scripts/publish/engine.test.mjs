@@ -8,6 +8,7 @@ function fixture(existing = null) {
   return {calls, tags, target, file:'/verified/package.tgz', wait:async()=>{},
     verifyArchive:async()=>calls.push('verify'), readRegistry:async()=>existing,
     readTags:async()=>({...tags}), stage:async(file, tag)=>calls.push(['stage',file,tag]),
+    removeTag:async(name,tag)=>{calls.push(['remove',tag]); delete tags[tag];},
     setTag:async(name,version,tag)=>{calls.push(['tag',tag]); tags[tag]=version;}};
 }
 test('staging submits verified bytes on an isolated tag without public-tag writes or claiming publication',async()=>{
@@ -67,4 +68,68 @@ test('1.0.0 also stages in isolation; completion advances latest while preservin
  f.tags.beta='0.9.0';
  const result=await finalizeVerified({...f,readRegistry:async()=>({...metadata,version:'1.0.0'})});
  assert.deepEqual(result.tags,['latest']);assert.equal(f.tags.beta,'0.9.0');
+});
+test('completion removes only its own inspection tag after required channels are confirmed',async()=>{
+ const f=fixture(metadata);f.tags.staged=target.version;
+ await finalizeVerified(f);
+ assert.deepEqual(f.calls,['verify',['tag','beta'],['tag','latest'],['remove','staged']]);
+ assert.deepEqual(f.tags,{latest:target.version,beta:target.version});
+ for(const staged of [undefined,'0.3.0','0.1.0']){
+  const g=fixture(metadata);if(staged!==undefined)g.tags.staged=staged;
+  await finalizeVerified(g);
+  assert.equal(g.calls.some(c=>Array.isArray(c)&&c[0]==='remove'),false);
+  assert.equal(g.tags.staged,staged);
+ }
+});
+test('unconfirmed required tags and integrity failures never remove the inspection tag',async()=>{
+ const f=fixture(metadata);f.tags.staged=target.version;
+ await assert.rejects(finalizeVerified({...f,attempts:2,setTag:async()=>{}}),/not confirmed/);
+ assert.equal(f.tags.staged,target.version);
+ const g=fixture({...metadata,dist:{integrity:'different'}});g.tags.staged=target.version;
+ await assert.rejects(finalizeVerified(g),/integrity/);
+ assert.equal(g.calls.some(c=>Array.isArray(c)&&c[0]==='remove'),false);
+});
+test('cleanup failures block completion and retry without repeating publication or channel writes',async()=>{
+ const f=fixture(metadata);f.tags.staged=target.version;
+ await assert.rejects(finalizeVerified({...f,removeTag:async()=>{throw Error('cleanup denied');}}),/cleanup denied/);
+ assert.equal(f.tags.staged,target.version);
+ const before=f.calls.length;
+ await finalizeVerified(f);
+ assert.deepEqual(f.calls.slice(before),['verify',['remove','staged']]);
+});
+test('cleanup observes propagation and refuses to claim success if its tag remains',async()=>{
+ const f=fixture(metadata);f.tags.staged=target.version;
+ await assert.rejects(finalizeVerified({...f,attempts:2,removeTag:async()=>{}}),/staged.*not confirmed/);
+ let reads=0;
+ const g=fixture(metadata);g.tags.staged=target.version;
+ const result=await finalizeVerified({...g,removeTag:async()=>{},readTags:async()=>{
+  if(g.tags.beta===target.version&&g.tags.latest===target.version&&++reads>3)delete g.tags.staged;
+  return {...g.tags};
+ }});
+ assert.equal(result.status,'published');
+});
+test('cleanup re-reads the inspection tag and preserves a newly approved different version',async()=>{
+ const f=fixture(metadata);f.tags.beta=f.tags.latest=target.version;f.tags.staged=target.version;
+ let reads=0;
+ await finalizeVerified({...f,readTags:async()=>{
+  if(++reads===4)f.tags.staged='0.3.0';
+  return {...f.tags};
+ }});
+ assert.equal(f.tags.staged,'0.3.0');
+ assert.equal(f.calls.some(c=>Array.isArray(c)&&c[0]==='remove'),false);
+});
+test('stable completion cleans its inspection tag while retaining the beta channel',async()=>{
+ const f=fixture();f.target={...target,version:'1.0.0'};f.tags.beta='0.9.0';f.tags.staged='1.0.0';
+ const result=await finalizeVerified({...f,readRegistry:async()=>({...metadata,version:'1.0.0'})});
+ assert.equal(result.status,'published');assert.equal(f.tags.beta,'0.9.0');
+ assert.equal(f.tags.staged,undefined);assert.equal(f.tags.latest,'1.0.0');
+});
+test('changed required channels block cleanup even after the earlier confirmation passed',async()=>{
+ const f=fixture(metadata);f.tags.beta=f.tags.latest=f.tags.staged=target.version;
+ let reads=0;
+ await assert.rejects(finalizeVerified({...f,readTags:async()=>{
+  if(++reads===4)f.tags.beta='0.2.0';
+  return {...f.tags};
+ }}),/not confirmed before staged cleanup/);
+ assert.equal(f.calls.some(c=>Array.isArray(c)&&c[0]==='remove'),false);
 });

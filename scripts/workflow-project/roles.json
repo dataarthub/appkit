@@ -1,0 +1,576 @@
+{
+  "source": {
+    "jobs": {
+      "verify": {
+        "runs-on": "ubuntu-latest",
+        "strategy": {
+          "fail-fast": false,
+          "matrix": {
+            "node": [
+              24,
+              26
+            ]
+          }
+        },
+        "steps": [
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "fetch-depth": 0
+            }
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": "${{ matrix.node }}"
+            }
+          },
+          {
+            "uses": "oven-sh/setup-bun@v2",
+            "with": {
+              "bun-version": "1.4.0"
+            }
+          },
+          {
+            "name": "Install offline UBL validator",
+            "run": "sudo apt-get update\nsudo apt-get install --no-install-recommends --yes libxml2-utils\nxmllint --version\n"
+          },
+          {
+            "name": "Record runner identity",
+            "run": "echo \"APPKIT_CI_IMAGE=${ImageOS}-${ImageVersion}\" >> \"$GITHUB_ENV\""
+          },
+          {
+            "uses": "actions/cache@v4",
+            "with": {
+              "path": "~/.bun/install/cache",
+              "key": "${{ runner.os }}-${{ runner.arch }}-appkit-bun-${{ hashFiles('bun.lock') }}",
+              "restore-keys": "${{ runner.os }}-${{ runner.arch }}-appkit-bun-"
+            }
+          },
+          {
+            "run": "bun install --frozen-lockfile --ignore-scripts"
+          },
+          {
+            "uses": "actions/cache/restore@v4",
+            "id": "tasks",
+            "with": {
+              "path": ".turbo/cache",
+              "key": "${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}",
+              "restore-keys": "${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-"
+            }
+          },
+          {
+            "name": "Select checks since the last successful main ancestor",
+            "id": "selection",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node scripts/workflow-adapter.mjs plan"
+          },
+          {
+            "name": "Install pinned Chromium for Storybook verification",
+            "if": "matrix.node == 24 && steps.selection.outputs.browser == 'true'",
+            "run": "bunx --no-install playwright install --with-deps chromium"
+          },
+          {
+            "name": "Run the same gate as local pre-push",
+            "if": "matrix.node == 24",
+            "run": "bun run secrets:setup\nbun run verify:push --ci-plan\n"
+          },
+          {
+            "name": "Verify Node 26 compatibility",
+            "if": "matrix.node != 24",
+            "run": "node scripts/verification/run.mjs --ci-plan --node-compat"
+          },
+          {
+            "name": "Verify isolated packed consumer when explicitly requested",
+            "if": "matrix.node == 24 && inputs.packed_consumer == true",
+            "run": "bun run test:consumer"
+          },
+          {
+            "uses": "actions/cache/save@v4",
+            "if": "${{ !cancelled() && hashFiles('.turbo/cache/**') != '' }}",
+            "with": {
+              "path": ".turbo/cache",
+              "key": "${{ steps.tasks.outputs.cache-primary-key }}"
+            }
+          }
+        ]
+      }
+    },
+    "dispatch": {
+      "inputs": {
+        "packed_consumer": {
+          "description": "Also verify exact archives in an isolated consumer",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  },
+  "publish": {
+    "jobs": {
+      "verify": {
+        "if": "github.event_name == 'release' && github.repository == 'dataarthub/appkit' && github.event.release.draft == false && github.event.release.prerelease == false && (startsWith(github.event.release.tag_name, 'appkit-core-v') ||\n startsWith(github.event.release.tag_name, 'appkit-react-v'))",
+        "runs-on": "ubuntu-latest",
+        "timeout-minutes": 30,
+        "permissions": {
+          "contents": "read",
+          "actions": "read"
+        },
+        "outputs": {
+          "sha": "${{ steps.select.outputs.sha }}",
+          "key": "${{ steps.select.outputs.key }}",
+          "environment": "${{ steps.select.outputs.environment }}",
+          "url": "${{ steps.select.outputs.url }}",
+          "integrity": "${{ steps.prepare.outputs.integrity }}",
+          "artifact": "${{ steps.upload.outputs.artifact-id }}"
+        },
+        "steps": [
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "fetch-depth": 0,
+              "persist-credentials": false
+            }
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": 24,
+              "package-manager-cache": false
+            }
+          },
+          {
+            "name": "Validate package tag, version and source commit",
+            "id": "select",
+            "run": "node scripts/publish/select.mjs"
+          },
+          {
+            "name": "Require successful Public quality for the exact release commit",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node scripts/publish/require-quality.mjs"
+          },
+          {
+            "uses": "oven-sh/setup-bun@v2",
+            "with": {
+              "bun-version": "1.4.0"
+            }
+          },
+          {
+            "name": "Install offline UBL validator",
+            "run": "sudo apt-get update\nsudo apt-get install --no-install-recommends --yes libxml2-utils\n"
+          },
+          {
+            "name": "Record runner identity",
+            "run": "echo \"APPKIT_CI_IMAGE=${ImageOS}-${ImageVersion}\" >> \"$GITHUB_ENV\""
+          },
+          {
+            "run": "bun install --frozen-lockfile --ignore-scripts"
+          },
+          {
+            "name": "Require exact-commit authoritative Source quality",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node scripts/workflow-supply/public/quality.mjs require-source"
+          },
+          {
+            "uses": "actions/cache/restore@v4",
+            "with": {
+              "path": ".turbo/cache",
+              "key": "${{ runner.os }}-${{ runner.arch }}-appkit-release-${{ github.run_id }}",
+              "restore-keys": "${{ runner.os }}-${{ runner.arch }}-appkit-two-node24-"
+            }
+          },
+          {
+            "name": "Build and verify package contracts (exact-commit Public quality already passed)",
+            "run": "bun run secrets:setup\nbun run check:quality\nbun run build\nbun run check:release\nbun run check:docs\n"
+          },
+          {
+            "name": "Verify React with declared and candidate Core",
+            "if": "steps.select.outputs.key == 'react'",
+            "run": "bun run check:react-core --release"
+          },
+          {
+            "name": "Verify exact packed archives in isolated consumers",
+            "env": {
+              "APPKIT_RELEASE_CONSUMER": "true"
+            },
+            "run": "bun run test:consumer"
+          },
+          {
+            "name": "Select only the tested target package archive",
+            "id": "prepare",
+            "run": "node scripts/publish/prepare.mjs"
+          },
+          {
+            "uses": "actions/upload-artifact@v7",
+            "id": "upload",
+            "with": {
+              "name": "npm-package-${{ github.run_id }}-${{ github.run_attempt }}",
+              "path": ".verification/publish/package.tgz\n.verification/publish/release.json\n",
+              "if-no-files-found": "error",
+              "retention-days": 7,
+              "compression-level": 0,
+              "include-hidden-files": true
+            }
+          }
+        ]
+      },
+      "stage": {
+        "name": "Stage package for approval",
+        "needs": "verify",
+        "runs-on": "ubuntu-latest",
+        "timeout-minutes": 10,
+        "permissions": {
+          "contents": "read",
+          "actions": "read",
+          "id-token": "write"
+        },
+        "environment": {
+          "name": "${{ needs.verify.outputs.environment }}",
+          "deployment": false
+        },
+        "steps": [
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "ref": "${{ needs.verify.outputs.sha }}",
+              "fetch-depth": 0,
+              "persist-credentials": false
+            }
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": 24,
+              "package-manager-cache": false
+            }
+          },
+          {
+            "name": "Install pinned Trusted Publishing CLI",
+            "run": "npm install --global npm@11.21.0 --ignore-scripts --no-audit --no-fund"
+          },
+          {
+            "uses": "actions/download-artifact@v8",
+            "with": {
+              "artifact-ids": "${{ needs.verify.outputs.artifact }}",
+              "path": ".verification/publish",
+              "digest-mismatch": "error"
+            }
+          },
+          {
+            "name": "Recheck Public quality immediately before publication",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node scripts/publish/require-quality.mjs"
+          },
+          {
+            "name": "Revalidate exact original Source quality evidence",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node scripts/workflow-supply/public/quality.mjs require-source"
+          },
+          {
+            "name": "Stage verified archive through OIDC",
+            "env": {
+              "APPKIT_NPM_PUBLISH": "true",
+              "VERIFIED_INTEGRITY": "${{ needs.verify.outputs.integrity }}"
+            },
+            "run": "node scripts/publish/publish.mjs"
+          }
+        ]
+      },
+      "resolve": {
+        "if": "github.event_name == 'workflow_dispatch' && github.repository == 'dataarthub/appkit' && github.ref == 'refs/heads/main'",
+        "runs-on": "ubuntu-latest",
+        "permissions": {
+          "contents": "read",
+          "actions": "read"
+        },
+        "outputs": {
+          "sha": "${{ steps.source.outputs.sha }}",
+          "tag": "${{ steps.source.outputs.tag }}",
+          "environment": "${{ steps.source.outputs.environment }}",
+          "artifact": "${{ steps.source.outputs.artifact }}"
+        },
+        "steps": [
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "persist-credentials": false
+            }
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": 24,
+              "package-manager-cache": false
+            }
+          },
+          {
+            "id": "source",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node scripts/publish/resolve-resume.mjs"
+          }
+        ]
+      },
+      "complete": {
+        "needs": "resolve",
+        "runs-on": "ubuntu-latest",
+        "timeout-minutes": 15,
+        "permissions": {
+          "contents": "read",
+          "actions": "read",
+          "deployments": "write",
+          "id-token": "write"
+        },
+        "env": {
+          "PUBLISH_SOURCE_SHA": "${{ needs.resolve.outputs.sha }}",
+          "PUBLISH_RELEASE_TAG": "${{ needs.resolve.outputs.tag }}",
+          "GITHUB_TOKEN": "${{ github.token }}"
+        },
+        "steps": [
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "ref": "${{ needs.resolve.outputs.sha }}",
+              "fetch-depth": 0,
+              "persist-credentials": false
+            }
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": 24,
+              "package-manager-cache": false
+            }
+          },
+          {
+            "uses": "actions/download-artifact@v8",
+            "with": {
+              "artifact-ids": "${{ needs.resolve.outputs.artifact }}",
+              "run-id": "${{ inputs.staged_run }}",
+              "github-token": "${{ github.token }}",
+              "path": ".verification/publish",
+              "digest-mismatch": "error"
+            }
+          },
+          {
+            "name": "Validate original release and select its npm environment",
+            "id": "select",
+            "run": "node scripts/publish/select.mjs"
+          },
+          {
+            "name": "Install pinned Trusted Publishing CLI",
+            "run": "npm install --global npm@11.21.0 --ignore-scripts --no-audit --no-fund"
+          },
+          {
+            "name": "Recheck Public quality for the original release commit",
+            "run": "node scripts/publish/require-quality.mjs"
+          },
+          {
+            "name": "Revalidate exact original Source quality evidence",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node scripts/workflow-supply/public/quality.mjs require-source",
+            "if": "hashFiles('.github/workflow-adapter.json') != ''"
+          },
+          {
+            "name": "Confirm approved archive, required tags, staged cleanup and Deployment",
+            "env": {
+              "APPKIT_NPM_PUBLISH": "true"
+            },
+            "run": "node scripts/publish/publish.mjs"
+          }
+        ],
+        "environment": {
+          "name": "${{ needs.resolve.outputs.environment }}",
+          "deployment": false
+        }
+      }
+    }
+  },
+  "complete": {
+    "jobs": {
+      "resolve": {
+        "if": "github.repository == 'dataarthub/appkit' && github.event.workflow_run.event == 'release' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == 'dataarthub/appkit'",
+        "runs-on": "ubuntu-latest",
+        "timeout-minutes": 5,
+        "permissions": {
+          "contents": "read",
+          "actions": "read"
+        },
+        "outputs": {
+          "sha": "${{ steps.source.outputs.sha }}",
+          "tag": "${{ steps.source.outputs.tag }}",
+          "artifact": "${{ steps.source.outputs.artifact }}",
+          "run": "${{ steps.source.outputs.run }}"
+        },
+        "steps": [
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "ref": "main",
+              "persist-credentials": false
+            }
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": 24,
+              "package-manager-cache": false
+            }
+          },
+          {
+            "id": "source",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node scripts/publish/resolve-resume.mjs"
+          }
+        ]
+      },
+      "observe": {
+        "needs": "resolve",
+        "runs-on": "ubuntu-latest",
+        "timeout-minutes": 35,
+        "permissions": {
+          "contents": "read",
+          "actions": "write"
+        },
+        "steps": [
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "ref": "main",
+              "persist-credentials": false
+            }
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": 24,
+              "package-manager-cache": false
+            }
+          },
+          {
+            "uses": "actions/download-artifact@v8",
+            "with": {
+              "artifact-ids": "${{ needs.resolve.outputs.artifact }}",
+              "run-id": "${{ needs.resolve.outputs.run }}",
+              "github-token": "${{ github.token }}",
+              "path": ".verification/publish",
+              "digest-mismatch": "error"
+            }
+          },
+          {
+            "name": "Observe npm approval for up to 30 minutes and request completion",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}",
+              "STAGING_RUN": "${{ needs.resolve.outputs.run }}",
+              "PUBLISH_SOURCE_SHA": "${{ needs.resolve.outputs.sha }}",
+              "PUBLISH_RELEASE_TAG": "${{ needs.resolve.outputs.tag }}",
+              "VERIFIED_ARTIFACT": "${{ needs.resolve.outputs.artifact }}"
+            },
+            "run": "node scripts/publish/await-approval.mjs"
+          }
+        ]
+      }
+    }
+  },
+  "record": {
+    "on": {
+      "workflow_dispatch": {
+        "inputs": {
+          "tag": {
+            "description": "Published version tag (for example v0.1.0); does not publish npm packages",
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    },
+    "permissions": {
+      "contents": "read"
+    },
+    "concurrency": {
+      "group": "appkit-npm-deployment-records",
+      "cancel-in-progress": false
+    },
+    "jobs": {
+      "record": {
+        "runs-on": "ubuntu-latest",
+        "permissions": {
+          "contents": "read",
+          "deployments": "write"
+        },
+        "steps": [
+          {
+            "uses": "actions/checkout@v6"
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": 24
+            }
+          },
+          {
+            "name": "Verify registry versions and record both package deployments",
+            "env": {
+              "GH_TOKEN": "${{ github.token }}",
+              "RELEASE_TAG": "${{ inputs.tag }}"
+            },
+            "run": "node scripts/record-npm-deployments.mjs --tag \"$RELEASE_TAG\" --apply"
+          }
+        ]
+      }
+    }
+  },
+  "conformance": {
+    "behaviorCommands": [
+      [
+        "bun",
+        "run",
+        "test:verification-tooling"
+      ],
+      [
+        "bun",
+        "run",
+        "test:quality-tooling"
+      ],
+      [
+        "bun",
+        "run",
+        "test:publish-tooling"
+      ]
+    ],
+    "probeInputs": {
+      "test:verification-tooling": [
+        "scripts/verification/",
+        "scripts/test-storybook",
+        "scripts/turbo",
+        "turbo.json"
+      ],
+      "test:quality-tooling": [
+        "scripts/check-secrets",
+        "scripts/setup-gitleaks",
+        "scripts/quality",
+        ".husky/",
+        "biome.json",
+        ".gitleaks.toml"
+      ],
+      "test:publish-tooling": [
+        "scripts/publish/"
+      ]
+    }
+  }
+}

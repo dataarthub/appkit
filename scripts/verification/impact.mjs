@@ -144,7 +144,7 @@ export function selectChecks({root, changes, full = false}) {
       plan.docs = plan.agent = true; continue;
     }
     if (/^scripts\/verification\/(?:commands|plan|quality-runs|run|workflow).*\.(?:mjs)$/.test(file)) {tooling.add('verification'); continue;}
-    if (file === '.github/workflows/publish.yml') {tooling.add('publish'); continue;}
+    if (['.github/workflows/publish.yml','.github/workflows/complete-approved.yml'].includes(file)) {tooling.add('publish'); continue;}
     if (file === '.github/workflows/record-npm-deployments.yml') {tooling.add('deployments'); continue;}
     if (file === 'react-core-policy.json' || /^scripts\/(?:check-react-core|react-core\/)/.test(file)) {plan.compatibility = true; tooling.add('react-core'); continue;}
     if (/^scripts\/(?:check-release|check-consumer)\.mjs$/.test(file)) {plan.release = true; plan.packages = true; continue;}

@@ -94,7 +94,7 @@ test('lockfile version-only updates skip browsers, resolved dependency changes d
  assert.equal(selectChecks({root,changes:[change('bun.lock',{before,after:after.replace('4.2.1','4.2.2')})]}).stories.length,2);
 }));
 test('known publication and CI tooling do not execute browser suites',()=>fixture(root=>{
- for(const file of ['.github/workflows/publish.yml','scripts/verification/commands.mjs','react-core-policy.json','scripts/check-release.mjs']) {
+ for(const file of ['.github/workflows/publish.yml','.github/workflows/complete-approved.yml','scripts/verification/commands.mjs','react-core-policy.json','scripts/check-release.mjs']) {
    assert.deepEqual(selectChecks({root,changes:[change(file)]}).stories,[],file);
  }
 }));
@@ -108,7 +108,7 @@ test('Core changes follow public imports to only the affected stories',()=>fixtu
 }));
 
 test('quality execution-environment edits require runtime verification',()=>fixture(root=>{
- const plan=selectChecks({root,changes:[change('.github/workflows/quality.yml')]});
+ const plan=selectChecks({root,changes:[change('.github/workflows/ci.yml')]});
  assert.equal(plan.packages,true);assert.equal(plan.stories.length,2);
 }));
 test('erased import type in a shared preview does not make Core a runtime dependency of all stories',()=>fixture((root,put)=>{

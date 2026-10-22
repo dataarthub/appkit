@@ -26,6 +26,13 @@
       "visibility": "public"
     },
     {
+      "title": "Workflow supply and local quality",
+      "slug": "workflow-supply",
+      "source": "docs/workflow-supply.md",
+      "archetype": "how-to",
+      "visibility": "public"
+    },
+    {
       "title": "Evaluate consuming coding agents",
       "slug": "agent-evaluation",
       "source": "docs/agent-evaluation.md",

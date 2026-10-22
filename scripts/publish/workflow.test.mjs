@@ -47,5 +47,8 @@ test('publisher refuses local execution and has no direct publication or automat
  assert.equal(result.status,1);assert.match(result.stderr,/OIDC publication job is required/);
  const source=readFileSync('scripts/publish/publish.mjs','utf8');
  assert.match(source,/\['stage', 'publish', archive/);
- assert.doesNotMatch(source,/\['publish', archive|\['stage', 'approve'/);
+ assert.doesNotMatch(source,/\[\s*['"]publish['"]\s*,|\[\s*['"]stage['"]\s*,\s*['"]approve['"]/);
+ for(const job of Object.values(workflow.jobs))for(const step of job.steps??[]){
+  assert.doesNotMatch(step.run??'',/\bnpm\s+(?:publish|stage\s+approve)\b/);
+ }
 });
