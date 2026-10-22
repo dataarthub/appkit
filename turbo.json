@@ -103,7 +103,8 @@
         "$TURBO_ROOT$/scripts/verification/browser.mjs",
         "$TURBO_ROOT$/scripts/verification/story-selection.mjs",
         "$TURBO_ROOT$/scripts/lib/**",
-        "$TURBO_ROOT$/bun.lock"
+        "$TURBO_ROOT$/bun.lock",
+        "!src/tools/paraglide/README.md"
       ],
       "env": [
         "APPKIT_STORY_FILES",

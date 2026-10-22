@@ -17,3 +17,9 @@ test('real Turbo hashing separates subsets, full selection and runtime image; in
  assert.ok(inputs.some(file=>file.startsWith('../appkit-core/src/')));
  assert.ok(inputs.some(file=>file.startsWith('src/')));
 });
+
+test('generated i18n README provenance cannot invalidate executable browser inputs',()=>{
+ const inputs=Object.keys(task(['one.stories.tsx']).inputs);
+ assert.ok(!inputs.includes('src/tools/paraglide/README.md'),'Random compilation directory in generated README must not invalidate browser tests');
+ for(const file of ['src/tools/paraglide/messages.js','src/tools/paraglide/runtime.js'])assert.ok(inputs.includes(file),`Missing runtime input: ${file}`);
+});
