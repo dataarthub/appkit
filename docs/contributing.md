@@ -197,11 +197,13 @@ The runner executes two story files at a time, pairing desktop/mobile within
 each theme. Each viewport project uses one worker with file parallelism disabled.
 The two viewport projects share Vite startup and one aggregate process-tree guard;
 light and dark themes and successive file batches run sequentially. A full
-73-file run starts 74 guarded invocations rather than 100. Turbo streams fresh
+73-file run starts 76 guarded invocations rather than 100. The first file batch
+for each theme runs its viewports separately to avoid overlapping cold-start
+memory peaks; subsequent batches pair them. Turbo streams fresh
 browser output immediately, including batch start/completion, duration and RSS;
 cache hits still suppress replayed test logs. Each batch gets a fresh process
 tree. Aggregate RSS is capped at the smaller of 3 GiB and one-third of physical
-memory, the Node heap at 1.5 GiB, and a batch at ten minutes. A resource limit or
+memory, the Node heap at 1 GiB (tightened from 1.5 GiB), and a batch at ten minutes. A resource limit or
 failed process inspection fails the run; no stories are skipped. The guard kills
 only its invocation's process groups, including detached browser descendants,
 on completion, failure or interruption. Do not start another browser suite in a
