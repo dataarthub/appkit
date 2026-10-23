@@ -102,6 +102,7 @@
         "$TURBO_ROOT$/packages/appkit-core/package.json",
         "$TURBO_ROOT$/scripts/test-storybook.mjs",
         "$TURBO_ROOT$/scripts/verification/browser.mjs",
+        "$TURBO_ROOT$/scripts/verification/browser-batches.mjs",
         "$TURBO_ROOT$/scripts/verification/story-selection.mjs",
         "$TURBO_ROOT$/scripts/lib/**",
         "$TURBO_ROOT$/bun.lock",

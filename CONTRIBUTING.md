@@ -88,7 +88,8 @@ lockfile, Node/Bun/platform/architecture, CI image and relevant environment. A p
 suite cannot satisfy another selection or the full suite; only successful task
 execution is cached. Cache hits suppress old browser output so replayed logs do
 not look like a fresh browser run. A cache miss runs the unchanged four browser conditions with
-one worker and three-file batches. Core-only changes still run relevant unit/types
+two-file batches, pairing desktop/mobile for each theme within one guarded invocation.
+Each viewport project retains one worker and sequential files. Core-only changes still run relevant unit/types
 and the two-Core matrix; import analysis determines whether UI tests are needed.
 Unknown inputs, unreadable metadata and changed resolved dependencies remain
 conservative. Version-only detection compares file contents, not commit messages
@@ -182,8 +183,13 @@ keyboard navigation and focus return; layout checks measure containment, overflo
 tap targets, clipping and overlap. These are isolated component/host-contract tests,
 not hosted identity, database authorization or seeded-backend E2E evidence.
 
-The runner executes three story files at a time with one worker, sequentially across
-the four mode/viewport combinations. Each batch gets a fresh Vite/Chromium process
+The runner executes two story files at a time, pairing desktop/mobile within
+each theme. Each viewport project uses one worker with file parallelism disabled.
+The two viewport projects share Vite startup and one aggregate process-tree guard;
+light and dark themes and successive file batches run sequentially. A full
+73-file run starts 74 guarded invocations rather than 100. Turbo streams fresh
+browser output immediately, including batch start/completion, duration and RSS;
+cache hits still suppress replayed test logs. Each batch gets a fresh process
 tree. Aggregate RSS is capped at the smaller of 3 GiB and one-third of physical
 memory, the Node heap at 1.5 GiB, and a batch at ten minutes. A resource limit or
 failed process inspection fails the run; no stories are skipped. The guard kills

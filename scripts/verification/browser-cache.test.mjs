@@ -13,7 +13,7 @@ test('real Turbo hashing separates subsets, full selection and runtime image; in
  assert.equal(a.hash,same.hash);
  for(const other of [b,full,image])assert.notEqual(a.hash,other.hash);
  const inputs=Object.keys(a.inputs);
- for(const file of ['.storybook/preview.tsx','vitest.storybook.config.ts','../../scripts/lib/browser-containment.cjs','../../scripts/lib/guarded-process.mjs','../../scripts/test-storybook.mjs','../../bun.lock','../appkit-core/package.json'])assert.ok(inputs.includes(file),`Missing browser input: ${file}`);
+ for(const file of ['.storybook/preview.tsx','vitest.storybook.config.ts','../../scripts/lib/browser-containment.cjs','../../scripts/lib/guarded-process.mjs','../../scripts/test-storybook.mjs','../../scripts/verification/browser-batches.mjs','../../bun.lock','../appkit-core/package.json'])assert.ok(inputs.includes(file),`Missing browser input: ${file}`);
  assert.ok(inputs.some(file=>file.startsWith('../appkit-core/src/')));
  assert.ok(inputs.some(file=>file.startsWith('src/')));
 });
