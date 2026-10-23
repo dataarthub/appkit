@@ -5,6 +5,42 @@ may be prepared before publication; confirm availability on the
 [npm package page](https://www.npmjs.com/package/@alneas/appkit-react). Publication
 dates are recorded only when confirmed.
 
+## Unreleased
+
+### Breaking changes
+
+- Move Kanban, DataTable, FileBrowser and the shared DnD wrappers to native
+  dnd-kit React 0.5.1. Generic provider callbacks use nullable
+  `event.operation.source` / `target`, direct entity `data`, and `event.canceled`
+  in `onDragEnd`; the separate `onDragCancel` prop is removed.
+- Draggable render props use `ref` / `handleRef` instead of `attributes`,
+  `listeners` and `setNodeRef`; droppable props use `ref` / `isDropTarget`.
+  Native feedback owns movement; render-prop `style` is presentation only.
+- Exported Kanban sensors, controller context props and custom surfaces now use
+  native engine types. Generic wrapper names/import paths, high-level component
+  props and FileProvider operations remain. `resolveKanbanMove` keeps its
+  structural legacy-shaped input.
+- Remove legacy core/sortable/utilities dependencies and the global React-19 JSX
+  compatibility shim. Hosts must migrate their own old-engine usage before
+  removing their direct dependencies.
+
+### Changed
+
+- Use a 250ms touch hold with 5px tolerance in the generic provider, retaining
+  its 5px mouse/pen threshold. Native icon handles preserve file selection/open
+  interactions and permit early touch scrolling.
+- Preserve hidden/grouped/persisted table order and reject stale drag positions.
+  File moves validate the current listing; successful overlapping moves refresh
+  the current relevant view, while navigation prevents refreshing departed views.
+
+### Upgrade
+
+- Follow the [unreleased native drag migration guide](https://github.com/dataarthub/appkit/blob/main/docs/development/dnd-kit-migration.md).
+  Release-version selection and publication are separate from this source change.
+- After a containing release is published, downstream consumers update exact
+  pins, low-level call sites, old dependencies, browser test settings and generated
+  API/notices. This entry does not change any already published archive.
+
 ## [0.2.0]
 
 ### Added

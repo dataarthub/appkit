@@ -195,8 +195,8 @@ not hosted identity, database authorization or seeded-backend E2E evidence.
 
 The runner executes up to six story files at a time in one viewport/theme
 condition. Each project uses one worker with file parallelism disabled; all four
-conditions and successive file batches run sequentially. A full 73-file run starts
-52 guarded invocations rather than 76. Using one viewport at a time avoids
+conditions and successive file batches run sequentially. The current 74-file suite uses
+52 guarded invocations. Using one viewport at a time avoids
 concurrent browser memory peaks while sharing startup across more files. The first
 batch in each condition contains only two files to leave room for initial
 dependency optimization; later batches contain up to six.
