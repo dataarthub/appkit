@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "distribution": "npm",
+  "repository": "dataarthub/appkit",
+  "project": "scripts/workflow-project/roles.json",
+  "runtime": {
+    "nodeVersions": [
+      24,
+      26
+    ],
+    "bunVersion": "1.4.0"
+  },
+  "retiredWorkflows": [
+    ".github/workflows/quality.yml",
+    ".github/workflows/complete-approved-release.yml"
+  ]
+}

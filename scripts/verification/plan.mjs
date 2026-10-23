@@ -6,7 +6,7 @@ import {selectChecks} from './impact.mjs';
 import {findBaseline, githubRuns} from './quality-runs.mjs';
 
 export const root = path.resolve(import.meta.dirname, '../..');
-export async function createPlan({ci = false, full = false, env = process.env, directory = root, list = githubRuns({token:env.GITHUB_TOKEN})} = {}) {
+export async function createPlan({ci = false, full = false, trustedBase = null, env = process.env, directory = root, list = githubRuns({token:env.GITHUB_TOKEN})} = {}) {
   const root = directory;
   // Hooks export repository-specific Git variables. Resolve the explicitly chosen
   // worktree from cwd instead, including when tests use disposable repositories.
@@ -14,7 +14,11 @@ export async function createPlan({ci = false, full = false, env = process.env, d
   const git = args => execFileSync('git', args, {cwd: root, env:gitEnv, encoding: 'utf8', maxBuffer: 32 * 1024 ** 2});
   const sha = git(['rev-parse', 'HEAD']).trim();
   let base = null;
-  if (!full) {
+  if (trustedBase && !full) {
+    if (!/^[a-f0-9]{40}$/.test(trustedBase) || spawnSync('git',['merge-base','--is-ancestor',trustedBase,sha],{cwd:root,env:gitEnv}).status !== 0) throw Error('Invalid trusted shared baseline');
+    base = trustedBase;
+  }
+  if (!full && !base) {
     if (ci) {
       if (env.GITHUB_EVENT_NAME !== 'push' || env.GITHUB_REF !== 'refs/heads/main' || env.GITHUB_SHA !== sha) full = true;
       else {

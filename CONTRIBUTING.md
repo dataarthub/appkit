@@ -27,12 +27,13 @@ Gitleaks release and verifies its SHA-256; macOS and Linux on arm64/x64 are supp
 Other platforms can supply the same Gitleaks version on PATH or through
 `APPKIT_GITLEAKS_BINARY`. No provider credentials are needed.
 
-Husky runs `bun run secrets:staged` and `bun run lint:staged` before each commit.
-A missing scanner or failed check blocks the commit. Gitleaks scans the staged Git
-patch with redacted output; lint-staged runs read-only Biome lint checks on staged
-JavaScript, TypeScript and JSON files. Neither command automatically formats files.
-Unstaged changes stay untouched. For partially staged files, lint checks the working
-copy; separate unfinished edits before committing.
+Husky runs `bun run quality:commit` before each commit. A missing scanner or failed
+check blocks the commit. The maintained gate scans the indexed Git patch with
+redacted Gitleaks diagnostics and runs Biome on isolated copies of indexed
+JavaScript, TypeScript and JSON files. It does not format files or change staging.
+Unstaged changes stay untouched, including partially staged files. The hook
+regression fixture installs this same command only in its disposable Git repository
+and verifies both lint rejection and a clean indexed commit.
 
 Before a push, Husky runs `bun run verify:push`. This always scans history for
 secrets and runs source lint, then selects package, documentation, tooling,
@@ -87,7 +88,8 @@ lockfile, Node/Bun/platform/architecture, CI image and relevant environment. A p
 suite cannot satisfy another selection or the full suite; only successful task
 execution is cached. Cache hits suppress old browser output so replayed logs do
 not look like a fresh browser run. A cache miss runs the unchanged four browser conditions with
-one worker and three-file batches. Core-only changes still run relevant unit/types
+six-file batches, executing one viewport/theme condition per guarded invocation.
+Each viewport project retains one worker and sequential files. Core-only changes still run relevant unit/types
 and the two-Core matrix; import analysis determines whether UI tests are needed.
 Unknown inputs, unreadable metadata and changed resolved dependencies remain
 conservative. Version-only detection compares file contents, not commit messages
@@ -97,7 +99,7 @@ all accumulated changes are covered by the selector.
 Use `bun run verify:full` to request every normal check, or
 `bun run verify:push --dry-run` to inspect the local selection and commands.
 `bun run test:consumer` remains an explicit packed-consumer check and a mandatory
-publication check. Public quality success proves the selected changes were checked;
+publication check. Source quality success proves the selected changes were checked;
 it does not claim that every story was rerun for every prose change.
 
 Package-specific stable GitHub Releases use the separate `publish.yml` workflow.
@@ -161,7 +163,7 @@ Install the pinned Chromium once with `bunx --no-install playwright install chro
 (on Linux CI, add `--with-deps`). Run `bun run test:storybook` for the full suite.
 The affected subset is selected by `verify:push` and the Node 24 quality job.
 Use `bun run verify:full` or a manual quality dispatch for full coverage.
-Publication requires the target commit's successful main-push Public quality run
+Publication requires the target commit's successful main-push Source quality run
 and does not rerun this browser suite.
 
 Every CSF3 story runs with fatal axe checks in Chromium at 1280×900 and 390×844,
@@ -181,10 +183,18 @@ keyboard navigation and focus return; layout checks measure containment, overflo
 tap targets, clipping and overlap. These are isolated component/host-contract tests,
 not hosted identity, database authorization or seeded-backend E2E evidence.
 
-The runner executes three story files at a time with one worker, sequentially across
-the four mode/viewport combinations. Each batch gets a fresh Vite/Chromium process
+The runner executes up to six story files at a time in one viewport/theme
+condition. Each project uses one worker with file parallelism disabled; all four
+conditions and successive file batches run sequentially. A full 73-file run starts
+52 guarded invocations rather than 76. Using one viewport at a time avoids
+concurrent browser memory peaks while sharing startup across more files. The first
+batch in each condition contains only two files to leave room for initial
+dependency optimization; later batches contain up to six.
+Turbo streams fresh
+browser output immediately, including batch start/completion, duration and RSS;
+cache hits still suppress replayed test logs. Each batch gets a fresh process
 tree. Aggregate RSS is capped at the smaller of 3 GiB and one-third of physical
-memory, the Node heap at 1.5 GiB, and a batch at ten minutes. A resource limit or
+memory, the Node heap at 1 GiB (tightened from 1.5 GiB), and a batch at ten minutes. A resource limit or
 failed process inspection fails the run; no stories are skipped. The guard kills
 only its invocation's process groups, including detached browser descendants,
 on completion, failure or interruption. Do not start another browser suite in a
@@ -198,3 +208,57 @@ Appkit-specific budgets and batching in this repository’s runner.
 
 Axe cannot replace assistive-technology or design review. No screenshot baselines
 are generated by this suite; intended visual changes still need human approval.
+
+## Generated workflow maintenance
+
+See [workflow supply and local quality](docs/workflow-supply.md) for `quality:commit`, `quality:push`, generated workflow checks and the actual selection/reuse limits.
+
+## Contract evidence and host responsibilities
+
+Use the owning [development policy](https://tech-docs.alneas.com/policies/development-policy.md#security-operations-and-lifecycle-contracts)
+for coding and lifecycle review. Inspect existing Core abstractions before adding a
+provider connection; keep provider SDKs behind optional entries. Core's adapter
+and action tests exercise malformed input, explicit failures, cancellation and
+cleanup. Packed consumers verify the distributed import boundary separately.
+`conformance:check` inspects public manifest/import/alias/symlink boundaries; its
+pinned clause catalog predates newer policy clauses and is not current whole-policy
+certification. Computed import findings require review.
+
+`test:verification-tooling` exercises the unit runner with real passing, failing,
+empty and skipped fixtures. Package unit tasks require fresh nonempty JUnit output
+without failures or skips, and remove their temporary reports on exit. Runner edits
+select package checks and verification tooling through the maintained push/CI
+selector; the Turbo test key includes the runner and test configuration. A process
+exit alone does not prove a suite ran.
+
+The approval example's tests cover changed arguments/registration/session, rejection,
+revocation while authorization is pending, concurrent approval and replay. Tool
+bridges enforce explicit exposure, output projection and per-session call limits;
+execution sessions retain cancellation ownership until work settles. These are
+in-memory application contracts. Trusted server authorization, expiring approval
+credentials, durable replay protection and authorization across MCP/plugin hosts
+remain the consuming service's responsibility. Injected instructions are data, not
+host authorization; no live-model safety evaluation is implied by these tests.
+
+Applications also own outbound AI destination/data-class approval, retention and
+delete propagation, equivalent fallback policy and a budget shared across retries
+and delegation. A bridge call limit is not a token/cost budget, and cancellation
+does not prove remote billing or effects stopped. Tenant isolation in file/search
+indexes, exports, queues, signed links and offboarding requires service-specific
+tests; generic adapter fixtures do not verify those delivery surfaces.
+
+Security reporting/triage, advisory monitoring, supported-version security fixes and
+expiring exceptions require maintainer ownership; this gate does not establish a
+response SLA. Supported runtime/package declarations and compatibility consumers
+are checked, while deprecation decisions and consequential API/security/data/CI
+review still require human review. No reviewer approval is inferred from a green
+suite. Recovery targets, isolated restores, persisted-schema migrations, durable-job
+deduplication/quarantine/replay and plugin suspension are host capabilities, not
+provided by the in-memory execution history. Verify them in the owning service.
+Public documentation/asset/search/AI withdrawal and cache invalidation belong to
+the publishing service and portal; local builds do not establish deployed removal.
+
+Reviewed no-release rationale for the contract-verification update: changes affect
+maintainer tests, verification orchestration and contributor guidance only. Package
+exports and runtime behavior are unchanged; no package version bump or consumer
+upgrade is required.

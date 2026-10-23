@@ -1,0 +1,86 @@
+# Generated: github-docs/public/templates/private-actions/public; reviewed base ae1ac274494114599ea6c0de2e02c1e61f324e42 (local-reviewed).
+# Bundle SHA-256: 69111de4aafb48fb77e3d8e702b88abdd18fc357a1a4a474a9e6a1ef27dd6fb6
+# Project adapter: .github/workflow-adapter.json; source: scripts/workflow-project/roles.json
+# Run workflow:generate explicitly; workflow:check never repairs output.
+name: "Complete approved npm release"
+on:
+  workflow_run:
+    workflows:
+      - "Publish npm packages"
+    types:
+      - "completed"
+permissions:
+  contents: "read"
+concurrency:
+  group: "npm-approval-${{ github.event.workflow_run.id }}"
+  cancel-in-progress: false
+jobs:
+  resolve:
+    if: "github.repository == 'dataarthub/appkit' && github.event.workflow_run.event == 'release' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == 'dataarthub/appkit'"
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 5
+    permissions:
+      contents: "read"
+      actions: "read"
+    outputs:
+      sha: "${{ steps.source.outputs.sha }}"
+      tag: "${{ steps.source.outputs.tag }}"
+      artifact: "${{ steps.source.outputs.artifact }}"
+      run: "${{ steps.source.outputs.run }}"
+    steps:
+      -
+        uses: "actions/checkout@v6"
+        with:
+          ref: "main"
+          persist-credentials: false
+        name: "Shared: actions/checkout@v6"
+      -
+        uses: "actions/setup-node@v6"
+        with:
+          node-version: 24
+          package-manager-cache: false
+        name: "Shared: actions/setup-node@v6"
+      -
+        id: "source"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+        run: "node scripts/publish/resolve-resume.mjs"
+        name: "Project: Run declared project check"
+  observe:
+    needs: "resolve"
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 35
+    permissions:
+      contents: "read"
+      actions: "write"
+    steps:
+      -
+        uses: "actions/checkout@v6"
+        with:
+          ref: "main"
+          persist-credentials: false
+        name: "Shared: actions/checkout@v6"
+      -
+        uses: "actions/setup-node@v6"
+        with:
+          node-version: 24
+          package-manager-cache: false
+        name: "Shared: actions/setup-node@v6"
+      -
+        uses: "actions/download-artifact@v8"
+        with:
+          artifact-ids: "${{ needs.resolve.outputs.artifact }}"
+          run-id: "${{ needs.resolve.outputs.run }}"
+          github-token: "${{ github.token }}"
+          path: ".verification/publish"
+          digest-mismatch: "error"
+        name: "Shared: actions/download-artifact@v8"
+      -
+        name: "Project: Observe npm approval for up to 30 minutes and request completion"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+          STAGING_RUN: "${{ needs.resolve.outputs.run }}"
+          PUBLISH_SOURCE_SHA: "${{ needs.resolve.outputs.sha }}"
+          PUBLISH_RELEASE_TAG: "${{ needs.resolve.outputs.tag }}"
+          VERIFIED_ARTIFACT: "${{ needs.resolve.outputs.artifact }}"
+        run: "node scripts/publish/await-approval.mjs"

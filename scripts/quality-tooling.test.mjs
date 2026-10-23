@@ -27,13 +27,16 @@ test('missing scanner fails closed with setup instructions',()=>fixture(({scan})
 test('installed pre-commit hook blocks a lint failure and permits a clean staged file',()=>fixture(({dir,env,git})=>{
  // Dependencies are read from this checkout; fixture Git metadata remains independent.
  const packageFile = path.join(dir,'package.json');
- writeFileSync(packageFile,JSON.stringify({private:true,type:'module',scripts:{'secrets:staged':'node scanner.mjs --staged','lint:staged':'lint-staged --no-stash --no-hide-partially-staged'}}));
+ writeFileSync(packageFile,JSON.stringify({private:true,type:'module',scripts:{'quality:commit':'node '+JSON.stringify(path.join(root,'scripts/workflow-supply/public/staged-gate.mjs'))+' commit','secrets:staged':'node scanner.mjs --staged','lint:staged':'lint-staged --no-stash --no-hide-partially-staged'}}));
  const scannerURL = new URL('./check-secrets.mjs',import.meta.url).href;
  writeFileSync(path.join(dir,'scanner.mjs'),'import '+JSON.stringify(scannerURL)+';\n');
  setupHookFixture(dir);
+ mkdirSync(path.join(dir,'scripts'));copyFileSync(path.join(root,'scripts/quality-tools.mjs'),path.join(dir,'scripts/quality-tools.mjs'));
+ mkdirSync(path.join(dir,'.verification'));symlinkSync(path.join(root,'.verification/tools'),path.join(dir,'.verification/tools'),'dir');
+ git(['add','biome.json','.gitleaks.toml']);
  const installed=spawnSync(process.execPath,[path.join(root,'node_modules/husky/bin.js')],{cwd:dir,env,encoding:'utf8'});assert.equal(installed.status,0,installed.stderr);
  writeFileSync(path.join(dir,'staged.ts'),'debugger;\n');git(['add','staged.ts']);
- const blocked=spawnSync('git',['-c','user.name=Appkit fixture','-c','user.email=fixture@example.invalid','commit','-m','blocked'],{cwd:dir,env,encoding:'utf8'});assert.notEqual(blocked.status,0);assert.match(blocked.stdout+blocked.stderr,/noDebugger/);
+ const blocked=spawnSync('git',['-c','user.name=Appkit fixture','-c','user.email=fixture@example.invalid','commit','-m','blocked'],{cwd:dir,env,encoding:'utf8'});assert.notEqual(blocked.status,0);assert.match(blocked.stdout+blocked.stderr,/Lint failed for indexed file/);
  writeFileSync(path.join(dir,'staged.ts'),'export const value = 1;\n');git(['add','staged.ts']);
  writeFileSync(path.join(dir,'not-staged.ts'),'debugger;\n');
  const accepted=spawnSync('git',['-c','user.name=Appkit fixture','-c','user.email=fixture@example.invalid','commit','-m','clean'],{cwd:dir,env,encoding:'utf8'});assert.equal(accepted.status,0,accepted.stdout+accepted.stderr);

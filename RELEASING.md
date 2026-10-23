@@ -48,7 +48,7 @@ workflow review. Leave the existing `0.1.0` archives and npm tags unchanged.
 
 Use [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/) in GitHub Actions. Configure each package's npm settings with GitHub owner `dataarthub`, repository `appkit`, workflow filename `publish.yml` and, if specified, environment `npm-core` or `npm-react` respectively. Keep **Allow npm publish disabled** and **Allow npm dist-tag enabled**. Staging through OIDC remains enabled; approval requires the maintainer's npm session and 2FA. These permissions are independent. OIDC dist-tag operations require npm 11.21.0+, which the workflow pins. Require 2FA for maintainers and enable the package setting to [require 2FA and disallow tokens](https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/); trusted publishers can still publish under that policy. These are account/package settings and are not enabled by a repository edit.
 
-The `publish.yml` workflow has two entry points: publishing a stable package-specific GitHub Release verifies and **stages** its archive; a manual dispatch on main completes an already approved staged release. Its GitHub-hosted registry jobs use Node 24, pinned npm 11.21.0 and `id-token: write`, without an npm write token. The staging command explicitly requests [provenance](https://docs.npmjs.com/generating-provenance-statements/) and disables lifecycle scripts. Verification and resume resolution have no OIDC permission; registry jobs install no package development dependencies. The main-update quality workflow remains verification-only.
+The `publish.yml` workflow has two entry points: publishing a stable package-specific GitHub Release verifies and **stages** its archive; a `workflow_dispatch` on main completes an already approved staged release. The approval observer requests this dispatch automatically, and manual dispatch remains a recovery path. Its GitHub-hosted registry jobs use Node 24, pinned npm 11.21.0 and `id-token: write`, without an npm write token. The staging command explicitly requests [provenance](https://docs.npmjs.com/generating-provenance-statements/) and disables lifecycle scripts. Verification and resume resolution have no OIDC permission; registry jobs install no package development dependencies. The main-update quality workflow remains verification-only.
 
 After this change is merged, check **both packages'** npm Trusted Publisher settings: repository `dataarthub/appkit`, workflow `publish.yml`, optional matching environment, direct publish disabled and dist-tag allowed. Previously enabling direct publish does not automatically revert when this workflow changes. Repository edits do not change npm settings. The environment names stay `npm-core` and `npm-react`; staging and completion use `deployment: false` so pending approval cannot appear as a successful public Deployment. Environments with custom deployment protection rules are incompatible with that GitHub setting and must be reviewed before adoption.
 
@@ -75,22 +75,22 @@ Choose the release scope before changing versions:
 The original `v0.1.0` remains the initial shared release tag. It does not trigger
 the new publisher. Draft Releases, prereleases, unrelated tags, tag pushes and
 manual workflow dispatches never stage a new package through this workflow.
-Manual dispatch is reserved for completing an original successful staging run.
+Dispatch is reserved for completing an original successful staging run; it does not stage another archive.
 
 1. Update only the intended package version and relevant lockfile/generated
    metadata. If React adopts a new Core, first publish that Core successfully,
    then update React's exact dependency and its own version in a follow-up PR.
    Commit and merge the reviewed changes into main.
-2. Wait for **Public quality** to finish successfully for that exact main commit.
+2. Wait for **Source quality** to finish successfully for that exact main commit.
    Do not tag a later, unverified commit or use a feature/manual run as a substitute.
    Create the package-specific tag on that exact reviewed commit. The version in
    the tag must match the selected package's `package.json`; the other package's
    version can differ. The workflow rejects commits outside main and moved tags.
 3. Prepare a draft GitHub Release for that tag. Publishing the Release authorizes
    automatic staging; public npm availability still requires the separate npm 2FA approval below.
-4. Inspect the **Publish package release** workflow. Before preparing any archive,
-   it requires a completed successful main-push run of `.github/workflows/quality.yml`
-   (`Public quality`) for the release's exact SHA in this repository. Missing,
+4. Inspect the **Publish npm packages** workflow. Before preparing any archive,
+   it requires a completed successful main-push run of `.github/workflows/ci.yml`
+   (`Source quality`) for the release's exact SHA in this repository. Missing,
    queued, running, failed, cancelled or skipped evidence blocks publication.
    A newer unsuccessful run cannot fall back to an older successful run for the
    same SHA. Finish/rerun main quality, then retry the release workflow; it does
@@ -98,7 +98,7 @@ Manual dispatch is reserved for completing an original successful staging run.
    The workflow reuses that exact-commit source-quality evidence, restores matching
    Turbo build caches, and checks secrets, lint, tooling, builds and release/docs
    contracts. It does not repeat source unit/type/agent suites already covered by
-   Public quality. It packs both candidates and tests those exact archives in
+   Source quality. It packs both candidates and tests those exact archives in
    isolated consumers, then selects and stages only the tagged package's tested archive.
 5. React releases additionally require the two-Core compatibility matrix and the
    mandatory-fix dependency policy. Core releases do not wait for React to adopt
@@ -121,10 +121,12 @@ The verified archive is handed to staging through an immutable artifact ID, its 
 
 1. Open the package's **Staged Packages** on npm. Check its name, version, source/provenance, initial inspection-only tag (`staged`) and the archive against the workflow summary's SHA-512 digest. An authenticated maintainer may use `npm stage list <package>`, `npm stage view <stage-id>` and `npm stage download <stage-id>` to inspect it; those operations cannot use the Actions OIDC session. Do not approve an unexpected stage solely because its version looks right.
 2. Approve the stage in npm with 2FA, or use `npm stage approve <stage-id>` in the maintainer's interactive session. Actions never approves stages. Rejection also requires the maintainer's 2FA. See [npm staged publishing](https://docs.npmjs.com/staged-publishing/).
-3. In GitHub Actions, select **Publish package release → Run workflow → main**. Set `staged_run` to the numeric run ID of the original **successful staging run** (shown in its URL and summary), not a completion run ID. The resolver requires a successful release-event run of `publish.yml`, its successful staging job, and the exact current-attempt immutable archive. Old direct-publish runs, forks, failed runs and expired archives cannot be used.
-4. Completion checks the original Release/tag, main ancestry and exact-SHA Public quality again, downloads that original archive, and verifies the public npm version's integrity against it. It repairs missing required tags without republishing and records `npm-core` or `npm-react` Deployment success against the **original source SHA**, with the npm page URL. It does not rebuild or rerun tests. A green completion workflow, confirmed registry bytes/tags and the successful Deployment mean the release is complete.
+3. After a successful staging run, **Complete approved npm release** starts automatically and observes the public npm version for up to **30 minutes**, every 30 seconds. It validates the original run/attempt and immutable archive, verifies package/version/integrity after approval becomes visible, and requests `publish.yml` completion on main with that original `staged_run` ID. The observer has no npm token or OIDC permission, never approves a stage and does not hold the npm publication lock while waiting. It executes trusted main code and treats the original artifact as data. Its `actions: write` permission is only for dispatching completion; npm still needs staging and dist-tag permissions, with direct publish disabled.
 
-After approval, registry visibility and dist-tags can take time to propagate. Completion waits up to five minutes per visibility/tag confirmation phase; missing approval, a network error or an unconfirmed tag is an incomplete release. Retry the manual completion using the **same original staging run ID**. A different archive integrity or a newer required tag fails closed; do not overwrite or roll back either.
+   If the window ends, its summary reports **approval-pending**, not release success. After approving later, select **Publish npm packages → Run workflow → main** and set `staged_run` to the numeric run ID of the original **successful staging run** (not the observer, stage UUID or completion run ID). API errors, changed run attempts or expired/deleted artifacts block automatic dispatch; inspect the failure and use the same validated recovery path. A dispatch response lost in transit must be checked in Actions before retrying. The resolver requires a successful release-event run of `publish.yml`, its successful staging job, and the exact current-attempt immutable archive. Old direct-publish runs, forks, failed runs and expired archives cannot be used.
+4. Completion checks the original Release/tag, main ancestry and exact-SHA Source quality again, downloads that original archive, and verifies the public npm version's integrity against it. It repairs missing required tags without republishing. After confirming those tags, it re-reads `staged` and removes it only if it still points to this release version; an absent tag or one pointing to any other version is preserved. Cleanup errors or unconfirmed removal block completion and can be retried with the same staging run ID. It then records `npm-core` or `npm-react` Deployment success against the **original source SHA**, with the npm page URL. It does not rebuild or rerun tests. A green completion workflow, confirmed registry bytes/tags and the successful Deployment mean the release is complete.
+
+After approval, registry visibility and dist-tags can take time to propagate. The observer's 30-minute budget includes its registry reads; the containing job has a 35-minute ceiling for checkout/download and final dispatch. Waiting consumes Actions runner time. An observer success means completion was requested, not that registry tags or Deployment already succeeded: check the separate completion run. Completion waits up to five minutes per visibility/tag confirmation phase; missing approval, a network error or an unconfirmed tag is an incomplete release. Retry completion using the **same original staging run ID**. A different archive integrity or a newer required tag fails closed; do not overwrite or roll back either.
 
 If staging returns an error or times out after submitting bytes, inspect npm Staged Packages before retrying: the version may already be reserved. Do not blindly rerun all jobs to upload it again. OIDC cannot list, inspect, approve or reject stages. If the original staging run failed, an authorized maintainer must resolve/reject any pending stage with 2FA before retrying staging. Rejection is not automatic permission to republish different bytes. The workflow never treats an ambiguous upload as successful.
 
@@ -142,8 +144,9 @@ For example, to move both packages from `0.1.0` to `0.1.1`:
    `reactVersion: "0.1.1"` as shown below. The gate reports that adoption as pending
    and still requires both compatibility lanes to pass. Merge the verified PR.
 2. On that reviewed main commit, create `appkit-core-v0.1.1` and publish its GitHub
-   Release. Approve the npm stage with 2FA, then run manual completion with the original
-   staging run ID. Wait for completion, including npm integrity, required dist-tags
+   Release. Approve the npm stage with 2FA and let the observer request completion
+   (or use the original staging run ID for manual recovery after its window). Wait
+   for completion, including npm integrity, required dist-tags
    and the `npm-core` deployment. A published GitHub
    Release alone does not mean npm publication succeeded.
 3. **React adoption PR:** after Core `0.1.1` exists on npm, set React to `0.1.1` and
@@ -152,7 +155,8 @@ For example, to move both packages from `0.1.0` to `0.1.1`:
    pin fail CI. Run `bun run check:react-core --release` after building both packages
    and merge the verified PR.
 4. Tag that later main commit `appkit-react-v0.1.1`, publish its GitHub Release and
-   approve the npm stage with 2FA, then manually complete and verify registry
+   approve the npm stage with 2FA, then confirm automatic completion (or manually
+   recover after its window) and verify registry
    integrity, required tags and the `npm-react` Deployment.
 
 These are two Releases and normally two different source commits, not one Release
@@ -169,7 +173,7 @@ and Git tags keep the existing format. This does not enable prerelease GitHub
 Releases in the current workflow.
 
 For a new pre-1.0 version, the Action stages the verified archive once with
-`--tag staged`. After npm 2FA approval, manual completion verifies registry integrity
+`--tag staged`. After npm 2FA approval, completion verifies registry integrity
 and adds `beta` and `latest` to the same version
 using `npm dist-tag add`. Both tag mappings are read back before success. A tag
 permission failure or unconfirmed mapping leaves the Action failed; rerun manual completion with the original staging run ID to

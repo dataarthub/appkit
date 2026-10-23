@@ -15,7 +15,21 @@ export async function stageVerified({target, file, verifyArchive, readRegistry, 
   return {status:'awaiting-approval', name:target.name, version:target.version, integrity:target.integrity};
 }
 
-export async function finalizeVerified({target, verifyArchive, readRegistry, readTags, setTag, wait = setTimeout, attempts = 60}) {
+async function cleanupStagedTag({target, readTags, removeTag, wait, attempts}) {
+  // Re-read immediately before cleanup; another approved stage may have moved it.
+  const current = await readTags(target.name);
+  if (planTagUpdates(target.version, current).length !== 0) throw Error('Required npm dist-tags were not confirmed before staged cleanup');
+  if (current.staged !== target.version) return;
+  await removeTag(target.name, 'staged');
+  for (let attempt=0; attempt<attempts; attempt++) {
+    const tags = await readTags(target.name);
+    if (planTagUpdates(target.version, tags).length === 0 && tags.staged !== target.version) return;
+    await wait(5000);
+  }
+  throw Error('npm staged tag cleanup was not confirmed; retry completion without re-staging');
+}
+
+export async function finalizeVerified({target, verifyArchive, readRegistry, readTags, setTag, removeTag, wait = setTimeout, attempts = 60}) {
   await verifyArchive();
   let observed = null;
   for (let attempt=0; attempt<attempts; attempt++) {
@@ -32,6 +46,7 @@ export async function finalizeVerified({target, verifyArchive, readRegistry, rea
   }
   for (let attempt=0; attempt<attempts; attempt++) {
     if (planTagUpdates(target.version, await readTags(target.name)).length === 0) {
+      await cleanupStagedTag({target, readTags, removeTag, wait, attempts});
       return {status:'published', name:target.name, version:target.version, integrity:target.integrity, tags:required};
     }
     await wait(5000);

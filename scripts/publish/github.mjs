@@ -5,5 +5,5 @@ export async function github(method, endpoint, body) {
     body:body === undefined ? undefined : JSON.stringify(body), signal:AbortSignal.timeout(30000),
   });
   if (!response.ok) throw Error(`GitHub ${method} ${endpoint}: HTTP ${response.status}`);
-  return response.json();
+  return response.status === 204 ? null : response.json();
 }

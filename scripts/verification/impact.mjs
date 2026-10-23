@@ -143,8 +143,9 @@ export function selectChecks({root, changes, full = false}) {
     if (/^packages\/appkit-(core|react)\/(?:consumer-ai\/(?:api-index|package-context)\.json)$/.test(file)) {
       plan.docs = plan.agent = true; continue;
     }
+    if (/^scripts\/(?:(?:test-unit|unit-report)\.mjs|verification\/unit-runner\.test\.mjs)$/.test(file)) {plan.packages = true; tooling.add('verification'); continue;}
     if (/^scripts\/verification\/(?:commands|plan|quality-runs|run|workflow).*\.(?:mjs)$/.test(file)) {tooling.add('verification'); continue;}
-    if (file === '.github/workflows/publish.yml') {tooling.add('publish'); continue;}
+    if (['.github/workflows/publish.yml','.github/workflows/complete-approved.yml'].includes(file)) {tooling.add('publish'); continue;}
     if (file === '.github/workflows/record-npm-deployments.yml') {tooling.add('deployments'); continue;}
     if (file === 'react-core-policy.json' || /^scripts\/(?:check-react-core|react-core\/)/.test(file)) {plan.compatibility = true; tooling.add('react-core'); continue;}
     if (/^scripts\/(?:check-release|check-consumer)\.mjs$/.test(file)) {plan.release = true; plan.packages = true; continue;}

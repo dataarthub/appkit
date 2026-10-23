@@ -35,6 +35,8 @@ const result = await (completing ? finalizeVerified : stageVerified)({target, fi
   },
   setTag: (name, version, tag) => execFileSync('npm', ['dist-tag', 'add', `${name}@${version}`, tag,
     '--registry=https://registry.npmjs.org'], {cwd: directory, stdio: 'inherit', timeout: 60000}),
+  removeTag: (name, tag) => execFileSync('npm', ['dist-tag', 'rm', name, tag,
+    '--registry=https://registry.npmjs.org'], {cwd: directory, stdio: 'inherit', timeout: 60000}),
   stage: (archive, tag) => execFileSync('npm', ['stage', 'publish', archive, '--provenance', '--access', 'public', '--tag', tag,
     '--ignore-scripts', '--workspaces=false', '--registry=https://registry.npmjs.org'], {cwd: directory, stdio: 'inherit', timeout: 180000}),
 });
@@ -47,6 +49,6 @@ if (completing) {
 }
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY,
   `\n### ${result.status}\n\n${target.name}@${target.version}\n\nArchive integrity: ${target.integrity}\n\n` +
-  (completing ? 'Registry integrity and required tags confirmed; Deployment recorded.\n' :
-    (result.status === 'already-published' ? `This exact archive is already public; run manual completion with staged_run **${process.env.GITHUB_RUN_ID}** to confirm tags and Deployment.\n` :
-    `Inspect and approve this version in npm Staged Packages with 2FA. Then run **Publish package release** manually on main, with staged_run **${process.env.GITHUB_RUN_ID}**. Do not rerun staging to finish publication.\n`)));
+  (completing ? 'Registry integrity and required tags confirmed; matching staged tag cleaned up; Deployment recorded.\n' :
+    (result.status === 'already-published' ? `This exact archive is already public; the approval observer will request completion. If needed, recover on main with staged_run **${process.env.GITHUB_RUN_ID}** to confirm tags and Deployment.\n` :
+    `Inspect and approve this version in npm Staged Packages with 2FA. The approval observer waits up to 30 minutes and requests completion automatically. After that window, run **Publish npm packages** manually on main with staged_run **${process.env.GITHUB_RUN_ID}**. Do not rerun staging to finish publication.\n`)));

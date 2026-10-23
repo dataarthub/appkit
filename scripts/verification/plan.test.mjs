@@ -24,7 +24,7 @@ test('local plan includes committed, staged, unstaged, deleted and untracked pat
 }));
 test('CI diffs all changes after the last passing ancestor, not just the last push',()=>fixture(async ({root,put,commit,base})=>{
  put('first.md','failed run change');const failed=commit();put('second.md','latest change');const sha=commit();
- const authoritative={event:'push',head_branch:'main',path:'.github/workflows/quality.yml',name:'Public quality',head_repository:{full_name:'dataarthub/appkit'},status:'completed'};
+ const authoritative={event:'push',head_branch:'main',path:'.github/workflows/ci.yml',name:'Source quality',head_repository:{full_name:'dataarthub/appkit'},status:'completed'};
  const list=async()=>[{...authoritative,id:3,head_sha:sha,conclusion:null},{...authoritative,id:2,head_sha:failed,conclusion:'failure'},{...authoritative,id:1,head_sha:base,conclusion:'success'}];
  const env={GITHUB_EVENT_NAME:'push',GITHUB_REF:'refs/heads/main',GITHUB_SHA:sha,GITHUB_RUN_ID:'3'};
  const plan=await createPlan({directory:root,ci:true,env,list});
