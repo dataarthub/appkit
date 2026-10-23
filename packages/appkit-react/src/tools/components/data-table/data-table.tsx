@@ -29,23 +29,11 @@ import {
 } from './table-engine';
 import * as m from '../../paraglide/messages.js';
 
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  horizontalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { DragDropProvider, type DragStartEvent, type DragEndEvent } from '@dnd-kit/react';
+import { useSortable, isSortable } from '@dnd-kit/react/sortable';
+import { PointerSensor, PointerActivationConstraints, Feedback } from '@dnd-kit/dom';
+import { closestCenter } from '@dnd-kit/collision';
+import { reorderVisibleColumns, getLeafColumnIds } from './column-order';
 
 import { cn } from "../../lib/utils";
 import { Button, buttonVariants } from '../ui/button';
@@ -98,6 +86,9 @@ interface DataTableColumnHeaderProps<
   enableColumnOrdering?: boolean;
   enableMultiSort?: boolean;
   sortIndex?: number;
+  sortableIndex: number;
+  sortableGroup: string;
+  registeredIds: string[];
 }
 
 function DataTableColumnHeader<TData extends object, TValue>({
@@ -105,10 +96,18 @@ function DataTableColumnHeader<TData extends object, TValue>({
   enableColumnOrdering = true,
   enableMultiSort = false,
   sortIndex,
+  sortableIndex, sortableGroup, registeredIds,
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
-    id: header.column.id,
-    disabled: !enableColumnOrdering,
+  const canReorder = enableColumnOrdering && !header.isPlaceholder && header.column.columns.length === 0;
+  const { ref, handleRef, isDragging } = useSortable({
+    id: header.id,
+    index: sortableIndex,
+    group: sortableGroup,
+    type: sortableGroup,
+    accept: sortableGroup,
+    data: {columnId: header.column.id, groupId: sortableGroup, columnIds: registeredIds},
+    disabled: !canReorder,
+    collisionDetector: closestCenter,
   });
 
   const canSort = header.column.getCanSort();
@@ -118,8 +117,6 @@ function DataTableColumnHeader<TData extends object, TValue>({
 
   const style: React.CSSProperties = enableColumnOrdering
     ? {
-        transform: CSS.Translate.toString(transform),
-        transition,
         opacity: isDragging ? 0.8 : 1,
         zIndex: isDragging ? 1 : 0,
         position: 'relative',
@@ -138,7 +135,9 @@ function DataTableColumnHeader<TData extends object, TValue>({
 
   return (
     <TableHead
-      ref={enableColumnOrdering ? setNodeRef : undefined}
+      ref={canReorder ? ref : undefined}
+      colSpan={header.colSpan}
+      aria-hidden={header.isPlaceholder || undefined}
       style={style}
       aria-sort={canSort ? (sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none') : undefined}
       className={cn(
@@ -147,8 +146,8 @@ function DataTableColumnHeader<TData extends object, TValue>({
       )}
       onClick={canSort ? handleSort : undefined}
     >
-      {enableColumnOrdering && !header.isPlaceholder && <button
-        type='button' ref={setActivatorNodeRef} {...attributes} {...listeners}
+      {canReorder && <button
+        type='button' ref={handleRef}
         aria-label={`Reorder column ${header.column.id}`}
         className='inline-flex h-6 w-6 items-center justify-center cursor-grab'
       ><GripVertical className='h-3 w-3' aria-hidden='true' /></button>}
@@ -271,35 +270,25 @@ export interface DataTableProps<TData extends object, TValue> {
 // =============================================================================
 
 /**
- * データテーブルコンポーネント
- *
- * ソート、フィルタ、ページネーション、行選択、列並べ替えに対応した
- * 高機能なデータテーブル。TanStack Table を使用。
- *
- * ## 制御モード (Controlled Mode)
- * `sorting` と `pagination` プロップスを渡すことで、外部状態からテーブルを制御できます。
- * これにより、サーバーサイドソートとクライアントサイドページネーションといった
- * 柔軟な組み合わせが、共有ライブラリ側のロジックを変更せずに実現可能です。
- *
- * 補足:
- * - `pagination` を指定した場合、`manualPagination` が false でも `onPaginationChange` を通知します。
- * - `pagination` 指定時はデータ更新時の `pageIndex` 自動リセットを無効化します。
- *
- * @example 基本的な使い方 (Uncontrolled)
+ * Render a sortable/filterable table with host-controlled or local state.
+ * @typeParam TData - Object shape of each data row.
+ * @typeParam TValue - Column cell-value type shared by the supplied column definitions.
+ * @param props - Columns, data, presentation and feature/state options. Native leaf
+ * reordering is enabled by default; sort and reorder buttons remain separate.
+ * @returns The table with its configured toolbar, pagination and interaction surfaces.
+ * @remarks Hidden/grouped columns retain stable persisted slots; changing current
+ * columns or visibility invalidates an active reorder snapshot. Controlled sorting
+ * and pagination remain host-owned. Supplying pagination notifies onPaginationChange
+ * even without manualPagination and disables automatic page-index reset on data updates.
+ * Import Appkit CSS once; this component owns its native drag provider.
+ * @example
  * ```tsx
- * <DataTable columns={columns} data={data} />
- * ```
- *
- * @example 外部状態によるソート制御 (Controlled Sorting)
- * ```tsx
- * const [sorting, setSorting] = useState<SortingState>([]);
- * <DataTable
- *   columns={columns}
- *   data={data}
- *   sorting={sorting}
- *   onSortingChange={setSorting}
- *   manualSorting={true}
- * />
+ * import {DataTable} from '@alneas/appkit-react/tools/data-table';
+ * import '@alneas/appkit-react/styles';
+ * export function ReviewTable() {
+ *   return <DataTable data={[{id: 'one', title: 'Review'}]}
+ *     columns={[{accessorKey: 'title', header: 'Title'}]} />;
+ * }
  * ```
  */
 export function DataTable<TData extends object, TValue>({
@@ -363,7 +352,7 @@ export function DataTable<TData extends object, TValue>({
     },
   );
   const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
-    columns.map((c) => c.id || ((c as { accessorKey?: string }).accessorKey as string)),
+    getLeafColumnIds(columns),
   );
   const isPaginationControlled = controlledPagination !== undefined;
   const sorting = controlledSorting ?? localSorting;
@@ -380,11 +369,11 @@ export function DataTable<TData extends object, TValue>({
   };
   const [settingsLoaded, setSettingsLoaded] = React.useState<string | null>(null);
   const columnIdListKey = React.useMemo(
-    () => columns.map((c) => c.id || (c as { accessorKey?: string }).accessorKey || '').join('|'),
-    [columns],
+    () => JSON.stringify([...(showRowNumber ? ['rowNumber'] : []), ...getLeafColumnIds(columns)]),
+    [columns, showRowNumber],
   );
   const validColumnIds = React.useMemo(
-    () => new Set(columnIdListKey.split('|').filter(Boolean)),
+    () => new Set<string>(JSON.parse(columnIdListKey)),
     [columnIdListKey],
   );
 
@@ -552,29 +541,31 @@ export function DataTable<TData extends object, TValue>({
     }
   }, [rowSelection, table, onSelectionChange]);
 
-  // DnD Sensors (MUST be called before early return)
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  // Handle drag end callback (MUST be defined before early return)
+  // A drag captures the registered leaf subset. Hidden/changed columns never use stale indices.
+  const dragSnapshot = React.useRef<{
+    sourceId: string; groupId: string; ids: string[]; leafIds: string[]; order: string[];
+  } | null>(null);
+  const handleDragStart = React.useCallback((event: DragStartEvent) => {
+    const source = event.operation.source;
+    if (!source || !Array.isArray(source.data.columnIds)) return;
+    dragSnapshot.current = {
+      sourceId: String(source.id), groupId: source.data.groupId,
+      ids: [...source.data.columnIds], leafIds: table.getAllLeafColumns().map(column => column.id),
+      order: [...columnOrder],
+    };
+  }, [table, columnOrder]);
   const handleDragEnd = React.useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    if (active && over && active.id !== over.id) {
-      setColumnOrder((order) => {
-        const oldIndex = order.indexOf(active.id as string);
-        const newIndex = order.indexOf(over.id as string);
-        return arrayMove(order, oldIndex, newIndex);
-      });
-    }
-  }, []);
+    const snapshot = dragSnapshot.current;
+    dragSnapshot.current = null;
+    const {source, target} = event.operation;
+    if (event.canceled || !enableColumnOrdering || !snapshot || !target || !isSortable(source) || String(source.id) !== snapshot.sourceId) return;
+    const leafIds = table.getAllLeafColumns().map(column => column.id);
+    const group = table.getHeaderGroups().find(group => group.id === snapshot.groupId);
+    const registeredIds = group?.headers.filter(header => !header.isPlaceholder && header.column.columns.length === 0).map(header => header.column.id);
+    if (!registeredIds || JSON.stringify(registeredIds) !== JSON.stringify(snapshot.ids) ||
+      JSON.stringify(leafIds) !== JSON.stringify(snapshot.leafIds) || JSON.stringify(columnOrder) !== JSON.stringify(snapshot.order)) return;
+    setColumnOrder(order => reorderVisibleColumns(order, leafIds, snapshot.ids, source.data.columnId, source.initialIndex, source.index));
+  }, [table, columnOrder, enableColumnOrdering]);
 
   // Get sort index for multi-sort display (MUST be called before early return)
   const getSortIndex = React.useCallback(
@@ -587,29 +578,25 @@ export function DataTable<TData extends object, TValue>({
   // Render table content (MUST be called before early return)
   const renderTable = React.useCallback(
     () => (
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DragDropProvider
+        sensors={defaults => [...defaults.filter(sensor => sensor !== PointerSensor), PointerSensor.configure({activationConstraints: [new PointerActivationConstraints.Distance({value: 8})]})]}
+        plugins={defaults => [...defaults, Feedback.configure({feedback: 'clone', dropAnimation: {duration: 0}})]}
+        onDragStart={handleDragStart} onDragEnd={handleDragEnd}
+      >
         <div className={cn('rounded-md border', tableClassName)}>
           <Table>
             <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <SortableContext
-                  key={headerGroup.id}
-                  items={columnOrder}
-                  strategy={horizontalListSortingStrategy}
-                >
-                  <TableRow>
-                    {headerGroup.headers.map((header) => (
-                      <DataTableColumnHeader
-                        key={header.id}
-                        header={header}
-                        enableColumnOrdering={enableColumnOrdering}
-                        enableMultiSort={enableMultiSort}
-                        sortIndex={getSortIndex(header.column.id)}
-                      />
-                    ))}
-                  </TableRow>
-                </SortableContext>
-              ))}
+              {table.getHeaderGroups().map(headerGroup => {
+                const registeredIds = headerGroup.headers.filter(header => !header.isPlaceholder && header.column.columns.length === 0).map(header => header.column.id);
+                return <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map(header => <DataTableColumnHeader
+                    key={header.id} header={header} enableColumnOrdering={enableColumnOrdering}
+                    enableMultiSort={enableMultiSort} sortIndex={getSortIndex(header.column.id)}
+                    sortableIndex={registeredIds.indexOf(header.column.id)} sortableGroup={headerGroup.id}
+                    registeredIds={registeredIds}
+                  />)}
+                </TableRow>;
+              })}
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
@@ -639,10 +626,10 @@ export function DataTable<TData extends object, TValue>({
             </TableBody>
           </Table>
         </div>
-      </DndContext>
+      </DragDropProvider>
     ),
     [
-      sensors,
+      handleDragStart,
       handleDragEnd,
       table,
       columnsWithRowNumber,

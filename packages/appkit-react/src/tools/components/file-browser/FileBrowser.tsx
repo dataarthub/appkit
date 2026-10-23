@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useStorageBrowser } from './useStorageBrowser';
 import { FileNavbar } from './FileNavbar';
 import { FileListView } from './FileListView';
@@ -10,8 +10,8 @@ import type { StorageAdapter } from '../../lib/storage/types';
 import type { FileBrowserViewMode, FileNode, FileGroupingAxis, FileProvider } from './types';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { DnDProvider } from '../ui/dnd';
-import type { DragEndEvent } from '@dnd-kit/core';
+import { DnDProvider, type DnDProviderProps } from '../ui/dnd';
+import {resolveFileDrop} from './file-drop';
 
 export interface FileBrowserProps {
   /** ファイルプロバイダー（優先） */
@@ -31,10 +31,23 @@ export interface FileBrowserProps {
 }
 
 /**
- * 高機能ファイルブラウザコンポーネント
- *
- * S3, R2, OCI などのオブジェクトストレージをエクスプローラー形式で表示・操作します。
- * DBテーブル管理 + UUIDファイル名といった複雑な構成にも FileProvider を通じて対応可能です。
+ * Browse files through a host-supplied FileProvider or wrapped StorageAdapter.
+ * @param props - Provider (preferred), optional adapter, initial path (default empty),
+ * initial view mode (default grid), grouping axis, open callback and presentation.
+ * @returns The browser, native drag boundary and preview/detail surfaces.
+ * @throws An Error during rendering when neither provider nor adapter is supplied.
+ * @remarks Hosts authorize storage access. A drop moves one currently listed file
+ * into a registered folder, awaits moveNode and then refreshes the current relevant
+ * view. Canceled/stale drops do not write; navigation does not undo a write already
+ * in flight. Import Appkit CSS once; this component owns its native drag provider.
+ * @example
+ * ```tsx
+ * import {FileBrowser, type FileProvider} from '@alneas/appkit-react/tools/file-browser';
+ * import '@alneas/appkit-react/styles';
+ * export function Files({provider}: {provider: FileProvider}) {
+ *   return <div style={{height: 500}}><FileBrowser provider={provider} /></div>;
+ * }
+ * ```
  */
 export function FileBrowser({
   provider: propProvider,
@@ -49,6 +62,7 @@ export function FileBrowser({
   const [previewNode, setPreviewNode] = useState<FileNode | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [detailsNode, setDetailsNode] = useState<FileNode | null>(null);
+  const navigationEpoch = useRef(0);
 
   // アダプターが直接渡された場合は標準のプロバイダーでラップする
   const provider = useMemo(() => {
@@ -80,6 +94,7 @@ export function FileBrowser({
 
   const handleOpen = useCallback(
     async (node: FileNode) => {
+      if (node.kind === 'folder') navigationEpoch.current++;
       const url = await openNode(node);
       if (url) {
         setPreviewNode(node);
@@ -149,34 +164,38 @@ export function FileBrowser({
     input.click();
   }, [provider, state.path, refresh]);
 
-  /**
-   * ドラッグ&ドロップ終了時の処理
-   */
-  const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over) return;
-
-      const activeNode = active.data.current as FileNode;
-      const overNode = over.data.current as FileNode;
-
-      // ファイルをフォルダにドロップした場合のみ移動を実行
-      if (activeNode.kind === 'file' && overNode.kind === 'folder') {
-        const targetPath = overNode.id.endsWith('/') ? overNode.id : `${overNode.id}/`;
-
-        // 同じ場所なら何もしない
-        if (activeNode.id.startsWith(targetPath)) return;
-
-        try {
-          await provider.moveNode(activeNode.id, targetPath);
-          refresh();
-        } catch (error) {
-          alert(error instanceof Error ? error.message : 'Failed to move file');
-        }
-      }
-    },
-    [provider, refresh],
-  );
+  const dragSnapshot = useRef<{provider: FileProvider; path: string; viewMode: FileBrowserViewMode; navigationEpoch: number} | null>(null);
+  const refreshContext = useRef<{provider: FileProvider; path: string; refresh: () => void} | null>(null);
+  useLayoutEffect(() => {
+    refreshContext.current = {provider, path: state.path, refresh};
+    return () => {refreshContext.current = null;};
+  }, [provider, state.path, refresh]);
+  useLayoutEffect(() => {
+    navigationEpoch.current++;
+    return () => {navigationEpoch.current++;};
+  }, [provider, initialPath]);
+  useLayoutEffect(() => {
+    dragSnapshot.current = null;
+  }, [provider, state.path, state.viewMode, state.isLoading, state.nodes]);
+  const handleDragStart: DnDProviderProps['onDragStart'] = () => {
+    dragSnapshot.current = {provider, path: state.path, viewMode: state.viewMode, navigationEpoch: navigationEpoch.current};
+  };
+  const handleDragEnd: DnDProviderProps['onDragEnd'] = async (event, manager) => {
+    const snapshot = dragSnapshot.current;
+    dragSnapshot.current = null;
+    const {source, target} = event.operation;
+    if (!snapshot || snapshot.navigationEpoch !== navigationEpoch.current || snapshot.provider !== provider || snapshot.path !== state.path || snapshot.viewMode !== state.viewMode || state.isLoading) return;
+    if (!source || !target || manager.registry.draggables.get(source.id) !== source || manager.registry.droppables.get(target.id) !== target) return;
+    const move = resolveFileDrop(event, state.nodes);
+    if (!move) return;
+    try {
+      await provider.moveNode(move.nodeId, move.targetPath);
+      const current = refreshContext.current;
+      if (current?.provider === provider && current.path === snapshot.path && navigationEpoch.current === snapshot.navigationEpoch) current.refresh();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to move file');
+    }
+  };
 
   return (
     <div
@@ -187,8 +206,8 @@ export function FileBrowser({
         path={state.path}
         viewMode={state.viewMode}
         isLoading={state.isLoading}
-        onNavigate={navigate}
-        onNavigateUp={navigateUp}
+        onNavigate={path => {navigationEpoch.current++; navigate(path);}}
+        onNavigateUp={() => {navigationEpoch.current++; navigateUp();}}
         onSetViewMode={setViewMode}
         onRefresh={refresh}
         onSearch={search}
@@ -206,7 +225,7 @@ export function FileBrowser({
       )}
 
       {/* メインコンテンツ */}
-      <DnDProvider onDragEnd={handleDragEnd}>
+      <DnDProvider onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className='flex-1 relative flex flex-col min-h-0'>
           {state.isLoading && state.nodes.length === 0 ? (
             <div className='flex-1 flex items-center justify-center'>

@@ -181,3 +181,65 @@ export const DataAccessMode: Story = {
     }),
   },
 };
+
+import {expect,fn,userEvent,within,waitFor} from 'storybook/test';
+import type {FileProvider,FileNode} from '../../../src/tools/components/file-browser/types';
+const moveFile:FileNode={id:'report.txt',name:'Report.txt',kind:'file',size:12,contentType:'text/plain'};
+const otherFile:FileNode={id:'other.txt',name:'Other.txt',kind:'file',size:8};
+const moveFolder:FileNode={id:'archive',name:'Archive',kind:'folder'};
+function movementProvider():FileProvider{
+ let moved=false;
+ return {
+  listNodes:fn(async()=>({nodes:moved?[moveFolder]:[moveFile,moveFolder,otherFile],hasMore:false})),
+  moveNode:fn(async()=>{moved=true;}),
+  getUrl:fn(async()=> 'https://example.com/report.txt'),
+  searchNodes:fn(async()=>[]),createFolder:fn(),uploadFile:fn(),deleteNode:fn(),renameNode:fn(),
+ } as unknown as FileProvider;
+}
+async function moveWithKeyboard(canvasElement:HTMLElement,mode:'grid'|'list'){
+ const canvas=within(canvasElement);const handle=await canvas.findByRole('button',{name:'Move Report.txt'});
+ handle.focus();
+ // Native keyboard movement uses 10px increments; reach the folder using actual geometry.
+ const source=handle.closest(mode==='list'?'tr':'[data-file-drag]')!;
+ const folder=canvas.getByText('Archive').closest(mode==='list'?'tr':'[data-file-drop]')!;
+ const a=source.getBoundingClientRect(),b=folder.getBoundingClientRect();
+ const dx=b.x+b.width/2-(a.x+a.width/2),dy=b.y+b.height/2-(a.y+a.height/2);
+ await userEvent.keyboard('[Space]');
+ await waitFor(()=>expect(source).toHaveAttribute('data-dnd-dragging','true'));
+ for(let i=0;i<Math.round(Math.abs(dx)/10);i++)await userEvent.keyboard(dx>0?'{ArrowRight}':'{ArrowLeft}');
+ for(let i=0;i<Math.round(Math.abs(dy)/10);i++)await userEvent.keyboard(dy>0?'{ArrowDown}':'{ArrowUp}');
+ await waitFor(()=>expect(folder).toHaveAttribute('data-drop-over','true'));
+ await userEvent.keyboard('[Space]');
+}
+export const GridMoveContract:Story={
+ args:{provider:movementProvider(),initialViewMode:'grid',className:'h-[550px] w-full'},
+ play:async({canvasElement,args})=>{
+  const canvas=within(canvasElement);await canvas.findByRole('button',{name:'Move Report.txt'});
+  const user=userEvent.setup();
+  await user.click(canvas.getByText('Report.txt'));await user.keyboard('{Meta>}');await user.click(canvas.getByText('Other.txt'));await user.keyboard('{/Meta}');
+  await expect(canvas.getByText('2 selected')).toBeTruthy();
+  await moveWithKeyboard(canvasElement,'grid');
+  await waitFor(()=>expect(args.provider!.moveNode).toHaveBeenCalledWith('report.txt','archive/'));
+  await expect(args.provider!.moveNode).toHaveBeenCalledTimes(1);
+  await waitFor(()=>expect(canvas.queryByText('Report.txt')).toBeNull());
+ },
+};
+export const ListMoveContract:Story={
+ args:{provider:movementProvider(),initialViewMode:'list',className:'h-[550px] w-full'},
+ play:async({canvasElement,args})=>{
+  await moveWithKeyboard(canvasElement,'list');
+  await waitFor(()=>expect(args.provider!.moveNode).toHaveBeenCalledWith('report.txt','archive/'));
+  await expect(args.provider!.moveNode).toHaveBeenCalledTimes(1);
+ },
+};
+export const CancelMoveContract:Story={
+ args:{provider:movementProvider(),initialViewMode:'list',className:'h-[550px] w-full'},
+ play:async({canvasElement,args})=>{
+  const canvas=within(canvasElement);const handle=await canvas.findByRole('button',{name:'Move Report.txt'});handle.focus();
+  await userEvent.keyboard('[Space]{ArrowDown}{Escape}');
+  await waitFor(()=>expect(document.activeElement).toBe(handle));await expect(args.provider!.moveNode).not.toHaveBeenCalled();
+  await userEvent.click(canvas.getByText('Report.txt'));await expect(canvas.getByText('1 selected')).toBeTruthy();
+  await userEvent.pointer({target:canvas.getByText('Report.txt'),keys:'[MouseRight]'});await expect(await within(document.body).findByRole('menu')).toBeTruthy();
+  await userEvent.keyboard('{Escape}');
+ },
+};

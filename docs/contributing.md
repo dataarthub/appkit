@@ -51,7 +51,9 @@ React/Core compatibility and browser checks from changed inputs. Turbo reuses
 matching build/type/unit results. This command does not run live-model evaluation
 or publish packages. Git hooks can be bypassed, so the Node 24 CI job uses the same
 selector and runner after installing Gitleaks. Node 26 checks affected package
-builds, types and unit tests. CI still runs only on main updates or manual dispatch.
+builds, types and unit tests. Source quality runs for pull requests, main updates
+and manual dispatch. Only a successful main-push run for the exact release commit
+can establish authoritative publication evidence.
 
 ### Selecting verification by impact
 
@@ -195,8 +197,8 @@ not hosted identity, database authorization or seeded-backend E2E evidence.
 
 The runner executes up to six story files at a time in one viewport/theme
 condition. Each project uses one worker with file parallelism disabled; all four
-conditions and successive file batches run sequentially. A full 73-file run starts
-52 guarded invocations rather than 76. Using one viewport at a time avoids
+conditions and successive file batches run sequentially. The current 74-file suite uses
+52 guarded invocations. Using one viewport at a time avoids
 concurrent browser memory peaks while sharing startup across more files. The first
 batch in each condition contains only two files to leave room for initial
 dependency optimization; later batches contain up to six.

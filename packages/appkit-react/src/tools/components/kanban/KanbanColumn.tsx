@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import { Badge } from '../ui/badge';
 import { KanbanCard } from './KanbanCard';
@@ -13,7 +12,25 @@ import { KanbanColumnFrame } from './kanban-primitives';
 import type { KanbanColumnProps } from './types';
 
 /**
- * カンバンカラム
+ * Render a preset Kanban column with native task/column registrations.
+ * @param props - Column metadata, current tasks, optional custom renderer, click
+ * callback, test id and readOnly flag. Limits only affect warning presentation.
+ * @param ref - Forwarded column div ref, including React 19 callback cleanup.
+ * @returns The column, header/count and rendered task cards.
+ * @remarks Use inside KanbanDragSurface; it does not own persistent task state.
+ * Import Appkit CSS once. Prefer KanbanBoard when no custom surface is needed.
+ * @example
+ * ```tsx
+ * import {KanbanDragSurface, KanbanColumn, useKanbanDrag} from '@alneas/appkit-react/tools/kanban';
+ * import '@alneas/appkit-react/styles';
+ * export function OneColumn() {
+ *   const tasks = [{id: 'one', title: 'Review', status: 'todo'}];
+ *   const controller = useKanbanDrag({tasks});
+ *   return <KanbanDragSurface controller={controller}>
+ *     <KanbanColumn column={{id: 'todo', title: 'Todo'}} tasks={tasks} />
+ *   </KanbanDragSurface>;
+ * }
+ * ```
  */
 export const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
   ({ column, tasks, onTaskClick, testId, renderCard, readOnly }, ref) => {
@@ -46,7 +63,7 @@ export const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
           data-slot='kanban-column-content'
           className='flex flex-1 flex-col gap-2 overflow-y-auto'
         >
-          <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+          <>
             {tasks.map((task) => (
               <React.Fragment key={task.id}>
                 {renderCard ? (
@@ -66,7 +83,7 @@ export const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
                 )}
               </React.Fragment>
             ))}
-          </SortableContext>
+          </>
 
           {/* 空状態 */}
           {tasks.length === 0 && (

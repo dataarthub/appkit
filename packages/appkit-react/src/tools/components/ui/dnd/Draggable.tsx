@@ -1,36 +1,46 @@
-import React from 'react';
-import { useDraggable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
+import type {CSSProperties, ReactNode} from 'react';
+import {useDraggable} from '@dnd-kit/react';
 
+/** Native draggable options; render refs replace legacy attributes/listeners. */
 export interface DraggableProps {
-  /** 一意識別子 */
+  /** Unique identifier within the provider. */
   id: string;
-  /** ドラッグイベントに付随させるデータ */
+  /** Native source.data payload. */
   data?: Record<string, any>;
-  /** 子要素 */
+  /** Attach ref to the moving element and optional handleRef to its activator. */
   children: (props: {
-    attributes: any;
-    listeners: any;
-    setNodeRef: (node: HTMLElement | null) => void;
+    /** Attach to the element moved by native feedback; pass null on removal. */
+    ref: (element: Element | null) => void;
+    /** Optional separate activator; otherwise the element itself activates dragging. */
+    handleRef: (element: Element | null) => void;
+    /** Whether this registration is the current dragging source. */
     isDragging: boolean;
-    style: React.CSSProperties;
-  }) => React.ReactNode;
+    /** Cursor/opacity presentation only; native feedback owns movement transforms. */
+    style: CSSProperties;
+  }) => ReactNode;
 }
 
 /**
- * ドラッグ可能な要素を作成するコンポーネント
+ * Register an element and optional separate handle with the native provider.
+ * @param props - Unique string id, optional source.data payload and render callback.
+ * @returns The rendered child inside a fragment; input listeners are installed natively.
+ * @remarks Place under DnDProvider. Keep nested interactive controls outside the
+ * handle when they must remain independently clickable. See the migration guide
+ * for native event and feedback semantics.
+ * @example
+ * ```tsx
+ * import {DnDProvider, Draggable} from '@alneas/appkit-react/tools/ui';
+ * import '@alneas/appkit-react/styles';
+ * export function MovableItem() {
+ *   return <DnDProvider><Draggable id="report" data={{name: 'Report'}}>
+ *     {({ref, handleRef, style}) => <div ref={ref} style={style}>
+ *       <button ref={handleRef}>Move report</button>
+ *     </div>}
+ *   </Draggable></DnDProvider>;
+ * }
+ * ```
  */
-export function Draggable({ id, data, children }: DraggableProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id,
-    data,
-  });
-
-  const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.5 : undefined,
-    cursor: 'grab',
-  };
-
-  return <>{children({ attributes, listeners, setNodeRef, isDragging, style })}</>;
+export function Draggable({id, data, children}: DraggableProps) {
+  const {ref, handleRef, isDragging} = useDraggable({id, data});
+  return <>{children({ref, handleRef, isDragging, style: {opacity: isDragging ? 0.5 : undefined, cursor: 'grab'}})}</>;
 }

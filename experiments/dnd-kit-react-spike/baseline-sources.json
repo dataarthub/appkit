@@ -1,0 +1,25 @@
+{
+  "commit": "9eb2b623ed35b2a78201a2abc9d64deac04f9159",
+  "files": [
+    {
+      "snapshot": "baseline-sensors.ts",
+      "source": "packages/appkit-react/src/tools/components/kanban/use-kanban-sensors.ts",
+      "sha256": "28282e9008c05020eec61b33fc907936fc4ae9fb0c89321dd6aaa65fcd87458f"
+    },
+    {
+      "snapshot": "baseline-resolver.ts",
+      "source": "packages/appkit-react/src/tools/components/kanban/kanban-drag.ts",
+      "sha256": "af7db14cbb4832b19bb58363211e7c386aa21c48b7a8802249f40554a99b4aaf"
+    },
+    {
+      "snapshot": "types.ts",
+      "source": "packages/appkit-react/src/tools/components/kanban/types.ts",
+      "sha256": "a96f92770e5c2e2f5bb8497005be1cf462c4017506ab7c11065abd75c9b30293"
+    },
+    {
+      "snapshot": "legacy-jsx-shim.ts",
+      "source": "packages/appkit-react/src/tools/types/dnd-react19.ts",
+      "sha256": "2932a34cceef7f3da3159e6980a440aca7532ddc34ab91ffeac89fd873aea9f1"
+    }
+  ]
+}

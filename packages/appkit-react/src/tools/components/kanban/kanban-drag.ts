@@ -1,14 +1,29 @@
-import type { DragEndEvent } from '@dnd-kit/core';
 import type { KanbanColumn, KanbanTask } from './types';
 
-/** Internal shared drop resolution. A move changes status, never the order within a column. */
+/**
+ * Resolve a status-only move from the retained structural active/over event shape.
+ * @param event - Active id and nullable over target with optional data.current metadata.
+ * @param tasks - Current task listing; it is not mutated.
+ * @param statusField - Task property containing the column id.
+ * @param columns - Optional live preset columns; omitted for compound registrations.
+ * @returns The taskId/status pair, or null for unknown, unchanged or invalid targets.
+ * @remarks This helper retains its legacy-shaped structural input without a
+ * dependency on legacy dnd-kit types. It never persists within-column order.
+ * @example
+ * ```tsx
+ * import {resolveKanbanMove} from '@alneas/appkit-react/tools/kanban';
+ * const tasks = [{id: 'one', title: 'Review', status: 'todo'}];
+ * export const move = resolveKanbanMove({active: {id: 'one'},
+ *   over: {id: 'done', data: {current: {type: 'Column'}}}}, tasks, 'status');
+ * ```
+ */
 export function resolveKanbanMove(
   {
     active,
     over,
   }: {
-    active: Pick<DragEndEvent['active'], 'id'>;
-    over: Pick<NonNullable<DragEndEvent['over']>, 'id' | 'data'> | null;
+    active: {id: string | number};
+    over: {id: string | number; data: {current?: Record<string, unknown>}} | null;
   },
   tasks: KanbanTask[],
   statusField: string,

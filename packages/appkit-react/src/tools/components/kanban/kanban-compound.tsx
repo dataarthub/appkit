@@ -11,7 +11,6 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import * as React from 'react';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { cn } from "../../lib/utils";
 import { Badge } from '../ui/badge';
 import { KanbanCardView } from './KanbanCardView';
@@ -192,7 +191,7 @@ export function KanbanColumnBodySlot({
       className={cn('flex flex-1 flex-col gap-2 overflow-y-auto', className)}
       {...props}
     >
-      <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+      <>
         {children ? (
           children
         ) : tasks.length > 0 ? (
@@ -202,7 +201,7 @@ export function KanbanColumnBodySlot({
             {emptyMessage}
           </div>
         )}
-      </SortableContext>
+      </>
     </div>
   );
 }
