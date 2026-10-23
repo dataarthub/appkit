@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {runBrowserBatches} from './browser-batches.mjs';
 
-test('paired batches execute each selected story in all four projects within the original budgets', async () => {
+test('single-viewport batches cover every selected story exactly once within the original budgets', async () => {
   const files = Array.from({length: 7}, (_, i) => `story-${i}.stories.tsx`);
   const coverage = [], logs = [];
   let calls = 0;
@@ -15,18 +15,18 @@ test('paired batches execute each selected story in all four projects within the
       assert.equal(options.timeoutMs, 600_000);
       const projects = args.filter(arg => arg.startsWith('--project=')).map(arg => arg.slice(10));
       const selected = args.filter(arg => arg.endsWith('.stories.tsx'));
-      assert.equal(projects.length, calls % 5 < 2 ? 1 : 2);
-      if (calls % 5 < 2) assert.deepEqual(selected, files.slice(0, 2));
-      assert.ok(selected.length > 0 && selected.length <= 2);
+      assert.equal(projects.length, 1);
+      assert.deepEqual(selected, calls % 2 === 0 ? files.slice(0, 6) : files.slice(6));
+      assert.ok(selected.length > 0 && selected.length <= 6);
       assert.match(logs.at(-1), /Starting Storybook/); // progress precedes execution
       for (const project of projects) for (const file of selected) coverage.push(`${project}:${file}`);
       calls++;
       return {ok: true, code: 0, peakMiB: 1024};
     }});
-  assert.equal(calls, 10);
+  assert.equal(calls, 8);
   const expected = ['light-desktop', 'light-mobile', 'dark-desktop', 'dark-mobile'].flatMap(project => files.map(file => `${project}:${file}`));
   assert.deepEqual(coverage.sort(), expected.sort());
-  assert.equal(logs.filter(line => /completed/.test(line)).length, 10);
+  assert.equal(logs.filter(line => /completed/.test(line)).length, 8);
 });
 
 test('a failed test or memory guard stops subsequent batches and cannot produce a pass', async () => {

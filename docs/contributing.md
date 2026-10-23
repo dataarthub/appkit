@@ -98,7 +98,7 @@ lockfile, Node/Bun/platform/architecture, CI image and relevant environment. A p
 suite cannot satisfy another selection or the full suite; only successful task
 execution is cached. Cache hits suppress old browser output so replayed logs do
 not look like a fresh browser run. A cache miss runs the unchanged four browser conditions with
-two-file batches, pairing desktop/mobile for each theme within one guarded invocation.
+six-file batches, executing one viewport/theme condition per guarded invocation.
 Each viewport project retains one worker and sequential files. Core-only changes still run relevant unit/types
 and the two-Core matrix; import analysis determines whether UI tests are needed.
 Unknown inputs, unreadable metadata and changed resolved dependencies remain
@@ -193,13 +193,12 @@ keyboard navigation and focus return; layout checks measure containment, overflo
 tap targets, clipping and overlap. These are isolated component/host-contract tests,
 not hosted identity, database authorization or seeded-backend E2E evidence.
 
-The runner executes two story files at a time, pairing desktop/mobile within
-each theme. Each viewport project uses one worker with file parallelism disabled.
-The two viewport projects share Vite startup and one aggregate process-tree guard;
-light and dark themes and successive file batches run sequentially. A full
-73-file run starts 76 guarded invocations rather than 100. The first file batch
-for each theme runs its viewports separately to avoid overlapping cold-start
-memory peaks; subsequent batches pair them. Turbo streams fresh
+The runner executes up to six story files at a time in one viewport/theme
+condition. Each project uses one worker with file parallelism disabled; all four
+conditions and successive file batches run sequentially. A full 73-file run starts
+52 guarded invocations rather than 76. Using one viewport at a time avoids
+concurrent browser memory peaks while sharing startup across more files.
+Turbo streams fresh
 browser output immediately, including batch start/completion, duration and RSS;
 cache hits still suppress replayed test logs. Each batch gets a fresh process
 tree. Aggregate RSS is capped at the smaller of 3 GiB and one-third of physical
