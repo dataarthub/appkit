@@ -31,8 +31,13 @@ export interface CheckboxProps extends CheckboxPrimitive.Root.Props {
  * }
  * ```
  */
-const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
-  ({ className, testId, ...props }, ref) => (
+function Checkbox({
+  ref,
+  className,
+  testId,
+  ...props
+}: React.PropsWithoutRef<CheckboxProps> & React.RefAttributes<HTMLButtonElement>) {
+  return (
     <CheckboxPrimitive.Root
       ref={ref}
       data-slot='checkbox'
@@ -50,8 +55,8 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
         <CheckIcon />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
-  ),
-);
+  );
+}
 Checkbox.displayName = 'Checkbox';
 
 export { Checkbox };

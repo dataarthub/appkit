@@ -39,21 +39,26 @@ export interface FormContainerProps extends React.HTMLAttributes<HTMLDivElement>
  * </FormContainer>
  * ```
  */
-export const FormContainer = React.forwardRef<HTMLDivElement, FormContainerProps>(
-  ({ className, maxWidth = '4xl', fullWidth = false, children, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'mx-auto w-full px-4 py-6 md:px-6 lg:px-8',
-          !fullWidth && containerWidths[maxWidth],
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  },
-);
+export function FormContainer({
+  ref,
+  className,
+  maxWidth = '4xl',
+  fullWidth = false,
+  children,
+  ...props
+}: React.PropsWithoutRef<FormContainerProps> & React.RefAttributes<HTMLDivElement>) {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        'mx-auto w-full px-4 py-6 md:px-6 lg:px-8',
+        !fullWidth && containerWidths[maxWidth],
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
 FormContainer.displayName = 'FormContainer';

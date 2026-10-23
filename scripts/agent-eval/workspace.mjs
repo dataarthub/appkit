@@ -21,7 +21,7 @@ export function collectSubmission({outputDir,allowedPaths,destination,protectedD
  mkdirSync(destination,{recursive:true});for(const file of found){const target=path.join(destination,file.path);if(existsSync(target))throw Error('Submission destination already exists');mkdirSync(path.dirname(target),{recursive:true});writeFileSync(target,file.bytes,{flag:'wx'});}
  return {files:found.map(f=>({path:f.path,sha256:sha256(f.bytes),size:f.bytes.length})),digest:canonicalDigest(found),protectedInputsDigest:protectedDir?fixtureDigest(protectedDir):null};
 }
-export const evaluationDependencies=['react@19.2.3','react-dom@19.2.3','typescript@6.0.3','@types/node@24','@types/react@19','@types/react-dom@19','jsdom@26.1.0','@testing-library/react@16.3.0','@testing-library/dom@10.4.1'];
+export const evaluationDependencies=['react@19.2.3','react-dom@19.2.3','typescript@6.0.3','@types/node@24','@types/react@19','@types/react-dom@19','jsdom@30.1.3','@testing-library/react@16.3.0','@testing-library/dom@10.4.1'];
 export function prepareOutputFiles(output,allowedPaths){
  chmodSync(output,0o777);
  for(const file of allowedPaths){if(!relativePath(file))throw Error('Invalid output path');const target=path.join(output,file);mkdirSync(path.dirname(target),{recursive:true});let dir=path.dirname(target);while(dir!==output){chmodSync(dir,0o777);dir=path.dirname(dir);}if(existsSync(target)){const stat=lstatSync(target);if(!stat.isFile()||stat.nlink!==1)throw Error('Unsafe starter output');chmodSync(target,0o666);}}

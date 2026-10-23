@@ -18,21 +18,26 @@ import { cn } from '../../lib/utils';
  * }
  * ```
  */
-const Separator = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive>
->(({ className, orientation = 'horizontal', ...props }, ref) => (
-  <SeparatorPrimitive
-    ref={ref}
-    data-slot='separator'
-    orientation={orientation}
-    className={cn(
-      'bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch',
-      className,
-    )}
-    {...props}
-  />
-));
+function Separator({
+  ref,
+  className,
+  orientation = 'horizontal',
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof SeparatorPrimitive>> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
+    <SeparatorPrimitive
+      ref={ref}
+      data-slot='separator'
+      orientation={orientation}
+      className={cn(
+        'bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 Separator.displayName = SeparatorPrimitive.displayName;
 
 export { Separator };

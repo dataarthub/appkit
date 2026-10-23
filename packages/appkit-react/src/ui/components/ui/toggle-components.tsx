@@ -20,17 +20,23 @@ import { toggleVariants } from './toggle-variants';
  * }
  * ```
  */
-const Toggle = React.forwardRef<
-  HTMLButtonElement,
-  TogglePrimitive.Props & VariantProps<typeof toggleVariants>
->(({ className, variant, size, ...props }, ref) => (
-  <TogglePrimitive
-    ref={ref}
-    data-slot='toggle'
-    className={cn(toggleVariants({ variant, size, className }))}
-    {...props}
-  />
-));
+function Toggle({
+  ref,
+  className,
+  variant,
+  size,
+  ...props
+}: React.PropsWithoutRef<TogglePrimitive.Props & VariantProps<typeof toggleVariants>> &
+  React.RefAttributes<HTMLButtonElement>) {
+  return (
+    <TogglePrimitive
+      ref={ref}
+      data-slot='toggle'
+      className={cn(toggleVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
+}
 Toggle.displayName = 'Toggle';
 
 export { Toggle };

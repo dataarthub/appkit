@@ -17,27 +17,33 @@ import { cn } from '../../lib/utils';
  * }
  * ```
  */
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<'div'> & { /**
- * Visual size preset; defaults to default unless the owning component states otherwise.
- */
-  /**
-   * Visual size preset; defaults to default unless the owning component states otherwise.
-   */
-  size?: 'default' | 'sm' }
->(({ className, size = 'default', ...props }, ref) => (
-  <div
-    ref={ref}
-    data-slot='card'
-    data-size={size}
-    className={cn(
-      'ring-foreground/10 bg-card text-card-foreground gap-4 overflow-hidden rounded-xl py-4 text-sm ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
-      className,
-    )}
-    {...props}
-  />
-));
+function Card({
+  ref,
+  className,
+  size = 'default',
+  ...props
+}: React.PropsWithoutRef<
+  React.ComponentProps<'div'> & {
+    /**
+     * Visual size preset; defaults to default unless the owning component states otherwise.
+     */
+    size?: 'default' | 'sm';
+  }
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
+    <div
+      ref={ref}
+      data-slot='card'
+      data-size={size}
+      className={cn(
+        'ring-foreground/10 bg-card text-card-foreground gap-4 overflow-hidden rounded-xl py-4 text-sm ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 Card.displayName = 'Card';
 
 /**
@@ -55,8 +61,12 @@ Card.displayName = 'Card';
  * }
  * ```
  */
-const CardHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function CardHeader({
+  ref,
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='card-header'
@@ -66,8 +76,8 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 CardHeader.displayName = 'CardHeader';
 
 /**
@@ -85,8 +95,12 @@ CardHeader.displayName = 'CardHeader';
  * }
  * ```
  */
-const CardTitle = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function CardTitle({
+  ref,
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='card-title'
@@ -96,8 +110,8 @@ const CardTitle = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 CardTitle.displayName = 'CardTitle';
 
 /**
@@ -115,16 +129,20 @@ CardTitle.displayName = 'CardTitle';
  * }
  * ```
  */
-const CardDescription = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function CardDescription({
+  ref,
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='card-description'
       className={cn('text-muted-foreground text-sm', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 CardDescription.displayName = 'CardDescription';
 
 /**
@@ -142,16 +160,20 @@ CardDescription.displayName = 'CardDescription';
  * }
  * ```
  */
-const CardAction = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function CardAction({
+  ref,
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='card-action'
       className={cn('col-start-2 row-span-2 row-start-1 self-start justify-self-end', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 CardAction.displayName = 'CardAction';
 
 /**
@@ -169,16 +191,20 @@ CardAction.displayName = 'CardAction';
  * }
  * ```
  */
-const CardContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function CardContent({
+  ref,
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='card-content'
       className={cn('px-4 group-data-[size=sm]/card:px-3', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 CardContent.displayName = 'CardContent';
 
 /**
@@ -196,8 +222,12 @@ CardContent.displayName = 'CardContent';
  * }
  * ```
  */
-const CardFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function CardFooter({
+  ref,
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='card-footer'
@@ -207,8 +237,8 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 CardFooter.displayName = 'CardFooter';
 
 export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent };

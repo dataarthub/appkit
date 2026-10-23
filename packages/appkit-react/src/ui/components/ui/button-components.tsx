@@ -38,30 +38,40 @@ export interface ButtonProps
  * }
  * ```
  */
-const Button = React.forwardRef<HTMLElement, ButtonProps>(
-  ({ className, variant, size, testId, loading, disabled, children, ...props }, ref) => {
-    const isDisabled = disabled || loading;
+function Button({
+  ref,
+  className,
+  variant,
+  size,
+  testId,
+  loading,
+  disabled,
+  children,
+  ...props
+}: React.PropsWithoutRef<ButtonProps> & React.RefAttributes<HTMLElement>) {
+  const isDisabled = disabled || loading;
 
-    return (
-      <ButtonPrimitive
-        ref={ref}
-        data-slot='button'
-        data-testid={testId}
-        data-loading={loading || undefined}
-        data-destructive={variant === 'destructive' || undefined}
-        aria-busy={loading || undefined}
-        disabled={isDisabled}
-        className={typeof className === 'function' ? state => cn(buttonVariants({ variant, size }), className(state)) : cn(buttonVariants({ variant, size, className }))}
-        {...props}
-      >
-        {loading && (
-          <Loader2 className='mr-2 h-4 w-4 animate-spin' aria-hidden='true' />
-        )}
-        {children}
-      </ButtonPrimitive>
-    );
-  },
-);
+  return (
+    <ButtonPrimitive
+      ref={ref}
+      data-slot='button'
+      data-testid={testId}
+      data-loading={loading || undefined}
+      data-destructive={variant === 'destructive' || undefined}
+      aria-busy={loading || undefined}
+      disabled={isDisabled}
+      className={
+        typeof className === 'function'
+          ? (state) => cn(buttonVariants({ variant, size }), className(state))
+          : cn(buttonVariants({ variant, size, className }))
+      }
+      {...props}
+    >
+      {loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' aria-hidden='true' />}
+      {children}
+    </ButtonPrimitive>
+  );
+}
 Button.displayName = 'Button';
 
 export { Button };

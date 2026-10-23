@@ -157,10 +157,13 @@ const fieldVariants = cva('data-[invalid]:text-destructive gap-2 group/field fle
  * }
  * ```
  */
-const Field = React.forwardRef<
-  HTMLDivElement,
-  FieldPrimitive.Root.Props & VariantProps<typeof fieldVariants>
->(({ className, orientation = 'vertical', ...props }, ref) => {
+function Field({
+  ref,
+  className,
+  orientation = 'vertical',
+  ...props
+}: React.PropsWithoutRef<FieldPrimitive.Root.Props & VariantProps<typeof fieldVariants>> &
+  React.RefAttributes<HTMLDivElement>) {
   return (
     <FieldPrimitive.Root
       ref={ref}
@@ -170,7 +173,7 @@ const Field = React.forwardRef<
       {...props}
     />
   );
-});
+}
 Field.displayName = 'Field';
 
 // ============================================================================
@@ -221,23 +224,25 @@ function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
  * }
  * ```
  */
-const FieldLabel = React.forwardRef<HTMLLabelElement, FieldPrimitive.Label.Props>(
-  ({ className, ...props }, ref) => {
-    return (
-      <FieldPrimitive.Label
-        ref={ref}
-        data-slot='field-label'
-        className={cn(
-          'has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled]/field:opacity-50 has-[>[data-slot=field]]:rounded-lg has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-2.5 group/field-label peer/field-label flex w-fit leading-snug text-sm font-medium',
-          'has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col',
-          'data-[invalid]:text-destructive',
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
-);
+function FieldLabel({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<FieldPrimitive.Label.Props> & React.RefAttributes<HTMLLabelElement>) {
+  return (
+    <FieldPrimitive.Label
+      ref={ref}
+      data-slot='field-label'
+      className={cn(
+        'has-data-checked:bg-primary/5 has-data-checked:border-primary dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled]/field:opacity-50 has-[>[data-slot=field]]:rounded-lg has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-2.5 group/field-label peer/field-label flex w-fit leading-snug text-sm font-medium',
+        'has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col',
+        'data-[invalid]:text-destructive',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 FieldLabel.displayName = 'FieldLabel';
 
 // ============================================================================
@@ -291,23 +296,26 @@ function FieldTitle({ className, ...props }: React.ComponentProps<'div'>) {
  * }
  * ```
  */
-const FieldDescription = React.forwardRef<HTMLParagraphElement, FieldPrimitive.Description.Props>(
-  ({ className, ...props }, ref) => {
-    return (
-      <FieldPrimitive.Description
-        ref={ref}
-        data-slot='field-description'
-        className={cn(
-          'text-muted-foreground text-left text-sm [[data-variant=legend]+&]:-mt-1.5 leading-normal font-normal group-has-[[data-orientation=horizontal]]/field:text-balance',
-          'last:mt-0 nth-last-2:-mt-1',
-          '[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4',
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
-);
+function FieldDescription({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<FieldPrimitive.Description.Props> &
+  React.RefAttributes<HTMLParagraphElement>) {
+  return (
+    <FieldPrimitive.Description
+      ref={ref}
+      data-slot='field-description'
+      className={cn(
+        'text-muted-foreground text-left text-sm [[data-variant=legend]+&]:-mt-1.5 leading-normal font-normal group-has-[[data-orientation=horizontal]]/field:text-balance',
+        'last:mt-0 nth-last-2:-mt-1',
+        '[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 FieldDescription.displayName = 'FieldDescription';
 
 // ============================================================================
@@ -381,21 +389,32 @@ function FieldSeparator({
  * }
  * ```
  */
-const FieldError = React.forwardRef<
-  HTMLDivElement,
+function FieldError({
+  ref,
+  className,
+  children,
+  errors,
+  ...props
+}: React.PropsWithoutRef<
   FieldPrimitive.Error.Props & {
     /**
      * Explicit validation messages; duplicate message strings are collapsed and missing/empty messages may yield no content.
      */
-    errors?: Array<{ /**
- * Optional error message used for deduplication and display; missing messages do not render a list item.
- */
-    /**
-     * Optional error message used for deduplication and display; missing messages do not render a list item.
-     */
-    message?: string } | undefined>;
+    errors?: Array<
+      | {
+          /**
+           * Optional error message used for deduplication and display; missing messages do not render a list item.
+           */
+          /**
+           * Optional error message used for deduplication and display; missing messages do not render a list item.
+           */
+          message?: string;
+        }
+      | undefined
+    >;
   }
->(({ className, children, errors, ...props }, ref) => {
+> &
+  React.RefAttributes<HTMLDivElement>) {
   const content = useMemo(() => {
     if (children) {
       return children;
@@ -432,7 +451,7 @@ const FieldError = React.forwardRef<
       {content}
     </FieldPrimitive.Error>
   );
-});
+}
 FieldError.displayName = 'FieldError';
 
 // ============================================================================

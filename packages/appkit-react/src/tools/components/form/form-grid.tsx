@@ -70,19 +70,24 @@ const columnClasses = {
  * }
  * ```
  */
-export const FormGrid = React.forwardRef<HTMLDivElement, FormGridProps>(
-  ({ className, columns = 2, gap = 'md', children, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn('grid', columnClasses[columns], gapClasses[gap], className)}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  },
-);
+export function FormGrid({
+  ref,
+  className,
+  columns = 2,
+  gap = 'md',
+  children,
+  ...props
+}: React.PropsWithoutRef<FormGridProps> & React.RefAttributes<HTMLDivElement>) {
+  return (
+    <div
+      ref={ref}
+      className={cn('grid', columnClasses[columns], gapClasses[gap], className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
 FormGrid.displayName = 'FormGrid';
 
 /**
@@ -111,13 +116,17 @@ export interface FormGridItemProps extends React.HTMLAttributes<HTMLDivElement> 
  * }
  * ```
  */
-export const FormGridItem = React.forwardRef<HTMLDivElement, FormGridItemProps>(
-  ({ className, width = 'medium', children, ...props }, ref) => {
-    return (
-      <div ref={ref} className={cn(widthToSpan[width], className)} {...props}>
-        {children}
-      </div>
-    );
-  },
-);
+export function FormGridItem({
+  ref,
+  className,
+  width = 'medium',
+  children,
+  ...props
+}: React.PropsWithoutRef<FormGridItemProps> & React.RefAttributes<HTMLDivElement>) {
+  return (
+    <div ref={ref} className={cn(widthToSpan[width], className)} {...props}>
+      {children}
+    </div>
+  );
+}
 FormGridItem.displayName = 'FormGridItem';

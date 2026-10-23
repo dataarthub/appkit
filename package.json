@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "bun@1.4.0",
   "engines": {
-    "node": ">=24.0.0"
+    "node": "^24.15.0 || >=26.0.0"
   },
   "workspaces": [
     "packages/*"
@@ -37,31 +37,35 @@
     "test:react-core-tooling": "node --test scripts/react-core/*.test.mjs",
     "test:publish-tooling": "node --test scripts/publish/*.test.mjs",
     "check:react-core": "node scripts/check-react-core.mjs",
-    "check:quality": "bun run secrets:check && bun run lint && bun run test:quality-tooling && bun run test:npm-deployments && bun run test:react-core-tooling && bun run test:publish-tooling",
+    "check:quality": "bun run secrets:check && bun run lint && bun run test:quality-tooling && bun run test:npm-deployments && bun run test:react-core-tooling && bun run test:publish-tooling && bun run test:typescript-tooling",
     "verify:push": "bun run check:quality && bun run verify && bun run test:agent-tooling && bun run check:react-core && bun run test:storybook",
     "storybook": "bun run storybook:prepare && bun run --cwd packages/appkit-react storybook",
     "build-storybook": "bun run storybook:prepare && bun run --cwd packages/appkit-react build-storybook",
     "check:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs && bun run --cwd packages/appkit-react typecheck:storybook",
     "storybook:prepare": "bun run turbo run build --filter=@alneas/appkit-core && bun run --cwd packages/appkit-react generate:i18n",
-    "test:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs scripts/guarded-process.test.mjs && node scripts/test-storybook.mjs"
+    "test:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs scripts/guarded-process.test.mjs && node scripts/test-storybook.mjs",
+    "typecheck:6": "bun run --cwd packages/appkit-core typecheck:6 && bun run --cwd packages/appkit-react typecheck:6 && bun run --cwd packages/appkit-react typecheck:storybook:6",
+    "typecheck:7": "bun run --cwd packages/appkit-core typecheck:7 && bun run --cwd packages/appkit-react typecheck:7 && bun run --cwd packages/appkit-react typecheck:storybook:7",
+    "test:typescript-tooling": "node --test scripts/typescript.test.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
-    "@storybook/addon-a11y": "10.6.0",
-    "@storybook/addon-docs": "10.6.0",
-    "@storybook/addon-vitest": "10.6.0",
-    "@storybook/react-vite": "10.6.0",
+    "@biomejs/biome": "2.6.2",
+    "@storybook/addon-a11y": "10.6.3",
+    "@storybook/addon-docs": "10.6.3",
+    "@storybook/addon-vitest": "10.6.3",
+    "@storybook/react-vite": "10.6.3",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.1",
-    "@vitest/browser-playwright": "4.1.12",
+    "@vitest/browser-playwright": "5.0.5",
     "husky": "9.1.7",
     "lint-staged": "17.6.0",
-    "msw": "2.15.0",
-    "playwright": "1.62.1",
-    "storybook": "10.6.0",
-    "turbo": "2.11.9",
-    "typescript": "6.0.3",
-    "vitest": "4.1.12",
-    "yaml": "2.9.1"
+    "msw": "3.0.3",
+    "playwright": "1.64.1",
+    "storybook": "10.6.3",
+    "turbo": "2.11.10",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vitest": "5.0.5",
+    "yaml": "2.9.1",
+    "@typescript/native": "npm:typescript@7.0.2"
   }
 }

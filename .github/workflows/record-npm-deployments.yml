@@ -22,6 +22,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+          check-latest: true
       # API ref is the selected tag's commit, not this workflow's current ref.
       # Do not set job.environment here: that would create an unrelated deployment.
       - name: Verify registry versions and record both package deployments

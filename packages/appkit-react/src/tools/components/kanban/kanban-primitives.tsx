@@ -66,7 +66,14 @@ export function KanbanDraggableCard({
   );
 }
 
-/** Shared column registration and drag-over presentation; headers and contents remain composable. */
+/**
+ * Shared column registration and drag-over presentation; headers and contents remain composable.
+ * @remarks Retained forwardRef during the React 19 migration because this component
+ * composes the caller's object/callback ref with the DnD droppable registration and
+ * forwards callback-ref cleanup. It is not a direct DOM-ref passthrough. A future
+ * ref-as-prop migration should separately verify registration, ref replacement and
+ * cleanup; forwardRef is not technically required by React 19 for this pattern.
+ */
 export const KanbanColumnFrame = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { column: KanbanColumn; isOverLimit?: boolean }
@@ -79,7 +86,8 @@ export const KanbanColumnFrame = React.forwardRef<
     (node: HTMLDivElement | null) => {
       setNodeRef(node);
       if (typeof ref === 'function') {
-        // ForwardedRef also supports React 18's void return type; React 19 may return cleanup.
+        // Callback refs may return no value or a React 19 cleanup function.
+        // Narrow the result before composing it with droppable-registration cleanup.
         const cleanup: unknown = ref(node);
         if (typeof cleanup === 'function')
           return () => {

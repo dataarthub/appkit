@@ -19,8 +19,12 @@ import { cn } from '../../lib/utils';
  * }
  * ```
  */
-const Label = React.forwardRef<HTMLLabelElement, React.ComponentProps<'label'>>(
-  ({ className, ...props }, ref) => (
+function Label({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentProps<'label'>> & React.RefAttributes<HTMLLabelElement>) {
+  return (
     <label
       ref={ref}
       data-slot='label'
@@ -30,8 +34,8 @@ const Label = React.forwardRef<HTMLLabelElement, React.ComponentProps<'label'>>(
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 Label.displayName = 'Label';
 
 export { Label };

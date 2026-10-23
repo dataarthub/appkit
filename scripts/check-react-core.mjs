@@ -65,7 +65,7 @@ try {
     const fixture = path.join(temporary, lane);
     mkdirSync(fixture);
     const selected = lane === 'current' ? current : candidate;
-    for (const directory of ['src', 'examples']) {
+    for (const directory of ['src', 'examples', 'messages']) {
       const source = path.join(root, 'packages/appkit-react', directory);
       files(source); cpSync(source, path.join(fixture, directory), {recursive: true});
     }
@@ -79,7 +79,12 @@ try {
     run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--legacy-peer-deps'], fixture, lane + '-install');
     const installed = verifyInstalledCore(fixture, selected);
     const bin = name => path.join(fixture, 'node_modules/.bin', name);
-    run(bin('tsc'), ['--noEmit', '--project', 'tsconfig.json'], fixture, lane + '-source-types');
+    for (const [compiler, version] of [['tsc6', 'Version 6.0.3'], ['tsc', 'Version 7.0.2']]) {
+      if (run(bin(compiler), ['--version'], fixture, lane + '-version-' + compiler).trim() !== version) throw Error('Incorrect compiler routing: ' + compiler);
+    }
+    for (const compiler of ['tsc6', 'tsc']) {
+      run(bin(compiler), ['--noEmit', '--project', 'tsconfig.json'], fixture, lane + '-source-types-' + compiler);
+    }
     const unitFiles = files(path.join(fixture, 'src')).filter(f => /\.(test|spec)\.tsx?$/.test(f));
     const bunTests = unitFiles.filter(f => !/from\s*['"]vitest['"]/.test(readFileSync(f, 'utf8')));
     if (bunTests.length) run('bun', ['test', ...bunTests], fixture, lane + '-bun-tests');
@@ -88,11 +93,12 @@ try {
     writeFileSync(path.join(fixture, 'consumer.tsx'), `import * as root from '@alneas/appkit-react'; import * as ui from '@alneas/appkit-react/ui'; import * as tools from '@alneas/appkit-react/tools'; import * as ai from '@alneas/appkit-react/ai'; console.log(root,ui,tools,ai); export {RequestForm} from './RequestForm.js';\n`);
     writeFileSync(path.join(fixture, 'consumer-commonjs.cts'), `import root = require('@alneas/appkit-react'); import ui = require('@alneas/appkit-react/ui'); import tools = require('@alneas/appkit-react/tools'); import ai = require('@alneas/appkit-react/ai'); export const Button: typeof ui.Button = root.Button; console.log(tools,ai);\n`);
     writeFileSync(path.join(fixture, 'consumer-tsconfig.json'), JSON.stringify({compilerOptions: {target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', jsx: 'react-jsx', strict: true, skipLibCheck: false, esModuleInterop: true, outDir: 'compiled', types: ['node', 'react', 'react-dom']}, files: ['consumer.tsx', 'consumer-commonjs.cts', 'RequestForm.tsx']}));
-    run(bin('tsc'), ['--project', 'consumer-tsconfig.json'], fixture, lane + '-consumer-types');
+    run(bin('tsc'), ['--noEmit', '--project', 'consumer-tsconfig.json'], fixture, lane + '-consumer-types-7');
+    run(bin('tsc6'), ['--project', 'consumer-tsconfig.json'], fixture, lane + '-consumer-types-6');
     writeFileSync(path.join(fixture, 'probe.mjs'), `import assert from 'node:assert/strict'; import {createElement} from 'react'; import {renderToString} from 'react-dom/server'; import {RequestForm} from './compiled/RequestForm.js'; for(const entry of ['@alneas/appkit-react','@alneas/appkit-react/ui','@alneas/appkit-react/tools','@alneas/appkit-react/ai']) assert(Object.keys(await import(entry)).length); const adapter=new Proxy({}, {get(){return ()=>{throw Error('SSR must not write records');};}}); assert(renderToString(createElement(RequestForm,{adapter})).includes('name="name"')); console.log('PASS ESM and request-form SSR');\n`);
     run(process.execPath, ['probe.mjs'], fixture, lane + '-ssr');
     run(process.execPath, ['-e', `for(const entry of ['@alneas/appkit-react','@alneas/appkit-react/ui','@alneas/appkit-react/tools','@alneas/appkit-react/ai']) require(entry);`], fixture, lane + '-commonjs');
-    return {passed: true, ...installed, reactIntegrity: reactArchive.integrity, checks: ['source-types', 'unit-tests', 'consumer-types', 'ssr', 'esm', 'commonjs']};
+    return {passed: true, ...installed, reactIntegrity: reactArchive.integrity, checks: ['source-types-6', 'source-types-7', 'unit-tests', 'consumer-types-6', 'consumer-types-7', 'ssr', 'esm', 'commonjs']};
   });
   console.log(JSON.stringify(result, null, 2));
   if (!result.passed) process.exitCode = 1;

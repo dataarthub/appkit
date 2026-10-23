@@ -4,7 +4,8 @@ import {analyzeSubmission,assessSubmission} from './score.mjs';import {gradeTask
 const base='/consumer',task=JSON.parse(readFileSync(path.join(base,'.grader-input.json'),'utf8')),scratch=mkdtempSync(path.join(tmpdir(),'appkit-verifier-'));
 if(process.getuid?.()!==0)throw Error('Trusted verifier requires a distinct executor UID');
 chmodSync(scratch,0o755);const workerFile=path.join(scratch,'executor.mjs');copyFileSync(path.join(import.meta.dirname,'solution-worker.mjs'),workerFile);
-if(Number(process.versions.node.split('.')[0])<24)throw Error('Node 24+ required');
+const [nodeMajor,nodeMinor]=process.versions.node.split('.').map(Number);
+if(!(nodeMajor===24&&nodeMinor>=15||nodeMajor>=26))throw Error('Development requires Node ^24.15.0 || >=26.0.0');
 writeFileSync(path.join(scratch,'package.json'),'{"private":true,"type":"module"}');symlinkSync(path.join(base,'node_modules'),path.join(scratch,'node_modules'),'dir');
 for(const file of task.allowedOutputPaths){const dest=path.join(scratch,file);mkdirSync(path.dirname(dest),{recursive:true});copyFileSync(path.join(base,'submission',file),dest);}
 const styles=path.join(scratch,'appkit-styles.d.ts');writeFileSync(styles,"declare module '@alneas/appkit-react/styles';\n");

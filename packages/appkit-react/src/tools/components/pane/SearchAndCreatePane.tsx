@@ -64,6 +64,11 @@ export interface SearchAndCreatePaneProps<T extends Record<string, unknown>> {
  * リソースの検索、既存アイテムの選択、および新しいアイテムの即時作成を
  * 一つのインターフェースで提供します。
  *
+ * @remarks Retained forwardRef during the React 19 migration because useImperativeHandle
+ * exposes an openCreateNew operation rather than a DOM node. A future ref-as-prop
+ * migration should separately verify the imperative handle and its create-form state
+ * transition; forwardRef is not technically required by React 19 for this pattern.
+ *
  * @example
  * ```tsx
  * <SearchAndCreatePane

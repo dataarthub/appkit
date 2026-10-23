@@ -32,6 +32,25 @@ import '@alneas/appkit-react/styles';
 export const components = {FormView, DataTable};
 ```
 
+For a headless filter, import `useFilter` from
+`@alneas/appkit-react/tools/filter`. It needs no provider or stylesheet:
+
+```tsx
+import {useFilter} from '@alneas/appkit-react/tools/filter';
+
+export function StatusFilter({onChange}: {onChange: (filter: Record<string, unknown>) => void}) {
+  const {values, setField} = useFilter({
+    fields: [{field: 'status', operator: 'eq'}],
+    onChange,
+  });
+  return <input value={String(values.status ?? '')}
+    onChange={event => setField('status', event.target.value)} />;
+}
+```
+
+Changed queries call the latest committed `onChange`. Replacing only the callback
+does not replay the existing filter, and equal query contents do not notify again.
+
 ## Verification
 
 Type-check this example in your application. See [the export reference](exports.md) for narrower entry points and exact optional peers. Package import/type checks do not certify hosted providers.

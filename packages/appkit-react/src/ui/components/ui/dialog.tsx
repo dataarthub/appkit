@@ -108,8 +108,12 @@ function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
  * }
  * ```
  */
-const DialogOverlay = React.forwardRef<HTMLDivElement, DialogPrimitive.Backdrop.Props>(
-  ({ className, ...props }, ref) => (
+function DialogOverlay({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<DialogPrimitive.Backdrop.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <DialogPrimitive.Backdrop
       ref={ref}
       data-slot='dialog-overlay'
@@ -119,8 +123,8 @@ const DialogOverlay = React.forwardRef<HTMLDivElement, DialogPrimitive.Backdrop.
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 DialogOverlay.displayName = DialogPrimitive.Backdrop.displayName;
 
 /**
@@ -157,8 +161,15 @@ export interface DialogContentProps extends React.ComponentPropsWithoutRef<
  * }
  * ```
  */
-const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
-  ({ className, children, testId, showCloseButton = true, ...props }, ref) => (
+function DialogContent({
+  ref,
+  className,
+  children,
+  testId,
+  showCloseButton = true,
+  ...props
+}: React.PropsWithoutRef<DialogContentProps> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Popup
@@ -184,8 +195,8 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
         )}
       </DialogPrimitive.Popup>
     </DialogPortal>
-  ),
-);
+  );
+}
 DialogContent.displayName = DialogPrimitive.Popup.displayName;
 
 /**
@@ -203,16 +214,21 @@ DialogContent.displayName = DialogPrimitive.Popup.displayName;
  * }
  * ```
  */
-const DialogHeader = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
-  ({ className, ...props }, ref) => (
+function DialogHeader({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<'div'>> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='dialog-header'
       className={cn('gap-2 flex flex-col', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 DialogHeader.displayName = 'DialogHeader';
 
 /**
@@ -230,31 +246,41 @@ DialogHeader.displayName = 'DialogHeader';
  * }
  * ```
  */
-const DialogFooter = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentPropsWithoutRef<'div'> & { /**
- * Controls whether the wrapper inserts its own close button; see the component for its default.
- */
-  /**
-   * Controls whether the wrapper inserts its own close button; see the component for its default.
-   */
-  showCloseButton?: boolean }
->(({ className, showCloseButton = false, children, ...props }, ref) => (
-  <div
-    ref={ref}
-    data-slot='dialog-footer'
-    className={cn(
-      'bg-muted/50 -mx-4 -mb-4 rounded-b-xl border-t p-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end',
-      className,
-    )}
-    {...props}
-  >
-    {children}
-    {showCloseButton && (
-      <DialogPrimitive.Close render={<Button variant='outline' />}>Close</DialogPrimitive.Close>
-    )}
-  </div>
-));
+function DialogFooter({
+  ref,
+  className,
+  showCloseButton = false,
+  children,
+  ...props
+}: React.PropsWithoutRef<
+  React.ComponentPropsWithoutRef<'div'> & {
+    /**
+     * Controls whether the wrapper inserts its own close button; see the component for its default.
+     */
+    /**
+     * Controls whether the wrapper inserts its own close button; see the component for its default.
+     */
+    showCloseButton?: boolean;
+  }
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
+    <div
+      ref={ref}
+      data-slot='dialog-footer'
+      className={cn(
+        'bg-muted/50 -mx-4 -mb-4 rounded-b-xl border-t p-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      {showCloseButton && (
+        <DialogPrimitive.Close render={<Button variant='outline' />}>Close</DialogPrimitive.Close>
+      )}
+    </div>
+  );
+}
 DialogFooter.displayName = 'DialogFooter';
 
 /**
@@ -272,17 +298,21 @@ DialogFooter.displayName = 'DialogFooter';
  * }
  * ```
  */
-const DialogTitle = React.forwardRef<
-  React.ComponentRef<typeof DialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    data-slot='dialog-title'
-    className={cn('text-sm leading-none font-medium', className)}
-    {...props}
-  />
-));
+function DialogTitle({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>> &
+  React.RefAttributes<React.ComponentRef<typeof DialogPrimitive.Title>>) {
+  return (
+    <DialogPrimitive.Title
+      ref={ref}
+      data-slot='dialog-title'
+      className={cn('text-sm leading-none font-medium', className)}
+      {...props}
+    />
+  );
+}
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
 /**
@@ -300,20 +330,24 @@ DialogTitle.displayName = DialogPrimitive.Title.displayName;
  * }
  * ```
  */
-const DialogDescription = React.forwardRef<
-  React.ComponentRef<typeof DialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    data-slot='dialog-description'
-    className={cn(
-      'text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3',
-      className,
-    )}
-    {...props}
-  />
-));
+function DialogDescription({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>> &
+  React.RefAttributes<React.ComponentRef<typeof DialogPrimitive.Description>>) {
+  return (
+    <DialogPrimitive.Description
+      ref={ref}
+      data-slot='dialog-description'
+      className={cn(
+        'text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 export {

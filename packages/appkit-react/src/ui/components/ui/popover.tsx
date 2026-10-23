@@ -68,15 +68,20 @@ function PopoverTrigger({
  * }
  * ```
  */
-const PopoverContent = React.forwardRef<
-  HTMLDivElement,
+function PopoverContent({
+  ref,
+  className,
+  align = 'center',
+  alignOffset = 0,
+  side = 'bottom',
+  sideOffset = 4,
+  ...props
+}: React.PropsWithoutRef<
   PopoverPrimitive.Popup.Props &
     Pick<PopoverPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'>
->(
-  (
-    { className, align = 'center', alignOffset = 0, side = 'bottom', sideOffset = 4, ...props },
-    ref,
-  ) => (
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Positioner
         align={align}
@@ -96,8 +101,8 @@ const PopoverContent = React.forwardRef<
         />
       </PopoverPrimitive.Positioner>
     </PopoverPrimitive.Portal>
-  ),
-);
+  );
+}
 PopoverContent.displayName = PopoverPrimitive.Popup.displayName;
 
 /**
@@ -115,16 +120,21 @@ PopoverContent.displayName = PopoverPrimitive.Popup.displayName;
  * }
  * ```
  */
-const PopoverHeader = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
-  ({ className, ...props }, ref) => (
+function PopoverHeader({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<'div'>> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='popover-header'
       className={cn('flex flex-col gap-0.5 text-sm', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 PopoverHeader.displayName = 'PopoverHeader';
 
 /**
@@ -142,17 +152,21 @@ PopoverHeader.displayName = 'PopoverHeader';
  * }
  * ```
  */
-const PopoverTitle = React.forwardRef<
-  React.ComponentRef<typeof PopoverPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <PopoverPrimitive.Title
-    ref={ref}
-    data-slot='popover-title'
-    className={cn('font-medium', className)}
-    {...props}
-  />
-));
+function PopoverTitle({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Title>> &
+  React.RefAttributes<React.ComponentRef<typeof PopoverPrimitive.Title>>) {
+  return (
+    <PopoverPrimitive.Title
+      ref={ref}
+      data-slot='popover-title'
+      className={cn('font-medium', className)}
+      {...props}
+    />
+  );
+}
 PopoverTitle.displayName = PopoverPrimitive.Title.displayName;
 
 /**
@@ -170,17 +184,21 @@ PopoverTitle.displayName = PopoverPrimitive.Title.displayName;
  * }
  * ```
  */
-const PopoverDescription = React.forwardRef<
-  React.ComponentRef<typeof PopoverPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <PopoverPrimitive.Description
-    ref={ref}
-    data-slot='popover-description'
-    className={cn('text-muted-foreground', className)}
-    {...props}
-  />
-));
+function PopoverDescription({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Description>> &
+  React.RefAttributes<React.ComponentRef<typeof PopoverPrimitive.Description>>) {
+  return (
+    <PopoverPrimitive.Description
+      ref={ref}
+      data-slot='popover-description'
+      className={cn('text-muted-foreground', className)}
+      {...props}
+    />
+  );
+}
 PopoverDescription.displayName = PopoverPrimitive.Description.displayName;
 
 export { Popover, PopoverContent, PopoverTrigger, PopoverHeader, PopoverTitle, PopoverDescription };

@@ -19,18 +19,23 @@ import { cn } from '../../lib/utils';
  * }
  * ```
  */
-const ToggleGroup = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive>
->(({ className, children, ...props }, ref) => (
-  <ToggleGroupPrimitive
-    ref={ref}
-    className={cn('flex items-center justify-center gap-1', className)}
-    {...props}
-  >
-    {children}
-  </ToggleGroupPrimitive>
-));
+function ToggleGroup({
+  ref,
+  className,
+  children,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive>> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
+    <ToggleGroupPrimitive
+      ref={ref}
+      className={cn('flex items-center justify-center gap-1', className)}
+      {...props}
+    >
+      {children}
+    </ToggleGroupPrimitive>
+  );
+}
 ToggleGroup.displayName = 'ToggleGroup';
 
 /**
@@ -48,15 +53,20 @@ ToggleGroup.displayName = 'ToggleGroup';
  * }
  * ```
  */
-const ToggleGroupItem = React.forwardRef<
-  HTMLButtonElement,
+function ToggleGroupItem({
+  ref,
+  className,
+  children,
+  ...props
+}: React.PropsWithoutRef<
   React.ComponentPropsWithoutRef<typeof TogglePrimitive> & {
     /**
      * Identity for this choice within the surrounding group; provide a distinct stable string.
      */
     value: string;
   }
->(({ className, children, ...props }, ref) => {
+> &
+  React.RefAttributes<HTMLButtonElement>) {
   // In Base UI, we just use Toggle inside ToggleGroup?
   // Or is there a ToggleGroup.Item?
   // Docs/Exports showed ToggleGroup export.
@@ -78,7 +88,7 @@ const ToggleGroupItem = React.forwardRef<
       {children}
     </TogglePrimitive>
   );
-});
+}
 ToggleGroupItem.displayName = 'ToggleGroupItem';
 
 export { ToggleGroup, ToggleGroupItem };

@@ -33,6 +33,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+          check-latest: true
           package-manager-cache: false
       - name: Validate package tag, version and source commit
         id: select
@@ -95,6 +96,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+          check-latest: true
           package-manager-cache: false
       - name: Install pinned Trusted Publishing CLI
         run: npm install --global npm@11.21.0 --ignore-scripts --no-audit --no-fund

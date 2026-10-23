@@ -118,10 +118,15 @@ interface SelectTriggerProps extends SelectPrimitive.Trigger.Props {
  * }
  * ```
  */
-const SelectTrigger = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Trigger>,
-  SelectTriggerProps
->(({ className, size = 'default', children, testId, ...props }, ref) => {
+function SelectTrigger({
+  ref,
+  className,
+  size = 'default',
+  children,
+  testId,
+  ...props
+}: React.PropsWithoutRef<SelectTriggerProps> &
+  React.RefAttributes<React.ElementRef<typeof SelectPrimitive.Trigger>>) {
   return (
     <SelectPrimitive.Trigger
       ref={ref}
@@ -140,7 +145,7 @@ const SelectTrigger = React.forwardRef<
       />
     </SelectPrimitive.Trigger>
   );
-});
+}
 SelectTrigger.displayName = 'SelectTrigger';
 
 /**
@@ -444,66 +449,67 @@ export interface SelectInputProps extends React.ComponentProps<typeof SelectPrim
  * }
  * ```
  */
-const SelectInput = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Root>,
-  SelectInputProps
->(
-  (
-    {
-      options,
-      placeholder,
-      className,
-      testId,
-      size = 'default',
-      icon,
-      'aria-label': ariaLabel,
-      'aria-labelledby': ariaLabelledBy,
-      value,
-      defaultValue,
-      onValueChange,
-      disabled,
-      name,
-      required,
-      open,
-      defaultOpen,
-      onOpenChange,
-      ...props
-    },
-    ref,
-  ) => {
-    return (
-      <Select
-        value={value !== undefined ? value : defaultValue !== undefined ? undefined : null}
-        defaultValue={defaultValue}
-        onValueChange={onValueChange}
-        disabled={disabled}
-        name={name}
-        required={required}
-        open={open}
-        defaultOpen={defaultOpen}
-        onOpenChange={onOpenChange}
-        {...props}
+function SelectInput({
+  ref,
+  options,
+  placeholder,
+  className,
+  testId,
+  size = 'default',
+  icon,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+  value,
+  defaultValue,
+  onValueChange,
+  disabled,
+  name,
+  required,
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: React.PropsWithoutRef<SelectInputProps> &
+  React.RefAttributes<React.ElementRef<typeof SelectPrimitive.Root>>) {
+  return (
+    <Select
+      value={value !== undefined ? value : defaultValue !== undefined ? undefined : null}
+      defaultValue={defaultValue}
+      onValueChange={onValueChange}
+      disabled={disabled}
+      name={name}
+      required={required}
+      open={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
+      {...props}
+    >
+      <SelectTrigger
+        ref={ref}
+        className={className}
+        testId={testId}
+        size={size}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
       >
-        <SelectTrigger ref={ref} className={className} testId={testId} size={size} aria-label={ariaLabel} aria-labelledby={ariaLabelledBy}>
-          {icon}
-          <SelectValue placeholder={placeholder}>
-            {value !== undefined && value !== null
-              ? (options.find((opt) => String(opt.value) === String(value))?.label ??
-                (typeof value === 'string' || typeof value === 'number' ? String(value) : null))
-              : undefined}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    );
-  },
-);
+        {icon}
+        <SelectValue placeholder={placeholder}>
+          {value !== undefined && value !== null
+            ? (options.find((opt) => String(opt.value) === String(value))?.label ??
+              (typeof value === 'string' || typeof value === 'number' ? String(value) : null))
+            : undefined}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
 SelectInput.displayName = 'SelectInput';
 

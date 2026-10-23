@@ -1,6 +1,8 @@
 # Contributing
 
-Install Node 24+ and Bun 1.4.0, then run `bun install --frozen-lockfile --ignore-scripts`. For one package use `bun run turbo run build typecheck --filter=@alneas/appkit-core` (or appkit-react). Do not rerun unrelated integration tests for unchanged implementations.
+Use the latest Node 24 patch for development (`nvm install` reads `.nvmrc`) and Bun 1.4.0. Development and test tools require `^24.15.0 || >=26.0.0`; Node 25 is not supported by jsdom 30. Then run `bun install --frozen-lockfile --ignore-scripts`. For one package use `bun run turbo run build typecheck --filter=@alneas/appkit-core` (or appkit-react). Do not rerun unrelated integration tests for unchanged implementations.
+
+Published package engines remain `>=24.0.0`. CI resolves fresh Node 24 and 26 patches; `bun run test:consumer` separately verifies the packed packages on Node 24.0.0 without development dependencies. The private workspace engine does not raise the public runtime minimum.
 
 1. Change the owning source and API JSDoc.
 2. Update its English feature guide, including the exact public import subpath. Install commands use package names, not subpaths.

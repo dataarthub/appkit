@@ -20,27 +20,36 @@ import { cn } from '../../lib/utils';
  * }
  * ```
  */
-const Avatar = React.forwardRef<
-  HTMLSpanElement,
-  AvatarPrimitive.Root.Props & { /**
- * Visual size preset; defaults to default unless the owning component states otherwise.
- */
-  /**
-   * Visual size preset; defaults to default unless the owning component states otherwise.
-   */
-  size?: 'default' | 'sm' | 'lg' }
->(({ className, size = 'default', ...props }, ref) => (
-  <AvatarPrimitive.Root
-    ref={ref}
-    data-slot='avatar'
-    data-size={size}
-    className={cn(
-      'size-8 rounded-full after:rounded-full data-[size=lg]:size-10 data-[size=sm]:size-6 after:border-border group/avatar relative flex shrink-0 select-none after:absolute after:inset-0 after:border after:mix-blend-darken dark:after:mix-blend-lighten',
-      className,
-    )}
-    {...props}
-  />
-));
+function Avatar({
+  ref,
+  className,
+  size = 'default',
+  ...props
+}: React.PropsWithoutRef<
+  AvatarPrimitive.Root.Props & {
+    /**
+     * Visual size preset; defaults to default unless the owning component states otherwise.
+     */
+    /**
+     * Visual size preset; defaults to default unless the owning component states otherwise.
+     */
+    size?: 'default' | 'sm' | 'lg';
+  }
+> &
+  React.RefAttributes<HTMLSpanElement>) {
+  return (
+    <AvatarPrimitive.Root
+      ref={ref}
+      data-slot='avatar'
+      data-size={size}
+      className={cn(
+        'size-8 rounded-full after:rounded-full data-[size=lg]:size-10 data-[size=sm]:size-6 after:border-border group/avatar relative flex shrink-0 select-none after:absolute after:inset-0 after:border after:mix-blend-darken dark:after:mix-blend-lighten',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
 /**
@@ -58,16 +67,20 @@ Avatar.displayName = AvatarPrimitive.Root.displayName;
  * }
  * ```
  */
-const AvatarImage = React.forwardRef<HTMLImageElement, AvatarPrimitive.Image.Props>(
-  ({ className, ...props }, ref) => (
+function AvatarImage({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<AvatarPrimitive.Image.Props> & React.RefAttributes<HTMLImageElement>) {
+  return (
     <AvatarPrimitive.Image
       ref={ref}
       data-slot='avatar-image'
       className={cn('rounded-full aspect-square size-full object-cover', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 /**
@@ -85,8 +98,12 @@ AvatarImage.displayName = AvatarPrimitive.Image.displayName;
  * }
  * ```
  */
-const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarPrimitive.Fallback.Props>(
-  ({ className, ...props }, ref) => (
+function AvatarFallback({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<AvatarPrimitive.Fallback.Props> & React.RefAttributes<HTMLSpanElement>) {
+  return (
     <AvatarPrimitive.Fallback
       ref={ref}
       data-slot='avatar-fallback'
@@ -96,8 +113,8 @@ const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarPrimitive.Fallbac
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
 /**

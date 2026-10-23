@@ -10,3 +10,10 @@ test('isolated tests declare their DOM test peer and use only the selected Core 
   assert.equal(manifest.overrides['@alneas/appkit-core'], '$@alneas/appkit-core');
   assert.deepEqual(react, before);
 });
+
+test('standalone React fixtures inherit both declared compiler aliases', () => {
+  const react = {devDependencies: {typescript: 'npm:@typescript/typescript6@6.0.2', '@typescript/native': 'npm:typescript@7.0.2'}};
+  const manifest = fixtureManifest({react, plugin: '6.1.1', coreArchive: '/tmp/core.tgz', reactArchive: '/tmp/react.tgz'});
+  assert.equal(manifest.dependencies.typescript, react.devDependencies.typescript);
+  assert.equal(manifest.dependencies['@typescript/native'], react.devDependencies['@typescript/native']);
+});

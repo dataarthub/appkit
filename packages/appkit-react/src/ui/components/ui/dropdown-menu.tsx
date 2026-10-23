@@ -88,15 +88,20 @@ function DropdownMenuTrigger({
  * }
  * ```
  */
-const DropdownMenuContent = React.forwardRef<
-  HTMLDivElement,
+function DropdownMenuContent({
+  ref,
+  className,
+  align = 'start',
+  alignOffset = 0,
+  side = 'bottom',
+  sideOffset = 4,
+  ...props
+}: React.PropsWithoutRef<
   MenuPrimitive.Popup.Props &
     Pick<MenuPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'>
->(
-  (
-    { className, align = 'start', alignOffset = 0, side = 'bottom', sideOffset = 4, ...props },
-    ref,
-  ) => (
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <MenuPrimitive.Portal>
       <MenuPrimitive.Positioner
         className='isolate z-50 outline-none'
@@ -116,8 +121,8 @@ const DropdownMenuContent = React.forwardRef<
         />
       </MenuPrimitive.Positioner>
     </MenuPrimitive.Portal>
-  ),
-);
+  );
+}
 DropdownMenuContent.displayName = MenuPrimitive.Popup.displayName;
 
 /**
@@ -154,27 +159,36 @@ function DropdownMenuGroup({ ...props }: MenuPrimitive.Group.Props) {
  * }
  * ```
  */
-const DropdownMenuLabel = React.forwardRef<
-  HTMLDivElement,
-  MenuPrimitive.GroupLabel.Props & { /**
- * Adds left inset spacing when true; omitted/false uses normal alignment.
- */
-  /**
-   * Adds left inset spacing when true; omitted/false uses normal alignment.
-   */
-  inset?: boolean }
->(({ className, inset, ...props }, ref) => (
-  <MenuPrimitive.GroupLabel
-    ref={ref}
-    data-slot='dropdown-menu-label'
-    data-inset={inset}
-    className={cn(
-      'text-muted-foreground px-1.5 py-1 text-xs font-medium data-[inset]:pl-8',
-      className,
-    )}
-    {...props}
-  />
-));
+function DropdownMenuLabel({
+  ref,
+  className,
+  inset,
+  ...props
+}: React.PropsWithoutRef<
+  MenuPrimitive.GroupLabel.Props & {
+    /**
+     * Adds left inset spacing when true; omitted/false uses normal alignment.
+     */
+    /**
+     * Adds left inset spacing when true; omitted/false uses normal alignment.
+     */
+    inset?: boolean;
+  }
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
+    <MenuPrimitive.GroupLabel
+      ref={ref}
+      data-slot='dropdown-menu-label'
+      data-inset={inset}
+      className={cn(
+        'text-muted-foreground px-1.5 py-1 text-xs font-medium data-[inset]:pl-8',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 DropdownMenuLabel.displayName = MenuPrimitive.GroupLabel.displayName;
 
 /**
@@ -192,8 +206,14 @@ DropdownMenuLabel.displayName = MenuPrimitive.GroupLabel.displayName;
  * }
  * ```
  */
-const DropdownMenuItem = React.forwardRef<
-  HTMLDivElement,
+function DropdownMenuItem({
+  ref,
+  className,
+  inset,
+  variant = 'default',
+  children,
+  ...props
+}: React.PropsWithoutRef<
   MenuPrimitive.Item.Props & {
     /**
      * Adds left inset spacing when true; omitted/false uses normal alignment.
@@ -204,21 +224,24 @@ const DropdownMenuItem = React.forwardRef<
      */
     variant?: 'default' | 'destructive';
   }
->(({ className, inset, variant = 'default', children, ...props }, ref) => (
-  <MenuPrimitive.Item
-    ref={ref}
-    data-slot='dropdown-menu-item'
-    data-inset={inset}
-    data-variant={variant}
-    className={cn(
-      "focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive not-data-[variant=destructive]:focus:**:text-accent-foreground gap-1.5 rounded-md px-1.5 py-1 text-sm [&_svg:not([class*='size-'])]:size-4 group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-      className,
-    )}
-    {...props}
-  >
-    {children}
-  </MenuPrimitive.Item>
-));
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
+    <MenuPrimitive.Item
+      ref={ref}
+      data-slot='dropdown-menu-item'
+      data-inset={inset}
+      data-variant={variant}
+      className={cn(
+        "focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive not-data-[variant=destructive]:focus:**:text-accent-foreground gap-1.5 rounded-md px-1.5 py-1 text-sm [&_svg:not([class*='size-'])]:size-4 group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </MenuPrimitive.Item>
+  );
+}
 DropdownMenuItem.displayName = MenuPrimitive.Item.displayName;
 
 /**
@@ -255,30 +278,40 @@ function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
  * }
  * ```
  */
-const DropdownMenuSubTrigger = React.forwardRef<
-  HTMLDivElement,
-  MenuPrimitive.SubmenuTrigger.Props & { /**
- * Adds left inset spacing when true; omitted/false uses normal alignment.
- */
-  /**
-   * Adds left inset spacing when true; omitted/false uses normal alignment.
-   */
-  inset?: boolean }
->(({ className, inset, children, ...props }, ref) => (
-  <MenuPrimitive.SubmenuTrigger
-    ref={ref}
-    data-slot='dropdown-menu-sub-trigger'
-    data-inset={inset}
-    className={cn(
-      "focus:bg-accent focus:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-1.5 rounded-md px-1.5 py-1 text-sm [&_svg:not([class*='size-'])]:size-4 flex cursor-default items-center outline-hidden select-none data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-      className,
-    )}
-    {...props}
-  >
-    {children}
-    <ChevronRightIcon className='ml-auto' />
-  </MenuPrimitive.SubmenuTrigger>
-));
+function DropdownMenuSubTrigger({
+  ref,
+  className,
+  inset,
+  children,
+  ...props
+}: React.PropsWithoutRef<
+  MenuPrimitive.SubmenuTrigger.Props & {
+    /**
+     * Adds left inset spacing when true; omitted/false uses normal alignment.
+     */
+    /**
+     * Adds left inset spacing when true; omitted/false uses normal alignment.
+     */
+    inset?: boolean;
+  }
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
+    <MenuPrimitive.SubmenuTrigger
+      ref={ref}
+      data-slot='dropdown-menu-sub-trigger'
+      data-inset={inset}
+      className={cn(
+        "focus:bg-accent focus:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-1.5 rounded-md px-1.5 py-1 text-sm [&_svg:not([class*='size-'])]:size-4 flex cursor-default items-center outline-hidden select-none data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      <ChevronRightIcon className='ml-auto' />
+    </MenuPrimitive.SubmenuTrigger>
+  );
+}
 DropdownMenuSubTrigger.displayName = MenuPrimitive.SubmenuTrigger.displayName;
 
 /**
@@ -296,14 +329,17 @@ DropdownMenuSubTrigger.displayName = MenuPrimitive.SubmenuTrigger.displayName;
  * }
  * ```
  */
-const DropdownMenuSubContent = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuContent>
->(
-  (
-    { className, align = 'start', alignOffset = -3, side = 'right', sideOffset = 0, ...props },
-    ref,
-  ) => (
+function DropdownMenuSubContent({
+  ref,
+  className,
+  align = 'start',
+  alignOffset = -3,
+  side = 'right',
+  sideOffset = 0,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof DropdownMenuContent>> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <DropdownMenuContent
       ref={ref}
       data-slot='dropdown-menu-sub-content'
@@ -317,8 +353,8 @@ const DropdownMenuSubContent = React.forwardRef<
       sideOffset={sideOffset}
       {...props}
     />
-  ),
-);
+  );
+}
 DropdownMenuSubContent.displayName = 'DropdownMenuSubContent';
 
 /**
@@ -336,8 +372,14 @@ DropdownMenuSubContent.displayName = 'DropdownMenuSubContent';
  * }
  * ```
  */
-const DropdownMenuCheckboxItem = React.forwardRef<HTMLDivElement, MenuPrimitive.CheckboxItem.Props>(
-  ({ className, children, checked, ...props }, ref) => (
+function DropdownMenuCheckboxItem({
+  ref,
+  className,
+  children,
+  checked,
+  ...props
+}: React.PropsWithoutRef<MenuPrimitive.CheckboxItem.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <MenuPrimitive.CheckboxItem
       ref={ref}
       data-slot='dropdown-menu-checkbox-item'
@@ -358,8 +400,8 @@ const DropdownMenuCheckboxItem = React.forwardRef<HTMLDivElement, MenuPrimitive.
       </span>
       {children}
     </MenuPrimitive.CheckboxItem>
-  ),
-);
+  );
+}
 DropdownMenuCheckboxItem.displayName = MenuPrimitive.CheckboxItem.displayName;
 
 /**
@@ -396,8 +438,13 @@ function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
  * }
  * ```
  */
-const DropdownMenuRadioItem = React.forwardRef<HTMLDivElement, MenuPrimitive.RadioItem.Props>(
-  ({ className, children, ...props }, ref) => (
+function DropdownMenuRadioItem({
+  ref,
+  className,
+  children,
+  ...props
+}: React.PropsWithoutRef<MenuPrimitive.RadioItem.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <MenuPrimitive.RadioItem
       ref={ref}
       data-slot='dropdown-menu-radio-item'
@@ -417,8 +464,8 @@ const DropdownMenuRadioItem = React.forwardRef<HTMLDivElement, MenuPrimitive.Rad
       </span>
       {children}
     </MenuPrimitive.RadioItem>
-  ),
-);
+  );
+}
 DropdownMenuRadioItem.displayName = MenuPrimitive.RadioItem.displayName;
 
 /**
@@ -436,16 +483,20 @@ DropdownMenuRadioItem.displayName = MenuPrimitive.RadioItem.displayName;
  * }
  * ```
  */
-const DropdownMenuSeparator = React.forwardRef<HTMLDivElement, MenuPrimitive.Separator.Props>(
-  ({ className, ...props }, ref) => (
+function DropdownMenuSeparator({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<MenuPrimitive.Separator.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <MenuPrimitive.Separator
       ref={ref}
       data-slot='dropdown-menu-separator'
       className={cn('bg-border -mx-1 my-1 h-px', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 DropdownMenuSeparator.displayName = MenuPrimitive.Separator.displayName;
 
 /**
@@ -463,8 +514,12 @@ DropdownMenuSeparator.displayName = MenuPrimitive.Separator.displayName;
  * }
  * ```
  */
-const DropdownMenuShortcut = React.forwardRef<HTMLSpanElement, React.ComponentProps<'span'>>(
-  ({ className, ...props }, ref) => (
+function DropdownMenuShortcut({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentProps<'span'>> & React.RefAttributes<HTMLSpanElement>) {
+  return (
     <span
       ref={ref}
       data-slot='dropdown-menu-shortcut'
@@ -474,8 +529,8 @@ const DropdownMenuShortcut = React.forwardRef<HTMLSpanElement, React.ComponentPr
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 DropdownMenuShortcut.displayName = 'DropdownMenuShortcut';
 
 export {

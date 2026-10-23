@@ -33,75 +33,78 @@ export interface InputProps extends React.ComponentProps<typeof InputPrimitive> 
  * }
  * ```
  */
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, testId, ...props }, ref) => {
-    // Explicitly exclude children from props since input is a void element
-    const {
-      children: _children,
-      ...restProps
-    } = props as InputProps & { children?: React.ReactNode };
+function Input({
+  ref,
+  className,
+  type,
+  testId,
+  ...props
+}: React.PropsWithoutRef<InputProps> & React.RefAttributes<HTMLInputElement>) {
+  // Explicitly exclude children from props since input is a void element
+  const { children: _children, ...restProps } = props as InputProps & {
+    children?: React.ReactNode;
+  };
 
-    const isNumeric = type === 'number';
-    const effectiveType = isNumeric ? 'text' : type;
-    const inputMode = props.inputMode || (isNumeric ? 'numeric' : undefined);
-    const pattern = props.pattern || (isNumeric ? '[0-9\\.\\-]*' : undefined);
+  const isNumeric = type === 'number';
+  const effectiveType = isNumeric ? 'text' : type;
+  const inputMode = props.inputMode || (isNumeric ? 'numeric' : undefined);
+  const pattern = props.pattern || (isNumeric ? '[0-9\\.\\-]*' : undefined);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (isNumeric && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-        e.preventDefault();
-        const direction = e.key === 'ArrowUp' ? 'up' : 'down';
-        const step = parseFloat(String(props.step || '1'));
-        const nextValue = getNextNumericValue(props.value as any, direction, step);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isNumeric && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      const direction = e.key === 'ArrowUp' ? 'up' : 'down';
+      const step = parseFloat(String(props.step || '1'));
+      const nextValue = getNextNumericValue(props.value as any, direction, step);
 
-        // Create a synthetic event to trigger onChange if needed,
-        // but since Input is often used with controlled value, we just need to call onChange if it exists.
-        // However, most React apps use controlled components.
-        // For uncontrolled ones, we'd need to set e.target.value.
-        if (props.onChange) {
-          const event = {
-            target: {
-              ...e.target,
-              value: String(nextValue),
-              name: props.name,
-            },
-            currentTarget: {
-              ...e.currentTarget,
-              value: String(nextValue),
-              name: props.name,
-            },
-          } as any;
-          props.onChange(event);
-        }
+      // Create a synthetic event to trigger onChange if needed,
+      // but since Input is often used with controlled value, we just need to call onChange if it exists.
+      // However, most React apps use controlled components.
+      // For uncontrolled ones, we'd need to set e.target.value.
+      if (props.onChange) {
+        const event = {
+          target: {
+            ...e.target,
+            value: String(nextValue),
+            name: props.name,
+          },
+          currentTarget: {
+            ...e.currentTarget,
+            value: String(nextValue),
+            name: props.name,
+          },
+        } as any;
+        props.onChange(event);
       }
-      props.onKeyDown?.(e as any);
-    };
+    }
+    props.onKeyDown?.(e as any);
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (isNumeric) {
-        e.target.value = normalizeNumericInput(e.target.value);
-      }
-      props.onChange?.(e as any);
-    };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isNumeric) {
+      e.target.value = normalizeNumericInput(e.target.value);
+    }
+    props.onChange?.(e as any);
+  };
 
-    return (
-      <InputPrimitive
-        ref={ref}
-        {...restProps}
-        type={effectiveType}
-        inputMode={inputMode}
-        pattern={pattern}
-        data-slot='input'
-        data-testid={testId}
-        onKeyDown={handleKeyDown}
-        onChange={handleChange}
-        className={cn(
-          'dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-lg border bg-background px-2.5 py-1 text-base transition-colors file:h-6 file:text-sm file:font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-          className,
-        )}
-      />
-    );
-  },
-);
+  return (
+    <InputPrimitive
+      ref={ref}
+      {...restProps}
+      type={effectiveType}
+      inputMode={inputMode}
+      pattern={pattern}
+      data-slot='input'
+      data-testid={testId}
+      onKeyDown={handleKeyDown}
+      onChange={handleChange}
+      className={cn(
+        'dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-lg border bg-background px-2.5 py-1 text-base transition-colors file:h-6 file:text-sm file:font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+        className,
+      )}
+    />
+  );
+}
 Input.displayName = 'Input';
 
 export { Input };

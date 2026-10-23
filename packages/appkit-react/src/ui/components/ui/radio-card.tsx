@@ -21,18 +21,20 @@ import { Label } from './label';
  * }
  * ```
  */
-const RadioCardGroup = React.forwardRef<HTMLDivElement, RadioGroupPrimitive.Props>(
-  ({ className, ...props }, ref) => {
-    return (
-      <RadioGroupPrimitive
-        ref={ref}
-        data-slot='radio-card-group'
-        className={cn('grid gap-2', className)}
-        {...props}
-      />
-    );
-  },
-);
+function RadioCardGroup({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<RadioGroupPrimitive.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
+    <RadioGroupPrimitive
+      ref={ref}
+      data-slot='radio-card-group'
+      className={cn('grid gap-2', className)}
+      {...props}
+    />
+  );
+}
 RadioCardGroup.displayName = 'RadioCardGroup';
 
 /**
@@ -50,8 +52,14 @@ RadioCardGroup.displayName = 'RadioCardGroup';
  * }
  * ```
  */
-const RadioCardItem = React.forwardRef<
-  HTMLButtonElement,
+function RadioCardItem({
+  ref,
+  className,
+  children,
+  label,
+  detail,
+  ...props
+}: React.PropsWithoutRef<
   RadioPrimitive.Root.Props & {
     /**
      * Visible control/option text or content; does not perform persistence or validation.
@@ -62,7 +70,8 @@ const RadioCardItem = React.forwardRef<
      */
     detail?: React.ReactNode;
   }
->(({ className, children, label, detail, ...props }, ref) => {
+> &
+  React.RefAttributes<HTMLButtonElement>) {
   return (
     <RadioPrimitive.Root
       ref={ref}
@@ -95,7 +104,7 @@ const RadioCardItem = React.forwardRef<
       </div>
     </RadioPrimitive.Root>
   );
-});
+}
 RadioCardItem.displayName = 'RadioCardItem';
 
 export { RadioCardGroup, RadioCardItem };

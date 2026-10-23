@@ -20,8 +20,13 @@ import { cn } from '../../lib/utils';
  * }
  * ```
  */
-const ScrollArea = React.forwardRef<HTMLDivElement, ScrollAreaPrimitive.Root.Props>(
-  ({ className, children, ...props }, ref) => (
+function ScrollArea({
+  ref,
+  className,
+  children,
+  ...props
+}: React.PropsWithoutRef<ScrollAreaPrimitive.Root.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <ScrollAreaPrimitive.Root
       ref={ref}
       data-slot='scroll-area'
@@ -37,8 +42,8 @@ const ScrollArea = React.forwardRef<HTMLDivElement, ScrollAreaPrimitive.Root.Pro
       <ScrollBar />
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
-  ),
-);
+  );
+}
 ScrollArea.displayName = 'ScrollArea';
 
 /**
