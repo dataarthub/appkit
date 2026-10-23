@@ -41,7 +41,9 @@ React/Core compatibility and browser checks from changed inputs. Turbo reuses
 matching build/type/unit results. This command does not run live-model evaluation
 or publish packages. Git hooks can be bypassed, so the Node 24 CI job uses the same
 selector and runner after installing Gitleaks. Node 26 checks affected package
-builds, types and unit tests. CI still runs only on main updates or manual dispatch.
+builds, types and unit tests. Source quality runs for pull requests, main updates
+and manual dispatch. Only a successful main-push run for the exact release commit
+can establish authoritative publication evidence.
 
 ### Selecting verification by impact
 
