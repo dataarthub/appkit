@@ -16,7 +16,7 @@ test('single-viewport batches cover every selected story exactly once within the
       const projects = args.filter(arg => arg.startsWith('--project=')).map(arg => arg.slice(10));
       const selected = args.filter(arg => arg.endsWith('.stories.tsx'));
       assert.equal(projects.length, 1);
-      assert.deepEqual(selected, calls % 2 === 0 ? files.slice(0, 6) : files.slice(6));
+      assert.deepEqual(selected, calls % 2 === 0 ? files.slice(0, 2) : files.slice(2));
       assert.ok(selected.length > 0 && selected.length <= 6);
       assert.match(logs.at(-1), /Starting Storybook/); // progress precedes execution
       for (const project of projects) for (const file of selected) coverage.push(`${project}:${file}`);

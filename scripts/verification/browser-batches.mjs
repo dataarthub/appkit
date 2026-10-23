@@ -6,8 +6,11 @@ export async function runBrowserBatches(files, {root, node = process.execPath, m
   if (!files.length) throw Error('Empty browser selection is not a successful test');
   const batches = [];
   for (const project of projects) {
-    for (let offset = 0; offset < files.length; offset += batchSize) {
-      batches.push({project, offset, batch: files.slice(offset, offset + batchSize)});
+    for (let offset = 0; offset < files.length;) {
+      // Keep initial dependency optimization separate from larger file batches.
+      const size = offset === 0 ? 2 : batchSize;
+      batches.push({project, offset, batch: files.slice(offset, offset + size)});
+      offset += size;
     }
   }
   let completed = 0;
