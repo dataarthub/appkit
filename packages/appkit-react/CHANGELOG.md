@@ -7,6 +7,10 @@ dates are recorded only when confirmed.
 
 ## [0.3.1]
 
+- Correct GenerativeUIRenderer declaration documentation to retain all rendering
+  requirements and fallback notes in one remarks block. Strict TypeDoc consumers
+  can generate API documentation without duplicate-tag warnings; runtime behavior,
+  exports and callable types are unchanged.
 - Update the exact `@alneas/appkit-core` dependency to published **0.2.1**.
   Hosts using Core directly should pin Core **0.2.1** alongside React **0.3.1**
   and refresh their lockfile so both resolve the same Core installation.

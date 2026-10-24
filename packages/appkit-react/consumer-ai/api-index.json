@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packageName": "@alneas/appkit-react",
   "packageVersion": "0.3.1",
-  "inputDigest": "d9c318e8e787bd7e914eff89856d69d952e18f862370a759d898ab910b70c0a2",
+  "inputDigest": "da8e4aa55e1b98949d7215b6868ab80cddd229f0bf2b0bf6827fb770a85b32e6",
   "entries": [
     {
       "importPath": "@alneas/appkit-react",
@@ -22512,7 +22512,7 @@
       "tags": [
         {
           "name": "remarks",
-          "text": "Envelope validation snapshots input by reference. Pass immutable documents; replace\ninput when a response changes. Component validators run during rendering and must\nbe pure. Unknown types and invalid data get per-block fallbacks; malformed envelopes\nget a document fallback. MinimalErrorBoundary isolates client render failures.\nBlock identity includes document ID, block ID/type and data."
+          "text": "Envelope validation snapshots input by reference. Pass immutable documents; replace\ninput when a response changes. Component validators run during rendering and must\nbe pure. Unknown types and invalid data get per-block fallbacks; malformed envelopes\nget a document fallback. MinimalErrorBoundary isolates client render failures.\nBlock identity includes document ID, block ID/type and data.\n\n\nRequires React; registered components own any other providers or CSS.\nThe default fallback is an English status paragraph. Client error boundaries handle\ndescendant render failures; React server rendering errors are not isolated by them.\nFallback callback errors propagate. Changing registry identity remounts blocks."
         },
         {
           "name": "param",
@@ -22521,10 +22521,6 @@
         {
           "name": "returns",
           "text": "Block wrappers and registered elements, or fallback content for invalid input."
-        },
-        {
-          "name": "remarks",
-          "text": "Requires React; registered components own any other providers or CSS.\nThe default fallback is an English status paragraph. Client error boundaries handle\ndescendant render failures; React server rendering errors are not isolated by them.\nFallback callback errors propagate. Changing registry identity remounts blocks."
         },
         {
           "name": "example",
@@ -30058,7 +30054,7 @@
       "tags": [
         {
           "name": "remarks",
-          "text": "Envelope validation snapshots input by reference. Pass immutable documents; replace\ninput when a response changes. Component validators run during rendering and must\nbe pure. Unknown types and invalid data get per-block fallbacks; malformed envelopes\nget a document fallback. MinimalErrorBoundary isolates client render failures.\nBlock identity includes document ID, block ID/type and data."
+          "text": "Envelope validation snapshots input by reference. Pass immutable documents; replace\ninput when a response changes. Component validators run during rendering and must\nbe pure. Unknown types and invalid data get per-block fallbacks; malformed envelopes\nget a document fallback. MinimalErrorBoundary isolates client render failures.\nBlock identity includes document ID, block ID/type and data.\n\n\nRequires React; registered components own any other providers or CSS.\nThe default fallback is an English status paragraph. Client error boundaries handle\ndescendant render failures; React server rendering errors are not isolated by them.\nFallback callback errors propagate. Changing registry identity remounts blocks."
         },
         {
           "name": "param",
@@ -30067,10 +30063,6 @@
         {
           "name": "returns",
           "text": "Block wrappers and registered elements, or fallback content for invalid input."
-        },
-        {
-          "name": "remarks",
-          "text": "Requires React; registered components own any other providers or CSS.\nThe default fallback is an English status paragraph. Client error boundaries handle\ndescendant render failures; React server rendering errors are not isolated by them.\nFallback callback errors propagate. Changing registry identity remounts blocks."
         },
         {
           "name": "example",
