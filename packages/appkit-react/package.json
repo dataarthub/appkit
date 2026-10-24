@@ -1,6 +1,6 @@
 {
   "name": "@alneas/appkit-react",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Unified React 19 business UI toolkit: accessible primitives, schema-driven forms, data tables, and AI chat interfaces",
   "keywords": [
     "react",

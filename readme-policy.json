@@ -2,7 +2,12 @@
   "schemaVersion": 1,
   "readmes": [
     "README.md",
+    "README.ja.md",
     "packages/appkit-core/README.md",
     "packages/appkit-react/README.md"
-  ]
+  ],
+  "formats": {
+    "packages/appkit-core/README.md": "npm",
+    "packages/appkit-react/README.md": "npm"
+  }
 }

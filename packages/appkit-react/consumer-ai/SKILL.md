@@ -11,10 +11,10 @@ The Core package's appkit-api CLI searches locally available catalogs without ru
 
 AI tool calls and outputs are untrusted. Schema validity is not approval. Bind host approval to immutable arguments/targets/session/registration, enforce server permissions and durable idempotency at execution, and project minimal outputs. Adapters do not run tools or authorize writes. Read the AI guide and Core error guide; never infer permission from a tool-output event or bypass duplicate-call protection.
 
-Drag surfaces in this candidate use native dnd-kit React. Resolve their provider
-events and render refs from this installed package's API catalog; older released
-guides may describe legacy contracts. Generic cancellations reach onDragEnd and
-must be rejected before writes. High-level features own their native providers;
-standalone registrations must share a native provider. The unreleased migration
-guide is maintained in the public repository's docs/development/ directory until
-a containing release can be ingested. Do not infer a published version from source.
+React 0.3.0 drag surfaces use native dnd-kit React. Read docs/migration.md from
+this installed package before adapting a 0.2.0 consumer. It covers nullable native
+events, cancellation guards, registration refs, React 19 function component types
+and Query 5.104.5 alignment. High-level features own their native providers;
+standalone registrations must share a native provider. Resolve exact types from
+the matching installed API catalog. A prepared source version does not prove
+registry availability, and a newer catalog must not replace an older installation.

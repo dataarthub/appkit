@@ -136,7 +136,7 @@
       "package": "@alneas/appkit-react"
     },
     {
-      "title": "Migrate from app-core and react-tools",
+      "title": "Upgrade Appkit React to 0.3.0",
       "slug": "appkit-react/migration",
       "source": "packages/appkit-react/docs/migration.md",
       "archetype": "how-to",

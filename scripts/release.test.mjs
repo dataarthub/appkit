@@ -76,3 +76,12 @@ test('AI recovery APIs keep native Error behavior in both runtime formats',()=>{
  execFileSync(process.execPath,['--input-type=module','-e',`import assert from 'node:assert/strict'; const m=await import(${JSON.stringify(dir+'.js')}); const e=new m.AIChatError('AI_INCOMPLETE_STREAM','original');assert(e instanceof Error);assert.equal(e.message,'original');assert(m.getAIErrorInfo('tool','INVALID_INPUT').docsUrl);`]);
  execFileSync(process.execPath,['-e',`const assert=require('node:assert/strict'),m=require(${JSON.stringify(dir+'.cjs')});assert(new m.AIChatError('AI_INVALID_STREAM','original') instanceof Error);`]);
 });
+
+test('Bun workspace version metadata matches each release candidate manifest',()=>{
+ const parsed=ts.parseConfigFileTextToJson('bun.lock',readFileSync(path.join(root,'bun.lock'),'utf8'));
+ assert.equal(parsed.error,undefined);
+ for(const name of packages){
+  const pkg=JSON.parse(readFileSync(path.join(root,'packages',name,'package.json'),'utf8'));
+  assert.equal(parsed.config.workspaces['packages/'+name].version,pkg.version,name+': stale workspace release version');
+ }
+});

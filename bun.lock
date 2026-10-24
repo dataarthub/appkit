@@ -87,7 +87,7 @@
     },
     "packages/appkit-react": {
       "name": "@alneas/appkit-react",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "@alneas/appkit-core": "0.2.0",
         "@base-ui/react": "^1.9.0",

@@ -52,11 +52,21 @@ test('obsolete consumer AI files are detected, not silently left in a package',(
 
 test('portal landing links target approved package pages and preserve README anchors',()=>fixture((root,out,generate)=>{
  const readme=join(root,'README.md');
- writeFileSync(readme,readFileSync(readme,'utf8')+'\n[Core highlights](packages/appkit-core/README.md#key-highlights)\n');
+ writeFileSync(readme,readFileSync(readme,'utf8')+'\n[Core highlights](packages/appkit-core/README.md#documentation)\n');
  generate(['--output-dir',out]);
  const landing=readFileSync(join(out,'docs/index.md'),'utf8');
- assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#quickstart\)/);
- assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#key-highlights\)/);
+ assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#usage\)/);
+ assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#documentation\)/);
  const manifest=JSON.parse(readFileSync(join(out,'docs.manifest.json'),'utf8'));
  assert(manifest.documents.some(doc=>doc.source==='packages/appkit-core/docs/index.md'));
+}));
+
+test('portal introductions omit GitHub README language links while preserving canonical sources',()=>fixture((root,out,generate)=>{
+ const pairs=[['README.md','docs/index.md'],['packages/appkit-react/README.md','packages/appkit-react/docs/index.md']];
+ for(const [source]of pairs){const file=join(root,source),text=readFileSync(file,'utf8');if(!text.includes('[English](README.md) | [日本語](README.ja.md)'))writeFileSync(file,text.replace(/^(# [^\n]+\n)/,'$1\n[English](README.md) | [日本語](README.ja.md)\n'));}
+ generate(['--output-dir',out]);
+ for(const [source,landing]of pairs){
+  assert.match(readFileSync(join(root,source),'utf8'),/\[日本語\]\(README\.ja\.md\)/);
+  assert.doesNotMatch(readFileSync(join(out,landing),'utf8'),/\[English\]\(README\.md\)|README\.ja\.md/);
+ }
 }));

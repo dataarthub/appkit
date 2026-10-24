@@ -5,6 +5,14 @@ may be prepared before publication; confirm availability on the
 [npm package page](https://www.npmjs.com/package/@alneas/appkit-core). Publication
 dates are recorded only when confirmed.
 
+## Unreleased
+
+### Changed
+
+- Simplify the npm README to a concise English description, usage example and
+  documentation/history links. This source-only documentation correction is
+  pending a future independent Core release; published 0.2.0 bytes stay unchanged.
+
 ## [0.2.0]
 
 ### Added

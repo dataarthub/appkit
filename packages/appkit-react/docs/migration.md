@@ -1,6 +1,6 @@
 ---
-title: "Migrate from app-core and react-tools"
-description: "Choose between the restricted package rename and the public Appkit 0.1.0 subset, then update dependencies, imports, providers and behavior checks."
+title: "Upgrade Appkit React to 0.3.0"
+description: "Migrate native drag registrations, React 19 component types and shared Query dependencies, preserving the older package-split route."
 sidebar:
   order: 20
 archetype: how-to
@@ -8,20 +8,313 @@ project: appkit
 tags: ["migration", "core", "react"]
 ---
 
-# Migrate from app-core and react-tools
+# Upgrade Appkit React to 0.3.0
+
+This guide targets **React 0.3.0 with Core 0.2.0**, upgrading from React 0.2.0.
+It may be prepared before npm publication. Confirm availability on npm before
+installing; source versions and a merged PR do not prove delivery. The default
+portal must retain the last delivered revision until publication is confirmed;
+then ingest the reviewed 0.3.0 source and API catalog together.
 
 ## Prerequisites
 
+Use Node.js 24 or newer and React/React DOM matching `^19.2.3`. Confirm that
+React 0.3.0 is published before installing it; a source manifest version or merged
+PR does not establish npm availability.
+Keep the host lockfile and a working revision before upgrading. No new feature
+peer is required for high-level components. Import Appkit CSS once at the host
+boundary; provider contexts remain owned by each feature.
+
+## Public import
+
+| Surface | Supported import |
+| --- | --- |
+| Generic provider and registrations | `@alneas/appkit-react/tools/ui` (also root, `/tools` and `/tools/core`) |
+| Kanban board, Compound API and low-level helpers | `@alneas/appkit-react/tools/kanban` |
+| DataTable | `@alneas/appkit-react/tools/data-table` |
+| FileBrowser, standalone views and FileProvider types | `@alneas/appkit-react/tools/file-browser` |
+| Stylesheet | `@alneas/appkit-react/styles` |
+
+## Step-by-Step Implementation
+
+### 1. Select a containing release and inventory old-engine usage
+
+Confirm availability first, then install exact package versions. Before publication,
+use only the maintainer-verified candidate archives for isolated testing.
+
+```bash
+npm view @alneas/appkit-react@0.3.0 version
+npm install --save-exact @alneas/appkit-react@0.3.0 @alneas/appkit-core@0.2.0 @tanstack/react-query@5.104.5 @tanstack/query-core@5.104.5
+```
+
+Core does not advance to 0.3.0 in this release. Align both direct Query packages
+at **5.104.5**. Mixed 5.104.4 / 5.104.5 installations can make QueryClient and Query
+nominal types incompatible. Refresh the host lockfile and inspect `npm ls
+@tanstack/react-query @tanstack/query-core`; do not hide conflicts with type casts
+or skipLibCheck. The library's Node >=24.0.0 and React/React DOM ^19.2.3 requirements
+remain; repository development tools have a separate Node requirement.
+
+Align any direct Core dependency with the selected React package's exact Core
+pin. If the host imports native dnd-kit hooks or sensor classes directly, declare
+those packages as direct host dependencies too. High-level Appkit usage does not
+require installing their import subpaths as packages.
+
+Inventory `onDragCancel`, `active`/`over.data.current`, `setNodeRef`, `attributes`,
+`listeners`, `isOver`, custom Kanban controllers/sensors and external old-engine
+hooks. Remove old application dependencies only when its own remaining usages
+have also migrated. Do not compose old and native registrations under one
+provider.
+
+### 2. Keep high-level business props and migrate low-level composition
+
+#### Kanban and DataTable
+
+React 0.3.0 uses dnd-kit React 0.5.1 for all Appkit drag surfaces.
+Previously published 0.2.0 archive bytes remain unchanged. These components
+create their own drag provider; hosts still import Appkit CSS once.
+
+```tsx
+import {KanbanBoard, type KanbanTask} from '@alneas/appkit-react/tools/kanban';
+import '@alneas/appkit-react/styles';
+const tasks: KanbanTask[] = [{id: 'one', title: 'Review', status: 'todo'}];
+export function ReviewTasks() {
+  return <KanbanBoard tasks={tasks} columns={[{id: 'todo', title: 'Todo'}, {id: 'done', title: 'Done'}]}
+    onStatusChange={(taskId, status) => { console.log(taskId, status); }} />;
+}
+```
+
+Kanban drag changes status, including movement into empty columns. It does not
+persist order within a column or invoke `onOrderChange`. WIP limits remain visual
+warnings. Space/Enter starts or confirms movement, Left/Right selects a column,
+and Escape cancels. Read-only cards do not activate dragging. Preset optimistic
+updates and controlled compound state retain their existing ownership.
+
+DataTable keeps `DataTableProps`, `DataTableViewProps` and the existing settings
+format. Use the separate reorder button to move leaf columns; sorting remains a
+separate action. Hidden column slots remain in persisted order. Group headers
+and placeholders do not activate dragging. A column/visibility change during a
+drag invalidates its saved positions rather than applying stale indices.
+
+#### Low-level Kanban compatibility
+
+The following exported helpers from `@alneas/appkit-react/tools/kanban` expose
+an intentional source/runtime compatibility change in React 0.3.0:
+
+| API | React 0.3.0 contract |
+| --- | --- |
+| `useKanbanSensors(statusField)` | Native `@dnd-kit/dom` sensor descriptors, not legacy core descriptors. |
+| `useKanbanDrag(options).contextProps` | Native `DragDropProvider` props. Events expose `operation.source`/`operation.target`; cancellation is `event.canceled` on end. There is no legacy `onDragCancel` property. |
+| `KanbanDragSurface.controller` | A `KanbanDragController` returned by the migrated hook. Manually constructed legacy controllers must migrate. |
+
+The high-level props/callbacks and helper names remain. `resolveKanbanMove` retains
+its structural `{active, over}` input with `over.data.current`, so existing callers
+passing that shape still work. `KanbanDraggableCard` and `KanbanColumnFrame` now
+register with the native provider: pair them with the migrated surface, not a
+legacy `DndContext` or legacy hooks. To compose a low-level board:
+
+```tsx
+import {KanbanDragSurface, KanbanColumn, useKanbanDrag, type KanbanTask}
+  from '@alneas/appkit-react/tools/kanban';
+const customTasks: KanbanTask[] = [{id: 'one', title: 'Review', status: 'todo'}];
+export function CustomTaskSurface() {
+  const controller = useKanbanDrag({tasks: customTasks});
+  return <KanbanDragSurface controller={controller}>
+    <KanbanColumn column={{id: 'todo', title: 'Todo'}} tasks={customTasks} />
+    <KanbanColumn column={{id: 'done', title: 'Done'}} tasks={[]} />
+  </KanbanDragSurface>;
+}
+```
+
+#### Generic wrappers and FileBrowser
+
+`DnDProvider`, `Draggable`, `Droppable` and their prop types remain exported from
+`@alneas/appkit-react`, `/tools`, `/tools/core` and `/tools/ui`. Their low-level
+contracts now use the native engine and are a breaking change:
+
+| Legacy contract | Native contract |
+| --- | --- |
+| `event.active`, `event.over.data.current` | `event.operation.source`, `event.operation.target`, with `.data` directly on each entity; either entity can be null. |
+| Separate `onDragCancel` callback | `onDragEnd` also runs on cancel; check `event.canceled` before persisting. |
+| `attributes`, `listeners`, `setNodeRef` | `ref` on the draggable element; optional `handleRef` on a separate activator. Accessibility and input listeners are managed natively. |
+| Droppable `setNodeRef`, `isOver` | `ref`, `isDropTarget`. |
+| CSS transform in render-prop `style` | Native feedback controls movement; `style` remains presentational opacity/cursor styling. |
+| External legacy core hooks/context | Native `@dnd-kit/react` hooks with the native provider. |
+
+The default provider uses a 5px mouse/pen threshold and a 250ms touch hold
+with 5px tolerance so early swipes can scroll, plus native keyboard movement
+(10px per arrow, Shift for larger movement), native accessibility and clone
+feedback with immediate drop completion. Hosts can pass native provider props
+including sensors/plugins to customize this policy. Droppables use pointer
+intersection; an outside drop does not choose the nearest folder. Registration
+IDs are unique within each provider. A separate handle preserves nested controls:
+
+```tsx
+import {DnDProvider, Draggable, Droppable} from '@alneas/appkit-react/tools/ui';
+import '@alneas/appkit-react/styles';
+export function NativeDragExample() {
+  return <DnDProvider onDragEnd={event => {
+    const {source, target} = event.operation;
+    if (event.canceled || !source || !target) return;
+    console.log(source.data, target.data);
+  }}>
+    <Draggable id="file" data={{name: 'Report'}}>
+      {({ref, handleRef, style}) => <div ref={ref} style={style}>
+        <button ref={handleRef}>Move report</button>
+      </div>}
+    </Draggable>
+    <Droppable id="folder">{({ref, isDropTarget}) =>
+      <div ref={ref} data-over={isDropTarget}>Archive</div>}
+    </Droppable>
+  </DnDProvider>;
+}
+```
+
+`FileBrowser`, `FileListView`, `FileGridView` and `FileProvider` retain their
+high-level props and storage contract. Standalone list/grid views must be inside
+`DnDProvider`; their list icon buttons and grid icon buttons are the native drag
+handles. Click/Meta-or-Ctrl selection, double-click open and context menus remain.
+Dropping moves only the dragged file into a listed folder, even when several
+files are selected. The folder path gains one trailing slash when needed.
+Cancellation, outside drops, missing/removed entities and listing/navigation
+changes do not write. A successful `moveNode` resolves before refresh; a rejected
+move reports its error without a success refresh. Navigation during an in-flight
+move prevents its completion from refreshing the old view.
+
+The package no longer depends on legacy `@dnd-kit/core`, `@dnd-kit/sortable` or
+`@dnd-kit/utilities` and no longer installs a global JSX compatibility shim.
+Remove those application dependencies only after migrating any application-owned
+old-engine usages. Dependency/type checks alone do not establish interaction or
+accessibility parity in a host application.
+
+A host-owned FileProvider stays an explicit input. Appkit does not configure a
+live storage service or authorize access to it:
+
+```tsx
+import {FileBrowser, type FileProvider} from '@alneas/appkit-react/tools/file-browser';
+import '@alneas/appkit-react/styles';
+export function HostFiles({provider}: {provider: FileProvider}) {
+  return <div style={{height: 500}}><FileBrowser provider={provider} initialViewMode="list" /></div>;
+}
+```
+
+### 3. Roll out downstream consumers after publication
+
+After React 0.3.0 is confirmed published, update the application's exact public
+package pin, migrate low-level call sites, remove obsolete old-engine direct
+dependencies, and regenerate its declarations, API reports and notices through
+its own tooling. Update browser dependency optimization settings and installation
+guides that still name the old engine. Replace artificial legacy MouseSensor or
+TouchSensor test injections with trusted pointer/touch input. Keep restricted
+implementation details and raw verification receipts in their owning repository.
+
+### React 19 refs, component types and callbacks
+
+DOM-ref wrappers receive `ref` as a regular React 19 prop. Existing calls such as
+`<Input ref={inputRef} />` retain their public props and ref targets, including
+callback-ref cleanup and supported Base UI `render` composition. Custom wrappers
+can pass `ref` along with the other props:
+
+```tsx
+import type {ComponentProps} from 'react';
+import {Input} from '@alneas/appkit-react/ui';
+
+export function NameInput(props: ComponentProps<typeof Input>) {
+  return <Input {...props} />;
+}
+```
+
+Use `ComponentProps<typeof Input>` and `ComponentRef<typeof Input>` for consumer
+types. Regular function components do not retain the `ForwardRefExoticComponent`
+wrapper type or its internal `.render`/`$$typeof` properties.
+
+Register window keyboard shortcuts with `@alneas/appkit-react/ui/hooks`:
+
+```tsx
+import {useKeyboardShortcuts} from '@alneas/appkit-react/ui/hooks';
+
+export function SaveShortcut({save}: {save: () => void}) {
+  useKeyboardShortcuts([{key: 's', ctrlKey: true, handler: save}]);
+  return null;
+}
+```
+
+Definitions and handlers use the latest committed values without re-registering
+the listener. Pass `false` as the second argument to disable shortcuts. Matching
+is case-insensitive, `ctrlKey: true` accepts Ctrl or Meta, and only the first
+match runs. Matches prevent the default action unless `preventDefault: false`.
+Input, composition and repeat events are not filtered. This hook needs no
+provider or stylesheet.
+
+For a headless filter, import `useFilter` from
+`@alneas/appkit-react/tools/filter`. It needs no provider or stylesheet:
+
+```tsx
+import {useFilter} from '@alneas/appkit-react/tools/filter';
+
+export function StatusFilter({onChange}: {onChange: (filter: Record<string, unknown>) => void}) {
+  const {values, setField} = useFilter({
+    fields: [{field: 'status', operator: 'eq'}],
+    onChange,
+  });
+  return <input value={String(values.status ?? '')}
+    onChange={event => setField('status', event.target.value)} />;
+}
+```
+
+Changed queries call the latest committed `onChange`. Replacing only the callback
+does not replay the existing filter, and equal query contents do not notify again.
+
+
+## Verification
+
+Compile against the packed package with NodeNext and `skipLibCheck: false` in
+both ESM and CommonJS consumers. Old callback/render-prop examples should fail
+for the documented boundary change, not for missing hidden dependencies. Check
+that neither the installed graph nor emitted declarations need legacy dnd-kit or
+a global JSX augmentation.
+
+Exercise real components: empty-column Kanban movement, status-only callbacks,
+read-only/cancel/focus behavior; hidden/grouped/persisted table ordering and
+sorting; grid/list file moves, selection, double-click and context menus. Include
+held touch movement and pre-activation scrolling. Assert one intended move,
+refresh only after success, and no writes for cancel/outside/removed or stale
+entities. A viewport named mobile does not establish touch support.
+
+Run the consuming application's type and interaction checks before rollout. The
+[maintainer contribution guide](https://github.com/dataarthub/appkit/blob/main/CONTRIBUTING.md)
+describes Appkit's own verification commands. Passing isolated component tests
+does not establish hosted-provider authorization or complete downstream acceptance.
+
+## Troubleshooting / Common Pitfalls
+
+| Symptom | Action |
+| --- | --- |
+| `onDragCancel` or `event.active` no longer type-checks | Use native `onDragEnd`, inspect `event.canceled`, then nullable `operation.source`/`target`. |
+| Render props have no `attributes`, `listeners` or `setNodeRef` | Attach native `ref` and optional `handleRef`; use `isDropTarget` on targets. |
+| External hooks do not see the board/provider | Use the native engine consistently; update custom surface/controller composition. |
+| Existing synthetic mouse/touch tests never start | Use trusted pointer input; test touch hold and scroll separately. |
+| A file move finishes after navigation | The provider write may already have completed; Appkit suppresses refreshing the departed view, not the remote write itself. |
+| Expected low-level API is absent from the installed package | Confirm the exact containing release and installed lockfile; this guide targets React 0.3.0; verify registry availability. |
+
+
+## Earlier separate-package migration
+
+If you are still using the older separate packages, identify the supported public
+exports using this route, then apply the 0.3.0 compatibility steps above. Confirm
+the destination versions are published before running the commands.
+
+### Prerequisites
+
 This guide starts with applications using `@dataarthub/app-core` and
-`@dataarthub/react-tools`. The public destination is `@alneas/appkit-core@0.1.0`
-and `@alneas/appkit-react@0.1.0`. A public version number is independent of the
-legacy private package versions; `0.1.0` is not an in-place downgrade.
+`@dataarthub/react-tools`. The public destination is `@alneas/appkit-core@0.2.0`
+and `@alneas/appkit-react@0.3.0`. A public version number is independent of the
+legacy private package versions; public and restricted version numbers must not be compared as an in-place upgrade or downgrade.
 
 Use Node.js 24.0.0 or later. Public React requires React and React DOM matching
 `^19.2.3`. Keep the application's existing lockfile and a working revision before
 changing dependencies. Inventory feature imports and runtime behavior first.
 
-## Public import
+### Public import
 
 Install the two package names. Import framework-free APIs from
 `@alneas/appkit-core/data`, `/storage`, `/japan`, `/graph` or `/ai`, and React
@@ -29,9 +322,9 @@ features from `@alneas/appkit-react/ui`, `/tools` or `/ai`. Full import targets
 appear in the tables below and the [Core export reference](../../appkit-core/docs/exports.md)
 and [React export reference](exports.md).
 
-## Step-by-Step Implementation
+### Step-by-Step Implementation
 
-### 1. Choose the migration route
+#### 1. Choose the migration route
 
 | Route | Destination | What to change |
 | --- | --- | --- |
@@ -56,15 +349,15 @@ account; a version in a source manifest does not establish that it is published.
 The public install commands and compatibility claims below apply to the public
 route only. This guide does not certify a private release or its consumers.
 
-### 2. Install the public packages and keep registry scopes separate
+#### 2. Install the public packages and keep registry scopes separate
 
 For a React application using the form recipe:
 
 ```bash
-bun add --exact @alneas/appkit-core@0.1.0 @alneas/appkit-react@0.1.0 react@19.2.3 react-dom@19.2.3 @tanstack/react-query@5.104.4
+bun add --exact @alneas/appkit-core@0.2.0 @alneas/appkit-react@0.3.0 react@19.2.3 react-dom@19.2.3 @tanstack/react-query@5.104.5 @tanstack/query-core@5.104.5
 ```
 
-A server-only application needs only `@alneas/appkit-core@0.1.0` plus its selected
+A server-only application needs only `@alneas/appkit-core@0.2.0` plus its selected
 adapter's dependencies. Install feature-specific peers from the export references;
 root installation does not configure a database, storage endpoint or AI provider.
 
@@ -80,7 +373,7 @@ configuration. An entirely public consumer does not need GitHub Packages credent
 Do not change the default registry to GitHub Packages for the public packages.
 Do not replace registry dependencies with sibling source aliases or tarball overrides.
 
-### 3. Move React imports to feature subpaths
+#### 3. Move React imports to feature subpaths
 
 The following are destination entry points to inspect, not a claim that every
 symbol in an old barrel is available at the new entry.
@@ -126,7 +419,7 @@ Import the public stylesheet once at the application boundary. There is no publi
 export. Review your own CSS overrides against the resulting UI; an import change
 does not prove visual equivalence.
 
-### 4. Separate framework-free Core imports from React bindings
+#### 4. Separate framework-free Core imports from React bindings
 
 | Legacy Core import | Public destination / decision |
 | --- | --- |
@@ -179,7 +472,7 @@ export function loadRecords(adapter: DataAccessAdapter) {
 }
 ```
 
-### 5. Reconnect providers and review behavior
+#### 5. Reconnect providers and review behavior
 
 Use the [complete request-form recipe](request-form.md) for a working form with
 `QueryClientProvider`, `DataAccessProvider`, a stable query client, `collection`,
@@ -211,7 +504,7 @@ Review these contracts before switching traffic:
   Structured API checks and this migration example do not establish that an AI
   coding agent can migrate an arbitrary application correctly.
 
-### 6. Remove legacy dependencies after the cutover
+#### 6. Remove legacy dependencies after the cutover
 
 For an application that has migrated every legacy import to the public subset:
 
@@ -231,7 +524,7 @@ The private `compliance/prepare.mjs` is also not shipped by the public packages.
 Review the public packages' `LICENSE` files and React's `THIRD_PARTY_NOTICES.md`;
 keep notices for any retained private or application dependencies in scope.
 
-## Verification
+### Verification
 
 In the consuming application:
 
@@ -254,7 +547,7 @@ consumers, declarations and the request-form recipe; they do not certify your
 application, private extensions or every hosted provider. This guide's import
 example is checked separately; no complete legacy application migration is claimed.
 
-## Troubleshooting / Common Pitfalls
+### Troubleshooting / Common Pitfalls
 
 | Symptom | What to check |
 | --- | --- |

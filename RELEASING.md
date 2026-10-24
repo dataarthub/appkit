@@ -319,3 +319,24 @@ When reporting a live evaluation, continue to run `bun run check:agent-eval` aga
 that run's exact receipts and archives; missing, stale or changed evidence still
 cannot qualify. Making evaluation optional does not relax its grading or allow
 harness self-tests to be reported as real task successes. Keep raw evidence ignored.
+
+## React 0.3.0 documentation handoff
+
+React 0.3.0 is prepared independently; Core and React's exact Core dependency stay
+at 0.2.0. The packaged `packages/appkit-react/docs/migration.md` and cumulative
+changelog describe the breaking native DnD/component-type contracts and required
+Query 5.104.5 alignment. Verify these materials in the exact React archive.
+
+Source preparation and a versioned changelog do not establish registry delivery.
+The portal owner must keep its default pages and API ingestion at the last
+confirmed delivered revision until npm publication is verified, then ingest the
+reviewed source for React 0.3.0, regenerate its API/AI references, translate and
+check links/examples under its own publication workflow. This repository neither
+ingests nor deploys the portal. Do not advertise 0.3.0 as available or silently
+mix the new API catalog with the older delivered pages before that checkpoint.
+
+Keep Core's API ingestion at its confirmed `appkit-core-v0.2.0` source; a React
+release does not advance Core's delivered source identity. Reviewed Core README
+corrections may be ingested separately when they describe only released behavior.
+Core's concise English npm README correction is recorded as Unreleased for
+its next independently selected release; do not republish Core 0.2.0 to deliver it.
