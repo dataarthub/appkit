@@ -1,115 +1,267 @@
-name: Publish package release
+# Generated: github-docs/public/templates/private-actions/public; reviewed base ae1ac274494114599ea6c0de2e02c1e61f324e42 (local-reviewed).
+# Bundle SHA-256: 69111de4aafb48fb77e3d8e702b88abdd18fc357a1a4a474a9e6a1ef27dd6fb6
+# Project adapter: .github/workflow-adapter.json; source: scripts/workflow-project/roles.json
+# Run workflow:generate explicitly; workflow:check never repairs output.
+name: "Publish npm packages"
 on:
   release:
-    types: [published]
+    types:
+      - "published"
+  workflow_dispatch:
+    inputs:
+      staged_run:
+        description: "Original successful staging run ID after human npm approval"
+        required: true
+        type: "string"
 permissions:
-  contents: read
+  contents: "read"
 concurrency:
-  # Serialize Core and React releases; do not cancel a publication in progress.
-  group: appkit-npm-publication
+  group: "appkit-npm-release"
   cancel-in-progress: false
 jobs:
   verify:
-    if: >-
-      github.repository == 'dataarthub/appkit' &&
-      github.event.release.draft == false &&
-      github.event.release.prerelease == false &&
-      (startsWith(github.event.release.tag_name, 'appkit-core-v') ||
-       startsWith(github.event.release.tag_name, 'appkit-react-v'))
-    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'release' && github.repository == 'dataarthub/appkit' && github.event.release.draft == false && github.event.release.prerelease == false && (github.event_name == 'release' && github.repository == 'dataarthub/appkit' && github.event.release.draft == false && github.event.release.prerelease == false && (startsWith(github.event.release.tag_name, 'appkit-core-v') ||
+       startsWith(github.event.release.tag_name, 'appkit-react-v')))
+    runs-on: "ubuntu-latest"
     timeout-minutes: 30
+    permissions:
+      contents: "read"
+      actions: "read"
     outputs:
-      sha: ${{ steps.select.outputs.sha }}
-      key: ${{ steps.select.outputs.key }}
-      environment: ${{ steps.select.outputs.environment }}
-      url: ${{ steps.select.outputs.url }}
-      integrity: ${{ steps.prepare.outputs.integrity }}
-      artifact: ${{ steps.upload.outputs.artifact-id }}
+      sha: "${{ steps.select.outputs.sha }}"
+      key: "${{ steps.select.outputs.key }}"
+      environment: "${{ steps.select.outputs.environment }}"
+      url: "${{ steps.select.outputs.url }}"
+      integrity: "${{ steps.prepare.outputs.integrity }}"
+      artifact: "${{ steps.upload.outputs.artifact-id }}"
     steps:
-      - uses: actions/checkout@v6
+      -
+        uses: "actions/checkout@v6"
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v6
+        name: "Shared: actions/checkout@v6"
+      -
+        uses: "actions/setup-node@v6"
         with:
           node-version: 24
-          check-latest: true
           package-manager-cache: false
-      - name: Validate package tag, version and source commit
-        id: select
-        run: node scripts/publish/select.mjs
-      - uses: oven-sh/setup-bun@v2
+          check-latest: true
+        name: "Shared: actions/setup-node@v6"
+      -
+        name: "Project: Validate package tag, version and source commit"
+        id: "select"
+        run: "node scripts/publish/select.mjs"
+      -
+        name: "Project: Require successful Public quality for the exact release commit"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+        run: "node scripts/publish/require-quality.mjs"
+      -
+        uses: "oven-sh/setup-bun@v2"
         with:
-          bun-version: 1.4.0
-      - name: Install offline UBL validator
+          bun-version: "1.4.0"
+        name: "Shared: oven-sh/setup-bun@v2"
+      -
+        name: "Project: Install offline UBL validator"
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes libxml2-utils
-      - name: Record runner identity
-        run: echo "APPKIT_CI_IMAGE=${ImageOS}-${ImageVersion}" >> "$GITHUB_ENV"
-      - run: bun install --frozen-lockfile --ignore-scripts
-      - name: Verify source quality, build, types, tests and package contracts
+      -
+        name: "Project: Record runner identity"
+        run: "echo \"APPKIT_CI_IMAGE=${ImageOS}-${ImageVersion}\" >> \"$GITHUB_ENV\""
+      -
+        run: "bun install --frozen-lockfile --ignore-scripts"
+        name: "Project: Run declared project check"
+      -
+        name: "Project: Require exact-commit authoritative Source quality"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+        run: "node scripts/workflow-supply/public/quality.mjs require-source"
+      -
+        uses: "actions/cache/restore@v4"
+        with:
+          path: ".turbo/cache"
+          key: "${{ runner.os }}-${{ runner.arch }}-appkit-release-${{ github.run_id }}"
+          restore-keys: "${{ runner.os }}-${{ runner.arch }}-appkit-two-node24-"
+        name: "Shared: actions/cache/restore@v4"
+      -
+        name: "Project: Build and verify package contracts (exact-commit Public quality already passed)"
         run: |
           bun run secrets:setup
           bun run check:quality
-          bun run verify
-          bun run test:agent-tooling
-      - name: Verify React with declared and candidate Core
-        if: steps.select.outputs.key == 'react'
-        run: bun run check:react-core --release
-      - name: Verify exact packed archives in isolated consumers
+          bun run build
+          bun run check:release
+          bun run check:docs
+      -
+        name: "Project: Verify React with declared and candidate Core"
+        if: "steps.select.outputs.key == 'react'"
+        run: "bun run check:react-core --release"
+      -
+        name: "Project: Verify exact packed archives in isolated consumers"
         env:
-          APPKIT_RELEASE_CONSUMER: 'true'
-        run: bun run test:consumer
-      - name: Select only the tested target package archive
-        id: prepare
-        run: node scripts/publish/prepare.mjs
-      - uses: actions/upload-artifact@v7
-        id: upload
+          APPKIT_RELEASE_CONSUMER: "true"
+        run: "bun run test:consumer"
+      -
+        name: "Project: Select only the tested target package archive"
+        id: "prepare"
+        run: "node scripts/publish/prepare.mjs"
+      -
+        uses: "actions/upload-artifact@v7"
+        id: "upload"
         with:
-          name: npm-package-${{ github.run_id }}-${{ github.run_attempt }}
+          name: "npm-package-${{ github.run_id }}-${{ github.run_attempt }}"
           path: |
             .verification/publish/package.tgz
             .verification/publish/release.json
-          if-no-files-found: error
+          if-no-files-found: "error"
           retention-days: 7
           compression-level: 0
-          # Only public package bytes and sanitized identity; never raw receipts.
           include-hidden-files: true
-  publish:
-    needs: verify
-    runs-on: ubuntu-latest
+        name: "Shared: actions/upload-artifact@v7"
+  stage:
+    name: "Stage package for approval"
+    needs: "verify"
+    runs-on: "ubuntu-latest"
     timeout-minutes: 10
     permissions:
-      contents: read
-      deployments: write
-      id-token: write
+      contents: "read"
+      actions: "read"
+      id-token: "write"
     environment:
-      name: ${{ needs.verify.outputs.environment }}
-      url: ${{ needs.verify.outputs.url }}
+      name: "${{ needs.verify.outputs.environment }}"
+      deployment: false
     steps:
-      - uses: actions/checkout@v6
+      -
+        uses: "actions/checkout@v6"
         with:
-          ref: ${{ needs.verify.outputs.sha }}
+          ref: "${{ needs.verify.outputs.sha }}"
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v6
+        name: "Shared: actions/checkout@v6"
+      -
+        uses: "actions/setup-node@v6"
         with:
           node-version: 24
-          check-latest: true
           package-manager-cache: false
-      - name: Install pinned Trusted Publishing CLI
-        run: npm install --global npm@11.21.0 --ignore-scripts --no-audit --no-fund
-      - uses: actions/download-artifact@v8
+          check-latest: true
+        name: "Shared: actions/setup-node@v6"
+      -
+        name: "Project: Install pinned Trusted Publishing CLI"
+        run: "npm install --global npm@11.21.0 --ignore-scripts --no-audit --no-fund"
+      -
+        uses: "actions/download-artifact@v8"
         with:
-          artifact-ids: ${{ needs.verify.outputs.artifact }}
-          path: .verification/publish
-          digest-mismatch: error
-      # Before 1.0.0: publish with beta, then point latest at the same version.
-      # At/after 1.0.0: require latest only; never overwrite a newer tag on retry.
-      # npm Trusted Publisher must allow both npm publish and npm dist-tag.
-      - name: Publish verified archive and confirm required npm dist-tags through OIDC
+          artifact-ids: "${{ needs.verify.outputs.artifact }}"
+          path: ".verification/publish"
+          digest-mismatch: "error"
+        name: "Shared: actions/download-artifact@v8"
+      -
+        name: "Project: Recheck Public quality immediately before publication"
         env:
-          APPKIT_NPM_PUBLISH: 'true'
-          VERIFIED_INTEGRITY: ${{ needs.verify.outputs.integrity }}
-        run: node scripts/publish/publish.mjs
+          GITHUB_TOKEN: "${{ github.token }}"
+        run: "node scripts/publish/require-quality.mjs"
+      -
+        name: "Project: Revalidate exact original Source quality evidence"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+        run: "node scripts/workflow-supply/public/quality.mjs require-source"
+      -
+        name: "Project: Stage verified archive through OIDC"
+        env:
+          APPKIT_NPM_PUBLISH: "true"
+          VERIFIED_INTEGRITY: "${{ needs.verify.outputs.integrity }}"
+        run: "node scripts/publish/publish.mjs"
+  resolve:
+    if: "github.event_name == 'workflow_dispatch' && github.repository == 'dataarthub/appkit' && github.ref == 'refs/heads/main'"
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: "read"
+      actions: "read"
+    outputs:
+      sha: "${{ steps.source.outputs.sha }}"
+      tag: "${{ steps.source.outputs.tag }}"
+      environment: "${{ steps.source.outputs.environment }}"
+      artifact: "${{ steps.source.outputs.artifact }}"
+    steps:
+      -
+        uses: "actions/checkout@v6"
+        with:
+          persist-credentials: false
+        name: "Shared: actions/checkout@v6"
+      -
+        uses: "actions/setup-node@v6"
+        with:
+          node-version: 24
+          package-manager-cache: false
+          check-latest: true
+        name: "Shared: actions/setup-node@v6"
+      -
+        id: "source"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+        run: "node scripts/publish/resolve-resume.mjs"
+        name: "Project: Run declared project check"
+    timeout-minutes: 35
+  complete:
+    needs: "resolve"
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 15
+    permissions:
+      contents: "read"
+      actions: "read"
+      deployments: "write"
+      id-token: "write"
+    env:
+      PUBLISH_SOURCE_SHA: "${{ needs.resolve.outputs.sha }}"
+      PUBLISH_RELEASE_TAG: "${{ needs.resolve.outputs.tag }}"
+      GITHUB_TOKEN: "${{ github.token }}"
+    steps:
+      -
+        uses: "actions/checkout@v6"
+        with:
+          ref: "${{ needs.resolve.outputs.sha }}"
+          fetch-depth: 0
+          persist-credentials: false
+        name: "Shared: actions/checkout@v6"
+      -
+        uses: "actions/setup-node@v6"
+        with:
+          node-version: 24
+          package-manager-cache: false
+          check-latest: true
+        name: "Shared: actions/setup-node@v6"
+      -
+        uses: "actions/download-artifact@v8"
+        with:
+          artifact-ids: "${{ needs.resolve.outputs.artifact }}"
+          run-id: "${{ inputs.staged_run }}"
+          github-token: "${{ github.token }}"
+          path: ".verification/publish"
+          digest-mismatch: "error"
+        name: "Shared: actions/download-artifact@v8"
+      -
+        name: "Project: Validate original release and select its npm environment"
+        id: "select"
+        run: "node scripts/publish/select.mjs"
+      -
+        name: "Project: Install pinned Trusted Publishing CLI"
+        run: "npm install --global npm@11.21.0 --ignore-scripts --no-audit --no-fund"
+      -
+        name: "Project: Recheck Public quality for the original release commit"
+        run: "node scripts/publish/require-quality.mjs"
+      -
+        name: "Project: Revalidate exact original Source quality evidence"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+        run: "node scripts/workflow-supply/public/quality.mjs require-source"
+        if: "hashFiles('.github/workflow-adapter.json') != ''"
+      -
+        name: "Project: Confirm approved archive, required tags, staged cleanup and Deployment"
+        env:
+          APPKIT_NPM_PUBLISH: "true"
+        run: "node scripts/publish/publish.mjs"
+    environment:
+      name: "${{ needs.resolve.outputs.environment }}"
+      deployment: false

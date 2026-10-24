@@ -18,3 +18,20 @@ test('changed call/session and registration invalidate approval including awaite
  let allow!:(value:boolean)=>void;const y=setup(()=>new Promise<boolean>(resolve=>{allow=resolve;}));const pending=y.example.queue(call())!,operation=y.example.approve(pending.approvalId);y.unregister();y.registry.registerAction(y.action);allow(true);assert.equal(await operation,null);assert.equal(y.writes(),0);
  const denied=setup(async()=>false),d=denied.example.queue(call())!;assert.equal(await denied.example.approve(d.approvalId),null);assert.equal(denied.writes(),0);
 });
+test('revocation during authorization and duplicate approval never execute a stale effect',async()=>{
+ for(const revoke of ['reject','close','session','replace'] as const){
+  let allow!:(value:boolean)=>void;
+  const x=setup(()=>new Promise<boolean>(resolve=>{allow=resolve;}));
+  const approval=x.example.queue(call())!,running=x.example.approve(approval.approvalId);
+  assert.equal(await x.example.approve(approval.approvalId),null);
+  if(revoke==='reject')x.example.reject(approval.approvalId);
+  if(revoke==='close')x.example.close();
+  if(revoke==='session')x.example.setSession('revoked-session');
+  if(revoke==='replace')x.example.queue({...call(),arguments:{recordId:'r1',name:'Replacement'}});
+  allow(true);assert.equal(await running,null);assert.equal(x.writes(),0);x.example.close();
+ }
+ const x=setup(),approval=x.example.queue(call())!;
+ assert.equal((await x.example.approve(approval.approvalId))?.ok,true);
+ assert.equal(await x.example.approve(approval.approvalId),null);
+ assert.equal(x.writes(),1);x.example.close();
+});

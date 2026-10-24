@@ -70,6 +70,8 @@ With these default validator options, input is not coerced, defaults are not ins
 
 ## Next Steps
 
+- [Change history](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/CHANGELOG.md): additions, fixes and upgrade notes by version.
+
 - [Data and schema guide](docs/data.md): record contracts and database adapters.
 - [Public exports and optional peers](docs/exports.md): exact import paths and SDK requirements.
 - [AI security and approval boundaries](docs/ai.md): validation, permissions and tool execution.
@@ -750,6 +752,8 @@ console.log(validate(schema, { name: 'Ada', reason: 'Equipment request' }).valid
 With these default validator options, input is not coerced, defaults are not inserted and extra keys are not removed. Invalid input returns errors; invalid schemas or validator configuration can throw. A successful result validates the data but does not narrow its TypeScript type or authorize a write. After validation, pass accepted records to your application's persistence layer. See the [data guide](data.md) for the `DataAccessAdapter` contract and provider-specific entry points.
 
 ## Next Steps
+
+- [Change history](https://github.com/dataarthub/appkit/blob/main/packages/appkit-core/CHANGELOG.md): additions, fixes and upgrade notes by version.
 
 - [Data and schema guide](data.md): record contracts and database adapters.
 - [Public exports and optional peers](exports.md): exact import paths and SDK requirements.

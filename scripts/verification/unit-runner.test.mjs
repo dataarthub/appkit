@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtempSync,mkdirSync,writeFileSync,rmSync,readdirSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {validateUnitReport} from '../unit-report.mjs';
+const runner=resolve('scripts/test-unit.mjs');
+function fixture(source,work){const root=mkdtempSync(join(tmpdir(),'appkit-unit-runner-'));try{mkdirSync(join(root,'src'));if(source!==null)writeFileSync(join(root,'src/fixture.test.ts'),source);return work(root);}finally{rmSync(root,{recursive:true,force:true});}}
+function run(root){return spawnSync(process.execPath,[runner],{cwd:root,encoding:'utf8'});}
+test('unit runner rejects no discovered tests and empty test files',()=>{
+ for(const source of [null,'export const value=1;'])fixture(source,root=>assert.notEqual(run(root).status,0));
+});
+test('unit runner rejects skipped tests despite successful process status',()=>fixture("import {test} from 'bun:test'; test.skip('skipped',()=>{});",root=>assert.notEqual(run(root).status,0)));
+test('unit runner propagates failures and accepts a nonempty passing suite',()=>{
+ fixture("import {test,expect} from 'bun:test'; test('failed',()=>expect(1).toBe(2));",root=>assert.notEqual(run(root).status,0));
+ fixture("import {test,expect} from 'bun:test'; test('passed',()=>expect(1).toBe(1));",root=>{const result=run(root);assert.equal(result.status,0,result.stderr);assert.deepEqual(readdirSync(root).sort(),['src']);});
+});
+test('a passing file cannot hide an empty selected file',()=>fixture('export const noTests=true;',root=>{
+ writeFileSync(join(root,'src/passing.test.ts'),"import {test,expect} from 'bun:test'; test('pass',()=>expect(true).toBe(true));");
+ assert.notEqual(run(root).status,0);
+}));
+
+test('Bun and Vitest reports bind executed cases to selected files and reject missing/failure evidence',()=>{
+ const bun='<testsuites tests="1" failures="0" skipped="0"><testcase file="src/a.test.ts" name="ok" /></testsuites>';
+ const vitest='<testsuites tests="1" failures="0" errors="0"><testsuite tests="1" failures="0" errors="0" skipped="0"><testcase classname="src/a.test.ts" name="ok" /></testsuite></testsuites>';
+ for(const report of [bun,vitest]){
+  validateUnitReport(report,['src/a.test.ts'],'/fixture');
+  assert.throws(()=>validateUnitReport(report,['src/b.test.ts'],'/fixture'));
+  assert.throws(()=>validateUnitReport(report,['src/a.test.ts','src/b.test.ts'],'/fixture'));
+  assert.throws(()=>validateUnitReport(report.replace('tests="1"','tests="2"'),['src/a.test.ts'],'/fixture'));
+  assert.throws(()=>validateUnitReport(report.replace('failures="0"','failures="1"'),['src/a.test.ts'],'/fixture'));
+ }
+ for(const report of ['', '<testsuites tests="0" />',vitest.replace('skipped="0"','skipped="1"')])assert.throws(()=>validateUnitReport(report,['src/a.test.ts'],'/fixture'));
+});

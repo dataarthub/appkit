@@ -6,6 +6,15 @@ import path from 'node:path';
 import ts from 'typescript';
 const root=path.resolve(import.meta.dirname,'..');
 const packages=['appkit-core','appkit-react'];
+test('selected package changelogs match their version and are linked from npm README',()=>{
+ for(const name of packages){
+  const dir=path.join(root,'packages',name),pkg=JSON.parse(readFileSync(path.join(dir,'package.json')));
+  if(!pkg.files?.includes('CHANGELOG.md'))continue;
+  const notes=readFileSync(path.join(dir,'CHANGELOG.md'),'utf8'),heading=`## [${pkg.version}]`;
+  assert(notes.split('\n').some(line=>line===heading||line.startsWith(heading+' - ')),name+': missing release entry');
+  assert(readFileSync(path.join(dir,'README.md'),'utf8').includes(`https://github.com/dataarthub/appkit/blob/main/packages/${name}/CHANGELOG.md`),name+': missing npm-compatible history link');
+ }
+});
 function sources(dir){return readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?sources(path.join(dir,e.name)):/\.(ts|tsx)$/.test(e.name)?[path.join(dir,e.name)]:[]);}
 test('migrated source imports use only the two published package names',()=>{
  const bad=[];

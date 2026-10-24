@@ -44,7 +44,22 @@ function formatSize(bytes?: number): string {
 }
 
 /**
- * ファイルの一覧表示（詳細リスト形式）
+ * Render a semantic table of host-owned file nodes with native icon drag handles.
+ * @param props - Current nodes, selected ids, optional verification state and host
+ * selection/open/delete/detail/rename/tag/verify callbacks; no storage is configured here.
+ * @returns The table view; empty listings show the corresponding empty state.
+ * @remarks Place standalone views under DnDProvider from the same native engine.
+ * Selection and open callbacks remain host-owned. Import Appkit CSS once.
+ * @example
+ * ```tsx
+ * import {FileListView} from '@alneas/appkit-react/tools/file-browser';
+ * import {DnDProvider} from '@alneas/appkit-react/tools/ui';
+ * import '@alneas/appkit-react/styles';
+ * export function EmptyFiles() {
+ *   return <DnDProvider><FileListView nodes={[]} selectedIds={[]}
+ *     onSelect={() => {}} onOpen={() => {}} onDelete={() => {}} /></DnDProvider>;
+ * }
+ * ```
  */
 export function FileListView({
   nodes,
@@ -72,8 +87,8 @@ export function FileListView({
 
   const renderNodeContent = (
     node: FileNode, isSelected: boolean,
-    rowProps: React.ComponentPropsWithRef<typeof TableRow> = {},
-    dragHandle?: { attributes: React.HTMLAttributes<HTMLButtonElement>; listeners?: React.HTMLAttributes<HTMLButtonElement> },
+    rowProps: React.ComponentPropsWithRef<typeof TableRow> & {'data-file-drop'?: string; 'data-drop-over'?: boolean} = {},
+    dragHandle?: (element: Element | null) => void,
   ) => {
     const tags = node.metadata?.tags?.split(',').filter(Boolean) || [];
     const verification = verifyingIds[node.id];
@@ -92,7 +107,7 @@ export function FileListView({
         <TableCell className='font-medium'>
           <div className='flex items-center gap-3'>
             {dragHandle ? (
-              <button type='button' aria-label={`Move ${node.name}`} {...dragHandle.attributes} {...dragHandle.listeners}>
+              <button type='button' aria-label={`Move ${node.name}`} ref={dragHandle}>
                 <FileIcon kind={node.kind} contentType={node.contentType} className='h-4 w-4 shrink-0' />
               </button>
             ) : <FileIcon kind={node.kind} contentType={node.contentType} className='h-4 w-4 shrink-0' />}
@@ -169,15 +184,15 @@ export function FileListView({
               );
               const item = node.kind === 'file' ? (
                 <Draggable id={node.id} data={node}>
-                  {({ setNodeRef, style, attributes, listeners, isDragging }) =>
+                  {({ ref, style, handleRef, isDragging }) =>
                     withContextMenu(renderNodeContent(node, isSelected,
-                      { ref: setNodeRef, style, className: cn(isDragging && 'z-50') },
-                      { attributes, listeners }))}
+                      { ref, style, className: cn(isDragging && 'z-50') },
+                      handleRef))}
                 </Draggable>
               ) : (
                 <Droppable id={node.id} data={node}>
-                  {({ setNodeRef, isOver }) => withContextMenu(renderNodeContent(node, isSelected,
-                    { ref: setNodeRef, className: cn(isOver && 'bg-primary/10 ring-2 ring-primary/20 inset-x-0') }))}
+                  {({ ref, isDropTarget }) => withContextMenu(renderNodeContent(node, isSelected,
+                    { ref, 'data-file-drop': node.id, 'data-drop-over': isDropTarget, className: cn(isDropTarget && 'bg-primary/10 ring-2 ring-primary/20 inset-x-0') }))}
                 </Droppable>
               );
 

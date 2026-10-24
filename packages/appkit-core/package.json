@@ -1,6 +1,6 @@
 {
   "name": "@alneas/appkit-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Unified business logic backbone: schema validation, persistence adapters, dependency graphs, and Japanese/regional commercial presets",
   "keywords": [
     "typescript",
@@ -38,6 +38,7 @@
     "dist",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
     "docs",
     "llms.txt",
     "llms-full.txt",

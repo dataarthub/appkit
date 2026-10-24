@@ -7,6 +7,7 @@ import {
   type ColumnDef,
 } from '../../../src/tools/components/data-table/table-engine';
 import { DataTable } from '../../../src/tools/components/data-table/data-table';
+import { useDataTableStore } from '../../../src/tools/components/data-table/table-store';
 import { TableView } from '../../../src/tools/components/data-table/table-compound';
 import { createColumnsFromHeads, TableHeadBase } from '../../../src/tools/components/data-table/table-utils';
 import { Checkbox } from '../../../src/tools/components/ui/checkbox';
@@ -405,5 +406,64 @@ export const CustomTableViewCompound: StoryObj = {
         </TableView.Footer>
       </TableView.Root>
     );
+  },
+};
+
+
+export const HiddenColumnsOrderingContract: Story = {
+  args: {...Default.args, storageKey: 'dnd-hidden-contract', showRowNumber: true, variant: 'minimal'},
+  render: function HiddenColumnsFixture(args) {
+    React.useState(() => {
+      useDataTableStore.getState().setTableSettings('dnd-hidden-contract', {
+        columnOrder: ['select','status','email','amount'], columnVisibility: {email:false}, sorting: [], pageSize:10,
+      });
+      return true;
+    });
+    const [mounted,setMounted]=React.useState(true);
+    return <><button onClick={()=>setMounted(current=>!current)}>Toggle table mount</button>{mounted&&<DataTable {...args}/>}</>;
+  },
+  play: async ({canvasElement}) => {
+    const canvas=within(canvasElement);
+    const handles=()=>canvas.getAllByRole('button',{name:/^Reorder column /}).map(handle=>handle.getAttribute('aria-label'));
+    await waitFor(()=>expect(handles()).toEqual(['Reorder column select','Reorder column status','Reorder column amount','Reorder column rowNumber']));
+    canvas.getByRole('button',{name:'Reorder column status'}).focus();
+    await userEvent.keyboard('[Space]{ArrowRight}[Space]');
+    await waitFor(()=>expect(handles()).toEqual(['Reorder column select','Reorder column amount','Reorder column status','Reorder column rowNumber']));
+    await waitFor(()=>expect(useDataTableStore.getState().getTableSettings('dnd-hidden-contract').columnOrder).toEqual(['select','amount','email','status','rowNumber']));
+    await userEvent.click(canvas.getByRole('button',{name:'Toggle table mount'}));
+    await userEvent.click(canvas.getByRole('button',{name:'Toggle table mount'}));
+    await waitFor(()=>expect(handles()).toEqual(['Reorder column select','Reorder column amount','Reorder column status','Reorder column rowNumber']));
+    await expect(useDataTableStore.getState().getTableSettings('dnd-hidden-contract').columnVisibility.email).toBe(false);
+  },
+};
+
+export const GroupedHeadersOrderingContract: Story = {
+  args: {
+    data: paymentData as object[], variant:'minimal',
+    columns: [
+      {id:'identity',header:'Identity',columns:[{accessorKey:'status',header:'Status'},{accessorKey:'email',header:'Email'}]},
+      {accessorKey:'amount',header:'Amount'},
+    ] as ColumnDef<object,unknown>[],
+  },
+  play: async({canvasElement})=>{
+    const canvas=within(canvasElement);
+    await expect(canvas.queryByRole('button',{name:'Reorder column identity'})).toBeNull();
+    const handles=()=>canvas.getAllByRole('button',{name:/^Reorder column /}).map(handle=>handle.getAttribute('aria-label'));
+    await waitFor(()=>expect(handles()).toEqual(['Reorder column status','Reorder column email','Reorder column amount']));
+    canvas.getByRole('button',{name:'Reorder column status'}).focus();
+    await userEvent.keyboard('[Space]{ArrowRight}[Space]');
+    await waitFor(()=>expect(handles()).toEqual(['Reorder column email','Reorder column status','Reorder column amount']));
+    const rows=within(canvas.getByRole('table')).getAllByRole('row');
+    await expect(within(rows[2]).getAllByRole('cell')[0].textContent).toBe(paymentData[0].email);
+  },
+};
+
+export const CancelOrderingContract: Story = {
+  args: {...Default.args, variant:'minimal'},
+  play:async({canvasElement})=>{
+    const canvas=within(canvasElement);
+    canvas.getByRole('button',{name:'Reorder column status'}).focus();
+    await userEvent.keyboard('[Space]{ArrowRight}[Escape]');
+    await waitFor(()=>expect(canvas.getAllByRole('button',{name:/^Reorder column /}).map(handle=>handle.getAttribute('aria-label'))).toEqual(['Reorder column select','Reorder column status','Reorder column email','Reorder column amount']));
   },
 };

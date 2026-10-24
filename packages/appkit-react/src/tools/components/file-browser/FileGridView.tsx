@@ -32,7 +32,22 @@ export interface FileGridViewProps {
 }
 
 /**
- * ファイルの一覧表示（グリッド形式）
+ * Render a grid of host-owned file nodes with native icon drag handles.
+ * @param props - Current nodes, selected ids, optional verification state and host
+ * selection/open/delete/detail/rename/tag/verify callbacks; no storage is configured here.
+ * @returns The grid view; empty listings show the corresponding empty state.
+ * @remarks Place standalone views under DnDProvider from the same native engine.
+ * Selection and open callbacks remain host-owned. Import Appkit CSS once.
+ * @example
+ * ```tsx
+ * import {FileGridView} from '@alneas/appkit-react/tools/file-browser';
+ * import {DnDProvider} from '@alneas/appkit-react/tools/ui';
+ * import '@alneas/appkit-react/styles';
+ * export function EmptyFiles() {
+ *   return <DnDProvider><FileGridView nodes={[]} selectedIds={[]}
+ *     onSelect={() => {}} onOpen={() => {}} onDelete={() => {}} /></DnDProvider>;
+ * }
+ * ```
  */
 export function FileGridView({
   nodes,
@@ -59,7 +74,7 @@ export function FileGridView({
     }
   };
 
-  const renderNodeContent = (node: FileNode, isSelected: boolean) => {
+  const renderNodeContent = (node: FileNode, isSelected: boolean, handleRef?: (element: Element | null) => void) => {
     const tags = node.metadata?.tags?.split(',').filter(Boolean) || [];
     const verification = verifyingIds[node.id];
 
@@ -75,6 +90,7 @@ export function FileGridView({
         onDoubleClick={() => onOpen(node)}
       >
         <div className='relative w-full aspect-square flex items-center justify-center mb-2'>
+          {handleRef ? <button type='button' ref={handleRef} aria-label={`Move ${node.name}`} className='flex items-center justify-center w-full h-full border-0 bg-transparent p-0'>
           <FileIcon
             kind={node.kind}
             contentType={node.contentType}
@@ -83,6 +99,16 @@ export function FileGridView({
               isSelected ? 'scale-110' : 'group-hover:scale-105',
             )}
           />
+          </button> : (
+          <FileIcon
+            kind={node.kind}
+            contentType={node.contentType}
+            className={cn(
+              'w-12 h-12 transition-transform',
+              isSelected ? 'scale-110' : 'group-hover:scale-105',
+            )}
+          />
+          )}
 
           {/* 選択チェックマーク */}
           {isSelected && (
@@ -177,26 +203,27 @@ export function FileGridView({
               <div className='w-full h-full'>
                 {node.kind === 'file' ? (
                   <Draggable id={node.id} data={node}>
-                    {({ setNodeRef, style, attributes, listeners }) => (
+                    {({ ref, handleRef, style }) => (
                       <div
-                        ref={setNodeRef}
+                        ref={ref}
+                        data-file-drag={node.id}
                         style={style}
-                        {...attributes}
-                        {...listeners}
                         className='w-full h-full'
                       >
-                        {renderNodeContent(node, isSelected)}
+                        {renderNodeContent(node, isSelected, handleRef)}
                       </div>
                     )}
                   </Draggable>
                 ) : (
                   <Droppable id={node.id} data={node}>
-                    {({ setNodeRef, isOver }) => (
+                    {({ ref, isDropTarget }) => (
                       <div
-                        ref={setNodeRef}
+                        ref={ref}
+                        data-file-drop={node.id}
+                        data-drop-over={isDropTarget}
                         className={cn(
                           'w-full h-full rounded-xl',
-                          isOver && 'bg-primary/10 ring-4 ring-primary/20',
+                          isDropTarget && 'bg-primary/10 ring-4 ring-primary/20',
                         )}
                       >
                         {renderNodeContent(node, isSelected)}

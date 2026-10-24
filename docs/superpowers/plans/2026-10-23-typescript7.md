@@ -1,5 +1,12 @@
 # TypeScript 6/7 coexistence
 
+> Historical execution record from the original candidate. Earlier hold/no-commit
+> constraints and baseline pins below describe that stage only. PR preparation
+> is now authorized; the integrated candidate retains main's native dnd-kit 0.5.1,
+> exact Core 0.2.0 dependency and shared verification gates. Current guidance:
+> [React 19 and dependency refresh](../../development/react19-toolchain.md).
+
+
 Keep generation, declaration emit and Compiler API analysis on TypeScript 6.0.3.
 Add stable TypeScript 7.0.2 for no-emit checks using Microsoft's official aliases.
 Only switch normal checks after both compilers pass, including independent installs.

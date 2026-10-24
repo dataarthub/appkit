@@ -1,5 +1,12 @@
 # Remaining minor and patch dependency updates
 
+> Historical execution record from the original candidate. Earlier hold/no-commit
+> constraints and baseline pins below describe that stage only. PR preparation
+> is now authorized; the integrated candidate retains main's native dnd-kit 0.5.1,
+> exact Core 0.2.0 dependency and shared verification gates. Current guidance:
+> [React 19 and dependency refresh](../../development/react19-toolchain.md).
+
+
 > Execute inline with superpowers:executing-plans; user authorized updates and verification.
 
 **Goal:** Update compatible direct dependencies without changing public Appkit types or behavior.

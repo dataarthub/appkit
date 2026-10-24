@@ -4,5 +4,5 @@ test('Core bin points to an executable built-in-only entry with no TypeScript or
  const pkg=JSON.parse(readFileSync(path.join(root,'packages/appkit-core/package.json')));assert.equal(pkg.bin?.['appkit-api'],'./dist/agent-cli.mjs');
  execFileSync(process.execPath,['scripts/build-agent-cli.mjs'],{cwd:root});
  const file=path.join(root,'packages/appkit-core/dist/agent-cli.mjs');assert(statSync(file).mode&0o111);assert.match(readFileSync(file,'utf8'),/^#!\/usr\/bin\/env node/);
- assert.match(execFileSync(process.execPath,[file,'--version'],{encoding:'utf8'}),/0.1.0/);
+ assert.equal(execFileSync(process.execPath,[file,'--version'],{encoding:'utf8'}),`appkit-api ${pkg.version}\n`);
 });

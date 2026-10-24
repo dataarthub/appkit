@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "packageName": "@alneas/appkit-react",
-  "packageVersion": "0.1.0",
-  "inputDigest": "bae5167f0f981e9d26f4fcbfc67a7a2404034a76a2eea9a6245dcc20961c09ee",
+  "packageVersion": "0.2.0",
+  "inputDigest": "0fe6becb4257a85c2ad33f296a518a4caf54add82237519b751c7e0a70d23d2c",
   "entries": [
     {
       "importPath": "@alneas/appkit-react",
@@ -4723,15 +4723,31 @@
       "signatures": [
         "<TData extends object, TValue>({ columns, data, variant, filterContent, storageKey, enableSortingByDefault, enableMultiSort, showRowNumber, itemCount, onAdd, pageCount, rowCount, onPaginationChange, onSortingChange, onColumnFiltersChange, onRowClick, onSelectionChange, rowIdField, manualPagination, manualSorting, manualFiltering, filterColumn, sorting: controlledSorting, pagination: controlledPagination, enableColumnOrdering, containerClassName, tableClassName, pageSizeOptions, filterLayout, defaultFilterOpen, activeFiltersContent, }: DataTableProps<TData, TValue>): Element"
       ],
-      "summary": "データテーブルコンポーネント\n\nソート、フィルタ、ページネーション、行選択、列並べ替えに対応した\n高機能なデータテーブル。TanStack Table を使用。\n\n## 制御モード (Controlled Mode)\n`sorting` と `pagination` プロップスを渡すことで、外部状態からテーブルを制御できます。\nこれにより、サーバーサイドソートとクライアントサイドページネーションといった\n柔軟な組み合わせが、共有ライブラリ側のロジックを変更せずに実現可能です。\n\n補足:\n- `pagination` を指定した場合、`manualPagination` が false でも `onPaginationChange` を通知します。\n- `pagination` 指定時はデータ更新時の `pageIndex` 自動リセットを無効化します。",
+      "summary": "Render a sortable/filterable table with host-controlled or local state.",
       "tags": [
         {
-          "name": "example",
-          "text": "基本的な使い方 (Uncontrolled)\n```tsx\n<DataTable columns={columns} data={data} />\n```"
+          "name": "typeParam",
+          "text": "TData - Object shape of each data row."
+        },
+        {
+          "name": "typeParam",
+          "text": "TValue - Column cell-value type shared by the supplied column definitions."
+        },
+        {
+          "name": "param",
+          "text": "props - Columns, data, presentation and feature/state options. Native leaf\nreordering is enabled by default; sort and reorder buttons remain separate."
+        },
+        {
+          "name": "returns",
+          "text": "The table with its configured toolbar, pagination and interaction surfaces."
+        },
+        {
+          "name": "remarks",
+          "text": "Hidden/grouped columns retain stable persisted slots; changing current\ncolumns or visibility invalidates an active reorder snapshot. Controlled sorting\nand pagination remain host-owned. Supplying pagination notifies onPaginationChange\neven without manualPagination and disables automatic page-index reset on data updates.\nImport Appkit CSS once; this component owns its native drag provider."
         },
         {
           "name": "example",
-          "text": "外部状態によるソート制御 (Controlled Sorting)\n```tsx\nconst [sorting, setSorting] = useState<SortingState>([]);\n<DataTable\ncolumns={columns}\ndata={data}\nsorting={sorting}\nonSortingChange={setSorting}\nmanualSorting={true}\n/>\n```"
+          "text": "```tsx\nimport {DataTable} from '@alneas/appkit-react/tools/data-table';\nimport '@alneas/appkit-react/styles';\nexport function ReviewTable() {\n  return <DataTable data={[{id: 'one', title: 'Review'}]}\n    columns={[{accessorKey: 'title', header: 'Title'}]} />;\n}\n```"
         }
       ],
       "guide": "docs/index.md"
@@ -5326,10 +5342,27 @@
       "name": "DnDProvider",
       "kind": "value",
       "signatures": [
-        "({ children, onDragStart, onDragEnd, onDragCancel }: DnDProviderProps): Element"
+        "({ children, sensors: customSensors, plugins: customPlugins, ...props }: Props$1<Record<string, any>, Draggable<Record<string, any>>, Droppable<Record<string, any>>, DragDropManager<Record<string, any>, Draggable<Record<string, any>>, Droppable<Record<string, any>>>>): Element"
       ],
-      "summary": "DnD 操作のコンテキストを提供するラッパーコンポーネント",
-      "tags": [],
+      "summary": "Provide a native drag context for Appkit registrations and host-owned children.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Native provider options and content; omitted sensors use 5px\nmouse/pen movement and a 250ms touch hold with 5px tolerance. Omitted plugins\nretain native accessibility and clone feedback with immediate drop completion."
+        },
+        {
+          "name": "returns",
+          "text": "A provider element; no storage operations are performed by this wrapper."
+        },
+        {
+          "name": "remarks",
+          "text": "Import Appkit CSS once. Do not mix legacy core registrations into this\ncontext. Check event.canceled and nullable operation entities before persisting."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function DragArea() {\n  return <DnDProvider onDragEnd={event => {\n    if (!event.canceled) console.log(event.operation.target?.id);\n  }}><div>Host content</div></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/index.md"
     },
     {
@@ -5337,10 +5370,15 @@
       "name": "DnDProviderProps",
       "kind": "type",
       "signatures": [
-        "export interface DnDProviderProps {\n    children: React.ReactNode;\n    onDragStart?: (event: DragStartEvent) => void;\n    onDragEnd?: (event: DragEndEvent) => void;\n    onDragCancel?: (event: DragCancelEvent) => void;\n}"
+        "export type DnDProviderProps = ComponentProps<typeof DragDropProvider>;"
       ],
-      "summary": "",
-      "tags": [],
+      "summary": "Native DragDropProvider props, including custom sensors/plugins and children.",
+      "tags": [
+        {
+          "name": "remarks",
+          "text": "Cancellation is delivered through onDragEnd with event.canceled;\nthe legacy onDragCancel callback is not supported. Native provider members\nretain their upstream contracts. See the development migration guide."
+        }
+      ],
       "guide": "docs/index.md"
     },
     {
@@ -5388,8 +5426,25 @@
       "signatures": [
         "({ id, data, children }: DraggableProps): Element"
       ],
-      "summary": "ドラッグ可能な要素を作成するコンポーネント",
-      "tags": [],
+      "summary": "Register an element and optional separate handle with the native provider.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Unique string id, optional source.data payload and render callback."
+        },
+        {
+          "name": "returns",
+          "text": "The rendered child inside a fragment; input listeners are installed natively."
+        },
+        {
+          "name": "remarks",
+          "text": "Place under DnDProvider. Keep nested interactive controls outside the\nhandle when they must remain independently clickable. See the migration guide\nfor native event and feedback semantics."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider, Draggable} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function MovableItem() {\n  return <DnDProvider><Draggable id=\"report\" data={{name: 'Report'}}>\n    {({ref, handleRef, style}) => <div ref={ref} style={style}>\n      <button ref={handleRef}>Move report</button>\n    </div>}\n  </Draggable></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/index.md"
     },
     {
@@ -5397,9 +5452,9 @@
       "name": "DraggableProps",
       "kind": "type",
       "signatures": [
-        "export interface DraggableProps {\n    id: string;\n    data?: Record<string, any>;\n    children: (props: {\n        attributes: any;\n        listeners: any;\n        setNodeRef: (node: HTMLElement | null) => void;\n        isDragging: boolean;\n        style: React.CSSProperties;\n    }) => React.ReactNode;\n}"
+        "export interface DraggableProps {\n    id: string;\n    data?: Record<string, any>;\n    children: (props: {\n        ref: (element: Element | null) => void;\n        handleRef: (element: Element | null) => void;\n        isDragging: boolean;\n        style: CSSProperties;\n    }) => ReactNode;\n}"
       ],
-      "summary": "",
+      "summary": "Native draggable options; render refs replace legacy attributes/listeners.",
       "tags": [],
       "guide": "docs/index.md"
     },
@@ -6210,8 +6265,25 @@
       "signatures": [
         "({ id, data, disabled, children }: DroppableProps): Element"
       ],
-      "summary": "ドロップ可能な領域を作成するコンポーネント",
-      "tags": [],
+      "summary": "Register a native drop target using pointer intersection, including keyboard coordinates.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Target id, optional target.data payload, disabled flag and renderer."
+        },
+        {
+          "name": "returns",
+          "text": "The rendered target inside a fragment."
+        },
+        {
+          "name": "remarks",
+          "text": "Requires the same native DnDProvider as its source. Outside drops do\nnot choose the nearest target. This registration does not persist host data."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider, Droppable} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function TargetArea() {\n  return <DnDProvider><Droppable id=\"archive\" data={{kind: 'folder'}}>\n    {({ref, isDropTarget}) => <div ref={ref} data-over={isDropTarget}>Archive</div>}\n  </Droppable></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/index.md"
     },
     {
@@ -6219,9 +6291,9 @@
       "name": "DroppableProps",
       "kind": "type",
       "signatures": [
-        "export interface DroppableProps {\n    id: string;\n    data?: Record<string, any>;\n    disabled?: boolean;\n    children: (props: {\n        setNodeRef: (node: HTMLElement | null) => void;\n        isOver: boolean;\n    }) => React.ReactNode;\n}"
+        "export interface DroppableProps {\n    id: string;\n    data?: Record<string, any>;\n    disabled?: boolean;\n    children: (props: {\n        ref: (element: Element | null) => void;\n        isDropTarget: boolean;\n    }) => ReactNode;\n}"
       ],
-      "summary": "",
+      "summary": "Native target options; ids must be unique within the provider.",
       "tags": [],
       "guide": "docs/index.md"
     },
@@ -37578,15 +37650,31 @@
       "signatures": [
         "<TData extends object, TValue>({ columns, data, variant, filterContent, storageKey, enableSortingByDefault, enableMultiSort, showRowNumber, itemCount, onAdd, pageCount, rowCount, onPaginationChange, onSortingChange, onColumnFiltersChange, onRowClick, onSelectionChange, rowIdField, manualPagination, manualSorting, manualFiltering, filterColumn, sorting: controlledSorting, pagination: controlledPagination, enableColumnOrdering, containerClassName, tableClassName, pageSizeOptions, filterLayout, defaultFilterOpen, activeFiltersContent, }: DataTableProps<TData, TValue>): Element"
       ],
-      "summary": "データテーブルコンポーネント\n\nソート、フィルタ、ページネーション、行選択、列並べ替えに対応した\n高機能なデータテーブル。TanStack Table を使用。\n\n## 制御モード (Controlled Mode)\n`sorting` と `pagination` プロップスを渡すことで、外部状態からテーブルを制御できます。\nこれにより、サーバーサイドソートとクライアントサイドページネーションといった\n柔軟な組み合わせが、共有ライブラリ側のロジックを変更せずに実現可能です。\n\n補足:\n- `pagination` を指定した場合、`manualPagination` が false でも `onPaginationChange` を通知します。\n- `pagination` 指定時はデータ更新時の `pageIndex` 自動リセットを無効化します。",
+      "summary": "Render a sortable/filterable table with host-controlled or local state.",
       "tags": [
         {
-          "name": "example",
-          "text": "基本的な使い方 (Uncontrolled)\n```tsx\n<DataTable columns={columns} data={data} />\n```"
+          "name": "typeParam",
+          "text": "TData - Object shape of each data row."
+        },
+        {
+          "name": "typeParam",
+          "text": "TValue - Column cell-value type shared by the supplied column definitions."
+        },
+        {
+          "name": "param",
+          "text": "props - Columns, data, presentation and feature/state options. Native leaf\nreordering is enabled by default; sort and reorder buttons remain separate."
+        },
+        {
+          "name": "returns",
+          "text": "The table with its configured toolbar, pagination and interaction surfaces."
+        },
+        {
+          "name": "remarks",
+          "text": "Hidden/grouped columns retain stable persisted slots; changing current\ncolumns or visibility invalidates an active reorder snapshot. Controlled sorting\nand pagination remain host-owned. Supplying pagination notifies onPaginationChange\neven without manualPagination and disables automatic page-index reset on data updates.\nImport Appkit CSS once; this component owns its native drag provider."
         },
         {
           "name": "example",
-          "text": "外部状態によるソート制御 (Controlled Sorting)\n```tsx\nconst [sorting, setSorting] = useState<SortingState>([]);\n<DataTable\ncolumns={columns}\ndata={data}\nsorting={sorting}\nonSortingChange={setSorting}\nmanualSorting={true}\n/>\n```"
+          "text": "```tsx\nimport {DataTable} from '@alneas/appkit-react/tools/data-table';\nimport '@alneas/appkit-react/styles';\nexport function ReviewTable() {\n  return <DataTable data={[{id: 'one', title: 'Review'}]}\n    columns={[{accessorKey: 'title', header: 'Title'}]} />;\n}\n```"
         }
       ],
       "guide": "docs/tools.md"
@@ -38181,10 +38269,27 @@
       "name": "DnDProvider",
       "kind": "value",
       "signatures": [
-        "({ children, onDragStart, onDragEnd, onDragCancel }: DnDProviderProps): Element"
+        "({ children, sensors: customSensors, plugins: customPlugins, ...props }: Props$1<Record<string, any>, Draggable<Record<string, any>>, Droppable<Record<string, any>>, DragDropManager<Record<string, any>, Draggable<Record<string, any>>, Droppable<Record<string, any>>>>): Element"
       ],
-      "summary": "DnD 操作のコンテキストを提供するラッパーコンポーネント",
-      "tags": [],
+      "summary": "Provide a native drag context for Appkit registrations and host-owned children.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Native provider options and content; omitted sensors use 5px\nmouse/pen movement and a 250ms touch hold with 5px tolerance. Omitted plugins\nretain native accessibility and clone feedback with immediate drop completion."
+        },
+        {
+          "name": "returns",
+          "text": "A provider element; no storage operations are performed by this wrapper."
+        },
+        {
+          "name": "remarks",
+          "text": "Import Appkit CSS once. Do not mix legacy core registrations into this\ncontext. Check event.canceled and nullable operation entities before persisting."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function DragArea() {\n  return <DnDProvider onDragEnd={event => {\n    if (!event.canceled) console.log(event.operation.target?.id);\n  }}><div>Host content</div></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -38192,10 +38297,15 @@
       "name": "DnDProviderProps",
       "kind": "type",
       "signatures": [
-        "export interface DnDProviderProps {\n    children: React.ReactNode;\n    onDragStart?: (event: DragStartEvent) => void;\n    onDragEnd?: (event: DragEndEvent) => void;\n    onDragCancel?: (event: DragCancelEvent) => void;\n}"
+        "export type DnDProviderProps = ComponentProps<typeof DragDropProvider>;"
       ],
-      "summary": "",
-      "tags": [],
+      "summary": "Native DragDropProvider props, including custom sensors/plugins and children.",
+      "tags": [
+        {
+          "name": "remarks",
+          "text": "Cancellation is delivered through onDragEnd with event.canceled;\nthe legacy onDragCancel callback is not supported. Native provider members\nretain their upstream contracts. See the development migration guide."
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -38243,8 +38353,25 @@
       "signatures": [
         "({ id, data, children }: DraggableProps): Element"
       ],
-      "summary": "ドラッグ可能な要素を作成するコンポーネント",
-      "tags": [],
+      "summary": "Register an element and optional separate handle with the native provider.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Unique string id, optional source.data payload and render callback."
+        },
+        {
+          "name": "returns",
+          "text": "The rendered child inside a fragment; input listeners are installed natively."
+        },
+        {
+          "name": "remarks",
+          "text": "Place under DnDProvider. Keep nested interactive controls outside the\nhandle when they must remain independently clickable. See the migration guide\nfor native event and feedback semantics."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider, Draggable} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function MovableItem() {\n  return <DnDProvider><Draggable id=\"report\" data={{name: 'Report'}}>\n    {({ref, handleRef, style}) => <div ref={ref} style={style}>\n      <button ref={handleRef}>Move report</button>\n    </div>}\n  </Draggable></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -38252,9 +38379,9 @@
       "name": "DraggableProps",
       "kind": "type",
       "signatures": [
-        "export interface DraggableProps {\n    id: string;\n    data?: Record<string, any>;\n    children: (props: {\n        attributes: any;\n        listeners: any;\n        setNodeRef: (node: HTMLElement | null) => void;\n        isDragging: boolean;\n        style: React.CSSProperties;\n    }) => React.ReactNode;\n}"
+        "export interface DraggableProps {\n    id: string;\n    data?: Record<string, any>;\n    children: (props: {\n        ref: (element: Element | null) => void;\n        handleRef: (element: Element | null) => void;\n        isDragging: boolean;\n        style: CSSProperties;\n    }) => ReactNode;\n}"
       ],
-      "summary": "",
+      "summary": "Native draggable options; render refs replace legacy attributes/listeners.",
       "tags": [],
       "guide": "docs/tools.md"
     },
@@ -39065,8 +39192,25 @@
       "signatures": [
         "({ id, data, disabled, children }: DroppableProps): Element"
       ],
-      "summary": "ドロップ可能な領域を作成するコンポーネント",
-      "tags": [],
+      "summary": "Register a native drop target using pointer intersection, including keyboard coordinates.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Target id, optional target.data payload, disabled flag and renderer."
+        },
+        {
+          "name": "returns",
+          "text": "The rendered target inside a fragment."
+        },
+        {
+          "name": "remarks",
+          "text": "Requires the same native DnDProvider as its source. Outside drops do\nnot choose the nearest target. This registration does not persist host data."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider, Droppable} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function TargetArea() {\n  return <DnDProvider><Droppable id=\"archive\" data={{kind: 'folder'}}>\n    {({ref, isDropTarget}) => <div ref={ref} data-over={isDropTarget}>Archive</div>}\n  </Droppable></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -39074,9 +39218,9 @@
       "name": "DroppableProps",
       "kind": "type",
       "signatures": [
-        "export interface DroppableProps {\n    id: string;\n    data?: Record<string, any>;\n    disabled?: boolean;\n    children: (props: {\n        setNodeRef: (node: HTMLElement | null) => void;\n        isOver: boolean;\n    }) => React.ReactNode;\n}"
+        "export interface DroppableProps {\n    id: string;\n    data?: Record<string, any>;\n    disabled?: boolean;\n    children: (props: {\n        ref: (element: Element | null) => void;\n        isDropTarget: boolean;\n    }) => ReactNode;\n}"
       ],
-      "summary": "",
+      "summary": "Native target options; ids must be unique within the provider.",
       "tags": [],
       "guide": "docs/tools.md"
     },
@@ -60215,10 +60359,27 @@
       "name": "DnDProvider",
       "kind": "value",
       "signatures": [
-        "({ children, onDragStart, onDragEnd, onDragCancel }: DnDProviderProps): Element"
+        "({ children, sensors: customSensors, plugins: customPlugins, ...props }: Props$1<Record<string, any>, Draggable<Record<string, any>>, Droppable<Record<string, any>>, DragDropManager<Record<string, any>, Draggable<Record<string, any>>, Droppable<Record<string, any>>>>): Element"
       ],
-      "summary": "DnD 操作のコンテキストを提供するラッパーコンポーネント",
-      "tags": [],
+      "summary": "Provide a native drag context for Appkit registrations and host-owned children.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Native provider options and content; omitted sensors use 5px\nmouse/pen movement and a 250ms touch hold with 5px tolerance. Omitted plugins\nretain native accessibility and clone feedback with immediate drop completion."
+        },
+        {
+          "name": "returns",
+          "text": "A provider element; no storage operations are performed by this wrapper."
+        },
+        {
+          "name": "remarks",
+          "text": "Import Appkit CSS once. Do not mix legacy core registrations into this\ncontext. Check event.canceled and nullable operation entities before persisting."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function DragArea() {\n  return <DnDProvider onDragEnd={event => {\n    if (!event.canceled) console.log(event.operation.target?.id);\n  }}><div>Host content</div></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -60226,10 +60387,15 @@
       "name": "DnDProviderProps",
       "kind": "type",
       "signatures": [
-        "export interface DnDProviderProps {\n    children: React.ReactNode;\n    onDragStart?: (event: DragStartEvent) => void;\n    onDragEnd?: (event: DragEndEvent) => void;\n    onDragCancel?: (event: DragCancelEvent) => void;\n}"
+        "export type DnDProviderProps = ComponentProps<typeof DragDropProvider>;"
       ],
-      "summary": "",
-      "tags": [],
+      "summary": "Native DragDropProvider props, including custom sensors/plugins and children.",
+      "tags": [
+        {
+          "name": "remarks",
+          "text": "Cancellation is delivered through onDragEnd with event.canceled;\nthe legacy onDragCancel callback is not supported. Native provider members\nretain their upstream contracts. See the development migration guide."
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -60277,8 +60443,25 @@
       "signatures": [
         "({ id, data, children }: DraggableProps): Element"
       ],
-      "summary": "ドラッグ可能な要素を作成するコンポーネント",
-      "tags": [],
+      "summary": "Register an element and optional separate handle with the native provider.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Unique string id, optional source.data payload and render callback."
+        },
+        {
+          "name": "returns",
+          "text": "The rendered child inside a fragment; input listeners are installed natively."
+        },
+        {
+          "name": "remarks",
+          "text": "Place under DnDProvider. Keep nested interactive controls outside the\nhandle when they must remain independently clickable. See the migration guide\nfor native event and feedback semantics."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider, Draggable} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function MovableItem() {\n  return <DnDProvider><Draggable id=\"report\" data={{name: 'Report'}}>\n    {({ref, handleRef, style}) => <div ref={ref} style={style}>\n      <button ref={handleRef}>Move report</button>\n    </div>}\n  </Draggable></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -60286,9 +60469,9 @@
       "name": "DraggableProps",
       "kind": "type",
       "signatures": [
-        "export interface DraggableProps {\n    id: string;\n    data?: Record<string, any>;\n    children: (props: {\n        attributes: any;\n        listeners: any;\n        setNodeRef: (node: HTMLElement | null) => void;\n        isDragging: boolean;\n        style: React.CSSProperties;\n    }) => React.ReactNode;\n}"
+        "export interface DraggableProps {\n    id: string;\n    data?: Record<string, any>;\n    children: (props: {\n        ref: (element: Element | null) => void;\n        handleRef: (element: Element | null) => void;\n        isDragging: boolean;\n        style: CSSProperties;\n    }) => ReactNode;\n}"
       ],
-      "summary": "",
+      "summary": "Native draggable options; render refs replace legacy attributes/listeners.",
       "tags": [],
       "guide": "docs/tools.md"
     },
@@ -61099,8 +61282,25 @@
       "signatures": [
         "({ id, data, disabled, children }: DroppableProps): Element"
       ],
-      "summary": "ドロップ可能な領域を作成するコンポーネント",
-      "tags": [],
+      "summary": "Register a native drop target using pointer intersection, including keyboard coordinates.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Target id, optional target.data payload, disabled flag and renderer."
+        },
+        {
+          "name": "returns",
+          "text": "The rendered target inside a fragment."
+        },
+        {
+          "name": "remarks",
+          "text": "Requires the same native DnDProvider as its source. Outside drops do\nnot choose the nearest target. This registration does not persist host data."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider, Droppable} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function TargetArea() {\n  return <DnDProvider><Droppable id=\"archive\" data={{kind: 'folder'}}>\n    {({ref, isDropTarget}) => <div ref={ref} data-over={isDropTarget}>Archive</div>}\n  </Droppable></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -61108,9 +61308,9 @@
       "name": "DroppableProps",
       "kind": "type",
       "signatures": [
-        "export interface DroppableProps {\n    id: string;\n    data?: Record<string, any>;\n    disabled?: boolean;\n    children: (props: {\n        setNodeRef: (node: HTMLElement | null) => void;\n        isOver: boolean;\n    }) => React.ReactNode;\n}"
+        "export interface DroppableProps {\n    id: string;\n    data?: Record<string, any>;\n    disabled?: boolean;\n    children: (props: {\n        ref: (element: Element | null) => void;\n        isDropTarget: boolean;\n    }) => ReactNode;\n}"
       ],
-      "summary": "",
+      "summary": "Native target options; ids must be unique within the provider.",
       "tags": [],
       "guide": "docs/tools.md"
     },
@@ -74720,15 +74920,31 @@
       "signatures": [
         "<TData extends object, TValue>({ columns, data, variant, filterContent, storageKey, enableSortingByDefault, enableMultiSort, showRowNumber, itemCount, onAdd, pageCount, rowCount, onPaginationChange, onSortingChange, onColumnFiltersChange, onRowClick, onSelectionChange, rowIdField, manualPagination, manualSorting, manualFiltering, filterColumn, sorting: controlledSorting, pagination: controlledPagination, enableColumnOrdering, containerClassName, tableClassName, pageSizeOptions, filterLayout, defaultFilterOpen, activeFiltersContent, }: DataTableProps<TData, TValue>): Element"
       ],
-      "summary": "データテーブルコンポーネント\n\nソート、フィルタ、ページネーション、行選択、列並べ替えに対応した\n高機能なデータテーブル。TanStack Table を使用。\n\n## 制御モード (Controlled Mode)\n`sorting` と `pagination` プロップスを渡すことで、外部状態からテーブルを制御できます。\nこれにより、サーバーサイドソートとクライアントサイドページネーションといった\n柔軟な組み合わせが、共有ライブラリ側のロジックを変更せずに実現可能です。\n\n補足:\n- `pagination` を指定した場合、`manualPagination` が false でも `onPaginationChange` を通知します。\n- `pagination` 指定時はデータ更新時の `pageIndex` 自動リセットを無効化します。",
+      "summary": "Render a sortable/filterable table with host-controlled or local state.",
       "tags": [
         {
-          "name": "example",
-          "text": "基本的な使い方 (Uncontrolled)\n```tsx\n<DataTable columns={columns} data={data} />\n```"
+          "name": "typeParam",
+          "text": "TData - Object shape of each data row."
+        },
+        {
+          "name": "typeParam",
+          "text": "TValue - Column cell-value type shared by the supplied column definitions."
+        },
+        {
+          "name": "param",
+          "text": "props - Columns, data, presentation and feature/state options. Native leaf\nreordering is enabled by default; sort and reorder buttons remain separate."
+        },
+        {
+          "name": "returns",
+          "text": "The table with its configured toolbar, pagination and interaction surfaces."
+        },
+        {
+          "name": "remarks",
+          "text": "Hidden/grouped columns retain stable persisted slots; changing current\ncolumns or visibility invalidates an active reorder snapshot. Controlled sorting\nand pagination remain host-owned. Supplying pagination notifies onPaginationChange\neven without manualPagination and disables automatic page-index reset on data updates.\nImport Appkit CSS once; this component owns its native drag provider."
         },
         {
           "name": "example",
-          "text": "外部状態によるソート制御 (Controlled Sorting)\n```tsx\nconst [sorting, setSorting] = useState<SortingState>([]);\n<DataTable\ncolumns={columns}\ndata={data}\nsorting={sorting}\nonSortingChange={setSorting}\nmanualSorting={true}\n/>\n```"
+          "text": "```tsx\nimport {DataTable} from '@alneas/appkit-react/tools/data-table';\nimport '@alneas/appkit-react/styles';\nexport function ReviewTable() {\n  return <DataTable data={[{id: 'one', title: 'Review'}]}\n    columns={[{accessorKey: 'title', header: 'Title'}]} />;\n}\n```"
         }
       ],
       "guide": "docs/tools.md"
@@ -76060,8 +76276,29 @@
       "signatures": [
         "({ provider: propProvider, adapter, initialPath, initialViewMode, groupingAxis, onOpenFile, className, }: FileBrowserProps): Element"
       ],
-      "summary": "高機能ファイルブラウザコンポーネント\n\nS3, R2, OCI などのオブジェクトストレージをエクスプローラー形式で表示・操作します。\nDBテーブル管理 + UUIDファイル名といった複雑な構成にも FileProvider を通じて対応可能です。",
-      "tags": [],
+      "summary": "Browse files through a host-supplied FileProvider or wrapped StorageAdapter.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Provider (preferred), optional adapter, initial path (default empty),\ninitial view mode (default grid), grouping axis, open callback and presentation."
+        },
+        {
+          "name": "returns",
+          "text": "The browser, native drag boundary and preview/detail surfaces."
+        },
+        {
+          "name": "throws",
+          "text": "An Error during rendering when neither provider nor adapter is supplied."
+        },
+        {
+          "name": "remarks",
+          "text": "Hosts authorize storage access. A drop moves one currently listed file\ninto a registered folder, awaits moveNode and then refreshes the current relevant\nview. Canceled/stale drops do not write; navigation does not undo a write already\nin flight. Import Appkit CSS once; this component owns its native drag provider."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {FileBrowser, type FileProvider} from '@alneas/appkit-react/tools/file-browser';\nimport '@alneas/appkit-react/styles';\nexport function Files({provider}: {provider: FileProvider}) {\n  return <div style={{height: 500}}><FileBrowser provider={provider} /></div>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -76148,8 +76385,25 @@
       "signatures": [
         "({ nodes, selectedIds, verifyingIds, onSelect, onOpen, onDelete, onDetails, onRename, onUpdateTags, onVerify, }: FileGridViewProps): Element"
       ],
-      "summary": "ファイルの一覧表示（グリッド形式）",
-      "tags": [],
+      "summary": "Render a grid of host-owned file nodes with native icon drag handles.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Current nodes, selected ids, optional verification state and host\nselection/open/delete/detail/rename/tag/verify callbacks; no storage is configured here."
+        },
+        {
+          "name": "returns",
+          "text": "The grid view; empty listings show the corresponding empty state."
+        },
+        {
+          "name": "remarks",
+          "text": "Place standalone views under DnDProvider from the same native engine.\nSelection and open callbacks remain host-owned. Import Appkit CSS once."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {FileGridView} from '@alneas/appkit-react/tools/file-browser';\nimport {DnDProvider} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function EmptyFiles() {\n  return <DnDProvider><FileGridView nodes={[]} selectedIds={[]}\n    onSelect={() => {}} onOpen={() => {}} onDelete={() => {}} /></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -76181,8 +76435,25 @@
       "signatures": [
         "({ nodes, selectedIds, verifyingIds, onSelect, onOpen, onDelete, onDetails, onRename, onUpdateTags, onVerify, }: FileListViewProps): Element"
       ],
-      "summary": "ファイルの一覧表示（詳細リスト形式）",
-      "tags": [],
+      "summary": "Render a semantic table of host-owned file nodes with native icon drag handles.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Current nodes, selected ids, optional verification state and host\nselection/open/delete/detail/rename/tag/verify callbacks; no storage is configured here."
+        },
+        {
+          "name": "returns",
+          "text": "The table view; empty listings show the corresponding empty state."
+        },
+        {
+          "name": "remarks",
+          "text": "Place standalone views under DnDProvider from the same native engine.\nSelection and open callbacks remain host-owned. Import Appkit CSS once."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {FileListView} from '@alneas/appkit-react/tools/file-browser';\nimport {DnDProvider} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function EmptyFiles() {\n  return <DnDProvider><FileListView nodes={[]} selectedIds={[]}\n    onSelect={() => {}} onOpen={() => {}} onDelete={() => {}} /></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -79061,8 +79332,25 @@
       "signatures": [
         "({ ref, column, tasks, onTaskClick, testId, renderCard, readOnly, }: KanbanColumnProps & RefAttributes<HTMLDivElement>): Element"
       ],
-      "summary": "カンバンカラム",
-      "tags": [],
+      "summary": "Render a preset Kanban column with native task/column registrations.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Column metadata, current tasks, optional custom renderer, click\ncallback, test id and readOnly flag. Limits only affect warning presentation.\nThe optional ref prop forwards the column div, including React 19 callback cleanup."
+        },
+        {
+          "name": "returns",
+          "text": "The column, header/count and rendered task cards."
+        },
+        {
+          "name": "remarks",
+          "text": "Use inside KanbanDragSurface; it does not own persistent task state.\nImport Appkit CSS once. Prefer KanbanBoard when no custom surface is needed."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {KanbanDragSurface, KanbanColumn, useKanbanDrag} from '@alneas/appkit-react/tools/kanban';\nimport '@alneas/appkit-react/styles';\nexport function OneColumn() {\n  const tasks = [{id: 'one', title: 'Review', status: 'todo'}];\n  const controller = useKanbanDrag({tasks});\n  return <KanbanDragSurface controller={controller}>\n    <KanbanColumn column={{id: 'todo', title: 'Todo'}} tasks={tasks} />\n  </KanbanDragSurface>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -79083,11 +79371,31 @@
       "signatures": [
         "(props: HTMLAttributes<HTMLDivElement> & { column: KanbanColumn; isOverLimit?: boolean | undefined; } & RefAttributes<HTMLDivElement>): any"
       ],
-      "summary": "Shared column registration and drag-over presentation; headers and contents remain composable.",
+      "summary": "Register a native Kanban column while retaining host-composed content.",
       "tags": [
         {
           "name": "remarks",
-          "text": "Retained forwardRef during the React 19 migration because this component\ncomposes the caller's object/callback ref with the DnD droppable registration and\nforwards callback-ref cleanup. It is not a direct DOM-ref passthrough. A future\nref-as-prop migration should separately verify registration, ref replacement and\ncleanup; forwardRef is not technically required by React 19 for this pattern."
+          "text": "Retain forwardRef to compose native registration and caller refs, including\ncallback cleanup; this is not a direct DOM-ref passthrough."
+        },
+        {
+          "name": "param",
+          "text": "props - Column metadata, optional limit presentation, HTML attributes and children."
+        },
+        {
+          "name": "param",
+          "text": "ref - Forwarded div ref, including React 19 callback cleanup support."
+        },
+        {
+          "name": "returns",
+          "text": "A column div accepting Kanban task registrations."
+        },
+        {
+          "name": "remarks",
+          "text": "Requires the native Kanban surface. Pointer intersection excludes outside\ndrops; WIP limits are presentational and do not reject a host status callback."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {KanbanDragSurface, KanbanColumnFrame, KanbanDraggableCard, useKanbanDrag}\n  from '@alneas/appkit-react/tools/kanban';\nimport '@alneas/appkit-react/styles';\nexport function CustomCards() {\n  const tasks = [{id: 'one', title: 'Review', status: 'todo'}];\n  const controller = useKanbanDrag({tasks});\n  return <KanbanDragSurface controller={controller}>\n    <KanbanColumnFrame column={{id: 'todo', title: 'Todo'}}>\n      <KanbanDraggableCard task={tasks[0]}>Review</KanbanDraggableCard>\n    </KanbanColumnFrame>\n  </KanbanDragSurface>;\n}\n```"
         }
       ],
       "guide": "docs/tools.md"
@@ -79149,13 +79457,41 @@
     },
     {
       "importPath": "@alneas/appkit-react/tools/kanban",
+      "name": "KanbanDragController",
+      "kind": "type",
+      "signatures": [
+        "export interface KanbanDragController {\n    activeTask: KanbanTask | null;\n    contextProps: NativeContextProps;\n}"
+      ],
+      "summary": "Native drag state and provider props used by KanbanDragSurface.",
+      "tags": [],
+      "guide": "docs/tools.md"
+    },
+    {
+      "importPath": "@alneas/appkit-react/tools/kanban",
       "name": "KanbanDragSurface",
       "kind": "value",
       "signatures": [
-        "({ controller, overlayClassName, children, }: { controller: ReturnType<({ tasks, columns, statusField, readOnly, onStatusChange, }: any) => { activeTask: KanbanTask | null; contextProps: { sensors: {}; accessibility: { screenReaderInstructions: { draggable: string; }; }; onDragStart: ({ active }: DragStartEvent) => void; onDragEnd: (event: DragEndEvent) => void; onDragCancel: () => void; }; }>; overlayClassName?: string | undefined; children: any; }): Element"
+        "({ controller, overlayClassName, children, }: { controller: ReturnType<({ tasks, columns, statusField, readOnly, onStatusChange }: any) => KanbanDragController>; overlayClassName?: string | undefined; children: any; }): Element"
       ],
-      "summary": "Internal shared D&D boundary; the overlay never registers a second draggable.",
-      "tags": [],
+      "summary": "Render the native Kanban provider and one body-portal overlay.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Native controller, optional overlay class and registered children."
+        },
+        {
+          "name": "returns",
+          "text": "The provider and overlay; no portal is created during server rendering."
+        },
+        {
+          "name": "remarks",
+          "text": "Uses immediate drop completion with native focus restoration. The\noverlay is presentation only and never registers a second draggable."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {KanbanDragSurface, KanbanColumnFrame, KanbanDraggableCard, useKanbanDrag}\n  from '@alneas/appkit-react/tools/kanban';\nimport '@alneas/appkit-react/styles';\nexport function CustomCards() {\n  const tasks = [{id: 'one', title: 'Review', status: 'todo'}];\n  const controller = useKanbanDrag({tasks});\n  return <KanbanDragSurface controller={controller}>\n    <KanbanColumnFrame column={{id: 'todo', title: 'Todo'}}>\n      <KanbanDraggableCard task={tasks[0]}>Review</KanbanDraggableCard>\n    </KanbanColumnFrame>\n  </KanbanDragSurface>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -79163,10 +79499,27 @@
       "name": "KanbanDraggableCard",
       "kind": "value",
       "signatures": [
-        "({ task, disabled, className, children, ...props }: HTMLAttributes<HTMLDivElement> & { task: KanbanTask; disabled?: boolean | undefined; }): Element"
+        "({ task, disabled, className, children, style, ...props }: HTMLAttributes<HTMLDivElement> & { task: KanbanTask; disabled?: boolean | undefined; }): Element"
       ],
-      "summary": "Single sortable registration shared by preset cards and Compound cards with custom children.",
-      "tags": [],
+      "summary": "Register a native status-only Kanban card with custom content.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Task, optional disabled flag (default false), HTML attributes,\ncustom style and children. Caller-supplied accessibility attributes are retained."
+        },
+        {
+          "name": "returns",
+          "text": "A div registered under the native Kanban surface."
+        },
+        {
+          "name": "remarks",
+          "text": "Requires the same native provider as KanbanColumnFrame. Disabled cards\nhave no automatic drag tab stop; this component does not persist order or status."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {KanbanDragSurface, KanbanColumnFrame, KanbanDraggableCard, useKanbanDrag}\n  from '@alneas/appkit-react/tools/kanban';\nimport '@alneas/appkit-react/styles';\nexport function CustomCards() {\n  const tasks = [{id: 'one', title: 'Review', status: 'todo'}];\n  const controller = useKanbanDrag({tasks});\n  return <KanbanDragSurface controller={controller}>\n    <KanbanColumnFrame column={{id: 'todo', title: 'Todo'}}>\n      <KanbanDraggableCard task={tasks[0]}>Review</KanbanDraggableCard>\n    </KanbanColumnFrame>\n  </KanbanDragSurface>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -79209,7 +79562,7 @@
       "signatures": [
         "kanbanAccessibility: {\n    screenReaderInstructions: {\n        draggable: string;\n    };\n}"
       ],
-      "summary": "",
+      "summary": "Japanese native accessibility instructions for status-only column movement.",
       "tags": [],
       "guide": "docs/tools.md"
     },
@@ -79218,10 +79571,39 @@
       "name": "resolveKanbanMove",
       "kind": "value",
       "signatures": [
-        "({ active, over, }: { active: Pick<Active, \"id\">; over: any; }, tasks: {}, statusField: string, columns?: {} | undefined): { taskId: string; status: string; } | null"
+        "({ active, over, }: { active: { id: string | number; }; over: { id: string | number; data: { current?: any; }; } | null; }, tasks: {}, statusField: string, columns?: {} | undefined): { taskId: string; status: string; } | null"
       ],
-      "summary": "Internal shared drop resolution. A move changes status, never the order within a column.",
-      "tags": [],
+      "summary": "Resolve a status-only move from the retained structural active/over event shape.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "event - Active id and nullable over target with optional data.current metadata."
+        },
+        {
+          "name": "param",
+          "text": "tasks - Current task listing; it is not mutated."
+        },
+        {
+          "name": "param",
+          "text": "statusField - Task property containing the column id."
+        },
+        {
+          "name": "param",
+          "text": "columns - Optional live preset columns; omitted for compound registrations."
+        },
+        {
+          "name": "returns",
+          "text": "The taskId/status pair, or null for unknown, unchanged or invalid targets."
+        },
+        {
+          "name": "remarks",
+          "text": "This helper retains its legacy-shaped structural input without a\ndependency on legacy dnd-kit types. It never persists within-column order."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {resolveKanbanMove} from '@alneas/appkit-react/tools/kanban';\nconst tasks = [{id: 'one', title: 'Review', status: 'todo'}];\nexport const move = resolveKanbanMove({active: {id: 'one'},\n  over: {id: 'done', data: {current: {type: 'Column'}}}}, tasks, 'status');\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -79240,10 +79622,27 @@
       "name": "useKanbanDrag",
       "kind": "value",
       "signatures": [
-        "({ tasks, columns, statusField, readOnly, onStatusChange, }: any): { activeTask: KanbanTask | null; contextProps: { sensors: {}; accessibility: { screenReaderInstructions: { draggable: string; }; }; onDragStart: ({ active }: DragStartEvent) => void; onDragEnd: (event: DragEndEvent) => void; onDragCancel: () => void; }; }"
+        "({ tasks, columns, statusField, readOnly, onStatusChange }: any): KanbanDragController"
       ],
-      "summary": "Shared interaction lifecycle. State ownership (optimistic or controlled) stays with the caller.",
-      "tags": [],
+      "summary": "Control a status-only Kanban drag using native provider events and sensors.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "options - Current tasks, optional columns, statusField (default status),\nreadOnly (default false) and the status-change callback. Hosts own durable state."
+        },
+        {
+          "name": "returns",
+          "text": "The active task or null and native props for KanbanDragSurface."
+        },
+        {
+          "name": "remarks",
+          "text": "No within-column ordering is persisted. Canceled, removed or read-only\noperations do not notify a status change. Use the migrated surface/provider;\ncontextProps is not a legacy DndContext prop object."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {KanbanDragSurface, KanbanColumn, useKanbanDrag} from '@alneas/appkit-react/tools/kanban';\nimport '@alneas/appkit-react/styles';\nexport function CustomBoard() {\n  const tasks = [{id: 'one', title: 'Review', status: 'todo'}];\n  const controller = useKanbanDrag({tasks});\n  return <KanbanDragSurface controller={controller}>\n    <KanbanColumn column={{id: 'todo', title: 'Todo'}} tasks={tasks} />\n    <KanbanColumn column={{id: 'done', title: 'Done'}} tasks={[]} />\n  </KanbanDragSurface>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -79253,8 +79652,25 @@
       "signatures": [
         "(statusField: string): {}"
       ],
-      "summary": "Shared sensors: Space/Enter picks up or drops, Left/Right selects a status column, Escape cancels.",
-      "tags": [],
+      "summary": "Build native pointer sensors and visual-column Left/Right keyboard traversal.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "statusField - Task property holding its current column id."
+        },
+        {
+          "name": "returns",
+          "text": "Native sensor descriptors, memoized by statusField; these are not\nlegacy DndContext sensors."
+        },
+        {
+          "name": "remarks",
+          "text": "Mouse/pen movement requires 10px; touch requires a 250ms hold with\n5px tolerance. Columns must register Column metadata under the same native\nprovider. Prefer useKanbanDrag for the complete status-change lifecycle."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DragDropProvider} from '@dnd-kit/react';\nimport {useKanbanSensors} from '@alneas/appkit-react/tools/kanban';\nexport function SensorBoundary() {\n  const sensors = useKanbanSensors('status');\n  return <DragDropProvider sensors={sensors}><div>Host registrations</div></DragDropProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -83967,10 +84383,27 @@
       "name": "DnDProvider",
       "kind": "value",
       "signatures": [
-        "({ children, onDragStart, onDragEnd, onDragCancel }: DnDProviderProps): Element"
+        "({ children, sensors: customSensors, plugins: customPlugins, ...props }: Props$1<Record<string, any>, Draggable<Record<string, any>>, Droppable<Record<string, any>>, DragDropManager<Record<string, any>, Draggable<Record<string, any>>, Droppable<Record<string, any>>>>): Element"
       ],
-      "summary": "DnD 操作のコンテキストを提供するラッパーコンポーネント",
-      "tags": [],
+      "summary": "Provide a native drag context for Appkit registrations and host-owned children.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Native provider options and content; omitted sensors use 5px\nmouse/pen movement and a 250ms touch hold with 5px tolerance. Omitted plugins\nretain native accessibility and clone feedback with immediate drop completion."
+        },
+        {
+          "name": "returns",
+          "text": "A provider element; no storage operations are performed by this wrapper."
+        },
+        {
+          "name": "remarks",
+          "text": "Import Appkit CSS once. Do not mix legacy core registrations into this\ncontext. Check event.canceled and nullable operation entities before persisting."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function DragArea() {\n  return <DnDProvider onDragEnd={event => {\n    if (!event.canceled) console.log(event.operation.target?.id);\n  }}><div>Host content</div></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -83978,10 +84411,15 @@
       "name": "DnDProviderProps",
       "kind": "type",
       "signatures": [
-        "export interface DnDProviderProps {\n    children: React.ReactNode;\n    onDragStart?: (event: DragStartEvent) => void;\n    onDragEnd?: (event: DragEndEvent) => void;\n    onDragCancel?: (event: DragCancelEvent) => void;\n}"
+        "export type DnDProviderProps = ComponentProps<typeof DragDropProvider>;"
       ],
-      "summary": "",
-      "tags": [],
+      "summary": "Native DragDropProvider props, including custom sensors/plugins and children.",
+      "tags": [
+        {
+          "name": "remarks",
+          "text": "Cancellation is delivered through onDragEnd with event.canceled;\nthe legacy onDragCancel callback is not supported. Native provider members\nretain their upstream contracts. See the development migration guide."
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -84002,8 +84440,25 @@
       "signatures": [
         "({ id, data, children }: DraggableProps): Element"
       ],
-      "summary": "ドラッグ可能な要素を作成するコンポーネント",
-      "tags": [],
+      "summary": "Register an element and optional separate handle with the native provider.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Unique string id, optional source.data payload and render callback."
+        },
+        {
+          "name": "returns",
+          "text": "The rendered child inside a fragment; input listeners are installed natively."
+        },
+        {
+          "name": "remarks",
+          "text": "Place under DnDProvider. Keep nested interactive controls outside the\nhandle when they must remain independently clickable. See the migration guide\nfor native event and feedback semantics."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider, Draggable} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function MovableItem() {\n  return <DnDProvider><Draggable id=\"report\" data={{name: 'Report'}}>\n    {({ref, handleRef, style}) => <div ref={ref} style={style}>\n      <button ref={handleRef}>Move report</button>\n    </div>}\n  </Draggable></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -84011,9 +84466,9 @@
       "name": "DraggableProps",
       "kind": "type",
       "signatures": [
-        "export interface DraggableProps {\n    id: string;\n    data?: Record<string, any>;\n    children: (props: {\n        attributes: any;\n        listeners: any;\n        setNodeRef: (node: HTMLElement | null) => void;\n        isDragging: boolean;\n        style: React.CSSProperties;\n    }) => React.ReactNode;\n}"
+        "export interface DraggableProps {\n    id: string;\n    data?: Record<string, any>;\n    children: (props: {\n        ref: (element: Element | null) => void;\n        handleRef: (element: Element | null) => void;\n        isDragging: boolean;\n        style: CSSProperties;\n    }) => ReactNode;\n}"
       ],
-      "summary": "",
+      "summary": "Native draggable options; render refs replace legacy attributes/listeners.",
       "tags": [],
       "guide": "docs/tools.md"
     },
@@ -84824,8 +85279,25 @@
       "signatures": [
         "({ id, data, disabled, children }: DroppableProps): Element"
       ],
-      "summary": "ドロップ可能な領域を作成するコンポーネント",
-      "tags": [],
+      "summary": "Register a native drop target using pointer intersection, including keyboard coordinates.",
+      "tags": [
+        {
+          "name": "param",
+          "text": "props - Target id, optional target.data payload, disabled flag and renderer."
+        },
+        {
+          "name": "returns",
+          "text": "The rendered target inside a fragment."
+        },
+        {
+          "name": "remarks",
+          "text": "Requires the same native DnDProvider as its source. Outside drops do\nnot choose the nearest target. This registration does not persist host data."
+        },
+        {
+          "name": "example",
+          "text": "```tsx\nimport {DnDProvider, Droppable} from '@alneas/appkit-react/tools/ui';\nimport '@alneas/appkit-react/styles';\nexport function TargetArea() {\n  return <DnDProvider><Droppable id=\"archive\" data={{kind: 'folder'}}>\n    {({ref, isDropTarget}) => <div ref={ref} data-over={isDropTarget}>Archive</div>}\n  </Droppable></DnDProvider>;\n}\n```"
+        }
+      ],
       "guide": "docs/tools.md"
     },
     {
@@ -84833,9 +85305,9 @@
       "name": "DroppableProps",
       "kind": "type",
       "signatures": [
-        "export interface DroppableProps {\n    id: string;\n    data?: Record<string, any>;\n    disabled?: boolean;\n    children: (props: {\n        setNodeRef: (node: HTMLElement | null) => void;\n        isOver: boolean;\n    }) => React.ReactNode;\n}"
+        "export interface DroppableProps {\n    id: string;\n    data?: Record<string, any>;\n    disabled?: boolean;\n    children: (props: {\n        ref: (element: Element | null) => void;\n        isDropTarget: boolean;\n    }) => ReactNode;\n}"
       ],
-      "summary": "",
+      "summary": "Native target options; ids must be unique within the provider.",
       "tags": [],
       "guide": "docs/tools.md"
     },
