@@ -7,6 +7,10 @@ dates are recorded only when confirmed.
 
 ## [0.3.1]
 
+- Preserve the KanbanColumnFrame registration/ref requirements in one JSDoc remarks
+  block so strict API documentation consumers retain the full guidance without
+  duplicate-tag warnings. Runtime behavior and callable types are unchanged.
+
 - Correct GenerativeUIRenderer declaration documentation to retain all rendering
   requirements and fallback notes in one remarks block. Strict TypeDoc consumers
   can generate API documentation without duplicate-tag warnings; runtime behavior,
