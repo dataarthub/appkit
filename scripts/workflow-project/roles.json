@@ -130,7 +130,7 @@
       "verify": {
         "if": "github.event_name == 'release' && github.repository == 'dataarthub/appkit' && github.event.release.draft == false && github.event.release.prerelease == false && (startsWith(github.event.release.tag_name, 'appkit-core-v') ||\n startsWith(github.event.release.tag_name, 'appkit-react-v'))",
         "runs-on": "ubuntu-latest",
-        "timeout-minutes": 30,
+        "timeout-minutes": 75,
         "permissions": {
           "contents": "read",
           "actions": "read"
@@ -141,12 +141,15 @@
           "environment": "${{ steps.select.outputs.environment }}",
           "url": "${{ steps.select.outputs.url }}",
           "integrity": "${{ steps.prepare.outputs.integrity }}",
-          "artifact": "${{ steps.upload.outputs.artifact-id }}"
+          "artifact": "${{ steps.upload.outputs.artifact-id }}",
+          "tag": "${{ steps.candidate.outputs.tag }}"
         },
         "steps": [
           {
             "uses": "actions/checkout@v6",
             "with": {
+              "ref": "${{ github.sha }}",
+              "path": "control",
               "fetch-depth": 0,
               "persist-credentials": false
             }
@@ -160,16 +163,34 @@
             }
           },
           {
+            "name": "Resolve fixed source using maintained control code",
+            "id": "candidate",
+            "working-directory": "${{ github.workspace }}",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node control/scripts/publish/select-source.mjs"
+          },
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "ref": "${{ steps.candidate.outputs.sha }}",
+              "path": "source",
+              "fetch-depth": 0,
+              "persist-credentials": false
+            }
+          },
+          {
             "name": "Validate package tag, version and source commit",
             "id": "select",
-            "run": "node scripts/publish/select.mjs"
+            "run": "node ../control/scripts/publish/select.mjs"
           },
           {
             "name": "Require successful Public quality for the exact release commit",
             "env": {
               "GITHUB_TOKEN": "${{ github.token }}"
             },
-            "run": "node scripts/publish/require-quality.mjs"
+            "run": "node ../control/scripts/publish/require-quality.mjs"
           },
           {
             "uses": "oven-sh/setup-bun@v2",
@@ -189,23 +210,38 @@
             "run": "bun install --frozen-lockfile --ignore-scripts"
           },
           {
-            "name": "Require exact-commit authoritative Source quality",
-            "env": {
-              "GITHUB_TOKEN": "${{ github.token }}"
-            },
-            "run": "node scripts/workflow-supply/public/quality.mjs require-source"
-          },
-          {
-            "uses": "actions/cache/restore@v4",
+            "uses": "actions/setup-node@v6",
             "with": {
-              "path": ".turbo/cache",
-              "key": "${{ runner.os }}-${{ runner.arch }}-appkit-release-${{ github.run_id }}",
-              "restore-keys": "${{ runner.os }}-${{ runner.arch }}-appkit-two-node24-"
+              "node-version": 26,
+              "package-manager-cache": false,
+              "check-latest": true
             }
           },
           {
-            "name": "Build and verify package contracts (exact-commit Public quality already passed)",
-            "run": "bun run secrets:setup\nbun run check:quality\nbun run build\nbun run check:release\nbun run check:docs\n"
+            "name": "Authenticate original evidence and run full Node 26 compatibility",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node ../control/scripts/publish/source-proof.mjs fresh"
+          },
+          {
+            "uses": "actions/setup-node@v6",
+            "with": {
+              "node-version": 24,
+              "package-manager-cache": false,
+              "check-latest": true
+            }
+          },
+          {
+            "name": "Install pinned Chromium and source safety tooling",
+            "run": "bun run secrets:setup\nbunx --no-install playwright install --with-deps chromium\n"
+          },
+          {
+            "name": "Authenticate original evidence and run full Node 24 source checks",
+            "env": {
+              "GITHUB_TOKEN": "${{ github.token }}"
+            },
+            "run": "node ../control/scripts/publish/source-proof.mjs fresh"
           },
           {
             "name": "Verify React with declared and candidate Core",
@@ -222,21 +258,30 @@
           {
             "name": "Select only the tested target package archive",
             "id": "prepare",
-            "run": "node scripts/publish/prepare.mjs"
+            "run": "node ../control/scripts/publish/prepare.mjs"
           },
           {
             "uses": "actions/upload-artifact@v7",
             "id": "upload",
             "with": {
               "name": "npm-package-${{ github.run_id }}-${{ github.run_attempt }}",
-              "path": ".verification/publish/package.tgz\n.verification/publish/release.json\n",
+              "path": "source/.verification/publish/package.tgz\nsource/.verification/publish/release.json\n",
               "if-no-files-found": "error",
               "retention-days": 7,
               "compression-level": 0,
               "include-hidden-files": true
             }
           }
-        ]
+        ],
+        "defaults": {
+          "run": {
+            "working-directory": "source"
+          }
+        },
+        "env": {
+          "PUBLISH_PACKAGE_ROOT": "${{ github.workspace }}/source",
+          "GITHUB_TOKEN": "${{ github.token }}"
+        }
       },
       "stage": {
         "name": "Stage package for approval",
@@ -256,9 +301,19 @@
           {
             "uses": "actions/checkout@v6",
             "with": {
-              "ref": "${{ needs.verify.outputs.sha }}",
+              "ref": "${{ github.sha }}",
+              "path": "control",
               "fetch-depth": 0,
               "persist-credentials": false
+            }
+          },
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "ref": "${{ needs.verify.outputs.sha }}",
+              "fetch-depth": 0,
+              "persist-credentials": false,
+              "path": "source"
             }
           },
           {
@@ -277,7 +332,7 @@
             "uses": "actions/download-artifact@v8",
             "with": {
               "artifact-ids": "${{ needs.verify.outputs.artifact }}",
-              "path": ".verification/publish",
+              "path": "source/.verification/publish",
               "digest-mismatch": "error"
             }
           },
@@ -286,14 +341,14 @@
             "env": {
               "GITHUB_TOKEN": "${{ github.token }}"
             },
-            "run": "node scripts/publish/require-quality.mjs"
+            "run": "node ../control/scripts/publish/require-quality.mjs"
           },
           {
             "name": "Revalidate exact original Source quality evidence",
             "env": {
               "GITHUB_TOKEN": "${{ github.token }}"
             },
-            "run": "node scripts/workflow-supply/public/quality.mjs require-source"
+            "run": "node ../control/scripts/publish/source-proof.mjs writer"
           },
           {
             "name": "Stage verified archive through OIDC",
@@ -301,9 +356,20 @@
               "APPKIT_NPM_PUBLISH": "true",
               "VERIFIED_INTEGRITY": "${{ needs.verify.outputs.integrity }}"
             },
-            "run": "node scripts/publish/publish.mjs"
+            "run": "node ../control/scripts/publish/publish.mjs"
           }
-        ]
+        ],
+        "defaults": {
+          "run": {
+            "working-directory": "source"
+          }
+        },
+        "env": {
+          "PUBLISH_PACKAGE_ROOT": "${{ github.workspace }}/source",
+          "PUBLISH_SOURCE_SHA": "${{ needs.verify.outputs.sha }}",
+          "PUBLISH_RELEASE_TAG": "${{ needs.verify.outputs.tag }}",
+          "GITHUB_TOKEN": "${{ github.token }}"
+        }
       },
       "resolve": {
         "if": "github.event_name == 'workflow_dispatch' && github.repository == 'dataarthub/appkit' && github.ref == 'refs/heads/main'",
@@ -316,7 +382,9 @@
           "sha": "${{ steps.source.outputs.sha }}",
           "tag": "${{ steps.source.outputs.tag }}",
           "environment": "${{ steps.source.outputs.environment }}",
-          "artifact": "${{ steps.source.outputs.artifact }}"
+          "artifact": "${{ steps.source.outputs.artifact }}",
+          "control": "${{ steps.source.outputs.control }}",
+          "attempt": "${{ steps.source.outputs.attempt }}"
         },
         "steps": [
           {
@@ -355,15 +423,29 @@
         "env": {
           "PUBLISH_SOURCE_SHA": "${{ needs.resolve.outputs.sha }}",
           "PUBLISH_RELEASE_TAG": "${{ needs.resolve.outputs.tag }}",
-          "GITHUB_TOKEN": "${{ github.token }}"
+          "GITHUB_TOKEN": "${{ github.token }}",
+          "PUBLISH_PACKAGE_ROOT": "${{ github.workspace }}/source",
+          "PUBLISH_PRODUCER_CONTROL": "${{ needs.resolve.outputs.control }}",
+          "PUBLISH_PRODUCER_RUN": "${{ inputs.staged_run }}",
+          "PUBLISH_PRODUCER_ATTEMPT": "${{ needs.resolve.outputs.attempt }}"
         },
         "steps": [
           {
             "uses": "actions/checkout@v6",
             "with": {
-              "ref": "${{ needs.resolve.outputs.sha }}",
+              "ref": "${{ github.sha }}",
+              "path": "control",
               "fetch-depth": 0,
               "persist-credentials": false
+            }
+          },
+          {
+            "uses": "actions/checkout@v6",
+            "with": {
+              "ref": "${{ needs.resolve.outputs.sha }}",
+              "fetch-depth": 0,
+              "persist-credentials": false,
+              "path": "source"
             }
           },
           {
@@ -380,14 +462,14 @@
               "artifact-ids": "${{ needs.resolve.outputs.artifact }}",
               "run-id": "${{ inputs.staged_run }}",
               "github-token": "${{ github.token }}",
-              "path": ".verification/publish",
+              "path": "source/.verification/publish",
               "digest-mismatch": "error"
             }
           },
           {
             "name": "Validate original release and select its npm environment",
             "id": "select",
-            "run": "node scripts/publish/select.mjs"
+            "run": "node ../control/scripts/publish/select.mjs"
           },
           {
             "name": "Install pinned Trusted Publishing CLI",
@@ -395,29 +477,43 @@
           },
           {
             "name": "Recheck Public quality for the original release commit",
-            "run": "node scripts/publish/require-quality.mjs"
+            "run": "node ../control/scripts/publish/require-quality.mjs"
           },
           {
             "name": "Revalidate exact original Source quality evidence",
             "env": {
               "GITHUB_TOKEN": "${{ github.token }}"
             },
-            "run": "node scripts/workflow-supply/public/quality.mjs require-source",
-            "if": "hashFiles('.github/workflow-adapter.json') != ''"
+            "run": "node ../control/scripts/publish/source-proof.mjs writer"
           },
           {
             "name": "Confirm approved archive, required tags, staged cleanup and Deployment",
             "env": {
               "APPKIT_NPM_PUBLISH": "true"
             },
-            "run": "node scripts/publish/publish.mjs"
+            "run": "node ../control/scripts/publish/publish.mjs"
           }
         ],
         "environment": {
           "name": "${{ needs.resolve.outputs.environment }}",
           "deployment": false
+        },
+        "defaults": {
+          "run": {
+            "working-directory": "source"
+          }
         }
       }
+    },
+    "recovery": {
+      "candidates": [
+        "core-0.2.1"
+      ]
+    },
+    "run-name": "${{ inputs.recover_release != '' && format('Recover {0}', inputs.recover_release) || 'Publish npm packages' }}",
+    "sourceEvidence": {
+      "mode": "fresh-two-root",
+      "script": "scripts/publish/source-proof.mjs"
     }
   },
   "complete": {

@@ -1,0 +1,18 @@
+{
+  "id": "core-0.2.1",
+  "run": 40060778911,
+  "attempt": 2,
+  "release": 422489080,
+  "tag": "appkit-core-v0.2.1",
+  "tagObject": "99492d380834efeb9279f33e5d646c356fcaad4b",
+  "sha": "aa7af4ec7d65f6fda997c640949c63aa1bfe4e72",
+  "preStageFailures": [
+    {
+      "run": 40066317790,
+      "attempt": 1,
+      "control": "85adba3fe41f335f9b333654e91bdecc4a03d87a",
+      "title": "Recover core-0.2.1",
+      "step": "Project: Validate package tag, version and source commit"
+    }
+  ]
+}

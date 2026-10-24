@@ -75,6 +75,20 @@ Manually dispatch `ci.yml` on the reviewed branch with `verification_mode=confor
 
 The default `full` mode and normal PR/main gates retain existing checks. Diagnostics do not run product/browser/DB suites, save remote task caches or issue authoritative source evidence. Their artifacts record scoped results, not full policy compliance. Before merging, satisfy the normal required PR checks independently.
 
+### Hosted image rollout and fixed-candidate recovery
+
+The release adapter declares `sourceEvidence.mode = fresh-two-root`. Shared
+conformance requires separate `control` and `source` checkouts, a fixed package
+root, fresh proof steps under every declared runtime, and immutable writer proof
+steps. The project helper authenticates image-only differences, runs the complete
+source suite freshly and binds its results to the transferred archive. These
+checks do not relax ordinary source-baseline identity or allow failed/missing
+formal evidence. See [RELEASING](./releasing.md#recover-a-release-stopped-before-archive-creation)
+for the original Core candidate, single-use dispatch, manual exact-producer
+completion and the source/control provenance distinction. Local tests establish
+wiring and failure behavior; the maintained main CI and real staging run establish
+remote execution. Neither is evidence of the user's npm approval.
+
 ## Independent public side evidence
 
 The project-owned source role runs `scripts/paired-public.mjs` in the required

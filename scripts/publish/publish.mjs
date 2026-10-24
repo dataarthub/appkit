@@ -3,6 +3,7 @@ import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {releaseContext, root} from './context.mjs';
 import {verifyArtifact} from './artifact.mjs';
+import {publicationPhase,candidates,authenticateRecovery,authenticateRecoveryProducer} from './recovery.mjs';
 import {stageVerified, finalizeVerified} from './engine.mjs';
 // OIDC can stage or repair tags; approval always requires a maintainer's npm 2FA.
 if (process.env.APPKIT_NPM_PUBLISH !== 'true' || !process.env.ACTIONS_ID_TOKEN_REQUEST_URL ||
@@ -13,7 +14,9 @@ const selected = releaseContext();
 const directory = path.join(root, '.verification/publish');
 const file = path.join(directory, 'package.tgz');
 const manifest = JSON.parse(readFileSync(path.join(directory, 'release.json'), 'utf8'));
-const completing = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch';
+const event=JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
+const completing = publicationPhase(process.env,event)==='complete';
+if(event.inputs?.recover_release){const c=candidates[event.inputs.recover_release];await authenticateRecovery(c);await authenticateRecoveryProducer(c);}
 const expectedIntegrity = completing ? manifest.integrity : process.env.VERIFIED_INTEGRITY;
 if (!/^sha512-[A-Za-z0-9+/]+={0,2}$/.test(expectedIntegrity ?? '')) throw Error('Verified artifact digest is required');
 const target = {...selected, integrity: expectedIntegrity};
