@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packageName": "@alneas/appkit-react",
   "packageVersion": "0.3.1",
-  "inputDigest": "da8e4aa55e1b98949d7215b6868ab80cddd229f0bf2b0bf6827fb770a85b32e6",
+  "inputDigest": "b3762052b10d987b9866df71810f0471a588ddd8f80122aae699731371e07c4f",
   "entries": [
     {
       "importPath": "@alneas/appkit-react",
@@ -79367,7 +79367,7 @@
       "tags": [
         {
           "name": "remarks",
-          "text": "Retain forwardRef to compose native registration and caller refs, including\ncallback cleanup; this is not a direct DOM-ref passthrough."
+          "text": "Retain forwardRef to compose native registration and caller refs, including\ncallback cleanup; this is not a direct DOM-ref passthrough.\nRequires the native Kanban surface. Pointer intersection excludes outside\ndrops; WIP limits are presentational and do not reject a host status callback."
         },
         {
           "name": "param",
@@ -79380,10 +79380,6 @@
         {
           "name": "returns",
           "text": "A column div accepting Kanban task registrations."
-        },
-        {
-          "name": "remarks",
-          "text": "Requires the native Kanban surface. Pointer intersection excludes outside\ndrops; WIP limits are presentational and do not reject a host status callback."
         },
         {
           "name": "example",

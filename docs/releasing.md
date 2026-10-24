@@ -332,30 +332,42 @@ that run's exact receipts and archives; missing, stale or changed evidence still
 cannot qualify. Making evaluation optional does not relax its grading or allow
 harness self-tests to be reported as real task successes. Keep raw evidence ignored.
 
-## React 0.3.1 dependency alignment preparation
+## Core 0.2.2 and React 0.3.1 staged documentation preparation
 
-Prepare only `@alneas/appkit-react` **0.3.1** (patch): update its exact Core
-production dependency from 0.2.0 to the published **0.2.1**, delivering the Core
-documentation patch and avoiding a second Core installation when hosts pin 0.2.1.
-Core remains 0.2.1; no additional Core release is needed. React 0.3.0 and its
-published archive, tag and Release remain unchanged. No new public API or breaking
-change is introduced; the 0.3.0 breaking migration still applies to 0.2.x hosts.
+Prepare Core **0.2.2** for the createAjvValidator declaration documentation fix.
+Its options/defaults and host requirements share one remarks block; runtime
+statements, callable types, exports and production dependencies are unchanged.
+React **0.3.1** also combines the GenerativeUIRenderer and KanbanColumnFrame
+remarks without changing their runtime behavior or callable contracts. The
+ordinary documentation gate rejects duplicate singleton remarks/returns tags in
+maintained package source; warnings and external documentation coverage stay strict.
 
-Verify the lockfile, generated package documentation, changelog and packed
-consumer resolution together. When both selected packages use Core 0.2.1, the
-host and React must resolve the same Core entry, without overrides or local
-production aliases. Keep independent-version compatibility checks and the
-existing mandatory-fix policy; this documentation patch adds no runtime fix
-requirement to `react-core-policy.json`.
+The prepared React manifest must retain exact, already published Core **0.2.1**
+until Core 0.2.2 publication is independently confirmed. Source version strings,
+passing candidate checks and prepared changelogs do not establish publication.
+Use this delivery order:
 
-Private consumers and the documentation portal must retain their confirmed
-published versions until React 0.3.1 publication is verified. Then update exact
-React/Core pins together, refresh the owning lockfile, and run private checks
-against the actual published archives. Private verification remains owned by the
-private repository; public CI does not read private source or credentials.
-Preparation does not authorize publication: create `appkit-react-v0.3.1` and its
-GitHub Release only through a separately authorized release, with normal archive
-verification, staging,maintainer 2FA approval and completion. Do not move existing tags.
+1. Review and verify Core 0.2.2, including its exact packed declarations and
+   consumers. A separately authorized `appkit-core-v0.2.2` Release uses the normal
+   staging, maintainer 2FA approval and completion flow. Confirm npm version and
+   archive identity, required tags and successful `npm-core` Deployment.
+2. Only after that checkpoint, update the still-unpublished React 0.3.1 dependency
+   to exact Core **0.2.2**, refresh its lockfile and generated documentation, and
+   update its final changelog/host instructions. Run `check:react-core --release`
+   and the maintained source and packed-consumer checks. When the host selects
+   the same Core version, it and React must resolve one Core module, without
+   production overrides or local aliases.
+3. After review and successful exact-source main quality, obtain separate
+   authorization for `appkit-react-v0.3.1` and its GitHub Release, then complete
+   the same npm staging/2FA/completion verification before announcing delivery.
+
+Existing Core 0.2.0/0.2.1 and React 0.3.0 archives, tags and Releases remain
+immutable. React 0.3.0 continues to require Core 0.2.0. No runtime fix is added to
+`react-core-policy.json`; the Core 0.2.2 prerequisite here delivers corrected
+consumer declaration documentation. Consumers and portal ingestion retain their
+confirmed published versions until each relevant publication is verified. Owning
+consumers then update exact dependencies and verify actual published archives.
+Public CI does not require restricted source, credentials or receipts.
 
 ## Core 0.2.1 and React 0.3.0 documentation handoff
 

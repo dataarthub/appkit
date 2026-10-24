@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "packageName": "@alneas/appkit-core",
-  "packageVersion": "0.2.1",
-  "inputDigest": "40279f44540b8e94b24beed9bbdced4aacd7e0c3817411386646373c88c21f1f",
+  "packageVersion": "0.2.2",
+  "inputDigest": "95eddf31eac9edc27db62799f408e31ce456f0c12e9e7814e94cbde627ac178b",
   "entries": [
     {
       "importPath": "@alneas/appkit-core",
@@ -4500,15 +4500,11 @@
         },
         {
           "name": "remarks",
-          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions."
+          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions.\nOmitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "throws",
           "text": "Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator."
-        },
-        {
-          "name": "remarks",
-          "text": "Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "example",
@@ -9116,15 +9112,11 @@
         },
         {
           "name": "remarks",
-          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions."
+          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions.\nOmitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "throws",
           "text": "Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator."
-        },
-        {
-          "name": "remarks",
-          "text": "Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "example",

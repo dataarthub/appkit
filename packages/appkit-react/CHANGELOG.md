@@ -15,9 +15,10 @@ dates are recorded only when confirmed.
   requirements and fallback notes in one remarks block. Strict TypeDoc consumers
   can generate API documentation without duplicate-tag warnings; runtime behavior,
   exports and callable types are unchanged.
-- Update the exact `@alneas/appkit-core` dependency to published **0.2.1**.
-  Hosts using Core directly should pin Core **0.2.1** alongside React **0.3.1**
-  and refresh their lockfile so both resolve the same Core installation.
+- Retain exact, published Core **0.2.1** during preparation. Publish the Core
+  **0.2.2** declaration-documentation patch first; only then update this prepared
+  React dependency, final changelog and host instructions to exact **0.2.2** and
+  verify one shared Core installation before React 0.3.1 publication.
 - This patch aligns the delivered Core documentation and dependency resolution;
   it adds no public API changes. The breaking migration from React 0.2.x remains
   documented under 0.3.0 and in the bundled migration guide.
