@@ -96,6 +96,22 @@ jobs:
         if: "matrix.node == 24 && inputs.packed_consumer == true"
         run: "bun run test:consumer"
       -
+        name: "Project: Verify independent public side after mandatory source checks"
+        if: "matrix.node == 24"
+        run: "node scripts/paired-public.mjs"
+      -
+        name: "Shared: Preserve public-only side evidence"
+        if: "matrix.node == 24"
+        uses: "actions/upload-artifact@v7"
+        with:
+          name: "appkit-public-side-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}"
+          path: |
+            ${{ runner.temp }}/appkit-public-side/public-plan.json
+            ${{ runner.temp }}/appkit-public-side/public-receipt.json
+            ${{ runner.temp }}/appkit-public-side/producer.json
+          if-no-files-found: "error"
+          retention-days: 7
+      -
         uses: "actions/cache/save@v4"
         if: "${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (!cancelled() && hashFiles('.turbo/cache/**') != '') }}"
         with:

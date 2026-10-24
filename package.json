@@ -45,7 +45,7 @@
     "storybook:prepare": "bun run turbo run build --filter=@alneas/appkit-core && bun run --cwd packages/appkit-react generate:i18n",
     "test:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs scripts/guarded-process.test.mjs && node scripts/verification/browser.mjs",
     "verify:full": "node scripts/verification/run.mjs --full",
-    "test:verification-tooling": "node --test scripts/verification/*.test.mjs scripts/typescript.test.mjs && bun run test:workflow",
+    "test:verification-tooling": "node --test scripts/verification/*.test.mjs scripts/typescript.test.mjs scripts/check-paired.test.mjs && bun run test:workflow",
     "workflow:generate": "node scripts/workflow-supply/public/supply.mjs generate --project-root .",
     "workflow:check": "node scripts/workflow-supply/public/supply.mjs check --project-root .",
     "test:workflow": "node --test scripts/workflow-supply/public/*.test.mjs",

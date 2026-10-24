@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "source": "https://tech-docs.alneas.com/templates/paired-maintenance/README.md",
+  "attribution": "Alneas shared paired-maintenance kit; vendored unchanged from reviewed local source",
+  "files": {
+    "check-paired.mjs": "097bec913a0efef481e9ec19482214f86835f788b1decab9d41b4b3775b5c074",
+    "check-paired.test.mjs": "f8cdb6a6278759471c3972243c5d0113d0b95381a75c3269abfe694c19437297"
+  }
+}
