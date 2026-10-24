@@ -18,11 +18,12 @@ const ctx={source:target.sha,control,run:Number(env.GITHUB_RUN_ID),attempt:Numbe
 if(command==='fresh'){
  if(phase!=='stage'||control!==env.GITHUB_SHA)throw Error('Fresh verification requires the staging control source');
  const before=inputHash(root),major=Number(process.versions.node.split('.')[0]);
- const result=spawnSync(process.execPath,['scripts/verification/run.mjs','--full',...(major===26?['--node-compat']:[])],{cwd:root,stdio:'inherit',env:{...Object.fromEntries(Object.entries(env).filter(([key])=>!key.startsWith('PUBLISH_'))),TURBO_FORCE:'true'}});
+ const freshEnv={...Object.fromEntries(Object.entries(env).filter(([key])=>!key.startsWith('PUBLISH_'))),TURBO_FORCE:'true'};
+ const result=spawnSync(process.execPath,['scripts/verification/run.mjs','--full',...(major===26?['--node-compat']:[])],{cwd:root,stdio:'inherit',env:freshEnv});
  if(result.status!==0)throw Error('Full fresh source verification failed');
  if(inputHash(root)!==before)throw Error('Source changed during fresh verification');
  execFileSync('git',['diff','--exit-code','HEAD','--'],{cwd:root,stdio:'inherit'});
- writeFileSync(path.join(directory,`fresh-node${major}.json`),JSON.stringify({major,status:'passed',identity:executionIdentity(root),formal:{run:formal.run.id,attempt:formal.run.run_attempt},...ctx}));
+ writeFileSync(path.join(directory,`fresh-node${major}.json`),JSON.stringify({major,status:'passed',identity:executionIdentity(root,freshEnv),formal:{run:formal.run.id,attempt:formal.run.run_attempt},...ctx}));
 }else if(command==='writer'){
  const manifest=JSON.parse(readFileSync(path.join(directory,'release.json')));
  if(manifest.recovery){const c=candidates[manifest.recovery.id];assert.deepEqual(manifest.recovery,c,'Unknown recovery archive');await authenticateRecovery(c);}

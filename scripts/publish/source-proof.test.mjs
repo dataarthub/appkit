@@ -11,7 +11,7 @@ function fixture(work){
  try{
   mkdirSync(path.join(control,'scripts'),{recursive:true});cpSync(path.resolve('scripts/publish'),path.join(control,'scripts/publish'),{recursive:true});
   mkdirSync(path.join(control,'scripts/workflow-supply/public'),{recursive:true});
-  writeFileSync(path.join(control,'scripts/workflow-supply/public/quality.mjs'),`import {execFileSync} from 'node:child_process';export async function requireSource(){if(process.env.FIXTURE_FORMAL_FAILURE)throw Error('invalid official evidence');return {run:{id:1,run_attempt:2}};}export function executionIdentity(){return {node:process.version,image:'fixture'};}export function inputHash(root){return execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'});}`);
+  writeFileSync(path.join(control,'scripts/workflow-supply/public/quality.mjs'),`import {execFileSync} from 'node:child_process';export async function requireSource(){if(process.env.FIXTURE_FORMAL_FAILURE)throw Error('invalid official evidence');return {run:{id:1,run_attempt:2}};}export function executionIdentity(root,env=process.env){return {node:process.version,image:'fixture',force:env.TURBO_FORCE??''};}export function inputHash(root){return execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'});}`);
   mkdirSync(path.join(control,'scripts/verification'),{recursive:true});
   writeFileSync(path.join(control,'scripts/verification/run.mjs'),`import assert from 'node:assert/strict';import {writeFileSync} from 'node:fs';assert(process.argv.includes('--full'));assert(!Object.keys(process.env).some(k=>k.startsWith('PUBLISH_')));if(process.env.FIXTURE_SOURCE_FAILURE)throw Error('source checks failed');writeFileSync('.verification/publish/child-ran.json',JSON.stringify({cwd:process.cwd(),args:process.argv.slice(2)}));`);
   writeFileSync(path.join(control,'.gitignore'),'.verification/\n');mkdirSync(path.join(control,'.github'));writeFileSync(path.join(control,'.github/workflow-adapter.json'),'{}');
@@ -28,6 +28,7 @@ test('fresh verification runs the original source in a separate root and isolate
  const result=run('fresh');assert.equal(result.status,0,result.stderr);
  const major=Number(process.versions.node.split('.')[0]);
  assert(existsSync(path.join(source,`.verification/publish/fresh-node${major}.json`)));
+ assert.equal(JSON.parse(readFileSync(path.join(source,`.verification/publish/fresh-node${major}.json`))).identity.force,'true');
  const child=JSON.parse(readFileSync(path.join(source,'.verification/publish/child-ran.json')));assert.equal(child.cwd,source);assert(child.args.includes('--full'));
 }));
 test('invalid official evidence or failed fresh checks never produce a source pass',()=>{
