@@ -1,6 +1,6 @@
 {
   "name": "@alneas/appkit-react",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Unified React 19 business UI toolkit: accessible primitives, schema-driven forms, data tables, and AI chat interfaces",
   "keywords": [
     "react",
@@ -411,7 +411,7 @@
     "typecheck:storybook:7": "tsc --project tsconfig.storybook.json"
   },
   "dependencies": {
-    "@alneas/appkit-core": "0.2.0",
+    "@alneas/appkit-core": "0.2.1",
     "@base-ui/react": "^1.9.0",
     "@dnd-kit/collision": "0.5.1",
     "@dnd-kit/dom": "0.5.1",

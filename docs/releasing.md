@@ -332,6 +332,31 @@ that run's exact receipts and archives; missing, stale or changed evidence still
 cannot qualify. Making evaluation optional does not relax its grading or allow
 harness self-tests to be reported as real task successes. Keep raw evidence ignored.
 
+## React 0.3.1 dependency alignment preparation
+
+Prepare only `@alneas/appkit-react` **0.3.1** (patch): update its exact Core
+production dependency from 0.2.0 to the published **0.2.1**, delivering the Core
+documentation patch and avoiding a second Core installation when hosts pin 0.2.1.
+Core remains 0.2.1; no additional Core release is needed. React 0.3.0 and its
+published archive, tag and Release remain unchanged. No new public API or breaking
+change is introduced; the 0.3.0 breaking migration still applies to 0.2.x hosts.
+
+Verify the lockfile, generated package documentation, changelog and packed
+consumer resolution together. When both selected packages use Core 0.2.1, the
+host and React must resolve the same Core entry, without overrides or local
+production aliases. Keep independent-version compatibility checks and the
+existing mandatory-fix policy; this documentation patch adds no runtime fix
+requirement to `react-core-policy.json`.
+
+Private consumers and the documentation portal must retain their confirmed
+published versions until React 0.3.1 publication is verified. Then update exact
+React/Core pins together, refresh the owning lockfile, and run private checks
+against the actual published archives. Private verification remains owned by the
+private repository; public CI does not read private source or credentials.
+Preparation does not authorize publication: create `appkit-react-v0.3.1` and its
+GitHub Release only through a separately authorized release, with normal archive
+verification, staging,maintainer 2FA approval and completion. Do not move existing tags.
+
 ## Core 0.2.1 and React 0.3.0 documentation handoff
 
 Prepare Core 0.2.1 for its concise npm README and bundled documentation corrections,

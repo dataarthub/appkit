@@ -36,7 +36,7 @@
   "bundleSha256": "d5251365e49bc3d17d71bdb44741f057e44610f0cd85487a6da07207d2442003",
   "outputs": {
     ".github/workflows/ci.yml": "3fb08370099199ece516d1ed765bdf89c097266ca585cdb06e5c8a29db81db56",
-    ".github/workflows/package-quality.yml": "6871d0fff4defc5c0c29c866a8a88b05096dd0fe4cfeb1dd44de06c3d7faeab2",
+    ".github/workflows/package-quality.yml": "c44d9d63ca160bcd398549ce258b2974d0f7567c67399b832a038e23c59f433e",
     ".github/workflows/publish.yml": "cfc60660aeea79a15504f5fa50e1c5a8de252f2778581122786195e31879a034",
     ".github/workflows/complete-approved.yml": "6816f5c6d5de4335913fd25db37e8d2d3cffe4a45a64457e1b2739bb4dcf34c6",
     ".github/workflows/record-npm-deployments.yml": "5c17a23f0108f3ff19bf4d824283281ece3a97184a6cb757b7a4ddfa16a57591"

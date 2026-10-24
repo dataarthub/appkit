@@ -16,6 +16,26 @@ installing; source versions and a merged PR do not prove delivery. The default
 portal must retain the last delivered revision until publication is confirmed;
 then ingest the reviewed 0.3.0 source and API catalog together.
 
+## React 0.3.1 dependency alignment (release preparation)
+
+React 0.3.1 is prepared with an exact dependency on the already published Core
+0.2.1. It adds no API migration beyond 0.3.0. Published React 0.3.0 retains its
+exact Core 0.2.0 dependency; the 0.3.0 commands below remain its historical route.
+
+After confirming React 0.3.1 is available, hosts with a direct Core dependency
+should install matching exact versions and refresh their lockfile:
+
+```bash
+npm view @alneas/appkit-react@0.3.1 version
+npm install --save-exact @alneas/appkit-react@0.3.1 @alneas/appkit-core@0.2.1 @tanstack/react-query@5.104.5 @tanstack/query-core@5.104.5
+npm ls @alneas/appkit-core
+```
+
+Confirm React and the host resolve the same Core 0.2.1 installation. Before npm
+publication, use verified candidate archives only for isolated checks; keep the
+portal and production consumers on their confirmed delivered versions. The
+remaining API migration sections apply to the 0.3 series.
+
 ## Prerequisites
 
 Use Node.js 24 or newer and React/React DOM matching `^19.2.3`. Confirm that
@@ -47,10 +67,10 @@ npm view @alneas/appkit-react@0.3.0 version
 npm install --save-exact @alneas/appkit-react@0.3.0 @alneas/appkit-core@0.2.0 @tanstack/react-query@5.104.5 @tanstack/query-core@5.104.5
 ```
 
-Core 0.2.1 is prepared separately for documentation improvements; it has no
-runtime/API migration and is not required by React 0.3.0. React's production Core
-pin remains exactly 0.2.0. A candidate Core archive is used only in the isolated
-compatibility lane; confirm each version's npm delivery independently.
+For the original React 0.3.0 release, Core remains exactly 0.2.0. Core 0.2.1
+contains documentation improvements with no runtime/API migration. React 0.3.1
+adopts that published patch as described above; confirm each version's npm
+delivery independently.
 Core does not advance to 0.3.0 in this release. Align both direct Query packages
 at **5.104.5**. Mixed 5.104.4 / 5.104.5 installations can make QueryClient and Query
 nominal types incompatible. Refresh the host lockfile and inspect `npm ls

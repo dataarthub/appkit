@@ -88,3 +88,61 @@ for the original Core candidate, single-use dispatch, manual exact-producer
 completion and the source/control provenance distinction. Local tests establish
 wiring and failure behavior; the maintained main CI and real staging run establish
 remote execution. Neither is evidence of the user's npm approval.
+
+## Independent public side evidence
+
+The project-owned source role runs `scripts/paired-public.mjs` in the required
+Node 24 verification job after its ordinary source gate and optional packed
+consumer check. It then uploads `appkit-public-side-<full-sha>-<run-id>-<attempt>`.
+Either side verification or artifact upload failure fails that existing job.
+Node 26 retains its compatibility checks. No additional source workflow or private
+access is needed.
+
+The public side plan selects bounded workflow conformance and source/side
+integration contract tests, each with a 60-second deadline. These checks supplement
+the preceding mandatory source checks; they do not replace product builds, types,
+unit tests, documentation, compatibility or selected browser coverage. The shared
+checker's CLI/failure tests run through `test:verification-tooling`, outside the
+side runner, because their own process-group fixtures must not nest inside its
+process-group cleanup boundary. They are tooling tests, not consumer adoption
+or publication evidence.
+
+The unchanged shared checker and adjacent test are attributed and content-pinned
+in `scripts/paired-maintenance-source.json`. Review upstream changes explicitly;
+normal source runs never download executable policy code. This integrates the
+[coordinated maintenance contract](https://tech-docs.alneas.com/policies/development-policy.md#coordinated-publicprivate-project-maintenance)
+and [shared kit](https://tech-docs.alneas.com/templates/paired-maintenance/README.md).
+
+The artifact contains only `public-plan.json`, `public-receipt.json` and
+`producer.json`, created under `$RUNNER_TEMP/appkit-public-side`, outside the
+checkout. The fixed task ID is `appkit-release-compatibility-v1`. The producer
+records repository, full source/workflow SHAs, workflow reference, run ID, attempt,
+event, ref, event head SHA and SHA-256 hashes of the plan and receipt. For pull
+requests the tested source is GitHub's merge SHA; `headShaFromEvent` separately
+records the PR branch head returned by the run API. The coordinator must validate
+both identities and fetch the selected merge revision rather than substituting
+the branch head. Plans and receipts contain
+public facts only; raw logs and `.verification/` are never uploaded. The source
+must be clean at the selected full SHA before and after the side checks. A rerun
+invalidates old files before attempting verification.
+
+Producer metadata and `reviewedBy` are declarations, not authenticated approval.
+A restricted coordinator must select the reviewed current public SHA, authenticate
+GitHub's `Source quality` run in `dataarthub/appkit` from `.github/workflows/ci.yml`,
+require its successful primary and compatibility jobs and latest run attempt,
+verify the exact immutable artifact identity/digest and plan/receipt hashes, and
+reject newer failures, superseded attempts and missing/expired artifacts. A
+candidate-uploaded JSON file alone cannot establish successful source verification.
+When provenance or supersession cannot be established, the protected coordinator
+must rerun the maintained side selection against the clean selected public SHA;
+it must use reviewed trusted checker/selection bytes and separately authenticate
+source quality. It must not execute a candidate's replacement verifier as its
+trust authority. Hosting required-check/review settings remain a separate owner
+responsibility; this change does not alter branch protection.
+
+The coordinator may build and verify candidate archives from that selected public
+SHA using existing build and isolated consumer commands. Such archives are
+verification inputs, never production dependency pins. This public workflow does
+not run the restricted pair mode, receive restricted evidence, or claim whole-task
+acceptance. Registry publication, exact published dependency adoption and actual
+delivery remain separate release prerequisites under `RELEASING.md`.
