@@ -21,3 +21,10 @@ test('browser checks use the selection-aware Turbo entry rather than an uncached
  const commands=commandsForPlan({...plan,stories:['one.stories.tsx']},'/selection.json');
  assert.deepEqual(commands.at(-1),['node','scripts/verification/browser.mjs','--plan','/selection.json']);
 });
+
+test('package verification checks compiler-backed contracts on both Node lanes',()=>{
+ for(const compatibility of [false,true]){
+  const commands=commandsForPlan({...plan,packages:true},'/plan.json',compatibility);
+  assert.ok(commands.some(command=>command.join(' ')==='bun run test:typescript-tooling'));
+ }
+});

@@ -1,7 +1,4 @@
 // @vitest-environment jsdom
-import { execFileSync } from 'node:child_process';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
 import * as React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, expect, expectTypeOf, test } from 'vitest';
@@ -23,29 +20,6 @@ import * as toast from './toast';
 afterEach(cleanup);
 type FormerProps<P, E> = React.PropsWithoutRef<P> & React.RefAttributes<E>;
 test('additional native wrappers preserve the previous public props and ref types', () => {
-  execFileSync(
-    process.execPath,
-    [
-      createRequire(import.meta.url).resolve('typescript/lib/tsc.js'),
-      '--ignoreConfig',
-      '--noEmit',
-      '--strict',
-      '--skipLibCheck',
-      '--types',
-      'node',
-      '--jsx',
-      'react-jsx',
-      '--esModuleInterop',
-      '--target',
-      'es2022',
-      '--module',
-      'esnext',
-      '--moduleResolution',
-      'bundler',
-      fileURLToPath(import.meta.url),
-    ],
-    { stdio: 'inherit' },
-  );
   expectTypeOf<React.ComponentProps<typeof formActionBar.FormActionBar>>().toEqualTypeOf<
     FormerProps<formActionBar.FormActionBarProps, HTMLDivElement>
   >();

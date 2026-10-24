@@ -7,7 +7,10 @@ const bun = script => add('bun', 'run', script);
 if (!nodeCompatibility) {
   bun('secrets:check'); bun('lint');
 }
-if (plan.packages) add('bun','run','turbo','run','build','typecheck','test');
+if (plan.packages) {
+  add('bun','run','turbo','run','build','typecheck','test');
+  bun('test:typescript-tooling');
+}
 if (!nodeCompatibility) {
   // Both the docs generator and self-importing stories consume package builds.
   if (!plan.packages && (plan.docs || plan.release || plan.stories.length)) bun('build');

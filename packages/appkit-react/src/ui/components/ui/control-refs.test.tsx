@@ -1,7 +1,4 @@
 // @vitest-environment jsdom
-import { execFileSync } from 'node:child_process';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
 import * as React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,12 +19,6 @@ afterEach(cleanup);
 
 type FormerProps<P, E> = React.PropsWithoutRef<P> & React.RefAttributes<E>;
 test('control props preserve their public ref types, including polymorphic HTMLElement refs', () => {
-  execFileSync(process.execPath, [
-    createRequire(import.meta.url).resolve('typescript/lib/tsc.js'),
-    '--ignoreConfig', '--noEmit', '--strict', '--skipLibCheck', '--types', 'node',
-    '--jsx', 'react-jsx', '--esModuleInterop', '--target', 'es2022',
-    '--module', 'esnext', '--moduleResolution', 'bundler', fileURLToPath(import.meta.url),
-  ], { stdio: 'inherit' });
   expectTypeOf<React.ComponentProps<typeof Button>>().toEqualTypeOf<FormerProps<ButtonProps, HTMLElement>>();
   expectTypeOf<React.ComponentProps<typeof MobileButton>>().toEqualTypeOf<FormerProps<MobileButtonProps, HTMLElement>>();
   expectTypeOf<React.ComponentProps<typeof FAB>>().toEqualTypeOf<FormerProps<FABProps, HTMLElement>>();

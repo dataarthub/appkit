@@ -1,7 +1,4 @@
 // @vitest-environment jsdom
-import { execFileSync } from 'node:child_process';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
 import * as React from 'react';
 import { afterEach, expect, expectTypeOf, test } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
@@ -32,30 +29,7 @@ afterEach(cleanup);
 type FormerProps<P, E> = React.PropsWithoutRef<P> & React.RefAttributes<E>;
 test('public component props retain the former ref and attribute types', () => {
   // Vitest normally transpiles without checking types, and the package tsconfig
-  // excludes tests. Compile this file so these contracts also run in normal CI.
-  execFileSync(
-    process.execPath,
-    [
-      createRequire(import.meta.url).resolve('typescript/lib/tsc.js'),
-      '--ignoreConfig',
-      '--noEmit',
-      '--strict',
-      '--skipLibCheck',
-      '--types',
-      'node',
-      '--jsx',
-      'react-jsx',
-      '--esModuleInterop',
-      '--target',
-      'es2022',
-      '--module',
-      'esnext',
-      '--moduleResolution',
-      'bundler',
-      fileURLToPath(import.meta.url),
-    ],
-    { stdio: 'inherit' },
-  );
+  // excludes tests. test:typescript-tooling compiles these assertions in normal CI.
   expectTypeOf<React.ComponentProps<typeof Card>>().toEqualTypeOf<
     FormerProps<React.ComponentProps<'div'> & { size?: 'default' | 'sm' }, HTMLDivElement>
   >();
