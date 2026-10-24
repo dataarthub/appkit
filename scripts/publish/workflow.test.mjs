@@ -68,3 +68,14 @@ test('recovery uses maintained control, immutable original source and fresh chec
  }
  for(const key of ['stage','complete'])assert(workflow.jobs[key].steps.some(s=>s.run==='node ../control/scripts/publish/source-proof.mjs writer'));
 });
+
+test('every maintained publication helper receives its scoped GitHub token',()=>{
+ for(const [phase,job] of Object.entries(workflow.jobs)){
+  for(const step of job.steps.filter(s=>s.run?.includes('scripts/publish/'))){
+   const effective={...job.env,...step.env};
+   assert.equal(effective.GITHUB_TOKEN,'${{ github.token }}',`Missing GitHub token: ${phase}/${step.name}`);
+  }
+  assert.equal(job.permissions.contents,'read');assert.equal(job.permissions.actions,'read');
+ }
+ assert.equal(workflow.jobs.verify.permissions['id-token'],undefined);
+});
