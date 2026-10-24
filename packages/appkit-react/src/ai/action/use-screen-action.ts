@@ -18,6 +18,11 @@ import { useScreenActionRegistry } from './context';
  * @remarks Latest committed validator/handler are read through refs. ID, description or
  * metadata identity changes trigger re-registration. No action executes automatically;
  * no styles are required. The host owns effects and authorization in its handler.
+ * Keep the ref/layout-effect bridge: external registry callers can invoke validation
+ * and execution outside Effect-originated callbacks. useEffectEvent is restricted to
+ * Effect logic and is not a replacement for these externally callable functions.
+ * This preserves latest committed callbacks without re-registering on every render;
+ * it is not a React 18 compatibility shim.
  *
  * @example
  * ```tsx

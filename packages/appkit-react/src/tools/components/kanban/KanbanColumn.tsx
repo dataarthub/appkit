@@ -15,7 +15,7 @@ import type { KanbanColumnProps } from './types';
  * Render a preset Kanban column with native task/column registrations.
  * @param props - Column metadata, current tasks, optional custom renderer, click
  * callback, test id and readOnly flag. Limits only affect warning presentation.
- * @param ref - Forwarded column div ref, including React 19 callback cleanup.
+ * The optional ref prop forwards the column div, including React 19 callback cleanup.
  * @returns The column, header/count and rendered task cards.
  * @remarks Use inside KanbanDragSurface; it does not own persistent task state.
  * Import Appkit CSS once. Prefer KanbanBoard when no custom surface is needed.
@@ -32,8 +32,9 @@ import type { KanbanColumnProps } from './types';
  * }
  * ```
  */
-export const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
-  ({ column, tasks, onTaskClick, testId, renderCard, readOnly }, ref) => {
+export function KanbanColumn({
+  ref, column, tasks, onTaskClick, testId, renderCard, readOnly,
+}: React.PropsWithoutRef<KanbanColumnProps> & React.RefAttributes<HTMLDivElement>) {
     const isOverLimit = column.limit ? tasks.length >= column.limit : false;
 
     return (
@@ -97,7 +98,6 @@ export const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
         </div>
       </KanbanColumnFrame>
     );
-  },
-);
+}
 
 KanbanColumn.displayName = 'KanbanColumn';

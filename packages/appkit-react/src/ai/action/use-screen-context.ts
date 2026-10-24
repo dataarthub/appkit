@@ -20,6 +20,10 @@ import type { UseScreenContextOptions } from './types';
  *
  * @remarks Requires ScreenActionProvider; no styles. Key/description/registry changes
  * re-register the context, while getter changes update a ref after commit.
+ * Keep the ref/layout-effect bridge because external registry reads can invoke the
+ * getter outside Effect-originated callbacks. useEffectEvent is restricted to Effect
+ * logic and cannot replace this on-demand public callback. The bridge preserves the
+ * latest committed getter without re-registering; it is not a React 18 compatibility shim.
  *
  * @example
  * ```tsx
@@ -45,6 +49,8 @@ export function useScreenContext<T = unknown>(
  * @throws Error without ScreenActionProvider; registry registration errors propagate from the layout effect.
  *
  * @remarks Requires ScreenActionProvider; no styles. Lifecycle matches the positional overload.
+ * The getter remains externally callable through the registry, so its latest committed
+ * version is held in a ref rather than an Effect-scoped useEffectEvent callback.
  *
  * @example
  * ```tsx

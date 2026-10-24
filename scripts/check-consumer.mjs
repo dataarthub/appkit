@@ -34,7 +34,9 @@ try {
  const coreBin=path.join(coreOnly,'node_modules/@alneas/appkit-core/dist/agent-cli.mjs');assert(!existsSync(path.join(coreOnly,'node_modules/react')));assert(!existsSync(path.join(coreOnly,'node_modules/typescript')));assert(lstatSync(coreBin).mode&0o111);
  run(process.execPath,[coreBin,'search','ActionRegistry','--json'],coreOnly);run('npm',['exec','--yes','--package=node@24.0.0','--','node',coreBin,'search','ActionRegistry','--json'],coreOnly);
  writeFileSync(path.join(fixture,'package.json'),JSON.stringify({private:true,type:'module'}));
- run('npm',['install','--ignore-scripts','--no-audit','--no-fund','--omit=optional','--legacy-peer-deps',...Object.values(records.packages).map(r=>r.file),'react@19.2.3','react-dom@19.2.3','typescript@6.0.3','@types/react@19','@types/react-dom@19','@types/node@24'],fixture);
+ run('npm',['install','--ignore-scripts','--no-audit','--no-fund','--legacy-peer-deps',...Object.values(records.packages).map(r=>r.file),'react@19.2.3','react-dom@19.2.3','typescript@npm:@typescript/typescript6@6.0.2','@typescript/native@npm:typescript@7.0.2','@types/react@19','@types/react-dom@19','@types/node@24'],fixture);
+ assert.equal(run(path.join(fixture,'node_modules/.bin/tsc6'),['--version'],fixture).trim(),'Version 6.0.3');
+ assert.equal(run(path.join(fixture,'node_modules/.bin/tsc'),['--version'],fixture).trim(),'Version 7.0.2');
  for(const legacy of ['core','sortable','utilities'])assert(!existsSync(path.join(fixture,'node_modules/@dnd-kit',legacy)),'Legacy dnd-kit installed: '+legacy);
  const bin=path.join(fixture,'node_modules/@alneas/appkit-core/dist/agent-cli.mjs');run(process.execPath,[bin,'search','ActionRegistry','--json'],fixture);run('npm',['exec','--yes','--package=node@24.0.0','--','node',bin,'search','ActionRegistry','--json'],fixture);
  const input=readFileSync(path.join(root,'packages/appkit-react/examples/request-form.tsx'),'utf8');writeFileSync(path.join(fixture,'RequestForm.tsx'),input);
@@ -77,13 +79,14 @@ void [nativeEnd,unchanged,nativeRender,nativeDrop,moved,NativeController,highLev
  for(const pkg of names){const dir=path.join(root,'packages',pkg);for(const file of ['README.md',...readdirSync(path.join(dir,'docs')).map(f=>'docs/'+f)]){
   const text=readFileSync(path.join(dir,file),'utf8');for(const block of text.matchAll(/```(?:typescript|tsx|ts)\n([\s\S]*?)```/g))writeFileSync(path.join(fixture,'example-'+index+++'.tsx'),block[1]);
  }}
- for(const block of readFileSync(path.join(root,'docs/development/dnd-kit-migration.md'),'utf8').matchAll(/```(?:typescript|tsx|ts)\n([\s\S]*?)```/g))writeFileSync(path.join(fixture,'example-'+index+++'.tsx'),block[1]);
+ for(const guide of ['dnd-kit-migration.md','react19-toolchain.md'])for(const block of readFileSync(path.join(root,'docs/development',guide),'utf8').matchAll(/```(?:typescript|tsx|ts)\n([\s\S]*?)```/g))writeFileSync(path.join(fixture,'example-'+index+++'.tsx'),block[1]);
  for(const file of ['ui/dnd/DnDProvider.tsx','ui/dnd/Draggable.tsx','ui/dnd/Droppable.tsx','kanban/use-kanban-drag.ts','kanban/use-kanban-sensors.ts','kanban/kanban-drag.ts','kanban/kanban-primitives.tsx','kanban/KanbanColumn.tsx','file-browser/FileBrowser.tsx','file-browser/FileListView.tsx','file-browser/FileGridView.tsx','data-table/data-table.tsx']) {
   const source=readFileSync(path.join(root,'packages/appkit-react/src/tools/components',file),'utf8');
   for(const block of source.matchAll(/\* ```(?:typescript|tsx|ts)\n([\s\S]*?)\* ```/g))writeFileSync(path.join(fixture,'example-'+index+++'.tsx'),block[1].replace(/^ *\* ?/gm,''));
  }
  writeFileSync(path.join(fixture,'tsconfig.json'),JSON.stringify({compilerOptions:{target:'ES2022',module:'NodeNext',moduleResolution:'NodeNext',jsx:'react-jsx',strict:true,skipLibCheck:false,outDir:'compiled',types:['node','react','react-dom']},include:['*.tsx','*.mts','*.cts','*.d.ts']}));
- run(path.join(fixture,'node_modules/.bin/tsc'),['--project','tsconfig.json'],fixture);
+ run(path.join(fixture,'node_modules/.bin/tsc'),['--noEmit','--project','tsconfig.json'],fixture);
+ run(path.join(fixture,'node_modules/.bin/tsc6'),['--project','tsconfig.json'],fixture);
  const entries=['@alneas/appkit-core',...['storage','data','japan','graph','ai','us'].map(x=>'@alneas/appkit-core/'+x),'@alneas/appkit-react',...['ui','tools','ai','tools/kanban','tools/data-table','tools/file-browser'].map(x=>'@alneas/appkit-react/'+x)];
  const probe="import assert from 'node:assert/strict';\n"+entries.map((e,i)=>`import * as m${i} from ${JSON.stringify(e)};assert(Object.keys(m${i}).length);`).join('\n')+"\nimport {createElement} from 'react';import {renderToString} from 'react-dom/server';import {RequestForm} from './compiled/RequestForm.js';const adapter=new Proxy({}, {get(){return ()=>{throw Error('SSR must not write records');};}});const html=renderToString(createElement(RequestForm,{adapter}));assert(html.includes('name=\"name\"'));console.log('PASS native ESM, minimum peer closure, documented request-form SSR');\n";
  // CSS is verified as a packed asset; Node SSR cannot execute a stylesheet import.
@@ -97,7 +100,7 @@ void [nativeEnd,unchanged,nativeRender,nativeDrop,moved,NativeController,highLev
  run('npm',['exec','--yes','--package=node@24.0.0','--','node','probe.cjs'],fixture);
  for(const name of names){const css=path.join(fixture,'node_modules/@alneas',name,'dist/styles.css');if(name==='appkit-react')assert(readFileSync(css,'utf8').length>1000,'CSS must be generated');}
  assert.deepEqual(sourceSelection(),records.sources,'Consumer checks changed selected source inputs');
- records.verified=true;records.completedAt=new Date().toISOString();records.checks={nodeMinimum:'24.0.0',hostNode:process.version,nativeEsm:true,commonJs:true,bun:true,nodeNextDeclarations:true,skipLibCheck:false,readmeAndFeatureExamples:index,requestFormSSR:true,css:true,optionalPeersOmitted:true};
+ records.verified=true;records.completedAt=new Date().toISOString();records.checks={nodeMinimum:'24.0.0',hostNode:process.version,nativeEsm:true,commonJs:true,bun:true,nodeNextDeclarations:true,typeScript6:run(path.join(fixture,'node_modules/.bin/tsc6'),['--version'],fixture).trim(),typeScript7:run(path.join(fixture,'node_modules/.bin/tsc'),['--version'],fixture).trim(),skipLibCheck:false,readmeAndFeatureExamples:index,requestFormSSR:true,css:true,optionalPeersOmitted:true};
  writeFileSync(path.join(artifacts,'archives.json'),JSON.stringify(records,null,2)+'\n');console.log('PASS: two-package archives and isolated consumers');
  if(process.env.APPKIT_RELEASE_CONSUMER==='true'){
   const handoff=path.join(root,'.verification/publish');mkdirSync(handoff,{recursive:true});

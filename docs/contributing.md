@@ -10,7 +10,9 @@ tags: ["appkit", "maintenance"]
 
 # Contributing
 
-Install Node 24+ and Bun 1.4.0, then run `bun install --frozen-lockfile --ignore-scripts`. For one package use `bun run turbo run build typecheck --filter=@alneas/appkit-core` (or appkit-react). Do not rerun unrelated integration tests for unchanged implementations.
+Use the latest Node 24 patch for development (`nvm install` reads `.nvmrc`) and Bun 1.4.0. Development and test tools require `^24.15.0 || >=26.0.0`; Node 25 is not supported by jsdom 30. Then run `bun install --frozen-lockfile --ignore-scripts`. For one package use `bun run turbo run build typecheck --filter=@alneas/appkit-core` (or appkit-react). Do not rerun unrelated integration tests for unchanged implementations.
+
+Published package engines remain `>=24.0.0`. CI resolves fresh Node 24 and 26 patches; `bun run test:consumer` separately verifies the packed packages on Node 24.0.0 without development dependencies. The private workspace engine does not raise the public runtime minimum. Ref compatibility assertions are compiled under both TypeScript versions by `bun run test:typescript-tooling`, with a 30-second deadline per compiler subprocess. Keep compiler startup outside the UI unit tests; their default five-second deadline remains unchanged.
 
 1. Change the owning source and API JSDoc.
 2. Update its English feature guide, including the exact public import subpath. Install commands use package names, not subpaths.
@@ -197,7 +199,7 @@ not hosted identity, database authorization or seeded-backend E2E evidence.
 
 The runner executes up to six story files at a time in one viewport/theme
 condition. Each project uses one worker with file parallelism disabled; all four
-conditions and successive file batches run sequentially. The current 74-file suite uses
+conditions and successive file batches run sequentially. The current 75-file suite uses
 52 guarded invocations. Using one viewport at a time avoids
 concurrent browser memory peaks while sharing startup across more files. The first
 batch in each condition contains only two files to leave room for initial

@@ -40,8 +40,13 @@ export interface MobileFormProps extends React.FormHTMLAttributes<HTMLFormElemen
  * }
  * ```
  */
-const MobileForm = React.forwardRef<HTMLFormElement, MobileFormProps>(
-  ({ className, testId, ...props }, ref) => (
+function MobileForm({
+  ref,
+  className,
+  testId,
+  ...props
+}: React.PropsWithoutRef<MobileFormProps> & React.RefAttributes<HTMLFormElement>) {
+  return (
     <form
       ref={ref}
       data-slot='mobile-form'
@@ -49,8 +54,8 @@ const MobileForm = React.forwardRef<HTMLFormElement, MobileFormProps>(
       className={cn('space-y-4 px-4 pb-safe', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 MobileForm.displayName = 'MobileForm';
 
 // ============================================================================
@@ -88,8 +93,15 @@ export interface MobileFormSectionProps extends React.HTMLAttributes<HTMLDivElem
  * }
  * ```
  */
-const MobileFormSection = React.forwardRef<HTMLDivElement, MobileFormSectionProps>(
-  ({ title, description, className, children, ...props }, ref) => (
+function MobileFormSection({
+  ref,
+  title,
+  description,
+  className,
+  children,
+  ...props
+}: React.PropsWithoutRef<MobileFormSectionProps> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='mobile-form-section'
@@ -104,8 +116,8 @@ const MobileFormSection = React.forwardRef<HTMLDivElement, MobileFormSectionProp
       )}
       <div className='space-y-3'>{children}</div>
     </div>
-  ),
-);
+  );
+}
 MobileFormSection.displayName = 'MobileFormSection';
 
 // ============================================================================
@@ -155,61 +167,79 @@ export interface MobileInputProps extends React.ComponentProps<typeof InputPrimi
  * }
  * ```
  */
-const MobileInput = React.forwardRef<HTMLInputElement, MobileInputProps>(
-  ({ label, error, helperText, icon, className, testId, ...props }, ref) => {
-    const generatedId = React.useId();
-    const controlId = props.id ?? generatedId;
-    const descriptionId = controlId + '-description';
-    // Exclude children from the void element
-    const {
-      children: _children,
-      ...restProps
-    } = props as MobileInputProps & {
-      children?: React.ReactNode;
-      };
+function MobileInput({
+  ref,
+  label,
+  error,
+  helperText,
+  icon,
+  className,
+  testId,
+  ...props
+}: React.PropsWithoutRef<MobileInputProps> & React.RefAttributes<HTMLInputElement>) {
+  const generatedId = React.useId();
+  const controlId = props.id ?? generatedId;
+  const descriptionId = controlId + '-description';
+  // Exclude children from the void element
+  const { children: _children, ...restProps } = props as MobileInputProps & {
+    children?: React.ReactNode;
+  };
 
-    return (
-      <div className='space-y-1.5' data-slot='mobile-input-wrapper'>
-        <label htmlFor={controlId} className='text-sm font-medium text-foreground'>{label}</label>
-        <div className='relative'>
-          {icon && (
-            <div className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
-              {icon}
-            </div>
+  return (
+    <div className='space-y-1.5' data-slot='mobile-input-wrapper'>
+      <label htmlFor={controlId} className='text-sm font-medium text-foreground'>
+        {label}
+      </label>
+      <div className='relative'>
+        {icon && (
+          <div className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
+            {icon}
+          </div>
+        )}
+        <InputPrimitive
+          ref={ref}
+          data-slot='mobile-input'
+          data-testid={testId}
+          aria-invalid={!!error}
+          className={cn(
+            // Base styles
+            'w-full h-12 px-4 text-base rounded-lg border bg-background',
+            'transition-colors outline-none',
+            // Focus
+            'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+            // Error
+            'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
+            'aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 aria-invalid:ring-[3px]',
+            // Disabled
+            'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+            // Placeholder
+            'placeholder:text-muted-foreground',
+            // Icon padding
+            icon && 'pl-10',
+            className,
           )}
-          <InputPrimitive
-            ref={ref}
-            data-slot='mobile-input'
-            data-testid={testId}
-            aria-invalid={!!error}
-            className={cn(
-              // Base styles
-              'w-full h-12 px-4 text-base rounded-lg border bg-background',
-              'transition-colors outline-none',
-              // Focus
-              'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-              // Error
-              'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
-              'aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 aria-invalid:ring-[3px]',
-              // Disabled
-              'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-              // Placeholder
-              'placeholder:text-muted-foreground',
-              // Icon padding
-              icon && 'pl-10',
-              className,
-            )}
-            {...restProps}
-            id={controlId}
-            aria-describedby={[props['aria-describedby'], (error || helperText) && descriptionId].filter(Boolean).join(' ') || undefined}
-          />
-        </div>
-        {error && <p id={descriptionId} className='text-xs text-destructive'>{error}</p>}
-        {helperText && !error && <p id={descriptionId} className='text-xs text-muted-foreground'>{helperText}</p>}
+          {...restProps}
+          id={controlId}
+          aria-describedby={
+            [props['aria-describedby'], (error || helperText) && descriptionId]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
+        />
       </div>
-    );
-  },
-);
+      {error && (
+        <p id={descriptionId} className='text-xs text-destructive'>
+          {error}
+        </p>
+      )}
+      {helperText && !error && (
+        <p id={descriptionId} className='text-xs text-muted-foreground'>
+          {helperText}
+        </p>
+      )}
+    </div>
+  );
+}
 MobileInput.displayName = 'MobileInput';
 
 // ============================================================================
@@ -271,14 +301,24 @@ export interface MobileSelectProps extends React.SelectHTMLAttributes<HTMLSelect
  * }
  * ```
  */
-const MobileSelect = React.forwardRef<HTMLSelectElement, MobileSelectProps>(
-  ({ label, options, error, placeholder, className, testId, ...props }, ref) => {
-    const generatedId = React.useId();
-    const controlId = props.id ?? generatedId;
-    const descriptionId = controlId + '-description';
-    return (
+function MobileSelect({
+  ref,
+  label,
+  options,
+  error,
+  placeholder,
+  className,
+  testId,
+  ...props
+}: React.PropsWithoutRef<MobileSelectProps> & React.RefAttributes<HTMLSelectElement>) {
+  const generatedId = React.useId();
+  const controlId = props.id ?? generatedId;
+  const descriptionId = controlId + '-description';
+  return (
     <div className='space-y-1.5' data-slot='mobile-select-wrapper'>
-      <label htmlFor={controlId} className='text-sm font-medium text-foreground'>{label}</label>
+      <label htmlFor={controlId} className='text-sm font-medium text-foreground'>
+        {label}
+      </label>
       <select
         ref={ref}
         data-slot='mobile-select'
@@ -299,7 +339,9 @@ const MobileSelect = React.forwardRef<HTMLSelectElement, MobileSelectProps>(
         )}
         {...props}
         id={controlId}
-        aria-describedby={[props['aria-describedby'], error && descriptionId].filter(Boolean).join(' ') || undefined}
+        aria-describedby={
+          [props['aria-describedby'], error && descriptionId].filter(Boolean).join(' ') || undefined
+        }
       >
         {placeholder && (
           <option value='' disabled>
@@ -312,11 +354,14 @@ const MobileSelect = React.forwardRef<HTMLSelectElement, MobileSelectProps>(
           </option>
         ))}
       </select>
-      {error && <p id={descriptionId} className='text-xs text-destructive'>{error}</p>}
+      {error && (
+        <p id={descriptionId} className='text-xs text-destructive'>
+          {error}
+        </p>
+      )}
     </div>
   );
-  },
-);
+}
 MobileSelect.displayName = 'MobileSelect';
 
 // ============================================================================
@@ -359,27 +404,40 @@ export interface MobileButtonProps
  * }
  * ```
  */
-const MobileButton = React.forwardRef<HTMLElement, MobileButtonProps>(
-  ({ className, variant, size, loading, icon, disabled, children, testId, ...props }, ref) => {
-    const isDisabled = disabled || loading;
+function MobileButton({
+  ref,
+  className,
+  variant,
+  size,
+  loading,
+  icon,
+  disabled,
+  children,
+  testId,
+  ...props
+}: React.PropsWithoutRef<MobileButtonProps> & React.RefAttributes<HTMLElement>) {
+  const isDisabled = disabled || loading;
 
-    return (
-      <ButtonPrimitive
-        ref={ref}
-        data-slot='mobile-button'
-        data-testid={testId}
-        data-loading={loading || undefined}
-        aria-busy={loading || undefined}
-        disabled={isDisabled}
-        className={typeof className === 'function' ? state => cn(mobileButtonVariants({ variant, size }), className(state)) : cn(mobileButtonVariants({ variant, size, className }))}
-        {...props}
-      >
-        {loading ? <Loader2 className='animate-spin' aria-hidden='true' /> : icon}
-        {children}
-      </ButtonPrimitive>
-    );
-  },
-);
+  return (
+    <ButtonPrimitive
+      ref={ref}
+      data-slot='mobile-button'
+      data-testid={testId}
+      data-loading={loading || undefined}
+      aria-busy={loading || undefined}
+      disabled={isDisabled}
+      className={
+        typeof className === 'function'
+          ? (state) => cn(mobileButtonVariants({ variant, size }), className(state))
+          : cn(mobileButtonVariants({ variant, size, className }))
+      }
+      {...props}
+    >
+      {loading ? <Loader2 className='animate-spin' aria-hidden='true' /> : icon}
+      {children}
+    </ButtonPrimitive>
+  );
+}
 MobileButton.displayName = 'MobileButton';
 
 // ============================================================================
@@ -421,20 +479,34 @@ export interface FABProps extends ButtonPrimitive.Props, VariantProps<typeof fab
  * }
  * ```
  */
-const FAB = React.forwardRef<HTMLElement, FABProps>(
-  ({ icon, label, position, extended, className, testId, ...props }, ref) => (
+function FAB({
+  ref,
+  icon,
+  label,
+  position,
+  extended,
+  className,
+  testId,
+  ...props
+}: React.PropsWithoutRef<FABProps> & React.RefAttributes<HTMLElement>) {
+  return (
     <ButtonPrimitive
       ref={ref}
       data-slot='fab'
       data-testid={testId}
-      className={typeof className === 'function' ? state => cn(fabVariants({ position, extended: extended || !!label }), className(state)) : cn(fabVariants({ position, extended: extended || !!label, className }))}
+      className={
+        typeof className === 'function'
+          ? (state) =>
+              cn(fabVariants({ position, extended: extended || !!label }), className(state))
+          : cn(fabVariants({ position, extended: extended || !!label, className }))
+      }
       {...props}
     >
       {icon}
       {(extended || label) && label && <span className='font-medium'>{label}</span>}
     </ButtonPrimitive>
-  ),
-);
+  );
+}
 FAB.displayName = 'FAB';
 
 // ============================================================================

@@ -19,36 +19,38 @@ import { Input, type InputProps } from './input';
  * }
  * ```
  */
-const PasswordInput = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, ...props }, ref) => {
-    const [showPassword, setShowPassword] = React.useState(false);
+function PasswordInput({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<InputProps> & React.RefAttributes<HTMLInputElement>) {
+  const [showPassword, setShowPassword] = React.useState(false);
 
-    return (
-      <div className='relative'>
-        <Input
-          type={showPassword ? 'text' : 'password'}
-          className={cn('pr-10', className)}
-          ref={ref}
-          {...props}
-        />
-        <button
-          type='button'
-          onClick={() => setShowPassword((prev) => !prev)}
-          className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
-          aria-pressed={showPassword}
-          disabled={props.disabled}
-        >
-          {showPassword ? (
-            <EyeOff className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
-          ) : (
-            <Eye className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
-          )}
-          <span className='sr-only'>{showPassword ? 'Hide password' : 'Show password'}</span>
-        </button>
-      </div>
-    );
-  },
-);
+  return (
+    <div className='relative'>
+      <Input
+        type={showPassword ? 'text' : 'password'}
+        className={cn('pr-10', className)}
+        ref={ref}
+        {...props}
+      />
+      <button
+        type='button'
+        onClick={() => setShowPassword((prev) => !prev)}
+        className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
+        aria-pressed={showPassword}
+        disabled={props.disabled}
+      >
+        {showPassword ? (
+          <EyeOff className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
+        ) : (
+          <Eye className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
+        )}
+        <span className='sr-only'>{showPassword ? 'Hide password' : 'Show password'}</span>
+      </button>
+    </div>
+  );
+}
 PasswordInput.displayName = 'PasswordInput';
 
 export { PasswordInput };

@@ -71,11 +71,12 @@ AlertDialogTrigger.displayName = 'AlertDialogTrigger';
  * }
  * ```
  */
-const AlertDialogPortal = React.forwardRef<HTMLDivElement, AlertDialogPrimitive.Portal.Props>(
-  ({ ...props }, ref) => (
-    <AlertDialogPrimitive.Portal ref={ref} data-slot='alert-dialog-portal' {...props} />
-  ),
-);
+function AlertDialogPortal({
+  ref,
+  ...props
+}: React.PropsWithoutRef<AlertDialogPrimitive.Portal.Props> & React.RefAttributes<HTMLDivElement>) {
+  return <AlertDialogPrimitive.Portal ref={ref} data-slot='alert-dialog-portal' {...props} />;
+}
 AlertDialogPortal.displayName = 'AlertDialogPortal';
 
 /**
@@ -93,8 +94,13 @@ AlertDialogPortal.displayName = 'AlertDialogPortal';
  * }
  * ```
  */
-const AlertDialogOverlay = React.forwardRef<HTMLDivElement, AlertDialogPrimitive.Backdrop.Props>(
-  ({ className, ...props }, ref) => (
+function AlertDialogOverlay({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<AlertDialogPrimitive.Backdrop.Props> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <AlertDialogPrimitive.Backdrop
       ref={ref}
       data-slot='alert-dialog-overlay'
@@ -104,8 +110,8 @@ const AlertDialogOverlay = React.forwardRef<HTMLDivElement, AlertDialogPrimitive
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 AlertDialogOverlay.displayName = 'AlertDialogOverlay';
 
 /**
@@ -123,32 +129,42 @@ AlertDialogOverlay.displayName = 'AlertDialogOverlay';
  * }
  * ```
  */
-const AlertDialogContent = React.forwardRef<
-  HTMLDivElement,
-  AlertDialogPrimitive.Popup.Props & { /**
- * Visual size preset; defaults to default unless the owning component states otherwise.
- */
-  /**
-   * Visual size preset; defaults to default unless the owning component states otherwise.
-   */
-  size?: 'default' | 'sm' }
->(({ className, size = 'default', children, ...props }, ref) => (
-  <AlertDialogPortal>
-    <AlertDialogOverlay />
-    <AlertDialogPrimitive.Popup
-      ref={ref}
-      data-slot='alert-dialog-content'
-      data-size={size}
-      className={cn(
-        'data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 bg-background ring-foreground/10 gap-4 rounded-xl p-4 ring-1 duration-100 data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-sm group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 outline-none',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </AlertDialogPrimitive.Popup>
-  </AlertDialogPortal>
-));
+function AlertDialogContent({
+  ref,
+  className,
+  size = 'default',
+  children,
+  ...props
+}: React.PropsWithoutRef<
+  AlertDialogPrimitive.Popup.Props & {
+    /**
+     * Visual size preset; defaults to default unless the owning component states otherwise.
+     */
+    /**
+     * Visual size preset; defaults to default unless the owning component states otherwise.
+     */
+    size?: 'default' | 'sm';
+  }
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
+    <AlertDialogPortal>
+      <AlertDialogOverlay />
+      <AlertDialogPrimitive.Popup
+        ref={ref}
+        data-slot='alert-dialog-content'
+        data-size={size}
+        className={cn(
+          'data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 bg-background ring-foreground/10 gap-4 rounded-xl p-4 ring-1 duration-100 data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-sm group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 outline-none',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </AlertDialogPrimitive.Popup>
+    </AlertDialogPortal>
+  );
+}
 AlertDialogContent.displayName = 'AlertDialogContent';
 
 /**
@@ -166,8 +182,12 @@ AlertDialogContent.displayName = 'AlertDialogContent';
  * }
  * ```
  */
-const AlertDialogHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function AlertDialogHeader({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentProps<'div'>> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='alert-dialog-header'
@@ -177,8 +197,8 @@ const AlertDialogHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 AlertDialogHeader.displayName = 'AlertDialogHeader';
 
 /**
@@ -196,8 +216,12 @@ AlertDialogHeader.displayName = 'AlertDialogHeader';
  * }
  * ```
  */
-const AlertDialogFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function AlertDialogFooter({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentProps<'div'>> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='alert-dialog-footer'
@@ -207,8 +231,8 @@ const AlertDialogFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 AlertDialogFooter.displayName = 'AlertDialogFooter';
 
 /**
@@ -226,8 +250,12 @@ AlertDialogFooter.displayName = 'AlertDialogFooter';
  * }
  * ```
  */
-const AlertDialogMedia = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
+function AlertDialogMedia({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentProps<'div'>> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='alert-dialog-media'
@@ -237,8 +265,8 @@ const AlertDialogMedia = React.forwardRef<HTMLDivElement, React.ComponentProps<'
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 AlertDialogMedia.displayName = 'AlertDialogMedia';
 
 /**
@@ -256,8 +284,13 @@ AlertDialogMedia.displayName = 'AlertDialogMedia';
  * }
  * ```
  */
-const AlertDialogTitle = React.forwardRef<HTMLHeadingElement, AlertDialogPrimitive.Title.Props>(
-  ({ className, ...props }, ref) => (
+function AlertDialogTitle({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<AlertDialogPrimitive.Title.Props> &
+  React.RefAttributes<HTMLHeadingElement>) {
+  return (
     <AlertDialogPrimitive.Title
       ref={ref}
       data-slot='alert-dialog-title'
@@ -267,8 +300,8 @@ const AlertDialogTitle = React.forwardRef<HTMLHeadingElement, AlertDialogPrimiti
       )}
       {...props}
     />
-  ),
-);
+  );
+}
 AlertDialogTitle.displayName = 'AlertDialogTitle';
 
 /**
@@ -286,20 +319,24 @@ AlertDialogTitle.displayName = 'AlertDialogTitle';
  * }
  * ```
  */
-const AlertDialogDescription = React.forwardRef<
-  HTMLParagraphElement,
-  AlertDialogPrimitive.Description.Props
->(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Description
-    ref={ref}
-    data-slot='alert-dialog-description'
-    className={cn(
-      'text-muted-foreground *:[a]:hover:text-foreground text-sm text-balance md:text-pretty *:[a]:underline *:[a]:underline-offset-3',
-      className,
-    )}
-    {...props}
-  />
-));
+function AlertDialogDescription({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<AlertDialogPrimitive.Description.Props> &
+  React.RefAttributes<HTMLParagraphElement>) {
+  return (
+    <AlertDialogPrimitive.Description
+      ref={ref}
+      data-slot='alert-dialog-description'
+      className={cn(
+        'text-muted-foreground *:[a]:hover:text-foreground text-sm text-balance md:text-pretty *:[a]:underline *:[a]:underline-offset-3',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
 AlertDialogDescription.displayName = 'AlertDialogDescription';
 
 /**
@@ -317,11 +354,14 @@ AlertDialogDescription.displayName = 'AlertDialogDescription';
  * }
  * ```
  */
-const AlertDialogAction = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
-  ({ className, ...props }, ref) => (
-    <Button ref={ref} data-slot='alert-dialog-action' className={cn(className)} {...props} />
-  ),
-);
+function AlertDialogAction({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentProps<typeof Button>> &
+  React.RefAttributes<HTMLButtonElement>) {
+  return <Button ref={ref} data-slot='alert-dialog-action' className={cn(className)} {...props} />;
+}
 AlertDialogAction.displayName = 'AlertDialogAction';
 
 /**
@@ -339,18 +379,26 @@ AlertDialogAction.displayName = 'AlertDialogAction';
  * }
  * ```
  */
-const AlertDialogCancel = React.forwardRef<
-  HTMLButtonElement,
+function AlertDialogCancel({
+  ref,
+  className,
+  variant = 'outline',
+  size = 'default',
+  ...props
+}: React.PropsWithoutRef<
   AlertDialogPrimitive.Close.Props & Pick<React.ComponentProps<typeof Button>, 'variant' | 'size'>
->(({ className, variant = 'outline', size = 'default', ...props }, ref) => (
-  <AlertDialogPrimitive.Close
-    ref={ref}
-    data-slot='alert-dialog-cancel'
-    className={cn(className)}
-    render={<Button variant={variant} size={size} />}
-    {...props}
-  />
-));
+> &
+  React.RefAttributes<HTMLButtonElement>) {
+  return (
+    <AlertDialogPrimitive.Close
+      ref={ref}
+      data-slot='alert-dialog-cancel'
+      className={cn(className)}
+      render={<Button variant={variant} size={size} />}
+      {...props}
+    />
+  );
+}
 AlertDialogCancel.displayName = 'AlertDialogCancel';
 
 export {

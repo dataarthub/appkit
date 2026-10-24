@@ -86,76 +86,72 @@ const statusIcons: Record<SaveStatus, React.ReactNode> = {
  * // Secondary: data-testid="profile-form-secondary"
  * ```
  */
-export const FormActionBar = React.forwardRef<HTMLDivElement, FormActionBarProps>(
-  (
-    {
-      testId,
-      className,
-      primaryLabel,
-      secondaryLabel,
-      onPrimary,
-      onSecondary,
-      saveStatus = 'idle',
-      sticky = true,
-      primaryDisabled = false,
-      tertiaryAction,
-      children,
-      ...props
-    },
-    ref,
-  ) => {
-    const resolvedPrimaryLabel = primaryLabel ?? m.common_actions_save({ defaultValue: 'Save' });
-    const resolvedSecondaryLabel =
-      secondaryLabel ?? m.common_actions_cancel({ defaultValue: 'Cancel' });
-    const statusMessage = '';
+export function FormActionBar({
+  ref,
+  testId,
+  className,
+  primaryLabel,
+  secondaryLabel,
+  onPrimary,
+  onSecondary,
+  saveStatus = 'idle',
+  sticky = true,
+  primaryDisabled = false,
+  tertiaryAction,
+  children,
+  ...props
+}: React.PropsWithoutRef<FormActionBarProps> & React.RefAttributes<HTMLDivElement>) {
+  const resolvedPrimaryLabel = primaryLabel ?? m.common_actions_save({ defaultValue: 'Save' });
+  const resolvedSecondaryLabel =
+    secondaryLabel ?? m.common_actions_cancel({ defaultValue: 'Cancel' });
+  const statusMessage = '';
 
-    return (
-      <div
-        ref={ref}
-        data-testid={testId}
-        data-save-status={saveStatus}
-        className={cn(
-          'flex flex-wrap items-center gap-3 border-t bg-background py-4',
-          sticky && 'sticky bottom-0 z-10',
-          className,
-        )}
-        {...props}
-      >
-        <div className='flex flex-1 flex-wrap items-center gap-3'>
-          <Button
-            type='submit'
-            testId={testId ? `${testId}-primary` : undefined}
-            onClick={onPrimary}
-            disabled={primaryDisabled || saveStatus === 'saving'}
-          >
-            {saveStatus === 'saving' && (
-              <Loader2 className='mr-2 h-4 w-4 animate-spin' aria-hidden='true' />
-            )}
-            {resolvedPrimaryLabel}
-          </Button>
-          {onSecondary && (
-            <Button
-              type='button'
-              variant='outline'
-              testId={testId ? `${testId}-secondary` : undefined}
-              onClick={onSecondary}
-              disabled={saveStatus === 'saving'}
-            >
-              {resolvedSecondaryLabel}
-            </Button>
+  return (
+    <div
+      ref={ref}
+      data-testid={testId}
+      data-save-status={saveStatus}
+      className={cn(
+        'flex flex-wrap items-center gap-3 border-t bg-background py-4',
+        sticky && 'sticky bottom-0 z-10',
+        className,
+      )}
+      {...props}
+    >
+      <div className='flex flex-1 flex-wrap items-center gap-3'>
+        <Button
+          type='submit'
+          testId={testId ? `${testId}-primary` : undefined}
+          onClick={onPrimary}
+          disabled={primaryDisabled || saveStatus === 'saving'}
+        >
+          {saveStatus === 'saving' && (
+            <Loader2 className='mr-2 h-4 w-4 animate-spin' aria-hidden='true' />
           )}
-          {tertiaryAction}
-          {children}
-        </div>
-
-        {saveStatus !== 'idle' && (
-          <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-            {statusIcons[saveStatus]}
-            {statusMessage && <span>{statusMessage}</span>}
-          </div>
+          {resolvedPrimaryLabel}
+        </Button>
+        {onSecondary && (
+          <Button
+            type='button'
+            variant='outline'
+            testId={testId ? `${testId}-secondary` : undefined}
+            onClick={onSecondary}
+            disabled={saveStatus === 'saving'}
+          >
+            {resolvedSecondaryLabel}
+          </Button>
         )}
+        {tertiaryAction}
+        {children}
       </div>
-    );
-  },
-);
+
+      {saveStatus !== 'idle' && (
+        <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+          {statusIcons[saveStatus]}
+          {statusMessage && <span>{statusMessage}</span>}
+        </div>
+      )}
+    </div>
+  );
+}
 FormActionBar.displayName = 'FormActionBar';

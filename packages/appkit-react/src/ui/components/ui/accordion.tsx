@@ -21,16 +21,20 @@ import { cn } from '../../lib/utils';
  * }
  * ```
  */
-const Accordion = React.forwardRef<HTMLDivElement, AccordionPrimitive.Root.Props>(
-  ({ className, ...props }, ref) => (
+function Accordion({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<AccordionPrimitive.Root.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <AccordionPrimitive.Root
       ref={ref}
       data-slot='accordion'
       className={cn('flex w-full flex-col', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 Accordion.displayName = 'Accordion';
 
 /**
@@ -48,16 +52,20 @@ Accordion.displayName = 'Accordion';
  * }
  * ```
  */
-const AccordionItem = React.forwardRef<HTMLDivElement, AccordionPrimitive.Item.Props>(
-  ({ className, ...props }, ref) => (
+function AccordionItem({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<AccordionPrimitive.Item.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <AccordionPrimitive.Item
       ref={ref}
       data-slot='accordion-item'
       className={cn('not-last:border-b', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 AccordionItem.displayName = 'AccordionItem';
 
 /**
@@ -75,8 +83,14 @@ AccordionItem.displayName = 'AccordionItem';
  * }
  * ```
  */
-const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionPrimitive.Trigger.Props>(
-  ({ className, children, ...props }, ref) => (
+function AccordionTrigger({
+  ref,
+  className,
+  children,
+  ...props
+}: React.PropsWithoutRef<AccordionPrimitive.Trigger.Props> &
+  React.RefAttributes<HTMLButtonElement>) {
+  return (
     <AccordionPrimitive.Header className='flex'>
       <AccordionPrimitive.Trigger
         ref={ref}
@@ -98,8 +112,8 @@ const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionPrimitive.
         />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-  ),
-);
+  );
+}
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 
 /**
@@ -117,8 +131,13 @@ AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
  * }
  * ```
  */
-const AccordionContent = React.forwardRef<HTMLDivElement, AccordionPrimitive.Panel.Props>(
-  ({ className, children, ...props }, ref) => (
+function AccordionContent({
+  ref,
+  className,
+  children,
+  ...props
+}: React.PropsWithoutRef<AccordionPrimitive.Panel.Props> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <AccordionPrimitive.Panel
       ref={ref}
       data-slot='accordion-content'
@@ -134,8 +153,8 @@ const AccordionContent = React.forwardRef<HTMLDivElement, AccordionPrimitive.Pan
         {children}
       </div>
     </AccordionPrimitive.Panel>
-  ),
-);
+  );
+}
 AccordionContent.displayName = AccordionPrimitive.Panel.displayName;
 
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };

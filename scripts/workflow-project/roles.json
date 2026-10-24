@@ -22,7 +22,8 @@
           {
             "uses": "actions/setup-node@v6",
             "with": {
-              "node-version": "${{ matrix.node }}"
+              "node-version": "${{ matrix.node }}",
+              "check-latest": true
             }
           },
           {
@@ -138,7 +139,8 @@
             "uses": "actions/setup-node@v6",
             "with": {
               "node-version": 24,
-              "package-manager-cache": false
+              "package-manager-cache": false,
+              "check-latest": true
             }
           },
           {
@@ -247,7 +249,8 @@
             "uses": "actions/setup-node@v6",
             "with": {
               "node-version": 24,
-              "package-manager-cache": false
+              "package-manager-cache": false,
+              "check-latest": true
             }
           },
           {
@@ -310,7 +313,8 @@
             "uses": "actions/setup-node@v6",
             "with": {
               "node-version": 24,
-              "package-manager-cache": false
+              "package-manager-cache": false,
+              "check-latest": true
             }
           },
           {
@@ -350,7 +354,8 @@
             "uses": "actions/setup-node@v6",
             "with": {
               "node-version": 24,
-              "package-manager-cache": false
+              "package-manager-cache": false,
+              "check-latest": true
             }
           },
           {
@@ -427,7 +432,8 @@
             "uses": "actions/setup-node@v6",
             "with": {
               "node-version": 24,
-              "package-manager-cache": false
+              "package-manager-cache": false,
+              "check-latest": true
             }
           },
           {
@@ -459,7 +465,8 @@
             "uses": "actions/setup-node@v6",
             "with": {
               "node-version": 24,
-              "package-manager-cache": false
+              "package-manager-cache": false,
+              "check-latest": true
             }
           },
           {
@@ -520,7 +527,8 @@
           {
             "uses": "actions/setup-node@v6",
             "with": {
-              "node-version": 24
+              "node-version": 24,
+              "check-latest": true
             }
           },
           {

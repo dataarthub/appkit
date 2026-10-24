@@ -39,6 +39,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+          check-latest: true
         name: "Shared: actions/setup-node@v6"
       -
         id: "source"
@@ -65,6 +66,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+          check-latest: true
         name: "Shared: actions/setup-node@v6"
       -
         uses: "actions/download-artifact@v8"

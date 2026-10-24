@@ -187,6 +187,10 @@ function initial<TRecord extends Record<string, any>>(key: string): ReviewState<
  * failure/cancellation; successes remain excluded from retries. Cancellation cannot
  * undo host effects, so persist idempotently and enforce concurrency/authorization in
  * the backend. A row that changed the backend before rejecting has an uncertain outcome.
+ * Keep the ref/layout-effect bridge for latest host inputs: the returned apply control
+ * can be called by UI event handlers and other host code outside Effect logic.
+ * useEffectEvent is restricted to Effect-originated callbacks and cannot replace this
+ * externally callable execution path. The ref is not a React 18 compatibility shim.
  *
  * @example
  * ```tsx

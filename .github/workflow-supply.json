@@ -36,9 +36,9 @@
   "bundleSha256": "69111de4aafb48fb77e3d8e702b88abdd18fc357a1a4a474a9e6a1ef27dd6fb6",
   "outputs": {
     ".github/workflows/ci.yml": "13bc7622e3d54b8bd43e92448e48285b90f3fd8b8f8e510017b64a0683c7e4ff",
-    ".github/workflows/package-quality.yml": "f7972f41208ef4d4c71338dd375070cbf82a57007d750e323f12bcb70596fcd4",
-    ".github/workflows/publish.yml": "ee3c678c8556c38e221fb1f27803165e1fed4d6d5c233347a08d9f1fabc31808",
-    ".github/workflows/complete-approved.yml": "d61fbac2f7678d9dbbba71390de5f862b69586f73d53f452aa56b175d88680d2",
-    ".github/workflows/record-npm-deployments.yml": "86abeb3664a1b476be1e749d4a569f1496be12b56743ec85fb679b7d7c97c012"
+    ".github/workflows/package-quality.yml": "b06ff3d93bdb9eb1db2700f694d8cc16c2d23594be3da13b92c696e574f56ecb",
+    ".github/workflows/publish.yml": "bb3904dd12d18df42cd4576c1ea6fad0ddc9bcf17151f36d31e9620d4e7b7023",
+    ".github/workflows/complete-approved.yml": "50e113431fc7c89cbedc04e2e9930d85ef33f5dcfd487180efcf7a7cc48772a0",
+    ".github/workflows/record-npm-deployments.yml": "945aee31a1094d43ab448e362668a5352d1a2b858203fc8ff688cc14fe9f3e97"
   }
 }

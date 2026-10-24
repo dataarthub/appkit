@@ -17,5 +17,5 @@ function run(args,report,selected){
 try{
  const bun=files.filter(file=>!isVitest(file));
  if(bun.length){const report=path.join(temporary,'bun.xml');run(['test',...bun,'--reporter=junit','--reporter-outfile='+report],report,bun);}
- if(files.some(isVitest)){const report=path.join(temporary,'vitest.xml');run(['x','--no-install','vitest','run','--config',path.resolve(root,'../../scripts/vitest.config.ts'),'--reporter=junit','--outputFile='+report],report,files.filter(isVitest));}
+ if(files.some(isVitest)){const report=path.join(temporary,'vitest.xml');run(['x','--no-install','vitest','run','--config',path.resolve(root,'../../scripts/vitest.config.ts'),'--reporter=default','--reporter=junit','--outputFile='+report],report,files.filter(isVitest));}
 }finally{rmSync(temporary,{recursive:true,force:true});}

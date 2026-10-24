@@ -36,8 +36,14 @@ interface SwitchProps extends SwitchPrimitive.Root.Props {
  * }
  * ```
  */
-const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
-  ({ className, size = 'default', testId, ...props }, ref) => (
+function Switch({
+  ref,
+  className,
+  size = 'default',
+  testId,
+  ...props
+}: React.PropsWithoutRef<SwitchProps> & React.RefAttributes<HTMLButtonElement>) {
+  return (
     <SwitchPrimitive.Root
       ref={ref}
       data-slot='switch'
@@ -54,8 +60,8 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         className='bg-background dark:data-unchecked:bg-foreground dark:data-checked:bg-primary-foreground rounded-full group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0 pointer-events-none block ring-0 transition-transform'
       />
     </SwitchPrimitive.Root>
-  ),
-);
+  );
+}
 Switch.displayName = 'Switch';
 
 export { Switch };

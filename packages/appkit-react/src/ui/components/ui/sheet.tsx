@@ -126,8 +126,16 @@ interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof SheetP
  * }
  * ```
  */
-const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
-  ({ className, children, side = 'right', showCloseButton = true, testId, ...props }, ref) => (
+function SheetContent({
+  ref,
+  className,
+  children,
+  side = 'right',
+  showCloseButton = true,
+  testId,
+  ...props
+}: React.PropsWithoutRef<SheetContentProps> & React.RefAttributes<HTMLDivElement>) {
+  return (
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Popup
@@ -162,8 +170,8 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
         )}
       </SheetPrimitive.Popup>
     </SheetPortal>
-  ),
-);
+  );
+}
 SheetContent.displayName = SheetPrimitive.Popup.displayName;
 
 /**
@@ -181,16 +189,21 @@ SheetContent.displayName = SheetPrimitive.Popup.displayName;
  * }
  * ```
  */
-const SheetHeader = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
-  ({ className, ...props }, ref) => (
+function SheetHeader({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<'div'>> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='sheet-header'
       className={cn('gap-0.5 p-4 flex flex-col', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 SheetHeader.displayName = 'SheetHeader';
 
 /**
@@ -208,16 +221,21 @@ SheetHeader.displayName = 'SheetHeader';
  * }
  * ```
  */
-const SheetFooter = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
-  ({ className, ...props }, ref) => (
+function SheetFooter({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<'div'>> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <div
       ref={ref}
       data-slot='sheet-footer'
       className={cn('gap-2 p-4 mt-auto flex flex-col', className)}
       {...props}
     />
-  ),
-);
+  );
+}
 SheetFooter.displayName = 'SheetFooter';
 
 /**
@@ -235,17 +253,21 @@ SheetFooter.displayName = 'SheetFooter';
  * }
  * ```
  */
-const SheetTitle = React.forwardRef<
-  React.ComponentRef<typeof SheetPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <SheetPrimitive.Title
-    ref={ref}
-    data-slot='sheet-title'
-    className={cn('text-foreground text-base font-medium', className)}
-    {...props}
-  />
-));
+function SheetTitle({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>> &
+  React.RefAttributes<React.ComponentRef<typeof SheetPrimitive.Title>>) {
+  return (
+    <SheetPrimitive.Title
+      ref={ref}
+      data-slot='sheet-title'
+      className={cn('text-foreground text-base font-medium', className)}
+      {...props}
+    />
+  );
+}
 SheetTitle.displayName = SheetPrimitive.Title.displayName;
 
 /**
@@ -263,17 +285,21 @@ SheetTitle.displayName = SheetPrimitive.Title.displayName;
  * }
  * ```
  */
-const SheetDescription = React.forwardRef<
-  React.ComponentRef<typeof SheetPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <SheetPrimitive.Description
-    ref={ref}
-    data-slot='sheet-description'
-    className={cn('text-muted-foreground text-sm', className)}
-    {...props}
-  />
-));
+function SheetDescription({
+  ref,
+  className,
+  ...props
+}: React.PropsWithoutRef<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>> &
+  React.RefAttributes<React.ComponentRef<typeof SheetPrimitive.Description>>) {
+  return (
+    <SheetPrimitive.Description
+      ref={ref}
+      data-slot='sheet-description'
+      className={cn('text-muted-foreground text-sm', className)}
+      {...props}
+    />
+  );
+}
 SheetDescription.displayName = SheetPrimitive.Description.displayName;
 
 export {

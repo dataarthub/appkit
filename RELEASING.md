@@ -2,6 +2,8 @@
 
 The initial release published only `@alneas/appkit-core@0.1.0` and `@alneas/appkit-react@0.1.0`. Features are import subpaths, not separate npm packages. Internal production dependencies use exact registry versions. Published versions are immutable; working-tree documentation and tooling changes belong to a later release.
 
+Run source verification with the latest Node 24 patch (development range `^24.15.0 || >=26.0.0`) and Bun 1.4.0. Published packages retain `engines.node: >=24.0.0`; the isolated packed-consumer gate must continue exercising Node 24.0.0 independently of the development runtime.
+
 ## Source and archive identity
 
 Before a future release, commit the reviewed changes and select that exact commit for verification and publication. Record the source selection and archive integrity, and compare `npm view <package>@<version> dist.integrity` with the reviewed archive after publication. An existing tag identifies its original source snapshot; do not move it to include subsequent changes. Do not infer archive identity from a matching version number or tag alone.

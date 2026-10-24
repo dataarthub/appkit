@@ -91,23 +91,21 @@ function TooltipTrigger({
  * }
  * ```
  */
-const TooltipContent = React.forwardRef<
-  HTMLDivElement,
+function TooltipContent({
+  ref,
+  className,
+  side = 'top',
+  sideOffset = 4,
+  align = 'center',
+  alignOffset = 0,
+  children,
+  ...props
+}: React.PropsWithoutRef<
   TooltipPrimitive.Popup.Props &
     Pick<TooltipPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'>
->(
-  (
-    {
-      className,
-      side = 'top',
-      sideOffset = 4,
-      align = 'center',
-      alignOffset = 0,
-      children,
-      ...props
-    },
-    ref,
-  ) => (
+> &
+  React.RefAttributes<HTMLDivElement>) {
+  return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Positioner
         align={align}
@@ -130,8 +128,8 @@ const TooltipContent = React.forwardRef<
         </TooltipPrimitive.Popup>
       </TooltipPrimitive.Positioner>
     </TooltipPrimitive.Portal>
-  ),
-);
+  );
+}
 TooltipContent.displayName = 'TooltipContent';
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };

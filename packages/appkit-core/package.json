@@ -1704,7 +1704,9 @@
   "scripts": {
     "build": "vite build && bun scripts/prepare-package.mjs && node ../../scripts/build-agent-cli.mjs && node ../../scripts/generate-docs.mjs --package appkit-core",
     "test": "node ../../scripts/test-unit.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "typecheck:6": "tsc6 --noEmit",
+    "typecheck:7": "tsc --noEmit"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^16.0.5",
@@ -1727,21 +1729,23 @@
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "ajv-i18n": "^4.2.0",
-    "bun-types": "^1.4.3",
-    "fast-uri": "^4.2.2",
-    "typescript": "6.0.3",
-    "vite": "^8.3.0",
+    "bun-types": "^1.4.4",
+    "fast-uri": "^4.2.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vite": "^8.3.5",
     "vite-plugin-dts": "^5.1.0",
     "zod": "^4.6.7",
-    "vitest": "4.1.12",
+    "vitest": "5.0.5",
     "@neondatabase/serverless": "^1.0.0",
     "@supabase/supabase-js": "^2.116.0",
     "@types/pg": "^8.15.6",
     "excelize-wasm": "0.1.3",
     "pg": "^8.20.0",
     "hono": "^4.12.3",
-    "bignumber.js": "^9.3.1",
-    "@vitejs/plugin-react": "^6.1.1"
+    "bignumber.js": "^11.1.5",
+    "@vitejs/plugin-react": "^6.1.1",
+    "bignumber-v9": "npm:bignumber.js@9.3.1",
+    "@typescript/native": "npm:typescript@7.0.2"
   },
   "peerDependencies": {
     "@supabase/supabase-js": "^2.116.0",

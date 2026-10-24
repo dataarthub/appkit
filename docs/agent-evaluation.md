@@ -23,7 +23,7 @@ certification. See the [release procedure](releasing.md).
 
 ## Prerequisites
 
-Work from the public Appkit repository root with Node 24+, Bun 1.4.0 and the repository's installed development dependencies. For a live batch, provision Docker, a reviewed coding-agent runner image and a verifier image supplying Node 24+. Both images must already be available locally and pinned by digest. The runner supplies its own model connection; no particular provider SDK or agent vendor is required by Appkit.
+Work from the public Appkit repository root with the latest Node 24 patch, Bun 1.4.0 and the repository's installed development dependencies. Development and verifier runtimes must satisfy `^24.15.0 || >=26.0.0`, including jsdom 30's requirements; this does not change the published packages' Node 24.0.0 minimum. For a live batch, provision Docker, a reviewed coding-agent runner image and a verifier image supplying a supported development Node version. Both images must already be available locally and pinned by digest. The runner supplies its own model connection; no particular provider SDK or agent vendor is required by Appkit.
 
 The published `0.1.0` archives stay unchanged. Development candidates can have the same version string and are identified by integrity/digest. This procedure does not authorize commits, publication or deployment. Keep local runner configuration and execution evidence under ignored `.verification/`.
 

@@ -7,7 +7,7 @@
  * @module filter/use-filter
  */
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect, useEffectEvent, useRef } from 'react';
 import {
   CollectionSchema,
   FilterResult,
@@ -163,6 +163,9 @@ function buildDefaultValues(
  * スキーマから型を推論し、MongoDBスタイルのフィルターオブジェクトを生成します。
  * UI無しでクエリビルダーとして使用することもできます。
  *
+ * @remarks Filter changes call the latest committed onChange callback. Replacing only
+ * the callback does not replay an unchanged filter; deep-equal queries are deduplicated.
+ *
  * @param {UseFilterOptions} options - フックオプション / Hook options
  * @returns {UseFilterReturn} フィルター状態とアクション / Filter state and actions
  *
@@ -258,18 +261,16 @@ export function useFilter(options: UseFilterOptions): UseFilterReturn {
     return resolvedFields.every((field) => isValueEmpty(values[field.field]));
   }, [values, resolvedFields]);
 
-  // Keep a stable ref to onChange to avoid stale closures
-  const onChangeRef = useRef(onChange);
-  useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
+  const onFilterChange = useEffectEvent((nextFilter: FilterResult) => {
+    onChange?.(nextFilter);
+  });
 
   // Trigger onChange callback when filter changes, preventing loops with deep comparison ref
   const lastSentFilterRef = useRef<FilterResult>({});
   useEffect(() => {
     if (JSON.stringify(filter) !== JSON.stringify(lastSentFilterRef.current)) {
       lastSentFilterRef.current = filter;
-      onChangeRef.current?.(filter);
+      onFilterChange(filter);
     }
   }, [filter]);
 

@@ -12,7 +12,12 @@ operational evidence into public packages or the approved documentation manifest
 Core owns framework-free storage, data, schema, graph, AI and regional contracts.
 React owns UI, forms, tables, providers and React AI bindings. Keep optional SDKs
 behind explicit feature entries, host React contexts external, and CSS explicit.
-Preserve native ESM, CommonJS, NodeNext declarations and the minimum Node 24.0.0.
+Preserve native ESM, CommonJS, NodeNext declarations and the published runtime
+minimum Node 24.0.0. Development/test tools require ^24.15.0 || >=26.0.0; use the
+latest Node 24 patch from .nvmrc. Keep the isolated Node 24.0.0 packed-consumer
+verification independent. Normal no-emit checks use TypeScript 7; keep
+`typescript` Compiler API imports and declaration generation on the TypeScript 6
+compatibility alias. Run `typecheck:6` when checking compiler compatibility.
 
 Run only checks matching changed inputs. Reuse recorded passes for unchanged
 implementations. Turbo caches deterministic build/type/unit tasks; do not fabricate

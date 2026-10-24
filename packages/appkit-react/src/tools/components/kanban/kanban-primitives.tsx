@@ -131,6 +131,8 @@ export function KanbanDraggableCard({
 
 /**
  * Register a native Kanban column while retaining host-composed content.
+ * @remarks Retain forwardRef to compose native registration and caller refs, including
+ * callback cleanup; this is not a direct DOM-ref passthrough.
  * @param props - Column metadata, optional limit presentation, HTML attributes and children.
  * @param ref - Forwarded div ref, including React 19 callback cleanup support.
  * @returns A column div accepting Kanban task registrations.

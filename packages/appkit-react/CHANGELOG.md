@@ -7,6 +7,19 @@ dates are recorded only when confirmed.
 
 ## Unreleased
 
+### React 19 and dependency maintenance
+
+- Simplify DOM-ref wrappers to React 19 ref props while preserving JSX props, DOM
+  targets, Base UI composition and callback cleanup. Their exported types are now
+  ordinary function components; `ForwardRefExoticComponent` internals are removed.
+  Use `ComponentProps` / `ComponentRef` rather than `.render` or `$$typeof`.
+- Keep filter and keyboard callbacks current through committed Effect Events;
+  unchanged filters remain deduplicated and listener ownership stays stable.
+- Update the reviewed Query pair, Zustand, panels, icons, form resolvers and
+  localization dependencies. Host applications sharing these dependencies should
+  verify their own provider/cache and localization integration when adopting.
+- See the [unreleased React 19 guide](https://github.com/dataarthub/appkit/blob/main/docs/development/react19-toolchain.md).
+
 ### Breaking changes
 
 - Move Kanban, DataTable, FileBrowser and the shared DnD wrappers to native

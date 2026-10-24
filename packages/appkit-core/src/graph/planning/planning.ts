@@ -234,7 +234,6 @@ export function planGanttTasks<T extends GanttPlanningTask>(
       }
       break;
     }
-    // biome-ignore lint/correctness/noUnreachable: Biome misclassifies the preceding break after a labeled continue in nested loops.
     for (const [resource, units] of demand) {
       if (!duration) continue;
       const usage = occupied.get(resource) ?? new GanttCapacityIndex(axis.length, checkBudget);

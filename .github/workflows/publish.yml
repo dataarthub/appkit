@@ -47,6 +47,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+          check-latest: true
         name: "Shared: actions/setup-node@v6"
       -
         name: "Project: Validate package tag, version and source commit"
@@ -144,6 +145,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+          check-latest: true
         name: "Shared: actions/setup-node@v6"
       -
         name: "Project: Install pinned Trusted Publishing CLI"
@@ -193,6 +195,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+          check-latest: true
         name: "Shared: actions/setup-node@v6"
       -
         id: "source"
@@ -227,6 +230,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+          check-latest: true
         name: "Shared: actions/setup-node@v6"
       -
         uses: "actions/download-artifact@v8"
