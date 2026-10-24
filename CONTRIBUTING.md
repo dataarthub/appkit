@@ -37,15 +37,25 @@ Unstaged changes stay untouched, including partially staged files. The hook
 regression fixture installs this same command only in its disposable Git repository
 and verifies both lint rejection and a clean indexed commit.
 
-Before a push, Husky runs `bun run verify:push`. This always scans history for
-secrets and runs source lint, then selects package, documentation, tooling,
-React/Core compatibility and browser checks from changed inputs. Turbo reuses
-matching build/type/unit results. This command does not run live-model evaluation
-or publish packages. Git hooks can be bypassed, so the Node 24 CI job uses the same
-selector and runner after installing Gitleaks. Node 26 checks affected package
-builds, types and unit tests. Source quality runs for pull requests, main updates
-and manual dispatch. Only a successful main-push run for the exact release commit
-can establish authoritative publication evidence.
+Before a push, Husky runs `bun run verify:push`: fresh secret-history and workflow
+consistency checks only. Staged commit checks remain read-only. Run affected checks
+locally or satisfy them in Ready PR CI before handoff; a successful lightweight
+push check does not establish source verification. Use `bun run quality:ci` for
+explicit local selection and `bun run verify:full` for an explicit full run.
+
+Source quality runs against the actual Ready PR merge candidate, merge queues,
+main and manual dispatch. Draft PRs omit heavy matrices. The required up-to-date
+branch setting remains enabled. `bun run merge:check --pr <number>` separately
+validates latest base/head, all Node source jobs and immutable source artifacts;
+it does not perform a merge or replace other required checks and human review.
+
+A trusted main job can inherit completed source checks after comparing the actual
+Git tree and execution identity with authenticated PR evidence. Changed trees can
+only reuse individual checks whose inputs match. Immutable artifacts are bound to
+repository/workflow, latest run/attempt, required jobs and digest; ordinary writable
+caches do not grant release authority. Independently passed checks in a failed run
+can be restored without marking the failed workflow or whole gate successful.
+Changes to verifier/workflow controls require a conservative bootstrap run.
 
 ### Selecting verification by impact
 
@@ -101,7 +111,7 @@ or filenames. Source quality from a successful ancestor remains usable only when
 all accumulated changes are covered by the selector.
 
 Use `bun run verify:full` to request every normal check, or
-`bun run verify:push --dry-run` to inspect the local selection and commands.
+`bun run quality:ci --dry-run` to inspect the local selection and commands.
 `bun run test:consumer` remains an explicit packed-consumer check and a mandatory
 publication check. Source quality success proves the selected changes were checked;
 it does not claim that every story was rerun for every prose change.
@@ -165,7 +175,7 @@ both package builds: run `bun run build` first in a clean checkout.
 
 Install the pinned Chromium once with `bunx --no-install playwright install chromium`
 (on Linux CI, add `--with-deps`). Run `bun run test:storybook` for the full suite.
-The affected subset is selected by `verify:push` and the Node 24 quality job.
+The affected subset is selected by `quality:ci` and the Node 24 quality job.
 Use `bun run verify:full` or a manual quality dispatch for full coverage.
 Publication requires the target commit's successful main-push Source quality run
 and does not rerun this browser suite.

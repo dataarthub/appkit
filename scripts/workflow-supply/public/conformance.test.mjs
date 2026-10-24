@@ -47,3 +47,10 @@ test('two-root fresh evidence requires every declared runtime and guarded immuta
   const p=structuredClone(project);mutate(p);assert(checkReleaseEvidence(p,{runtime:{nodeVersions:[24,26]}}).length>0);
  }
 });
+
+test('lightweight push is independent from the required CI source selector',()=>configured((root,project,p)=>{
+ p.scripts['quality:push']='node push.mjs';writeFileSync(join(root,'package.json'),JSON.stringify(p));
+ assert.equal(checkProject(root).configuration,'verified');
+ p.scripts['quality:ci']='node disconnected.mjs';writeFileSync(join(root,'package.json'),JSON.stringify(p));
+ assert(checkProject(root).failures.some(f=>f.id==='quality.selection'));
+}));

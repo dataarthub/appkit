@@ -14,7 +14,7 @@ test('unit runner rejects no discovered tests and empty test files',()=>{
 test('unit runner rejects skipped tests despite successful process status',()=>fixture("import {test} from 'bun:test'; test.skip('skipped',()=>{});",root=>assert.notEqual(run(root).status,0)));
 test('unit runner propagates failures and accepts a nonempty passing suite',()=>{
  fixture("import {test,expect} from 'bun:test'; test('failed',()=>expect(1).toBe(2));",root=>assert.notEqual(run(root).status,0));
- fixture("import {test,expect} from 'bun:test'; test('passed',()=>expect(1).toBe(1));",root=>{const result=run(root);assert.equal(result.status,0,result.stderr);assert.deepEqual(readdirSync(root).sort(),['src']);});
+ fixture("import {test,expect} from 'bun:test'; test('passed',()=>expect(1).toBe(1));",root=>{const result=run(root);assert.equal(result.status,0,result.stderr);assert.deepEqual(readdirSync(root).sort(),['.verification','src']);assert.deepEqual(readdirSync(join(root,'.verification')),['records']);assert.equal(readdirSync(join(root,'.verification/records/unit-checks')).length,1);const reused=run(root);assert.equal(reused.status,0,reused.stderr);assert.match(reused.stdout,/0 selected, 1 reused/);assert.doesNotMatch(reused.stderr,/1 pass/);});
 });
 test('a passing file cannot hide an empty selected file',()=>fixture('export const noTests=true;',root=>{
  writeFileSync(join(root,'src/passing.test.ts'),"import {test,expect} from 'bun:test'; test('pass',()=>expect(true).toBe(true));");
@@ -38,6 +38,7 @@ test('Vitest retains human-readable failure diagnostics alongside strict JUnit e
  const bin=join(root,'bin');mkdirSync(bin);
  const executable=join(bin,'bun');
  writeFileSync(executable,'#!'+process.execPath+'\n'+`const args=process.argv.slice(2);
+if(args[0]==='--version'){console.log('1.4.0');process.exit(0);}
 if(!args.includes('--reporter=default')||!args.includes('--reporter=junit'))process.exit(31);
 console.error('FAIL src/fixture.test.ts > failure-details: expected visible diagnostic');
 process.exit(7);

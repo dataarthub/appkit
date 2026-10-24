@@ -39,7 +39,7 @@ Common code owns naming, standard triggers, scoped credentials, main-only succes
 
 The project impact selector still selects packages, related Storybook stories and compatibility checks. It receives only a shared verified main ancestor; absent compatible evidence selects the full existing gate. Turbo reports actual cache hits.
 
-The mandatory secret-history check still runs. Selection requires a latest successful main run/attempt, successful jobs for every declared Node runtime and an unexpired immutable receipt with compatible execution identity. Failed intervening changes stay in scope. Missing/incompatible evidence, history or API access select full verification. Executed checks, exact-input local reuse and out-of-scope omissions are different outcomes. Local/PR success cannot satisfy a Release's official source-evidence requirement.
+The mandatory secret-history check still runs. Selection requires a latest successful main run/attempt, successful jobs for every declared Node runtime and an unexpired immutable receipt with compatible execution identity. Failed intervening changes stay in scope. Missing/incompatible evidence, history or API access select full verification. Executed checks, exact-input local reuse and out-of-scope omissions are different outcomes. Local success cannot satisfy official source evidence. Validated PR evidence can be inherited by main only after actual tree, producer, attempt, required jobs, artifact digest and execution identity match; Release still authenticates the resulting main source proof.
 
 Release verification requires Source quality success for the exact selected commit and keeps existing current-archive and registry checks. Release preparation reuses deterministic source suites only after validating the exact official main proof; it retains the real build and current archive/registry checks. Staging and completion retain the existing npm implementation, original run/attempt/artifact binding and manual bootstrap. No build or direct npm publish runs in registry-writing jobs. Human npm approval is separate; pending staging is not release success.
 
@@ -146,3 +146,32 @@ verification inputs, never production dependency pins. This public workflow does
 not run the restricted pair mode, receive restricted evidence, or claim whole-task
 acceptance. Registry publication, exact published dependency adoption and actual
 delivery remain separate release prerequisites under `RELEASING.md`.
+
+## Exact-input source receipts
+
+Push checks now run only fresh secret-history and generated-workflow consistency
+checks. Ready PR source verification uses the existing impact runner; Drafts omit
+heavy jobs, and merge queues use their actual integration candidate. Commit gates
+remain staged/read-only. Before handoff, affected checks still need a successful
+local or PR execution (or validated matching-input receipt).
+
+The project-owned `scripts/verification-evidence.mjs` restores JSON check receipts
+from digest-verified immutable Actions artifacts. It checks the latest producing
+attempt, same repository, reviewed workflow/verifier controls, actual candidate
+Git tree, required Node jobs and execution identity. No downloaded code or task
+outputs are executed. Full identical-tree source evidence can be inherited after
+merge; changed trees only enable keyed individual checks. A failed workflow's
+completed independent checks remain partial evidence. Missing, expired or
+incompatible evidence means conservative execution. Historic logs without those
+bindings remain records and do not become invented cache hits.
+
+Unit evidence in `.verification/records/unit-checks` preserves Bun's shared-process
+group and uses dependency closures for isolated Vitest files. Unknown resource or
+import edges execute afresh. Runtime/memory/config/lockfile/runner changes invalidate
+matching evidence. JUnit, normal exit and cleanup remain mandatory before recording.
+Only the two sanitized JSON CI-envelope files are uploaded; other ignored records
+and raw logs are not a public artifact allowlist.
+
+Local tooling fixtures verify reuse and rejection paths; they do not claim GitHub
+execution or a measured CI speedup. First rollout must bootstrap the new receipts
+and verify current remote workflows before relying on them for delivery.

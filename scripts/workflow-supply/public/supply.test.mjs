@@ -12,7 +12,7 @@ const parse=file=>{const p=spawnSync('bun',['-e','console.log(JSON.stringify(Bun
 test('source triggers, reusable quality, npm phases and least privilege are shared',()=>fixture(root=>{
  install(root,{source,reviewedRevision:'a'.repeat(40)});
  const ci=parse(join(root,'.github/workflows/ci.yml')),quality=parse(join(root,'.github/workflows/package-quality.yml')),publish=parse(join(root,'.github/workflows/publish.yml'));
- assert.equal(ci.name,'Source quality');assert.deepEqual(Object.keys(ci.on),['push','pull_request','workflow_dispatch']);assert.deepEqual(ci.permissions,{contents:'read',actions:'read'});
+ assert.equal(ci.name,'Source quality');assert.deepEqual(Object.keys(ci.on),['push','pull_request','merge_group','workflow_dispatch']);assert.deepEqual(ci.permissions,{contents:'read',actions:'read'});
  assert.equal(ci.jobs.verify.uses,'./.github/workflows/package-quality.yml');assert.equal(quality.name,'Shared package quality');assert.deepEqual(Object.keys(quality.on),['workflow_call']);
  assert.equal(publish.name,'Publish npm packages');assert.deepEqual(publish.on.release.types,['published']);assert.ok(publish.on.workflow_dispatch.inputs.staged_run.required);
  assert.match(publish.jobs.verify.if,/example\/public/);assert.match(publish.jobs.verify.if,/prerelease == false/);assert.match(publish.jobs.verify.if,/fixture-v/);

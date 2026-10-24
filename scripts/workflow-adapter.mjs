@@ -19,6 +19,7 @@ if(phase==='source'&&ci&&flags.includes('--ci-plan')){
  common=await select(root);plan=await projectPlan({root,common,full:flags.includes('--full'),ci});
  mkdirSync(join(root,'.cache/public-quality'),{recursive:true});writeFileSync(receipt,JSON.stringify({input:inputHash(root),common,plan})+'\n');
 }
+if(ci&&process.env.SOURCE_COMPLETE_INHERITED==='true'){common.reason='Authenticated identical-tree source evidence inherited; mandatory fresh safety checks remain';plan={...plan,packages:false,docs:false,release:false,agent:false,compatibility:false,tooling:[],stories:[],inherited:true};}
 mkdirSync(join(root,'.cache/public-quality'),{recursive:true});writeFileSync(join(root,'.cache/public-quality/plan.json'),JSON.stringify(common)+'\n');savePlan(plan);
 if(process.env.GITHUB_OUTPUT)appendFileSync(process.env.GITHUB_OUTPUT,`browser=${plan.stories.length>0}\npackages=${plan.packages}\n`);
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,`### Shared workflow contract\n\n${common.reason}. Baseline: ${common.baseline??'none'}; project selector preserved.\n\n### Project-specific verification\n\nPackage checks: ${plan.packages}; browser stories: ${plan.stories.length}. Existing Turbo reports executed tasks and actual cache hits. Unselected checks are omissions, not cache hits.\n`);

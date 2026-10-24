@@ -83,3 +83,14 @@ must clean up in finally. Keep verification evidence ignored and out of manifest
 - Generated README/documentation freshness: `bun run docs:generated` (temporary regeneration; does not repair normal output).
 
 - Generated output configuration: `generated-policy.json`.
+
+
+## Verification handoff and merge
+
+Push checks are lightweight security/workflow checks. Before handoff, satisfy the
+affected checks locally or in Ready PR CI through execution or validated reuse.
+Before an authorized merge, run `bun run merge:check --pr <number>` from the clean
+reviewed checkout and confirm every other required PR check and review. Keep the
+existing required up-to-date branch rule enabled. The command is read-only and
+source-specific; success does not authorize a merge. Raw logs without reusable
+input/run bindings remain historical records, never manufactured cache passes.

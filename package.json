@@ -45,19 +45,20 @@
     "storybook:prepare": "bun run turbo run build --filter=@alneas/appkit-core && bun run --cwd packages/appkit-react generate:i18n",
     "test:storybook": "bun run storybook:prepare && node --test scripts/storybook.test.mjs scripts/guarded-process.test.mjs && node scripts/verification/browser.mjs",
     "verify:full": "node scripts/verification/run.mjs --full",
-    "test:verification-tooling": "node --test scripts/verification/*.test.mjs scripts/typescript.test.mjs scripts/check-paired.test.mjs && bun run test:workflow",
+    "test:verification-tooling": "node --test scripts/verification/*.test.mjs scripts/typescript.test.mjs scripts/check-paired.test.mjs scripts/verification-evidence.test.mjs scripts/verification-partial.test.mjs && bun run test:workflow",
     "workflow:generate": "node scripts/workflow-supply/public/supply.mjs generate --project-root .",
     "workflow:check": "node scripts/workflow-supply/public/supply.mjs check --project-root .",
     "test:workflow": "node --test scripts/workflow-supply/public/*.test.mjs",
     "quality:commit": "node scripts/workflow-supply/public/staged-gate.mjs commit",
-    "quality:push": "node scripts/workflow-adapter.mjs source",
+    "quality:push": "node scripts/verification/push.mjs",
     "quality:ci": "node scripts/workflow-adapter.mjs source",
     "conformance:check": "node scripts/workflow-supply/public/conformance.mjs check --project-root .",
     "conformance:verify": "node scripts/workflow-supply/public/conformance.mjs verify --project-root .",
     "conformance:audit": "node scripts/workflow-supply/public/policy-report.mjs",
     "typecheck:6": "bun run --cwd packages/appkit-core typecheck:6 && bun run --cwd packages/appkit-react typecheck:6 && bun run --cwd packages/appkit-react typecheck:storybook:6",
     "typecheck:7": "bun run --cwd packages/appkit-core typecheck:7 && bun run --cwd packages/appkit-react typecheck:7 && bun run --cwd packages/appkit-react typecheck:storybook:7",
-    "test:typescript-tooling": "node --test scripts/typescript.test.mjs"
+    "test:typescript-tooling": "node --test scripts/typescript.test.mjs",
+    "merge:check": "node scripts/verification-evidence.mjs merge-check"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.2",
