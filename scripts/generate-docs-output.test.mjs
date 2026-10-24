@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, cpSync, copyFileSync, readFileSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, cpSync, copyFileSync, readFileSync, writeFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -17,6 +17,9 @@ function fixture(run){
   for(const f of ['README.md','CONTRIBUTING.md','RELEASING.md'])copyFileSync(join(source,f),join(root,f));
   for(const name of ['appkit-core','appkit-react']){
    const dir=join(root,'packages',name);mkdirSync(dir,{recursive:true});
+   // Preserve package-local registry dependencies when the workspace Core advances.
+   const dependencies=join(source,'packages',name,'node_modules');
+   if(existsSync(dependencies))symlinkSync(dependencies,join(dir,'node_modules'),'dir');
    for(const f of ['README.md','package.json'])copyFileSync(join(source,'packages',name,f),join(dir,f));
    for(const f of ['docs','consumer-ai'])cpSync(join(source,'packages',name,f),join(dir,f),{recursive:true});
    if(name==='appkit-core'){mkdirSync(join(dir,'src/ai/errors'),{recursive:true});copyFileSync(join(source,'packages/appkit-core/src/ai/errors/catalog.ts'),join(dir,'src/ai/errors/catalog.ts'));}
@@ -52,11 +55,21 @@ test('obsolete consumer AI files are detected, not silently left in a package',(
 
 test('portal landing links target approved package pages and preserve README anchors',()=>fixture((root,out,generate)=>{
  const readme=join(root,'README.md');
- writeFileSync(readme,readFileSync(readme,'utf8')+'\n[Core highlights](packages/appkit-core/README.md#key-highlights)\n');
+ writeFileSync(readme,readFileSync(readme,'utf8')+'\n[Core highlights](packages/appkit-core/README.md#documentation)\n');
  generate(['--output-dir',out]);
  const landing=readFileSync(join(out,'docs/index.md'),'utf8');
- assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#quickstart\)/);
- assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#key-highlights\)/);
+ assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#usage\)/);
+ assert.match(landing,/\]\(\.\.\/packages\/appkit-core\/docs\/index\.md#documentation\)/);
  const manifest=JSON.parse(readFileSync(join(out,'docs.manifest.json'),'utf8'));
  assert(manifest.documents.some(doc=>doc.source==='packages/appkit-core/docs/index.md'));
+}));
+
+test('portal introductions omit GitHub README language links while preserving canonical sources',()=>fixture((root,out,generate)=>{
+ const pairs=[['README.md','docs/index.md'],['packages/appkit-react/README.md','packages/appkit-react/docs/index.md']];
+ for(const [source]of pairs){const file=join(root,source),text=readFileSync(file,'utf8');if(!text.includes('[English](README.md) | [日本語](README.ja.md)'))writeFileSync(file,text.replace(/^(# [^\n]+\n)/,'$1\n[English](README.md) | [日本語](README.ja.md)\n'));}
+ generate(['--output-dir',out]);
+ for(const [source,landing]of pairs){
+  assert.match(readFileSync(join(root,source),'utf8'),/\[日本語\]\(README\.ja\.md\)/);
+  assert.doesNotMatch(readFileSync(join(out,landing),'utf8'),/\[English\]\(README\.md\)|README\.ja\.md/);
+ }
 }));

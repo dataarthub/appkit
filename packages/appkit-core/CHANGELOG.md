@@ -5,6 +5,27 @@ may be prepared before publication; confirm availability on the
 [npm package page](https://www.npmjs.com/package/@alneas/appkit-core). Publication
 dates are recorded only when confirmed.
 
+## [0.2.1]
+
+### Changed
+
+- Simplify the npm README to a concise English description, usage example and
+  documentation/history links. Regenerate the bundled landing page, full
+  documentation and consumer catalog metadata from that source.
+- Refresh maintainer type-check/test tooling and compatibility coverage. Public
+  APIs, runtime requirements, production dependencies and application behavior
+  are unchanged; no runtime fix requires React to adopt this patch.
+
+### Upgrade from 0.2.0
+
+- This patch delivers documentation improvements to npm consumers. Confirm npm
+  availability before updating; a prepared changelog is not publication proof.
+- No application migration is required. React 0.3.0 continues to depend exactly
+  on published Core 0.2.0 and remains independently releasable. Publishing Core
+  0.2.1 does not update that dependency or existing installations.
+- Previously published 0.2.0 bytes are immutable; deliver these corrections only
+  through the new 0.2.1 archive.
+
 ## [0.2.0]
 
 ### Added
@@ -55,5 +76,6 @@ dates are recorded only when confirmed.
 - Initial public release of the framework-independent storage, data/schema, graph,
   AI and regional business APIs, with ESM, CommonJS and TypeScript declarations.
 
+[0.2.1]: https://github.com/dataarthub/appkit/compare/appkit-core-v0.2.0...appkit-core-v0.2.1
 [0.2.0]: https://github.com/dataarthub/appkit/compare/v0.1.0...appkit-core-v0.2.0
 [0.1.0]: https://github.com/dataarthub/appkit/releases/tag/v0.1.0

@@ -21,7 +21,8 @@ function readdirSync(directory){
 }
 
 function landing(file,title,description,transform){
- const content=readFileSync(path.join(root,file),'utf8');
+ // The portal owns locale navigation; GitHub README language links are not portal pages.
+ const content=readFileSync(path.join(root,file),'utf8').replace(/^\[English\]\(README\.md\) \| \[日本語\]\(README\.ja\.md\)\s*\n/m,'');
  return `---\ntitle: ${JSON.stringify(title)}\ndescription: ${JSON.stringify(description)}\nsidebar:\n  order: 1\narchetype: explanation\nproject: appkit\ntags: ["appkit", "overview"]\n---\n\n`+transform(content);
 }
 

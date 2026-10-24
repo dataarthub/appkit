@@ -5,54 +5,62 @@ may be prepared before publication; confirm availability on the
 [npm package page](https://www.npmjs.com/package/@alneas/appkit-react). Publication
 dates are recorded only when confirmed.
 
-## Unreleased
-
-### React 19 and dependency maintenance
-
-- Simplify DOM-ref wrappers to React 19 ref props while preserving JSX props, DOM
-  targets, Base UI composition and callback cleanup. Their exported types are now
-  ordinary function components; `ForwardRefExoticComponent` internals are removed.
-  Use `ComponentProps` / `ComponentRef` rather than `.render` or `$$typeof`.
-- Keep filter and keyboard callbacks current through committed Effect Events;
-  unchanged filters remain deduplicated and listener ownership stays stable.
-- Update the reviewed Query pair, Zustand, panels, icons, form resolvers and
-  localization dependencies. Host applications sharing these dependencies should
-  verify their own provider/cache and localization integration when adopting.
-- See the [unreleased React 19 guide](https://github.com/dataarthub/appkit/blob/main/docs/development/react19-toolchain.md).
+## [0.3.0]
 
 ### Breaking changes
 
-- Move Kanban, DataTable, FileBrowser and the shared DnD wrappers to native
-  dnd-kit React 0.5.1. Generic provider callbacks use nullable
-  `event.operation.source` / `target`, direct entity `data`, and `event.canceled`
-  in `onDragEnd`; the separate `onDragCancel` prop is removed.
+- Move all Appkit drag surfaces to native dnd-kit React 0.5.1. Generic provider
+  events use nullable `operation.source` / `target`, direct entity `data`, and
+  `event.canceled` in `onDragEnd`; the separate `onDragCancel` prop is removed.
 - Draggable render props use `ref` / `handleRef` instead of `attributes`,
   `listeners` and `setNodeRef`; droppable props use `ref` / `isDropTarget`.
   Native feedback owns movement; render-prop `style` is presentation only.
-- Exported Kanban sensors, controller context props and custom surfaces now use
-  native engine types. Generic wrapper names/import paths, high-level component
-  props and FileProvider operations remain. `resolveKanbanMove` keeps its
-  structural legacy-shaped input.
-- Remove legacy core/sortable/utilities dependencies and the global React-19 JSX
-  compatibility shim. Hosts must migrate their own old-engine usage before
-  removing their direct dependencies.
+- Exported Kanban sensors, controller context props and custom surfaces use the
+  native engine. High-level component props, business callbacks and FileProvider
+  operations remain; `resolveKanbanMove` retains its structural legacy input.
+- DOM-ref wrappers expose ordinary React 19 function component types. Normal JSX
+  props, DOM targets, Base UI composition and callback cleanup remain supported;
+  `ForwardRefExoticComponent` internals such as `.render` / `$$typeof` are removed.
+  Use `ComponentProps<typeof Component>` and `ComponentRef<typeof Component>`.
+- Hosts sharing Query must align `@tanstack/react-query` and
+  `@tanstack/query-core` at **5.104.5**. Mixed 5.104.4 / 5.104.5 installations can
+  produce nominal QueryClient/Query type conflicts.
 
 ### Changed
 
-- Use a 250ms touch hold with 5px tolerance in the generic provider, retaining
-  its 5px mouse/pen threshold. Native icon handles preserve file selection/open
-  interactions and permit early touch scrolling.
+- Keep filter and keyboard callbacks current through committed Effect Events;
+  unchanged filters remain deduplicated and listener ownership stays stable.
+- Update Query to 5.104.5, Zustand to 5.0.16, panels to 4.14.8, Lucide to 1.61.0,
+  form resolvers to 6.0.0, and the reviewed localization dependencies. Host
+  integrations should verify their own cache/provider, forms and locale behavior.
+- Use a 250ms touch hold with 5px tolerance in the generic provider, retaining its
+  5px mouse/pen threshold. Native file icon handles retain selection/open behavior
+  and permit early touch scrolling.
+- Consolidate upgrade instructions in the packaged migration guide. Keep the npm
+  README concise and English-only, with documentation, history and migration links.
+
+### Fixed
+
 - Preserve hidden/grouped/persisted table order and reject stale drag positions.
   File moves validate the current listing; successful overlapping moves refresh
-  the current relevant view, while navigation prevents refreshing departed views.
+  the relevant current view without refreshing a departed view.
 
-### Upgrade
+### Removed
 
-- Follow the [unreleased native drag migration guide](https://github.com/dataarthub/appkit/blob/main/docs/development/dnd-kit-migration.md).
-  Release-version selection and publication are separate from this source change.
-- After a containing release is published, downstream consumers update exact
-  pins, low-level call sites, old dependencies, browser test settings and generated
-  API/notices. This entry does not change any already published archive.
+- Remove production legacy core/sortable/utilities dependencies and the global
+  React-19 JSX compatibility shim. Applications must migrate their own old-engine
+  usage before removing direct dependencies they still need.
+
+### Upgrade from 0.2.0
+
+- This pre-1.0 minor contains breaking low-level drag and component-type changes.
+  Read the [0.3.0 migration guide](docs/migration.md) before upgrading and confirm
+  npm availability before installing exact React 0.3.0 / Core 0.2.0 pins.
+- React's Core dependency stays exactly **0.2.0**; no Core 0.3.0 is required.
+  Node >=24.0.0 and React/React DOM ^19.2.3 remain the public requirements.
+- Align Query, migrate low-level callbacks/registrations, update relevant native
+  input tests and regenerate host-owned API/notices records. A source version or
+  prepared changelog does not change an already published archive.
 
 ## [0.2.0]
 
@@ -98,5 +106,6 @@ dates are recorded only when confirmed.
 - Initial public release of React UI, forms, tables, providers and AI bindings,
   with ESM, CommonJS, TypeScript declarations and explicit styles.
 
+[0.3.0]: https://github.com/dataarthub/appkit/compare/appkit-react-v0.2.0...appkit-react-v0.3.0
 [0.2.0]: https://github.com/dataarthub/appkit/compare/v0.1.0...appkit-react-v0.2.0
 [0.1.0]: https://github.com/dataarthub/appkit/releases/tag/v0.1.0
