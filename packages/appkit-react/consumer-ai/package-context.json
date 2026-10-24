@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "@alneas/appkit-react",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "exports": {
     ".": {
       "import": {
@@ -351,7 +351,7 @@
     "./api-index.json": "./consumer-ai/api-index.json"
   },
   "dependencies": {
-    "@alneas/appkit-core": "0.2.0",
+    "@alneas/appkit-core": "0.2.1",
     "@base-ui/react": "^1.9.0",
     "@dnd-kit/collision": "0.5.1",
     "@dnd-kit/dom": "0.5.1",
