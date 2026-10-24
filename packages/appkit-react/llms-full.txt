@@ -296,6 +296,10 @@ npm view @alneas/appkit-react@0.3.0 version
 npm install --save-exact @alneas/appkit-react@0.3.0 @alneas/appkit-core@0.2.0 @tanstack/react-query@5.104.5 @tanstack/query-core@5.104.5
 ```
 
+Core 0.2.1 is prepared separately for documentation improvements; it has no
+runtime/API migration and is not required by React 0.3.0. React's production Core
+pin remains exactly 0.2.0. A candidate Core archive is used only in the isolated
+compatibility lane; confirm each version's npm delivery independently.
 Core does not advance to 0.3.0 in this release. Align both direct Query packages
 at **5.104.5**. Mixed 5.104.4 / 5.104.5 installations can make QueryClient and Query
 nominal types incompatible. Refresh the host lockfile and inspect `npm ls

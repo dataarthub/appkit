@@ -320,10 +320,14 @@ that run's exact receipts and archives; missing, stale or changed evidence still
 cannot qualify. Making evaluation optional does not relax its grading or allow
 harness self-tests to be reported as real task successes. Keep raw evidence ignored.
 
-## React 0.3.0 documentation handoff
+## Core 0.2.1 and React 0.3.0 documentation handoff
 
-React 0.3.0 is prepared independently; Core and React's exact Core dependency stay
-at 0.2.0. The packaged `packages/appkit-react/docs/migration.md` and cumulative
+Prepare Core 0.2.1 for its concise npm README and bundled documentation corrections,
+and React 0.3.0 for its breaking upgrade. They use separate package-specific tags
+(`appkit-core-v0.2.1` and `appkit-react-v0.3.0`) and GitHub Releases on the reviewed,
+verified main commit. React's exact Core dependency stays at published 0.2.0.
+Neither release requires the other to finish first because React does not adopt
+this documentation-only patch; complete each staging/approval flow independently. The packaged `packages/appkit-react/docs/migration.md` and cumulative
 changelog describe the breaking native DnD/component-type contracts and required
 Query 5.104.5 alignment. Verify these materials in the exact React archive.
 
@@ -335,8 +339,12 @@ check links/examples under its own publication workflow. This repository neither
 ingests nor deploys the portal. Do not advertise 0.3.0 as available or silently
 mix the new API catalog with the older delivered pages before that checkpoint.
 
-Keep Core's API ingestion at its confirmed `appkit-core-v0.2.0` source; a React
-release does not advance Core's delivered source identity. Reviewed Core README
-corrections may be ingested separately when they describe only released behavior.
-Core's concise English npm README correction is recorded as Unreleased for
-its next independently selected release; do not republish Core 0.2.0 to deliver it.
+Keep Core's default API/documentation ingestion at its confirmed
+`appkit-core-v0.2.0` source until Core 0.2.1 publication is verified, then select
+that independently delivered source. React publication alone does not advance
+Core's delivered identity. Reviewed explanations of existing behavior may be
+corrected separately under the documentation policy. Never republish Core 0.2.0.
+No new mandatory-fix requirement is added to `react-core-policy.json`: this patch
+changes documentation and maintainer tooling, with no runtime/API correction that
+must reach React consumers. Test both the declared Core 0.2.0 archive and candidate
+Core 0.2.1 archive; the latter lane is verification-only, not a production pin.

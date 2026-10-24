@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, cpSync, copyFileSync, readFileSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, cpSync, copyFileSync, readFileSync, writeFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -17,6 +17,9 @@ function fixture(run){
   for(const f of ['README.md','CONTRIBUTING.md','RELEASING.md'])copyFileSync(join(source,f),join(root,f));
   for(const name of ['appkit-core','appkit-react']){
    const dir=join(root,'packages',name);mkdirSync(dir,{recursive:true});
+   // Preserve package-local registry dependencies when the workspace Core advances.
+   const dependencies=join(source,'packages',name,'node_modules');
+   if(existsSync(dependencies))symlinkSync(dependencies,join(dir,'node_modules'),'dir');
    for(const f of ['README.md','package.json'])copyFileSync(join(source,'packages',name,f),join(dir,f));
    for(const f of ['docs','consumer-ai'])cpSync(join(source,'packages',name,f),join(dir,f),{recursive:true});
    if(name==='appkit-core'){mkdirSync(join(dir,'src/ai/errors'),{recursive:true});copyFileSync(join(source,'packages/appkit-core/src/ai/errors/catalog.ts'),join(dir,'src/ai/errors/catalog.ts'));}
