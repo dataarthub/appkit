@@ -5,7 +5,7 @@ const run={id:123,run_attempt:2,event:'release',status:'completed',conclusion:'s
 const artifact={id:456,name:'npm-package-123-2',expired:false,workflow_run:{id:123,head_sha:run.head_sha}};
 const jobs=[{name:'Stage package for approval',status:'completed',conclusion:'success'}];
 test('resume binds a successful release run to its current-attempt immutable archive',()=>{
- assert.deepEqual(resumeTarget(run,[artifact],jobs),{sha:run.head_sha,tag:run.head_branch,artifact:'456'});
+ assert.deepEqual(resumeTarget(run,[artifact],jobs),{sha:run.head_sha,tag:run.head_branch,artifact:'456',control:run.head_sha,attempt:'2'});
 });
 test('manual, fork, failed, stale and ambiguous evidence cannot authorize completion',()=>{
  for(const patch of [{head_repository:{full_name:'fork/appkit'}},{event:'workflow_dispatch'},{conclusion:'failure'},{path:'.github/workflows/other.yml'},{repository:{full_name:'fork/appkit'}},{head_branch:'v0.1.0'}]) assert.throws(()=>resumeTarget({...run,...patch},[artifact],jobs));

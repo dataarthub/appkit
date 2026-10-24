@@ -1,5 +1,5 @@
-# Generated: github-docs/public/templates/private-actions/public; reviewed base ae1ac274494114599ea6c0de2e02c1e61f324e42 (local-reviewed).
-# Bundle SHA-256: 69111de4aafb48fb77e3d8e702b88abdd18fc357a1a4a474a9e6a1ef27dd6fb6
+# Generated: github-docs/public/templates/private-actions/public; reviewed base 08b7e72ee44f3b6f469490903569bbd325a923b0 (local-reviewed).
+# Bundle SHA-256: d5251365e49bc3d17d71bdb44741f057e44610f0cd85487a6da07207d2442003
 # Project adapter: .github/workflow-adapter.json; source: scripts/workflow-project/roles.json
 # Run workflow:generate explicitly; workflow:check never repairs output.
 name: "Source quality"
