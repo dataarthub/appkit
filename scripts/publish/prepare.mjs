@@ -1,7 +1,8 @@
 import {readFileSync, writeFileSync, copyFileSync, realpathSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
-import {releaseContext, outputs, root} from './context.mjs';
+import {releaseContext, outputs, root, controlRoot} from './context.mjs';
+import {validateFresh,candidates} from './recovery.mjs';
 import {archiveIntegrity, verifyArtifact} from './artifact.mjs';
 const target = releaseContext();
 execFileSync('git', ['diff', '--exit-code', 'HEAD', '--'], {cwd: root, stdio: 'inherit'});
@@ -16,7 +17,13 @@ if (!source.startsWith(allowed) || !path.basename(path.dirname(source)).startsWi
 const file = path.join(destination, 'package.tgz');
 copyFileSync(source, file);
 if (info.integrity !== archiveIntegrity(file)) throw Error('Packed package did not match reviewed consumer archive');
-const manifest = {schemaVersion: 1, ...target, integrity: info.integrity};
+const ctx={source:target.sha,control:execFileSync('git',['rev-parse','HEAD'],{cwd:controlRoot,encoding:'utf8'}).trim(),run:Number(process.env.GITHUB_RUN_ID),attempt:Number(process.env.GITHUB_RUN_ATTEMPT)};
+const nodes=[24,26].map(major=>JSON.parse(readFileSync(path.join(destination,`fresh-node${major}.json`))));
+for(const node of nodes)for(const key of Object.keys(ctx))if(node[key]!==ctx[key])throw Error('Fresh source checks changed producer context');
+const freshVerification={...ctx,status:'passed',nodes};validateFresh(freshVerification,ctx);
+const event=JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH));
+const recovery=event.inputs?.recover_release?candidates[event.inputs.recover_release]:null;
+const manifest = {schemaVersion: 1, ...target, integrity: info.integrity,freshVerification,...(recovery?{recovery}: {})};
 verifyArtifact({file, manifest, target});
 writeFileSync(path.join(destination, 'release.json'), JSON.stringify(manifest, null, 2) + '\n');
 outputs({integrity: info.integrity});

@@ -107,24 +107,26 @@ Dispatch is reserved for completing an original successful staging run; it does 
    A newer unsuccessful run cannot fall back to an older successful run for the
    same SHA. Finish/rerun main quality, then retry the release workflow; it does
    not wait indefinitely or start publication optimistically.
-   The workflow reuses that exact-commit source-quality evidence, restores matching
-   Turbo build caches, and checks secrets, lint, tooling, builds and release/docs
-   contracts. It does not repeat source unit/type/agent suites already covered by
-   Source quality. It packs both candidates and tests those exact archives in
-   isolated consumers, then selects and stages only the tagged package's tested archive.
+   The workflow authenticates the latest exact-source immutable receipt. It tolerates
+   only hosted image revision differences; other runtime, toolchain, environment or
+   verification-bundle differences still block the gate. It then runs full Node 26
+   compatibility and full Node 24 source checks freshly, including browser checks,
+   on the verification runner. This conservative release path does not claim reuse
+   in a different image. It retains the Node 24 build, packs both candidates and
+   tests those exact archives in isolated consumers, then stages only the tagged
+   package's tested archive.
 5. React releases additionally require the two-Core compatibility matrix and the
    mandatory-fix dependency policy. Core releases do not wait for React to adopt
    an unpublished dependency: for coordinated updates, publish Core's Release,
    wait for its successful npm publication, then publish React's Release.
 
-Storybook runs only through affected main quality verification (or an explicit
-full/manual check), not again during publication. Quality selection accumulates
-changes since a successful ancestor, so a documentation-only target may legitimately
-skip unchanged UI tests. The publication job depends on successful release
-verification and rechecks exact-SHA quality evidence immediately before the npm
-step; an unavailable evidence API also blocks publication. Only the staging and completion
-registry jobs have OIDC permission. This orders source verification, archive verification,
-and registry writes without duplicating browser work. GitHub Release publication
+Release verification repeats the full source suite deliberately so hosted image
+rollouts cannot turn evidence incompatibility into an omission. Source quality still
+uses its normal affected-input selection. The archive manifest records the package
+source, maintained control commit, producer run/attempt and both fresh runtime
+results. Only verification runs tests; OIDC staging and completion jobs authenticate
+original evidence and immutable archive identity without rebuilding or requiring
+their own hosted image to equal the verification image. GitHub Release publication
 starts this process; the Release page alone does not mean npm publication succeeded.
 
 The verified archive is handed to staging through an immutable artifact ID, its SHA-512 digest and a sanitized source/package identity manifest. Only the archive and sanitized manifest are uploaded; raw receipts and logs remain excluded. Staging rechecks the source, contents and digest before submitting that archive. **A successful initial workflow means staged, not publicly published.**
@@ -358,3 +360,42 @@ No new mandatory-fix requirement is added to `react-core-policy.json`: this patc
 changes documentation and maintainer tooling, with no runtime/API correction that
 must reach React consumers. Test both the declared Core 0.2.0 archive and candidate
 Core 0.2.1 archive; the latter lane is verification-only, not a production pin.
+
+## Recover a Release stopped before archive creation
+
+The maintained main workflow exposes a separately reviewed `recover_release`
+choice. Leave `staged_run` empty. The initial catalogued candidate is `core-0.2.1`:
+Release ID `422489080`, tag `appkit-core-v0.2.1`, annotated tag object
+`99492d380834efeb9279f33e5d646c356fcaad4b`, package source
+`aa7af4ec7d65f6fda997c640949c63aa1bfe4e72`, and original failed run
+`40060778911`, latest attempt `2`. This does not move/recreate the tag or Release.
+
+Before selecting source and immediately before staging, control code verifies the
+live fixed identities, zero original artifacts and the skipped original staging
+job. The first `Recover core-0.2.1` dispatch is the only permitted producer;
+rerunning that producer or dispatching it again is refused even while npm approval
+is pending. Any failure or ambiguous submission requires read-only investigation
+and a separately reviewed recovery decision, never a blind retry.
+
+Control code is checked out from the reviewed workflow commit into `control`, and
+the original clean package commit into `source`. Both SHAs remain explicit;
+GitHub's event SHA is never overwritten. Full Node 26/24 checks and isolated exact
+archive consumers run before the read-only verifier uploads one immutable bundle.
+The OIDC job downloads that exact artifact ID, revalidates its SHA-512 integrity,
+source/control/producer metadata and live original identities, then stages it with
+the same Trusted Publisher and human npm approval contract as ordinary releases.
+Provenance identifies the maintained workflow/control commit; the sanitized archive
+manifest also identifies the distinct original package source.
+
+The existing automatic observer accepts ordinary successful `release` producers.
+For a recovered dispatch producer, inspect/approve the staged package with npm 2FA,
+then use **Publish npm packages** on main with `staged_run` set to the successful
+recovery producer's run ID and `recover_release` empty. The resolver maps this
+producer back to the fixed original package source, and completion downloads its
+same immutable archive. It repairs tags and records Deployment without staging or
+rebuilding. Preserve the candidate identity record while completion can need it;
+retire its executable dispatch capability after the incident, retaining Git history.
+
+These workflow/control changes require no package version increment: neither npm
+package's payload, exports nor dependencies change. Private consumer adoption is
+outside this recovery task; exact published dependencies remain its prerequisite.

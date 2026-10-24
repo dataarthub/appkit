@@ -34,8 +34,9 @@ test('real preparation selects only the consumer-tested tagged archive and rejec
       packages: {'@alneas/appkit-react': {version: '0.2.0', file, integrity: archiveIntegrity(file)}}};
     json('.verification/publish/consumer.json', record);
     json('.verification/event.json', {action: 'published', repository: {full_name: 'dataarthub/appkit'}, release: {tag_name: 'appkit-react-v0.2.0', draft: false, prerelease: false}});
+    for(const major of [24,26])json(`.verification/publish/fresh-node${major}.json`,{major,status:'passed',identity:{node:`v${major}.0.0`,image:'fixture'},source:sha,control:sha,run:12,attempt:1});
     const run = () => spawnSync(process.execPath, ['scripts/publish/prepare.mjs'], {cwd: root, encoding: 'utf8', env: {...env,
-      GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'release', GITHUB_REPOSITORY: 'dataarthub/appkit', GITHUB_SHA: sha,
+      GITHUB_RUN_ID:'12',GITHUB_RUN_ATTEMPT:'1',GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'release', GITHUB_REPOSITORY: 'dataarthub/appkit', GITHUB_SHA: sha,
       GITHUB_EVENT_PATH: path.join(root, '.verification/event.json'), GITHUB_OUTPUT: path.join(root, '.verification/output')}});
     const success = run();
     assert.equal(success.status, 0, success.stderr);

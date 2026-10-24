@@ -1,12 +1,17 @@
 import {readFileSync, appendFileSync} from 'node:fs';
 import {execFileSync, spawnSync} from 'node:child_process';
 import path from 'node:path';
+import {candidates,publicationPhase} from './recovery.mjs';
 import {releaseTarget, validateRelease} from './contract.mjs';
-export const root = path.resolve(import.meta.dirname, '../..');
+export const controlRoot = path.resolve(import.meta.dirname, '../..');
+export const root = process.env.PUBLISH_PACKAGE_ROOT ? path.resolve(process.env.PUBLISH_PACKAGE_ROOT) : controlRoot;
+if(process.env.PUBLISH_PACKAGE_ROOT && (root!==path.join(process.env.GITHUB_WORKSPACE??'', 'source')||controlRoot!==path.join(process.env.GITHUB_WORKSPACE??'','control')))throw Error('Separate fixed control/source checkouts required');
 export function releaseContext(env = process.env) {
   if (!['release','workflow_dispatch'].includes(env.GITHUB_EVENT_NAME) || env.GITHUB_REPOSITORY !== 'dataarthub/appkit' || env.GITHUB_ACTIONS !== 'true') throw Error('This command requires the GitHub release workflow');
   let event = JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, 'utf8'));
+  const phase=publicationPhase(env,event);
   const resume = env.GITHUB_EVENT_NAME === 'workflow_dispatch';
+  if(resume&&phase==='stage'){const c=candidates[event.inputs.recover_release];if(env.PUBLISH_SOURCE_SHA!==c.sha||env.PUBLISH_RELEASE_TAG!==c.tag)throw Error('Fixed recovery source required');}
   if (resume) {
     if (env.GITHUB_REF !== 'refs/heads/main' || !/^[a-f0-9]{40}$/.test(env.PUBLISH_SOURCE_SHA ?? '')) throw Error('Validated completion context is required');
     releaseTarget(env.PUBLISH_RELEASE_TAG);
