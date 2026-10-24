@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,rmSync,readdirSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,rmSync,readdirSync,chmodSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
@@ -33,3 +33,17 @@ test('Bun and Vitest reports bind executed cases to selected files and reject mi
  }
  for(const report of ['', '<testsuites tests="0" />',vitest.replace('skipped="0"','skipped="1"')])assert.throws(()=>validateUnitReport(report,['src/a.test.ts'],'/fixture'));
 });
+
+test('Vitest retains human-readable failure diagnostics alongside strict JUnit evidence',()=>fixture("import {test} from 'vitest'; test('failure-details',()=>{});",root=>{
+ const bin=join(root,'bin');mkdirSync(bin);
+ const executable=join(bin,'bun');
+ writeFileSync(executable,'#!'+process.execPath+'\n'+`const args=process.argv.slice(2);
+if(!args.includes('--reporter=default')||!args.includes('--reporter=junit'))process.exit(31);
+console.error('FAIL src/fixture.test.ts > failure-details: expected visible diagnostic');
+process.exit(7);
+`);chmodSync(executable,0o755);
+ const result=spawnSync(process.execPath,[runner],{cwd:root,encoding:'utf8',env:{...process.env,PATH:bin+':'+process.env.PATH}});
+ assert.notEqual(result.status,0);
+ assert.match(result.stderr,/failure-details: expected visible diagnostic/);
+ assert.match(result.stderr,/Unit runner failed \(7\)/);
+}));
