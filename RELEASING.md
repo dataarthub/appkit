@@ -362,10 +362,23 @@ Release ID `422489080`, tag `appkit-core-v0.2.1`, annotated tag object
 
 Before selecting source and immediately before staging, control code verifies the
 live fixed identities, zero original artifacts and the skipped original staging
-job. The first `Recover core-0.2.1` dispatch is the only permitted producer;
-rerunning that producer or dispatching it again is refused even while npm approval
-is pending. Any failure or ambiguous submission requires read-only investigation
-and a separately reviewed recovery decision, never a blind retry.
+job. The first `Recover core-0.2.1` dispatch not explicitly retired below is the
+only permitted producer; rerunning it or dispatching again is refused even while
+npm approval is pending. Any failure or ambiguous submission requires read-only
+investigation and a separately reviewed recovery decision, never a blind retry.
+
+The reviewed `preStageFailures` inventory retires run `40066317790`, attempt `1`,
+control commit `85adba3fe41f335f9b333654e91bdecc4a03d87a`. It stopped at
+`Project: Validate package tag, version and source commit` because the helper did
+not receive the read-only GitHub token. Every selection and writer authentication
+rechecks this run's exact repository/workflow/event/branch/control/attempt, failed
+verification step, zero artifacts and skipped staging job before excluding it
+from the single-use guard. A changed attempt, produced archive, executed writer,
+unknown preceding run or changed failure identity stops recovery. This is a
+reviewed exception for a proven pre-stage failure, not permission to retry any
+failed or ambiguous submission. Verification helpers now receive the job's scoped
+read-only token; registry-job helpers retain their separately declared permissions.
+
 
 Control code is checked out from the reviewed workflow commit into `control`, and
 the original clean package commit into `source`. Both SHAs remain explicit;

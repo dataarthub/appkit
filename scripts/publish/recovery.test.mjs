@@ -43,3 +43,22 @@ test('completion resolves a successful recovery producer to original package SHA
  assert.equal(target.sha,candidate.sha);assert.equal(target.control,control);assert.equal(target.tag,candidate.tag);
  assert.throws(()=>resumeTarget({...r,display_title:'Complete package'},[artifact],jobs));
 });
+
+test('only explicitly reviewed failures with no archives and a skipped writer may be retired',async()=>{
+ const {validatePreStageFailure}=await import('./recovery.mjs');
+ const failure={run:70,attempt:1,control:'d'.repeat(40),title:'Recover core-0.2.1',step:'Project: Validate package tag, version and source commit'};
+ const run={id:70,run_attempt:1,event:'workflow_dispatch',head_branch:'main',head_sha:failure.control,display_title:failure.title,path:'.github/workflows/publish.yml',status:'completed',conclusion:'failure',repository:{full_name:'dataarthub/appkit'},head_repository:{full_name:'dataarthub/appkit'}};
+ const jobs=[{name:'verify',status:'completed',conclusion:'failure',steps:[{name:failure.step,status:'completed',conclusion:'failure'}]},{name:'Stage package for approval',status:'completed',conclusion:'skipped'}];
+ const f={failure,run,jobs,artifacts:{total_count:0,artifacts:[]}};
+ validatePreStageFailure(f);
+ for(const patch of [{run:{...run,run_attempt:2}},{run:{...run,head_sha:'b'.repeat(40)}},{run:{...run,conclusion:'cancelled'}},{run:{...run,display_title:'Other'}},{artifacts:{total_count:1,artifacts:[{}]}},{jobs:[jobs[0],{...jobs[1],conclusion:'success'}]},{jobs:[{...jobs[0],steps:[{name:'Upload',conclusion:'failure'}]},jobs[1]]}])assert.throws(()=>validatePreStageFailure({...f,...patch}));
+});
+test('producer guard retires only reviewed IDs and still refuses reruns or unknown preceding runs',async()=>{
+ const {validateRecoveryProducer}=await import('./recovery.mjs');
+ const c={...candidate,preStageFailures:[{run:29}]};
+ const r={id:30,run_attempt:1,event:'workflow_dispatch',head_branch:'main',display_title:`Recover ${c.id}`,head_sha:'d'.repeat(40),path:'.github/workflows/publish.yml',repository:{full_name:'dataarthub/appkit'},head_repository:{full_name:'dataarthub/appkit'}};
+ validateRecoveryProducer(c,r,[{...r,id:29},r]);
+ assert.throws(()=>validateRecoveryProducer(c,{...r,id:29},[{...r,id:29},r]));
+ assert.throws(()=>validateRecoveryProducer(c,r,[{...r,id:28},{...r,id:29},r]));
+ assert.throws(()=>validateRecoveryProducer(c,{...r,run_attempt:2},[{...r,id:29},r]));
+});

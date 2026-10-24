@@ -34,14 +34,36 @@ export function validateFresh(fresh,ctx){
 }
 export function validateRecoveryProducer(c,run,runs){
  assert(run?.event==='workflow_dispatch'&&run.head_branch==='main'&&run.path==='.github/workflows/publish.yml'&&run.display_title===`Recover ${c.id}`&&run.run_attempt===1&&run.repository?.full_name==='dataarthub/appkit'&&run.head_repository?.full_name==='dataarthub/appkit','Invalid recovery producer');
- const prior=runs.filter(r=>r.display_title===`Recover ${c.id}`).sort((a,b)=>a.id-b.id);
+ const retired=new Set((c.preStageFailures??[]).map(f=>f.run));assert(!retired.has(run.id),'A retired pre-stage failure cannot run again');
+ const prior=runs.filter(r=>r.display_title===`Recover ${c.id}`&&!retired.has(r.id)).sort((a,b)=>a.id-b.id);
  assert(prior.length&&prior[0].id===run.id,'Recovery candidate already used; never repeat ambiguous staging');
 }
 export async function authenticateRecoveryProducer(c,{api=github,env=process.env}={}){
+ await authenticatePreStageFailures(c,{api});
  const run=await api('GET',`actions/runs/${env.GITHUB_RUN_ID}`);
  const listed=await api('GET','actions/workflows/publish.yml/runs?event=workflow_dispatch&per_page=100');
  assert(listed.total_count<=100&&Array.isArray(listed.workflow_runs),'Recovery history exceeds bounded inspection');
  validateRecoveryProducer(c,run,listed.workflow_runs);
  assert(run.head_sha===env.GITHUB_SHA&&run.run_attempt===Number(env.GITHUB_RUN_ATTEMPT),'Recovery workflow source or attempt changed');
  return run;
+}
+
+export function validatePreStageFailure({failure:f,run:r,jobs,artifacts}){
+ assert(r?.id===f.run&&r.run_attempt===f.attempt&&r.head_sha===f.control&&r.event==='workflow_dispatch'&&r.head_branch==='main'&&r.display_title===f.title&&r.path==='.github/workflows/publish.yml'&&r.status==='completed'&&r.conclusion==='failure'&&r.repository?.full_name==='dataarthub/appkit'&&r.head_repository?.full_name==='dataarthub/appkit','Reviewed pre-stage failure identity changed');
+ assert(artifacts?.total_count===0&&Array.isArray(artifacts.artifacts)&&artifacts.artifacts.length===0,'Prior recovery produced an archive; staging state requires investigation');
+ assert(Array.isArray(jobs),'Prior recovery jobs missing');
+ const verify=jobs.filter(j=>j.name==='verify'),writers=jobs.filter(j=>j.name==='Stage package for approval');
+ assert(verify.length===1&&verify[0].status==='completed'&&verify[0].conclusion==='failure','Prior verification was not a confirmed failure');
+ const failed=verify[0].steps?.filter(s=>s.conclusion==='failure');
+ assert(failed?.length===1&&failed[0].name===f.step&&failed[0].status==='completed','Prior recovery failed outside its reviewed pre-stage step');
+ assert(writers.length===1&&writers[0].status==='completed'&&writers[0].conclusion==='skipped','Prior recovery writer did not remain skipped');
+}
+export async function authenticatePreStageFailures(c,{api=github}={}){
+ const failures=c.preStageFailures??[];
+ assert(Array.isArray(failures)&&failures.length<=10&&new Set(failures.map(f=>f.run)).size===failures.length,'Invalid reviewed pre-stage failure inventory');
+ for(const failure of failures){
+  const [run,artifacts,jobs]=await Promise.all([api('GET',`actions/runs/${failure.run}`),api('GET',`actions/runs/${failure.run}/artifacts?per_page=100`),api('GET',`actions/runs/${failure.run}/attempts/${failure.attempt}/jobs?per_page=100`)]);
+  assert(jobs.total_count<=100,'Ambiguous prior recovery jobs');
+  validatePreStageFailure({failure,run,artifacts,jobs:jobs.jobs});
+ }
 }

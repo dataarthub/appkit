@@ -263,7 +263,8 @@
           }
         },
         "env": {
-          "PUBLISH_PACKAGE_ROOT": "${{ github.workspace }}/source"
+          "PUBLISH_PACKAGE_ROOT": "${{ github.workspace }}/source",
+          "GITHUB_TOKEN": "${{ github.token }}"
         }
       },
       "stage": {
