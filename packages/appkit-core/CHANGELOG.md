@@ -19,7 +19,7 @@ dates are recorded only when confirmed.
 - This is an independently prepared documentation patch; confirm npm publication
   before adopting it. Existing 0.2.1 archives and tags remain immutable.
 - Publish Core 0.2.2 first. Only after publication may the prepared React 0.3.1
-  dependency change from published Core 0.2.1 to exact 0.2.2; refresh and verify its
+  dependency change from published Core ^0.2.1 to compatible Core ^0.2.2; refresh and verify its
   lockfile and consumers before React publication. Source preparation is not
   publication evidence and does not authorize registry writes.
 
