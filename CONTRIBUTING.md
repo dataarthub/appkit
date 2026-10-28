@@ -292,7 +292,7 @@ exact resolutions and integrity in bun.lock. Range edits do not authorize an
 unrelated dependency upgrade. Pre-1.0 caret ranges stay within their minor line;
 `^0.0.x` does not admit the next patch. Package versions remain independent.
 
-React 0.3.1 preparation uses Core `^0.2.1`. `check:react-core` tests that published
+React 0.3.1 uses the confirmed published Core minimum `^0.2.2`. `check:react-core` tests that published
 minimum and the current packed Core separately, verifying exact installed version,
 archive integrity, shared module identity, types and runtime behavior. A required
 fix raises the minimum; allowing the fixed version is insufficient. These lanes

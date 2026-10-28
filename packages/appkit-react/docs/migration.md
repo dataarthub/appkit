@@ -18,8 +18,8 @@ then ingest the reviewed 0.3.0 source and API catalog together.
 
 ## React 0.3.1 dependency alignment (release preparation)
 
-React 0.3.1 is prepared with Core `^0.2.1`, starting at the already published
-0.2.1 release. Applications keep an exact selected version in their lockfile. It adds no API migration beyond 0.3.0. Published React 0.3.0 retains its
+React 0.3.1 requires Core `^0.2.2`, starting at the confirmed published
+0.2.2 release. Applications keep an exact selected version in their lockfile. It adds no API migration beyond 0.3.0. Published React 0.3.0 retains its
 exact Core 0.2.0 dependency; the 0.3.0 commands below remain its historical route.
 
 After confirming React 0.3.1 is available, hosts with a direct Core dependency
@@ -27,11 +27,11 @@ should install matching exact versions and refresh their lockfile:
 
 ```bash
 npm view @alneas/appkit-react@0.3.1 version
-npm install --save-exact @alneas/appkit-react@0.3.1 @alneas/appkit-core@0.2.1 @tanstack/react-query@5.104.5 @tanstack/query-core@5.104.5
+npm install --save-exact @alneas/appkit-react@0.3.1 @alneas/appkit-core@0.2.2 @tanstack/react-query@5.104.5 @tanstack/query-core@5.104.5
 npm ls @alneas/appkit-core
 ```
 
-Confirm React and the host resolve the same Core 0.2.1 installation. Before npm
+Confirm React and the host resolve the same Core 0.2.2 installation. Before npm
 publication, use verified candidate archives only for isolated checks; keep the
 portal and production consumers on their confirmed delivered versions. The
 remaining API migration sections apply to the 0.3 series.
@@ -67,9 +67,9 @@ npm view @alneas/appkit-react@0.3.0 version
 npm install --save-exact @alneas/appkit-react@0.3.0 @alneas/appkit-core@0.2.0 @tanstack/react-query@5.104.5 @tanstack/query-core@5.104.5
 ```
 
-For the original React 0.3.0 release, Core remains exactly 0.2.0. Core 0.2.1
-contains documentation improvements with no runtime/API migration. React 0.3.1
-adopts that published patch as described above; confirm each version's npm
+For the original React 0.3.0 release, Core remains exactly 0.2.0. Core 0.2.1 and 0.2.2
+contain documentation improvements with no runtime/API migration. React 0.3.1
+adopts the published Core `^0.2.2` patch as described above; confirm each version's npm
 delivery independently.
 Core does not advance to 0.3.0 in this release. Align both direct Query packages
 at **5.104.5**. Mixed 5.104.4 / 5.104.5 installations can make QueryClient and Query

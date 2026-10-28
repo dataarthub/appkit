@@ -17,10 +17,10 @@ dates are recorded only when confirmed.
   requirements and fallback notes in one remarks block. Strict TypeDoc consumers
   can generate API documentation without duplicate-tag warnings; runtime behavior,
   exports and callable types are unchanged.
-- Use Core **^0.2.1** with the published minimum during preparation. Publish the Core
-  **0.2.2** declaration-documentation patch first; only then update this prepared
-  React dependency, final changelog and host instructions to **^0.2.2** and
-  verify one shared Core installation before React 0.3.1 publication.
+- Require the published Core **^0.2.2** documentation patch. The compatible range
+  admits Core 0.2.x updates while excluding older declaration documentation;
+  applications retain exact resolved versions and integrity in their lockfile.
+  Verify that React and any host Core dependency resolve one shared installation.
 - This patch aligns the delivered Core documentation and dependency resolution;
   it adds no public API changes. The breaking migration from React 0.2.x remains
   documented under 0.3.0 and in the bundled migration guide.
