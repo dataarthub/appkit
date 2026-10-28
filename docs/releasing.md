@@ -341,7 +341,7 @@ Prepare Core **0.2.2** for the createAjvValidator declaration documentation fix.
 Its options/defaults and host requirements share one remarks block; runtime
 statements, callable types, exports and production dependencies are unchanged.
 React **0.3.1** also combines the GenerativeUIRenderer and KanbanColumnFrame
-remarks without changing their runtime behavior or callable contracts. The
+remarks without changing their runtime behavior or callable contracts.
 React 0.3.1 also removes deprecated `aria-grabbed` from DataTable, shared Draggable
 activators and enabled Kanban cards, preserving native drag interactions and
 accessible instructions/announcements. This runtime accessibility correction is
@@ -349,24 +349,22 @@ absent from published React 0.3.0. The ordinary documentation gate rejects dupli
 singleton remarks/returns tags in
 maintained package source; warnings and external documentation coverage stay strict.
 
-The prepared React manifest uses **^0.2.1**, with an already published minimum,
-until Core 0.2.2 publication is independently confirmed. Source version strings,
-passing candidate checks and prepared changelogs do not establish publication.
-Use this delivery order:
+Core **0.2.2** publication has been confirmed with matching verified archive
+integrity, `beta`/`latest` tags and the successful `npm-core` Deployment. The
+prepared React **0.3.1** manifest now requires **^0.2.2**; its lockfile and generated
+documentation must match this adopted minimum. Source versions and prepared
+changelogs still do not establish React publication.
 
-1. Review and verify Core 0.2.2, including its exact packed declarations and
-   consumers. A separately authorized `appkit-core-v0.2.2` Release uses the normal
-   staging, maintainer 2FA approval and completion flow. Confirm npm version and
-   archive identity, required tags and successful `npm-core` Deployment.
-2. Only after that checkpoint, update the still-unpublished React 0.3.1 dependency
-   to Core **^0.2.2**, refresh its lockfile and generated documentation, and
-   update its final changelog/host instructions. Run `check:react-core --release`
-   and the maintained source and packed-consumer checks. When the host selects
-   the same Core version, it and React must resolve one Core module, without
-   production overrides or local aliases.
-3. After review and successful exact-source main quality, obtain separate
-   authorization for `appkit-react-v0.3.1` and its GitHub Release, then complete
-   the same npm staging/2FA/completion verification before announcing delivery.
+Before publishing React:
+
+1. Run `check:react-core --release`, the maintained source checks and the exact
+   packed-consumer gate, including strict documentation and minimum/locked/updated
+   compatible Core consumers. A host selecting the same Core must share its module
+   identity with React, without production overrides or local source aliases.
+2. Merge the reviewed React adoption changes and require successful Source quality
+   for that exact main commit. Publish `appkit-react-v0.3.1` only within the
+   maintainer's authorized scope, then complete npm staging, human 2FA approval and
+   final integrity/tag/Deployment verification before announcing delivery.
 
 Existing Core 0.2.0/0.2.1 and React 0.3.0 archives, tags and Releases remain
 immutable. React 0.3.0 continues to require Core 0.2.0. No runtime fix is added to
@@ -401,11 +399,10 @@ separately instead of relaxing declaration checks or claiming whole-range covera
 Fixed coordinated dnd-kit/TanStack dependencies and excelize-wasm retain the
 scoped exceptions in CONTRIBUTING.md.
 
-Publish Core first using its reviewed archive and confirmed registry identity.
-React's final Core minimum update to `^0.2.2` and its resulting lockfile/generated
-metadata must be reviewed and verified after that publication, before the React
-Release is published. A successful prepared `^0.2.1` candidate is not final proof
-for a different dependency floor. Owning consumers that need the drag accessibility
+Core was published first using its reviewed archive and confirmed registry
+identity. React's adopted Core minimum `^0.2.2` and its resulting lockfile/generated
+metadata require fresh verification before the React Release is published. Earlier
+prepared `^0.2.1` candidate results do not certify the new dependency floor. Owning consumers that need the drag accessibility
 fix must require React `^0.3.1` or a narrower reviewed constraint excluding 0.3.0,
 and verify the actual published archive before adoption.
 

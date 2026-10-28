@@ -411,7 +411,7 @@
     "typecheck:storybook:7": "tsc --project tsconfig.storybook.json"
   },
   "dependencies": {
-    "@alneas/appkit-core": "^0.2.1",
+    "@alneas/appkit-core": "^0.2.2",
     "@base-ui/react": "^1.9.0",
     "@dnd-kit/collision": "0.5.1",
     "@dnd-kit/dom": "0.5.1",
