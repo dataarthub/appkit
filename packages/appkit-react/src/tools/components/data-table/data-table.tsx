@@ -63,6 +63,7 @@ import {
 } from '../ui/dropdown-menu';
 
 import { useDataTableStore } from './table-store';
+import { useColumnDragHandleRef } from './drag-handle';
 
 // =============================================================================
 // Types
@@ -110,6 +111,8 @@ function DataTableColumnHeader<TData extends object, TValue>({
     collisionDetector: closestCenter,
   });
 
+  const columnHandleRef = useColumnDragHandleRef(handleRef);
+
   const canSort = header.column.getCanSort();
   const sortDirection = header.column.getIsSorted();
   const isSorted = sortDirection !== false;
@@ -147,7 +150,7 @@ function DataTableColumnHeader<TData extends object, TValue>({
       onClick={canSort ? handleSort : undefined}
     >
       {canReorder && <button
-        type='button' ref={handleRef}
+        type='button' ref={columnHandleRef}
         aria-label={`Reorder column ${header.column.id}`}
         className='inline-flex h-6 w-6 items-center justify-center cursor-grab'
       ><GripVertical className='h-3 w-3' aria-hidden='true' /></button>}

@@ -462,8 +462,21 @@ export const CancelOrderingContract: Story = {
   args: {...Default.args, variant:'minimal'},
   play:async({canvasElement})=>{
     const canvas=within(canvasElement);
-    canvas.getByRole('button',{name:'Reorder column status'}).focus();
-    await userEvent.keyboard('[Space]{ArrowRight}[Escape]');
+    const handle = canvas.getByRole('button',{name:'Reorder column status'});
+    await waitFor(() => expect(handle).toHaveAttribute('aria-pressed', 'false'));
+    await expect(handle).not.toHaveAttribute('aria-grabbed');
+    await expect(handle).toHaveAttribute('aria-roledescription', 'draggable');
+    const instructions = handle.ownerDocument.getElementById(handle.getAttribute('aria-describedby')!);
+    await expect(instructions).toHaveTextContent('space bar');
+    handle.focus();
+    await userEvent.keyboard('[Space]');
+    await waitFor(() => expect(handle).toHaveAttribute('aria-pressed', 'true'));
+    await expect(handle).not.toHaveAttribute('aria-grabbed');
+    await waitFor(() => expect(handle.ownerDocument.querySelector('[aria-live="polite"]')).toHaveTextContent('Picked up'));
+    await userEvent.keyboard('{ArrowRight}[Escape]');
+    await waitFor(() => expect(handle).toHaveAttribute('aria-pressed', 'false'));
+    await expect(handle).not.toHaveAttribute('aria-grabbed');
+    await waitFor(() => expect(handle.ownerDocument.querySelector('[aria-live="polite"]')).toHaveTextContent('cancelled'));
     await waitFor(()=>expect(canvas.getAllByRole('button',{name:/^Reorder column /}).map(handle=>handle.getAttribute('aria-label'))).toEqual(['Reorder column select','Reorder column status','Reorder column email','Reorder column amount']));
   },
 };
