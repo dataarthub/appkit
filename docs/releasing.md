@@ -284,7 +284,7 @@ This example is illustrative; the initial requirements list is empty. `coreVersi
 names the first Core release containing the required fix. The Core candidate must
 always have reached that version. Optional `reactVersion` names the first React
 version whose dependency must adopt the fix. Before that React version, ordinary
-pre-push/main CI reports an old dependency as `pendingRequirements` while testing
+Ready PR/main CI reports an old dependency as `pendingRequirements` while testing
 both Core combinations; it does not claim that React users have received the fix.
 At or after the React-version deadline, an old dependency fails before installation.
 Requirements without `reactVersion` retain immediate enforcement.
@@ -301,13 +301,15 @@ when adding the Core fix. The marker records that impact decision; tests do not
 infer business/security impact or automatically schedule the React release.
 
 Because the current lane uses the registry, an unpublished new dependency fails
-until that Core version exists on npm. Keep React's old published pin during Core
+until that Core version exists on npm. Keep React's published minimum constraint during Core
 preparation; setting a future adoption deadline never changes either matrix lane. For a coordinated release, publish Core
 first, then run this gate with React's updated dependency before publishing React.
 The gate itself never publishes, changes versions or tags, runs live-model
 evaluation, or treats its logs as agent-evaluation evidence.
 
-This gate requires network access and adds two npm installations to pre-push/CI.
+This gate requires network access and uses two isolated npm installations when
+selected by source verification or required by release verification. The lightweight
+push hook does not execute these installations.
 Receipts and command logs are retained under ignored `.verification/react-core/`;
 the disposable consumers are removed on completion or failure. Run
 `bun run test:react-core-tooling` for the deterministic policy/isolation tests.
@@ -333,14 +335,18 @@ that run's exact receipts and archives; missing, stale or changed evidence still
 cannot qualify. Making evaluation optional does not relax its grading or allow
 harness self-tests to be reported as real task successes. Keep raw evidence ignored.
 
-## Core 0.2.2 and React 0.3.1 staged documentation preparation
+## Core 0.2.2 and React 0.3.1 release preparation
 
 Prepare Core **0.2.2** for the createAjvValidator declaration documentation fix.
 Its options/defaults and host requirements share one remarks block; runtime
 statements, callable types, exports and production dependencies are unchanged.
 React **0.3.1** also combines the GenerativeUIRenderer and KanbanColumnFrame
 remarks without changing their runtime behavior or callable contracts. The
-ordinary documentation gate rejects duplicate singleton remarks/returns tags in
+React 0.3.1 also removes deprecated `aria-grabbed` from DataTable, shared Draggable
+activators and enabled Kanban cards, preserving native drag interactions and
+accessible instructions/announcements. This runtime accessibility correction is
+absent from published React 0.3.0. The ordinary documentation gate rejects duplicate
+singleton remarks/returns tags in
 maintained package source; warnings and external documentation coverage stay strict.
 
 The prepared React manifest uses **^0.2.1**, with an already published minimum,
@@ -369,6 +375,39 @@ consumer declaration documentation. Consumers and portal ingestion retain their
 confirmed published versions until each relevant publication is verified. Owning
 consumers then update published minimum constraints and exact locked resolutions, and verify actual published archives.
 Public CI does not require restricted source, credentials or receipts.
+
+### Installed-archive verification before publication
+
+After building and explicitly regenerating documentation, run `bun run test:consumer`.
+It verifies the exact packed files, strict TypeScript 6/7 NodeNext declarations,
+Node 24.0.0 ESM/CommonJS, Bun, documented examples, SSR and CSS, then runs the
+strict installed-declaration documentation consumer and dependency consumers.
+A failed check leaves the archive record unverified. Local working-tree results
+remain preflight until the selected source is committed and required CI succeeds.
+
+The documentation consumer treats warnings and unresolved documentation links as
+errors; known inherited React APIs link explicitly to their official reference.
+This is external declaration consumption, not an assertion that every historical
+API has complete prose or that the documentation portal has been deployed.
+
+Dependency receipts distinguish minimum, locked and updated-compatible Core and
+React host-peer selections, registry Core from the explicit development-only Core
+archive, and the precise optional-feature scope. Unchanged runtime dependency
+versions/integrity are recorded from the naturally installed graph. The Core dependency change is the range change in this
+release. Existing optional feature peers retain their previous constraints and
+feature-specific verification contracts; the base consumer does not certify every
+possible combination of optional SDKs. Record any exploratory upstream failures
+separately instead of relaxing declaration checks or claiming whole-range coverage.
+Fixed coordinated dnd-kit/TanStack dependencies and excelize-wasm retain the
+scoped exceptions in CONTRIBUTING.md.
+
+Publish Core first using its reviewed archive and confirmed registry identity.
+React's final Core minimum update to `^0.2.2` and its resulting lockfile/generated
+metadata must be reviewed and verified after that publication, before the React
+Release is published. A successful prepared `^0.2.1` candidate is not final proof
+for a different dependency floor. Owning consumers that need the drag accessibility
+fix must require React `^0.3.1` or a narrower reviewed constraint excluding 0.3.0,
+and verify the actual published archive before adoption.
 
 ## Core 0.2.1 and React 0.3.0 documentation handoff
 
