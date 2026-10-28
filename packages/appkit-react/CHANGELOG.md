@@ -7,6 +7,8 @@ dates are recorded only when confirmed.
 
 ## [0.3.1]
 
+### Fixed
+
 - Preserve the KanbanColumnFrame registration/ref requirements in one JSDoc remarks
   block so strict API documentation consumers retain the full guidance without
   duplicate-tag warnings. Runtime behavior and callable types are unchanged.

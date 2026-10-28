@@ -309,6 +309,16 @@ combinations. The pre-1.0 excelize-wasm peer remains 0.1.3 until another compati
 version has been exercised by its feature consumer. Tooling and isolated-fixture
 pins keep their existing contracts.
 
+The packed-consumer gate records separate archive, documentation and dependency
+results. Its dependency checks exercise the changed Core constraint against its
+published minimum, updated compatible registry selection and the explicit candidate
+archive, with supported minimum/locked/updated React host peers. Unchanged runtime
+dependencies resolve through their natural peer-compatible installation graph;
+the receipt retains their actual selected versions and integrity. Passing these
+bounded lanes does not certify unselected optional SDK combinations. A failed
+exploratory optional-feature check remains an independent diagnostic; it cannot be
+relabelled as a passing required lane. Keep strict declaration checks enabled.
+
 ## AI-assisted review
 
 Apply the shared [AI-assisted review contract](https://tech-docs.alneas.com/policies/development-policy.md#ai-assisted-code-review)

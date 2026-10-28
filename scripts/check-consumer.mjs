@@ -1,3 +1,5 @@
+import {verifyDocumentationConsumer} from './consumer-docs.mjs';
+import {main as verifyDependencyConsumers} from './consumer-dependency.mjs';
 import {dependencyAccepts} from './dependency-constraints.mjs';
 import assert from 'node:assert/strict';
 import {candidateArtifactDirectory} from './consumer-artifacts.mjs';
@@ -27,6 +29,8 @@ for(const name of names){
  for(const metadata of ['SKILL.md','package-context.json','api-index.json'])assert.equal(run('tar',['-xOf',file,'package/consumer-ai/'+metadata]),run('tar',['-xOf',file,'package/dist/consumer-ai/'+metadata]),'Metadata copy mismatch');
  records.packages[pkg.name]={version:pkg.version,file,sha256:createHash('sha256').update(readFileSync(file)).digest('hex'),integrity:info.integrity};
 }
+// Persist archive identities before verification; verified remains false on failure.
+writeFileSync(path.join(artifacts,'archives.json'),JSON.stringify(records,null,2)+'\n');
 // System temp prevents an undeclared import from falling back to checkout node_modules.
 const fixture=mkdtempSync(path.join(tmpdir(),'appkit-packed-')),coreOnly=mkdtempSync(path.join(tmpdir(),'appkit-core-cli-'));
 try {
@@ -107,8 +111,10 @@ void [nativeEnd,unchanged,nativeRender,nativeDrop,moved,NativeController,highLev
  console.log(run('npm',['exec','--yes','--package=node@24.0.0','--','node','probe.mjs'],fixture));
  run('npm',['exec','--yes','--package=node@24.0.0','--','node','probe.cjs'],fixture);
  for(const name of names){const css=path.join(fixture,'node_modules/@alneas',name,'dist/styles.css');if(name==='appkit-react')assert(readFileSync(css,'utf8').length>1000,'CSS must be generated');}
+ const documentation=await verifyDocumentationConsumer({archives:records.packages,logDirectory:path.join(artifacts,'documentation')});
+ const dependencies=await verifyDependencyConsumers(path.join(artifacts,'archives.json'));
  assert.deepEqual(sourceSelection(),records.sources,'Consumer checks changed selected source inputs');
- records.verified=true;records.completedAt=new Date().toISOString();records.checks={nodeMinimum:'24.0.0',hostNode:process.version,nativeEsm:true,commonJs:true,bun:true,nodeNextDeclarations:true,typeScript6:run(path.join(fixture,'node_modules/.bin/tsc6'),['--version'],fixture).trim(),typeScript7:run(path.join(fixture,'node_modules/.bin/tsc'),['--version'],fixture).trim(),skipLibCheck:false,readmeAndFeatureExamples:index,requestFormSSR:true,css:true,optionalPeersOmitted:true};
+ records.verified=true;records.completedAt=new Date().toISOString();records.checks={nodeMinimum:'24.0.0',hostNode:process.version,nativeEsm:true,commonJs:true,bun:true,nodeNextDeclarations:true,typeScript6:run(path.join(fixture,'node_modules/.bin/tsc6'),['--version'],fixture).trim(),typeScript7:run(path.join(fixture,'node_modules/.bin/tsc'),['--version'],fixture).trim(),skipLibCheck:false,readmeAndFeatureExamples:index,requestFormSSR:true,css:true,optionalPeersOmitted:true,documentation,dependencies};
  writeFileSync(path.join(artifacts,'archives.json'),JSON.stringify(records,null,2)+'\n');console.log('PASS: two-package archives and isolated consumers');
  if(process.env.APPKIT_RELEASE_CONSUMER==='true'){
   const handoff=path.join(root,'.verification/publish');mkdirSync(handoff,{recursive:true});
