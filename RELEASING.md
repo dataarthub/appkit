@@ -1,6 +1,6 @@
 # Releasing
 
-The initial release published only `@alneas/appkit-core@0.1.0` and `@alneas/appkit-react@0.1.0`. Features are import subpaths, not separate npm packages. Internal production dependencies use exact registry versions. Published versions are immutable; working-tree documentation and tooling changes belong to a later release.
+The initial release published only `@alneas/appkit-core@0.1.0` and `@alneas/appkit-react@0.1.0`. Features are import subpaths, not separate npm packages. Library production dependencies default to compatible published registry constraints; lockfile resolutions and archive identity remain exact. Published versions are immutable; working-tree documentation and tooling changes belong to a later release.
 
 Run source verification with the latest Node 24 patch (development range `^24.15.0 || >=26.0.0`) and Bun 1.4.0. Published packages retain `engines.node: >=24.0.0`; the isolated packed-consumer gate must continue exercising Node 24.0.0 independently of the development runtime.
 
@@ -69,7 +69,7 @@ Choose the release scope before changing versions:
 
 | Scope | Version/dependency changes | GitHub Releases |
 | --- | --- | --- |
-| Core only | Bump Core; keep React and its exact Core dependency unchanged | One Core Release |
+| Core only | Bump Core; keep React and its Core compatibility constraint unchanged | One Core Release |
 | React only | Bump React; keep its Core pin unless adopting an already published Core | One React Release |
 | Both; React adopts the new Core | First bump Core and publish it; then bump React and update its Core pin in a follow-up PR | Core Release, then React Release |
 | Both; React keeps its already published Core pin | Bump each package as needed; run the compatibility gate | Two Releases, one for each package |
@@ -81,7 +81,7 @@ Dispatch is reserved for completing an original successful staging run; it does 
 
 1. Update only the intended package version and relevant lockfile/generated
    metadata. If React adopts a new Core, first publish that Core successfully,
-   then update React's exact dependency and its own version in a follow-up PR.
+   then update React's published minimum constraint and its own version in a follow-up PR.
    Commit and merge the reviewed changes into main.
 2. Wait for **Source quality** to finish successfully for that exact main commit.
    Do not tag a later, unverified commit or use a feature/manual run as a substitute.
@@ -154,7 +154,7 @@ For example, to move both packages from `0.1.0` to `0.1.1`:
    and the `npm-core` deployment. A published GitHub
    Release alone does not mean npm publication succeeded.
 3. **React adoption PR:** after Core `0.1.1` exists on npm, set React to `0.1.1` and
-   its exact Core dependency to `"0.1.1"`; update the lockfile/generated metadata.
+   its Core constraint to `"^0.1.1"`; update the lockfile/generated metadata.
    Keep the requirement entry. The React-version deadline now makes an old Core
    pin fail CI. Run `bun run check:react-core --release` after building both packages
    and merge the verified PR.
@@ -229,15 +229,16 @@ and [status API](https://docs.github.com/en/rest/deployments/statuses#create-a-d
 
 ## React compatibility with independently versioned Core
 
-Keep React's Core dependency at an exact version. A newer Core release does not
-automatically update an already published React package. Run `bun run check:react-core`
-after building both packages; `bun run verify:push` and the Node 24 main-update CI
-job already include it. No additional PR or branch-push Action trigger is added.
+Use a compatible Core caret constraint with a published minimum; keep exact
+resolved versions/integrity in the lockfile. A newer Core release does not
+automatically update a consumer's locked resolution. Run `bun run check:react-core`
+after building both packages under the affected Ready PR/source and release gates;
+the lightweight push hook does not repeat it.
 
 The gate always tests the same React sources and packed React archive in two
 separate system-temp consumers:
 
-- **current** installs the exact Core version declared by React from the public npm
+- **current** installs the exact published minimum of React’s Core constraint from the public npm
   registry, never from the workspace.
 - **candidate** installs the locally built Core archive and intentionally overrides
   React's Core dependency for compatibility testing only. Package manifests in the
@@ -332,7 +333,7 @@ remarks without changing their runtime behavior or callable contracts. The
 ordinary documentation gate rejects duplicate singleton remarks/returns tags in
 maintained package source; warnings and external documentation coverage stay strict.
 
-The prepared React manifest must retain exact, already published Core **0.2.1**
+The prepared React manifest uses **^0.2.1**, with an already published minimum,
 until Core 0.2.2 publication is independently confirmed. Source version strings,
 passing candidate checks and prepared changelogs do not establish publication.
 Use this delivery order:
@@ -342,7 +343,7 @@ Use this delivery order:
    staging, maintainer 2FA approval and completion flow. Confirm npm version and
    archive identity, required tags and successful `npm-core` Deployment.
 2. Only after that checkpoint, update the still-unpublished React 0.3.1 dependency
-   to exact Core **0.2.2**, refresh its lockfile and generated documentation, and
+   to Core **^0.2.2**, refresh its lockfile and generated documentation, and
    update its final changelog/host instructions. Run `check:react-core --release`
    and the maintained source and packed-consumer checks. When the host selects
    the same Core version, it and React must resolve one Core module, without
@@ -356,7 +357,7 @@ immutable. React 0.3.0 continues to require Core 0.2.0. No runtime fix is added 
 `react-core-policy.json`; the Core 0.2.2 prerequisite here delivers corrected
 consumer declaration documentation. Consumers and portal ingestion retain their
 confirmed published versions until each relevant publication is verified. Owning
-consumers then update exact dependencies and verify actual published archives.
+consumers then update published minimum constraints and exact locked resolutions, and verify actual published archives.
 Public CI does not require restricted source, credentials or receipts.
 
 ## Core 0.2.1 and React 0.3.0 documentation handoff
@@ -438,4 +439,4 @@ retire its executable dispatch capability after the incident, retaining Git hist
 
 These workflow/control changes require no package version increment: neither npm
 package's payload, exports nor dependencies change. Private consumer adoption is
-outside this recovery task; exact published dependencies remain its prerequisite.
+outside this recovery task; reviewed published constraints and exact resolved archive identities remain its prerequisite.

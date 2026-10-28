@@ -10,6 +10,7 @@ function fixture(run){
  const root=mkdtempSync(join(tmpdir(),'appkit-generation-')),out=mkdtempSync(join(tmpdir(),'appkit-fresh-'));
  try{
   mkdirSync(join(root,'scripts'));
+  copyFileSync(join(source,'scripts/dependency-constraints.mjs'),join(root,'scripts/dependency-constraints.mjs'));
   copyFileSync(join(source,'scripts/generate-docs.mjs'),join(root,'scripts/generate-docs.mjs'));
   cpSync(join(source,'scripts/agent'),join(root,'scripts/agent'),{recursive:true});
   copyFileSync(join(source,'agent-policy.json'),join(root,'agent-policy.json'));

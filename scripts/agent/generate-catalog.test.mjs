@@ -77,3 +77,12 @@ test('registry and workspace installations give the same declaration digest',()=
   assert.deepEqual(generateCatalog(options),registry);
  }finally{rmSync(workspace,{recursive:true,force:true});}
 }));
+
+test('caret Core catalogs bind the actual compatible resolved version and reject incompatible versions',()=>fixture((dir,policy)=>{
+ coreDependency(dir,'0.2.1');
+ const file=path.join(dir,'package.json'),pkg=JSON.parse(readFileSync(file,'utf8'));pkg.dependencies['@alneas/appkit-core']='^0.2.0';writeFileSync(file,JSON.stringify(pkg));
+ const first=generateCatalog({packageDir:dir,policy:reactPolicy(policy)});
+ const dependency=path.join(dir,'node_modules/@alneas/appkit-core/package.json'),installed=JSON.parse(readFileSync(dependency,'utf8'));installed.version='0.2.2';writeFileSync(dependency,JSON.stringify(installed));
+ const second=generateCatalog({packageDir:dir,policy:reactPolicy(policy)});assert.notEqual(first.inputDigest,second.inputDigest);
+ installed.version='0.3.0';writeFileSync(dependency,JSON.stringify(installed));assert.throws(()=>generateCatalog({packageDir:dir,policy:reactPolicy(policy)}),/Core/);
+}));

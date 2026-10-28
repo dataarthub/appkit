@@ -34,3 +34,17 @@ Local preflight does not claim remote CI or committed-candidate proof. Commit/pu
 merge and publication require their existing authorization.
 
 Remote execution and committed-candidate proof remain pending authorized delivery.
+
+### Policy source and integration scope
+
+Policy review uses github-docs `f5ecca0dc9e1da333c7653cbf42220d4e37348b6`.
+The workflow supply stays based on `612b785efe4a5e571d59ae0a138a1cbe0060d0d0`
+so its reviewed reuse callbacks, Draft selection and merge-group support are
+preserved. The private registry-constraint conformance files are the unchanged
+policy-only imports from f5ecca0, recorded by exact file and bundle hashes. This
+is a reviewed composite, not a claim that the complete latest supplier was
+adopted. Tests, memory limits and human requirements remain unchanged.
+
+Author self-review of this adoption is not independent review. Independent PR
+review, current remote checks and any required human decision remain pending.
+No protected AI controller/provider integration is deployed by these changes.

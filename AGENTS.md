@@ -4,7 +4,8 @@ This is the independent public repository dataarthub/appkit. It owns exactly two
 npm packages: @alneas/appkit-core and @alneas/appkit-react, both initially 0.1.0.
 Keep package.json, bun.lock, turbo.json and CI local to this repository. Never
 create a workspace, production source alias or file/link dependency to the sibling
-appkit-private repository. Production internal dependencies use exact npm versions.
+appkit-private repository. Library dependencies use compatible published registry constraints by default;
+keep exact resolutions/integrity in bun.lock and review narrower exceptions.
 Private consumers use published versions; only selected disposable verification
 fixtures replace them with reviewed archives. Never copy Private sources or
 operational evidence into public packages or the approved documentation manifest.
@@ -94,3 +95,10 @@ reviewed checkout and confirm every other required PR check and review. Keep the
 existing required up-to-date branch rule enabled. The command is read-only and
 source-specific; success does not authorize a merge. Raw logs without reusable
 input/run bindings remain historical records, never manufactured cache passes.
+
+## Dependency constraints and AI review
+
+Follow CONTRIBUTING.md for published minima, compatible ranges, isolated consumer
+lanes and temporary coordinated-version exceptions. Follow its AI-assisted review
+section for independent context, evidenced findings, disposition and bounded
+re-review. Author self-review is not independent review or human approval.

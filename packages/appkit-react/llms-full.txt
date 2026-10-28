@@ -267,8 +267,8 @@ then ingest the reviewed 0.3.0 source and API catalog together.
 
 ## React 0.3.1 dependency alignment (release preparation)
 
-React 0.3.1 is prepared with an exact dependency on the already published Core
-0.2.1. It adds no API migration beyond 0.3.0. Published React 0.3.0 retains its
+React 0.3.1 is prepared with Core `^0.2.1`, starting at the already published
+0.2.1 release. Applications keep an exact selected version in their lockfile. It adds no API migration beyond 0.3.0. Published React 0.3.0 retains its
 exact Core 0.2.0 dependency; the 0.3.0 commands below remain its historical route.
 
 After confirming React 0.3.1 is available, hosts with a direct Core dependency

@@ -1,3 +1,4 @@
+import {dependencyAccepts} from '../dependency-constraints.mjs';
 import ts from 'typescript';
 import {readFileSync,existsSync} from 'node:fs';
 import path from 'node:path';
@@ -28,19 +29,20 @@ export function generateCatalog({packageDir,policy,readFile=file=>readFileSync(f
  }
  const roots=[...new Set(entryData.filter(e=>e.kind==='module').flatMap(e=>[e.targets.esmTypes,e.targets.commonjsTypes]).filter(Boolean).map(contained))];
  const compilerOptions={module:ts.ModuleKind.NodeNext,moduleResolution:ts.ModuleResolutionKind.NodeNext,skipLibCheck:true,noLib:true,types:[],strict:true};
- const coreName='@alneas/appkit-core',requiredCore=pkg.dependencies?.[coreName],coreRoots=new Set();
+ const coreName='@alneas/appkit-core',requiredCore=pkg.dependencies?.[coreName],coreRoots=new Set(),coreVersions=new Set();
  if(requiredCore){
   for(const file of roots){
    const mode=file.endsWith('.cts')?ts.ModuleKind.CommonJS:ts.ModuleKind.ESNext;
    const resolved=ts.resolveModuleName(coreName,file,compilerOptions,ts.sys,undefined,undefined,mode).resolvedModule;
-   if(resolved?.packageId?.version!==requiredCore)throw Error(`Resolved Core ${resolved?.packageId?.version??'is missing'}; expected ${requiredCore}. Reinstall dependencies before generating documentation.`);
+   if(!dependencyAccepts(requiredCore,resolved?.packageId?.version))throw Error(`Resolved Core ${resolved?.packageId?.version??'is missing'}; expected ${requiredCore}. Reinstall dependencies before generating documentation.`);
    let directory=path.dirname(resolved.resolvedFileName);
    while(!existsSync(path.join(directory,'package.json'))&&path.dirname(directory)!==directory)directory=path.dirname(directory);
    const manifest=JSON.parse(readFileSync(path.join(directory,'package.json'),'utf8'));
-   if(manifest.name!==coreName||manifest.version!==requiredCore)throw Error(`Resolved Core manifest does not match expected ${requiredCore}. Reinstall dependencies before generating documentation.`);
-   coreRoots.add(directory);
+   if(manifest.name!==coreName||!dependencyAccepts(requiredCore,manifest.version)||manifest.version!==resolved.packageId.version)throw Error(`Resolved Core manifest does not match expected ${requiredCore}. Reinstall dependencies before generating documentation.`);
+   coreRoots.add(directory);coreVersions.add(manifest.version);
   }
-  inputs.set('resolved-core.json',Buffer.from(JSON.stringify({name:coreName,version:requiredCore})));
+  if(coreVersions.size!==1)throw Error('ESM/CommonJS Core versions differ');
+  inputs.set('resolved-core.json',Buffer.from(JSON.stringify({name:coreName,version:[...coreVersions][0]})));
  }
  const program=ts.createProgram(roots,compilerOptions),checker=program.getTypeChecker();
  const printer=ts.createPrinter({removeComments:true,newLine:ts.NewLineKind.LineFeed});

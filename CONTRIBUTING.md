@@ -7,13 +7,13 @@ Published package engines remain `>=24.0.0`. CI resolves fresh Node 24 and 26 pa
 1. Change the owning source and API JSDoc.
 2. Update its English feature guide, including the exact public import subpath. Install commands use package names, not subpaths.
 3. Run affected tests and packaging/type checks. Record commands and identify reused evidence in the PR.
-4. Open a PR explaining the problem and resulting behavior. Version 0.1.0 is already published; review later version changes together with internal pins. Working-tree changes are candidates for a future release, not updates to the existing npm version.
+4. Open a PR explaining the problem and resulting behavior. Version 0.1.0 is already published; review later version changes together with dependency constraints. Working-tree changes are candidates for a future release, not updates to the existing npm version.
 
 `bun run check:release` checks public entry loading, root APIs and packaged files. `bun run check:docs` checks selected sources, subpaths and relative links. Builds generate the export reference and AI indexes; do not hand-edit generated files.
 
 Routine CI uses Turbo caching for builds, types and unit tests. Browser/database checks are selected when their integration boundaries change. Releases reuse the exact source commit's successful main quality run for browser evidence. Cache hits are prior passing results for matching source, helpers, dependencies and Node/Bun/platform runtime.
 
-Keep temporary fixtures in .verification/tmp and logs in .verification/logs. Packed consumers use a disposable system-temp directory so undeclared imports cannot resolve through checkout node_modules. Both are excluded from Git and public manifests. Public and private remain independent repositories with separate lockfiles; private uses exact published public versions. Only explicitly selected disposable consumer fixtures replace registry versions with reviewed tarballs.
+Keep temporary fixtures in .verification/tmp and logs in .verification/logs. Packed consumers use a disposable system-temp directory so undeclared imports cannot resolve through checkout node_modules. Both are excluded from Git and public manifests. Public and private remain independent repositories with separate lockfiles; private uses published registry constraints with exact locked resolutions. Only explicitly selected disposable consumer fixtures replace registry versions with reviewed tarballs.
 
 Ignored files are not automatically safe to share. Verification receipts, including `archives.json`, can contain absolute archive paths and environment details. Keep original receipts local so their hashes remain usable; inspect and redact a separate copy before sharing it. Do not upload raw `.verification/` files as CI artifacts or force-add them to Git. Check logs for credentials without printing matching values; revoke an exposed credential if one is confirmed.
 
@@ -123,7 +123,7 @@ completion dispatch confirms approved bytes/tags and records the Deployment. See
 a Release; tag pushes alone do not publish npm packages.
 
 The full gate also runs `bun run check:react-core`: React types, unit tests and
-packed-consumer SSR/load checks against both its exact registry Core dependency and
+packed-consumer SSR/load checks against both its minimum registry Core dependency and
 the new Core archive in separate temporary installations. Network access is required.
 For Core fixes that must reach React users, add an ID, the first required Core
 version, a reason and the planned React adoption version to `react-core-policy.json`.
@@ -254,21 +254,27 @@ credentials, durable replay protection and authorization across MCP/plugin hosts
 remain the consuming service's responsibility. Injected instructions are data, not
 host authorization; no live-model safety evaluation is implied by these tests.
 
-Applications also own outbound AI destination/data-class approval, retention and
+For implemented AI/data capabilities, applications own applicable outbound
+destination/data-class approval, retention and
 delete propagation, equivalent fallback policy and a budget shared across retries
 and delegation. A bridge call limit is not a token/cost budget, and cancellation
 does not prove remote billing or effects stopped. Tenant isolation in file/search
 indexes, exports, queues, signed links and offboarding requires service-specific
 tests; generic adapter fixtures do not verify those delivery surfaces.
 
-Security reporting/triage, advisory monitoring, supported-version security fixes and
-expiring exceptions require maintainer ownership; this gate does not establish a
-response SLA. Supported runtime/package declarations and compatibility consumers
+Policy adoption adds no triage/remediation deadline, recurring monitoring duty,
+backport or future security-support guarantee. Describe a reporting contact only
+if one is actually offered; do not invent one or imply availability. Existing
+published or contractual commitments remain separate. For a security fix chosen
+for release, identify affected consumers, deliver it under the release policy and
+verify delivery. This gate establishes no response SLA. Supported runtime/package declarations and compatibility consumers
 are checked, while deprecation decisions and consequential API/security/data/CI
 review still require human review. No reviewer approval is inferred from a green
 suite. Recovery targets, isolated restores, persisted-schema migrations, durable-job
 deduplication/quarantine/replay and plugin suspension are host capabilities, not
-provided by the in-memory execution history. Verify them in the owning service.
+provided by the in-memory execution history. Verify affected implemented behavior in the owning service; adopting this
+policy does not require absent platforms, RTO/RPO targets or periodic restore
+exercises.
 Public documentation/asset/search/AI withdrawal and cache invalidation belong to
 the publishing service and portal; local builds do not establish deployed removal.
 
@@ -276,3 +282,59 @@ Reviewed no-release rationale for the contract-verification update: changes affe
 maintainer tests, verification orchestration and contributor guidance only. Package
 exports and runtime behavior are unchanged; no package version bump or consumer
 upgrade is required.
+
+## Dependency constraints
+
+Apply the shared [dependency-range contract](https://tech-docs.alneas.com/policies/development-policy.md#dependency-ranges-and-reproducible-resolution).
+Distributed runtime dependencies and peers default to compatible caret ranges,
+starting at a published version with all required APIs/fixes. Frozen installs keep
+exact resolutions and integrity in bun.lock. Range edits do not authorize an
+unrelated dependency upgrade. Pre-1.0 caret ranges stay within their minor line;
+`^0.0.x` does not admit the next patch. Package versions remain independent.
+
+React 0.3.1 preparation uses Core `^0.2.1`. `check:react-core` tests that published
+minimum and the current packed Core separately, verifying exact installed version,
+archive integrity, shared module identity, types and runtime behavior. A required
+fix raises the minimum; allowing the fixed version is insufficient. These lanes
+currently accept explicit exact/caret/tilde constraints; other forms need an
+explicitly reviewed verifier extension. Do not infer whole-range verification
+from one locked installation. Changed constraints require packed-consumer checks.
+
+Existing narrower constraints remain scoped exceptions: the dnd-kit 0.5.1 family
+and TanStack Query/Table paired packages retain their reviewed coordinated
+versions, with Query host/provider identity checked in the existing consumers.
+Revisit them in a dedicated dependency update with aligned-pair and singleton
+checks; this policy adoption does not establish compatibility for untested
+combinations. The pre-1.0 excelize-wasm peer remains 0.1.3 until another compatible
+version has been exercised by its feature consumer. Tooling and isolated-fixture
+pins keep their existing contracts.
+
+## AI-assisted review
+
+Apply the shared [AI-assisted review contract](https://tech-docs.alneas.com/policies/development-policy.md#ai-assisted-code-review)
+in the existing PR/task record. Give an independent reviewer the current diff,
+intent, applicable instructions and relevant code/check evidence, without the
+implementation conversation. Record severity, trigger, impact and file/line
+evidence for actionable findings; distinguish introduced defects, existing issues
+and optional improvements. Record each disposition with reasons and verification.
+A closed thread alone does not resolve a defect; verified blocking defects must
+be fixed or covered by an existing authorized narrow exception.
+
+Focus re-review on fixes and affected dependencies. Count review/fix rounds for
+the same change across commits; stop automatic iteration after three rounds and
+reassess. Further rounds need the maintainer's recorded rationale and bounded
+scope. The cap never clears outstanding checks. Scale depth to consequences;
+retain existing human approval requirements and bind evidence to the reviewed
+head/base. A no-findings report states scope and limits. Author self-review must
+be labeled and does not establish independent review. Confirmed escapes become
+focused regressions or concise review instructions where useful.
+
+This is the project review procedure, not a newly deployed AI gate. The shared
+[review controller](https://tech-docs.alneas.com/templates/review-control/README.md)
+requires protected persistent state, a fresh read-only provider session and real
+host approval adapters. Those integrations are not configured here. Existing
+`merge:check`, required CI and human decisions remain in force; no synthetic
+approvals, new fixed reviewer count, automatic repair loop or unattended merge
+is introduced. Evaluate maintained reviewer model/prompt/tool changes with the
+shared [review-evals procedure](https://tech-docs.alneas.com/templates/review-evals/README.md),
+keeping clean examples and confirmed defect cases within their owning visibility.
