@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { DragDropProvider, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/react';
 import { pointerIntersection } from '@dnd-kit/collision';
 import { cn } from '../../lib/utils';
+import {useAccessibleDragRef} from '../ui/dnd/use-accessible-drag-ref';
 import { KanbanCardView } from './KanbanCardView';
 import type { KanbanColumn, KanbanTask } from './types';
 import type { useKanbanDrag } from './use-kanban-drag';
@@ -95,6 +96,7 @@ export function KanbanDraggableCard({
     elementRef.current = element;
     ref(disabled ? null : element);
   }, [ref, disabled]);
+  const accessibleCardRef = useAccessibleDragRef(cardRef, !disabled);
   React.useLayoutEffect(() => {
     // Native ref cleanup retains an active source. Explicitly detach read-only
     // cards so Accessibility cannot restore drag attributes after React clears them.
@@ -110,7 +112,7 @@ export function KanbanDraggableCard({
   });
   return (
     <div
-      ref={cardRef}
+      ref={accessibleCardRef}
       tabIndex={disabled ? undefined : 0}
       role={disabled ? undefined : 'button'}
       aria-roledescription={disabled ? undefined : 'draggable'}

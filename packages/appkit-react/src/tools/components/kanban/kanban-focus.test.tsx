@@ -51,3 +51,39 @@ test('read-only custom cards retain caller accessibility attributes',()=>{
  expect(card.getAttribute('tabindex')).toBe('-1');
  expect(card.getAttribute('aria-describedby')).toBe('updated');
 });
+
+test('enabled cards retain modern drag state without deprecated aria-grabbed',async()=>{
+ const view=render(<DragDropProvider plugins={[Accessibility]}><KanbanDraggableCard task={tasks[0]}>One</KanbanDraggableCard></DragDropProvider>);
+ const card=view.container.querySelector<HTMLElement>('[data-task-id=one]')!;
+ await act(async()=>{await new Promise(r=>setTimeout(r,30));});
+ expect(card.getAttribute('aria-pressed')).toBe('false');
+ expect(card.hasAttribute('aria-grabbed')).toBe(false);
+ expect(card.getAttribute('aria-describedby')).toBeTruthy();
+});
+
+test('enabled card state resets and its observer disconnects while read-only caller state is retained',async()=>{
+ let manager: NonNullable<ReturnType<typeof useDragDropManager>>;
+ function Capture(){manager=useDragDropManager()!;return null;}
+ function View({disabled=false}){return <DragDropProvider plugins={[Accessibility]}><Capture/><KanbanDraggableCard task={tasks[0]} disabled={disabled} role={disabled?'article':undefined} aria-grabbed={disabled?'false':undefined}>One</KanbanDraggableCard></DragDropProvider>;}
+ const view=render(<View/>);
+ const card=view.container.querySelector<HTMLElement>('[data-task-id=one]')!;
+ await act(async()=>{manager!.dragOperation.sourceIdentifier='one';manager!.registry.draggables.get('one')!.status='dragging';await new Promise(r=>setTimeout(r,30));});
+ expect(card.getAttribute('aria-pressed')).toBe('true');
+ expect(card.hasAttribute('aria-grabbed')).toBe(false);
+ await act(async()=>{manager!.registry.draggables.get('one')!.status='idle';manager!.dragOperation.sourceIdentifier=null;await new Promise(r=>setTimeout(r,30));});
+ expect(card.getAttribute('aria-pressed')).toBe('false');
+ view.rerender(<View disabled/>);
+ await act(async()=>{await new Promise(r=>setTimeout(r,30));});
+ expect(card.getAttribute('role')).toBe('article');
+ expect(card.getAttribute('aria-grabbed')).toBe('false');
+ expect(card.hasAttribute('aria-pressed')).toBe(false);
+ view.rerender(<View/>);
+ await act(async()=>{await new Promise(r=>setTimeout(r,30));});
+ expect(card.getAttribute('aria-pressed')).toBe('false');
+ expect(card.hasAttribute('aria-grabbed')).toBe(false);
+ view.unmount();
+ card.setAttribute('aria-grabbed','detached');
+ await act(async()=>{});
+ expect(card.getAttribute('aria-grabbed')).toBe('detached');
+ expect(manager!.registry.draggables.get('one')).toBeUndefined();
+});

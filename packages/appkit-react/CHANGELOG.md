@@ -5,6 +5,15 @@ may be prepared before publication; confirm availability on the
 [npm package page](https://www.npmjs.com/package/@alneas/appkit-react). Publication
 dates are recorded only when confirmed.
 
+## Unreleased
+
+### Fixed
+
+- Remove deprecated `aria-grabbed` from DataTable, shared Draggable/FileBrowser activators and enabled Kanban cards while
+  retaining `aria-pressed`, keyboard/pointer dragging, screen-reader instructions
+  and live announcements. This correction requires a new React package release;
+  published 0.3.0 archives do not contain it.
+
 ## [0.3.0]
 
 ### Breaking changes

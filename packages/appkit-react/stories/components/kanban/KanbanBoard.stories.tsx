@@ -217,11 +217,17 @@ export const DragContract: Story = {
   },
   play: async ({canvasElement, args}) => {
     const card = () => canvasElement.querySelector<HTMLElement>('[data-task-id="move"]')!;
+    const expectDragState = async (state: string) => {
+      await waitFor(()=>expect(card()).toHaveAttribute('aria-pressed',state));
+      await expect(card()).not.toHaveAttribute('aria-grabbed');
+    };
     const column = () => card().closest('[data-column-id]')?.getAttribute('data-column-id');
     await waitFor(()=>expect(card()).toHaveAttribute('tabindex','0'));
+    await expectDragState('false');
     card().focus();
     await userEvent.keyboard('[Space]');
     await waitFor(()=>expect(canvasElement.ownerDocument.querySelector('[data-dnd-overlay]')?.textContent).toContain('Move me'));
+    await expectDragState('true');
     await userEvent.keyboard('{ArrowRight}');
     await waitFor(()=>expect(canvasElement.querySelector('[data-column-id=empty]')).toHaveAttribute('data-over','true'));
     await userEvent.keyboard('[Space]');
@@ -230,23 +236,29 @@ export const DragContract: Story = {
     // The optimistic board derives the custom status field without mutating task props.
     await expect(args.tasks[0].stage).toBe('todo');
     await waitFor(()=>expect(card()).toHaveAttribute('tabindex','0'));
+    await expectDragState('false');
     card().focus();
     await userEvent.keyboard('[Enter]');
     await waitFor(()=>expect(canvasElement.ownerDocument.querySelector('[data-dnd-overlay]')?.textContent).toContain('Move me'));
+    await expectDragState('true');
     await userEvent.keyboard('{ArrowRight}');
     await waitFor(()=>expect(canvasElement.querySelector('[data-column-id=done]')).toHaveAttribute('data-over','true'));
     await userEvent.keyboard('[Escape]');
+    await expectDragState('false');
     await expect(column()).toBe('empty');
     await expect(args.onStatusChange).toHaveBeenCalledTimes(1);
     await waitFor(()=>expect(card()).toHaveAttribute('tabindex','0'));
+    await expectDragState('false');
     card().focus();
     await userEvent.keyboard('[Space]');
     await waitFor(()=>expect(canvasElement.ownerDocument.querySelector('[data-dnd-overlay]')?.textContent).toContain('Move me'));
+    await expectDragState('true');
     await userEvent.keyboard('{ArrowRight}');
     await waitFor(()=>expect(canvasElement.querySelector('[data-column-id=done]')).toHaveAttribute('data-over','true'));
     await userEvent.keyboard('[Space]');
     await waitFor(() => expect(column()).toBe('done'));
     await expect(args.onStatusChange).toHaveBeenCalledTimes(2);
+    await expectDragState('false');
     await expect(args.onOrderChange).not.toHaveBeenCalled();
   },
 };
