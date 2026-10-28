@@ -6,8 +6,9 @@ import {useCallback, type RefCallback} from 'react';
  * attributes; observing only this attribute preserves its instructions, live
  * announcements, aria-pressed state, keyboard sensor and pointer sensor.
  */
-export function useColumnDragHandleRef(handleRef: RefCallback<HTMLElement>): RefCallback<HTMLButtonElement> {
-  return useCallback((element: HTMLButtonElement | null) => {
+export function useAccessibleDragRef<T extends Element>(handleRef: RefCallback<T>, enabled = true): RefCallback<T> {
+  return useCallback((element: T | null) => {
+    if (!enabled) return handleRef(element);
     if (!element) {
       handleRef(null);
       return;
@@ -25,5 +26,5 @@ export function useColumnDragHandleRef(handleRef: RefCallback<HTMLElement>): Ref
       if (typeof cleanup === 'function') cleanup();
       else handleRef(null);
     };
-  }, [handleRef]);
+  }, [handleRef, enabled]);
 }

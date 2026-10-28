@@ -1,5 +1,6 @@
 import type {CSSProperties, ReactNode} from 'react';
 import {useDraggable} from '@dnd-kit/react';
+import {useAccessibleDragRef} from './use-accessible-drag-ref';
 
 /** Native draggable options; render refs replace legacy attributes/listeners. */
 export interface DraggableProps {
@@ -42,5 +43,7 @@ export interface DraggableProps {
  */
 export function Draggable({id, data, children}: DraggableProps) {
   const {ref, handleRef, isDragging} = useDraggable({id, data});
-  return <>{children({ref, handleRef, isDragging, style: {opacity: isDragging ? 0.5 : undefined, cursor: 'grab'}})}</>;
+  const accessibleRef = useAccessibleDragRef(ref);
+  const accessibleHandleRef = useAccessibleDragRef(handleRef);
+  return <>{children({ref: accessibleRef, handleRef: accessibleHandleRef, isDragging, style: {opacity: isDragging ? 0.5 : undefined, cursor: 'grab'}})}</>;
 }

@@ -36,7 +36,9 @@ DataTable is also available from `@alneas/appkit-react/tools/data-table`. Its
 column reorder button supports Space to pick up/drop, arrow keys to move, and
 Escape to cancel. It exposes `aria-pressed` for drag state and retains the native
 screen-reader instructions and live announcements. The deprecated `aria-grabbed`
-attribute is removed from column reorder buttons.
+attribute is removed from column reorder buttons, shared Draggable activators
+(including FileBrowser grid/list handles), and enabled Kanban cards. Read-only
+Kanban cards retain explicitly supplied caller accessibility attributes.
 
 ## Verification
 

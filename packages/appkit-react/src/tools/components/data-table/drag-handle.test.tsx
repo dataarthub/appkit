@@ -19,14 +19,14 @@ import {StrictMode, useCallback, type RefCallback} from 'react';
 import {act} from '@testing-library/react';
 import {DragDropProvider, useDragDropManager, useDraggable} from '@dnd-kit/react';
 import {Accessibility} from '@dnd-kit/dom';
-import {useColumnDragHandleRef} from './drag-handle';
+import {useAccessibleDragRef} from '../ui/dnd/use-accessible-drag-ref';
 
 test('native handle state follows active/reset lifecycle and unregisters on unmount', async () => {
   let manager: NonNullable<ReturnType<typeof useDragDropManager>>;
   function DragHandle() {
     manager = useDragDropManager()!;
     const {ref, handleRef} = useDraggable({id: 'title'});
-    const accessibleRef = useColumnDragHandleRef(handleRef);
+    const accessibleRef = useAccessibleDragRef(handleRef);
     return <div ref={ref}><button ref={accessibleRef}>Reorder title</button></div>;
   }
   const view = render(<StrictMode><DragDropProvider plugins={[Accessibility]}><DragHandle /></DragDropProvider></StrictMode>);
@@ -63,7 +63,7 @@ test.each([false, true])('ref replacement and React 19 cleanup preserve native r
       attached.push(node);
       if (returnsCleanup && node) return () => {cleaned.push(node);};
     }, []);
-    const ref = useColumnDragHandleRef(nativeRef);
+    const ref = useAccessibleDragRef(nativeRef);
     return <button key={id} ref={ref}>{id}</button>;
   }
   const view = render(<Handle id="first" />);

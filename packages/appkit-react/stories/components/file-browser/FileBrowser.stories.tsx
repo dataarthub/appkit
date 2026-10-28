@@ -198,6 +198,8 @@ function movementProvider():FileProvider{
 }
 async function moveWithKeyboard(canvasElement:HTMLElement,mode:'grid'|'list'){
  const canvas=within(canvasElement);const handle=await canvas.findByRole('button',{name:'Move Report.txt'});
+ await waitFor(()=>expect(handle).toHaveAttribute('aria-pressed','false'));
+ await expect(handle).not.toHaveAttribute('aria-grabbed');
  handle.focus();
  // Native keyboard movement uses 10px increments; reach the folder using actual geometry.
  const source=handle.closest(mode==='list'?'tr':'[data-file-drag]')!;
@@ -206,6 +208,8 @@ async function moveWithKeyboard(canvasElement:HTMLElement,mode:'grid'|'list'){
  const dx=b.x+b.width/2-(a.x+a.width/2),dy=b.y+b.height/2-(a.y+a.height/2);
  await userEvent.keyboard('[Space]');
  await waitFor(()=>expect(source).toHaveAttribute('data-dnd-dragging','true'));
+ await waitFor(()=>expect(handle).toHaveAttribute('aria-pressed','true'));
+ await expect(handle).not.toHaveAttribute('aria-grabbed');
  for(let i=0;i<Math.round(Math.abs(dx)/10);i++)await userEvent.keyboard(dx>0?'{ArrowRight}':'{ArrowLeft}');
  for(let i=0;i<Math.round(Math.abs(dy)/10);i++)await userEvent.keyboard(dy>0?'{ArrowDown}':'{ArrowUp}');
  await waitFor(()=>expect(folder).toHaveAttribute('data-drop-over','true'));
@@ -236,7 +240,14 @@ export const CancelMoveContract:Story={
  args:{provider:movementProvider(),initialViewMode:'list',className:'h-[550px] w-full'},
  play:async({canvasElement,args})=>{
   const canvas=within(canvasElement);const handle=await canvas.findByRole('button',{name:'Move Report.txt'});handle.focus();
-  await userEvent.keyboard('[Space]{ArrowDown}{Escape}');
+  await waitFor(()=>expect(handle).toHaveAttribute('aria-pressed','false'));
+  await expect(handle).not.toHaveAttribute('aria-grabbed');
+  await userEvent.keyboard('[Space]');
+  await waitFor(()=>expect(handle).toHaveAttribute('aria-pressed','true'));
+  await expect(handle).not.toHaveAttribute('aria-grabbed');
+  await userEvent.keyboard('{ArrowDown}{Escape}');
+  await waitFor(()=>expect(handle).toHaveAttribute('aria-pressed','false'));
+  await expect(handle).not.toHaveAttribute('aria-grabbed');
   await waitFor(()=>expect(document.activeElement).toBe(handle));await expect(args.provider!.moveNode).not.toHaveBeenCalled();
   await userEvent.click(canvas.getByText('Report.txt'));await expect(canvas.getByText('1 selected')).toBeTruthy();
   await userEvent.pointer({target:canvas.getByText('Report.txt'),keys:'[MouseRight]'});await expect(await within(document.body).findByRole('menu')).toBeTruthy();

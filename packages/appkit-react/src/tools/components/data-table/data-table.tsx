@@ -63,7 +63,7 @@ import {
 } from '../ui/dropdown-menu';
 
 import { useDataTableStore } from './table-store';
-import { useColumnDragHandleRef } from './drag-handle';
+import { useAccessibleDragRef } from '../ui/dnd/use-accessible-drag-ref';
 
 // =============================================================================
 // Types
@@ -111,7 +111,7 @@ function DataTableColumnHeader<TData extends object, TValue>({
     collisionDetector: closestCenter,
   });
 
-  const columnHandleRef = useColumnDragHandleRef(handleRef);
+  const columnHandleRef = useAccessibleDragRef(handleRef);
 
   const canSort = header.column.getCanSort();
   const sortDirection = header.column.getIsSorted();
