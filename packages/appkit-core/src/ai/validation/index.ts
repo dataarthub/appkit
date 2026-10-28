@@ -43,9 +43,9 @@ export interface AjvValidatorOptions {
  * not business validation rules merely because strict mode is disabled.
  * Compilation/configuration failures throw; invalid data returns valid: false.
  * Runtime compilation requires a host that permits AJV's generated functions.
+ * Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used.
  *
  * @throws Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator.
- * @remarks Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used.
  *
  * @example
  * ```typescript

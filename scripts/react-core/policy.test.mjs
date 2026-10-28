@@ -1,3 +1,4 @@
+import {dependencyAccepts, dependencyMinimum} from '../dependency-constraints.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {checkPolicy, matrixVerdict} from './policy.mjs';
@@ -17,8 +18,8 @@ test('numeric version ordering and prereleases cannot bypass requirements', () =
   for (const version of ['0.1.9', '0.1.10-rc.1']) assert.throws(() => checkPolicy({core, react: {...react, dependencies: {'@alneas/appkit-core': version}}, policy: required}), /fix/);
   assert.doesNotThrow(() => checkPolicy({core, react: {...react, dependencies: {'@alneas/appkit-core': '0.1.11'}}, policy: required}));
 });
-test('invalid policy, nonexact dependencies and unpublished future requirements fail closed', () => {
-  for (const version of ['^0.1.0', 'workspace:*', 'file:core.tgz', '01.1.0', '0.1.0-01']) assert.throws(() => checkPolicy({core, react: {...react, dependencies: {'@alneas/appkit-core': version}}, policy}));
+test('invalid policy, nonregistry dependencies and unpublished future requirements fail closed', () => {
+  for (const version of ['latest', 'workspace:*', 'file:core.tgz', '01.1.0', '0.1.0-01']) assert.throws(() => checkPolicy({core, react: {...react, dependencies: {'@alneas/appkit-core': version}}, policy}));
   for (const bad of [{}, {...policy, schemaVersion: 2}, {...policy, requirements: [{id: 'a', coreVersion: '0.3.0', reason: 'future'}]}, {...policy, requirements: [{id: 'a', coreVersion: '0.1.0', reason: ''}]}]) assert.throws(() => checkPolicy({core, react, policy: bad}));
 });
 test('all four matrix outcomes require both lanes to pass and explain the difference', () => {
@@ -48,4 +49,22 @@ test('staging never relaxes version validation or already active requirements', 
   }
   assert.throws(() => checkPolicy({core: {version: '0.1.0'}, react, policy: {schemaVersion: 1, requirements: [entry]}}), /Core version/);
   assert.throws(() => checkPolicy({core, react: {...react, version: '0.1.2-rc.1'}, policy: {schemaVersion: 1, requirements: [{...entry, reactVersion: '0.1.1'}]}}), /React dependency/);
+});
+
+test('compatible registry constraints use their minimum and cannot merely permit a required fix', () => {
+  const required = {schemaVersion: 1, requirements: [{id: 'fix', coreVersion: '0.1.1', reason: 'Required fix'}]};
+  for (const range of ['^0.1.1', '~0.1.1', '0.1.1']) {
+    const result = checkPolicy({core, react: {...react, dependencies: {'@alneas/appkit-core': range}}, policy: required});
+    assert.equal(result.requiredCore, '0.1.1');
+    assert.equal(result.coreConstraint, range);
+  }
+  assert.throws(() => checkPolicy({core, react: {...react, dependencies: {'@alneas/appkit-core': '^0.1.0'}}, policy: required}), /fix/);
+  for (const range of ['*', '>=0.1.1', '^0.1', '^0.1.1 || ^0.2.0']) {
+    assert.throws(() => checkPolicy({core, react: {...react, dependencies: {'@alneas/appkit-core': range}}, policy}));
+  }
+});
+
+test('range membership preserves pre-1.0 boundaries and excludes unselected prereleases',()=>{
+ assert.equal(dependencyMinimum('^0.2.1'),'0.2.1');
+ for(const [constraint,version,accepted] of [['^0.2.1','0.2.2',true],['^0.2.1','0.3.0',false],['^0.2.1','0.2.2-rc.1',false],['^0.0.3','0.0.4',false],['~1.2.3','1.3.0',false],['1.2.3','1.2.4',false]])assert.equal(dependencyAccepts(constraint,version),accepted);
 });

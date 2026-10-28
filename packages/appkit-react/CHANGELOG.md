@@ -5,9 +5,25 @@ may be prepared before publication; confirm availability on the
 [npm package page](https://www.npmjs.com/package/@alneas/appkit-react). Publication
 dates are recorded only when confirmed.
 
-## Unreleased
+## [0.3.1]
 
-### Fixed
+- Preserve the KanbanColumnFrame registration/ref requirements in one JSDoc remarks
+  block so strict API documentation consumers retain the full guidance without
+  duplicate-tag warnings. Runtime behavior and callable types are unchanged.
+
+- Correct GenerativeUIRenderer declaration documentation to retain all rendering
+  requirements and fallback notes in one remarks block. Strict TypeDoc consumers
+  can generate API documentation without duplicate-tag warnings; runtime behavior,
+  exports and callable types are unchanged.
+- Use Core **^0.2.1** with the published minimum during preparation. Publish the Core
+  **0.2.2** declaration-documentation patch first; only then update this prepared
+  React dependency, final changelog and host instructions to **^0.2.2** and
+  verify one shared Core installation before React 0.3.1 publication.
+- This patch aligns the delivered Core documentation and dependency resolution;
+  it adds no public API changes. The breaking migration from React 0.2.x remains
+  documented under 0.3.0 and in the bundled migration guide.
+- This entry describes release preparation. Confirm npm availability before
+  adopting React 0.3.1; published React 0.3.0 continues to require Core 0.2.0.
 
 - Remove deprecated `aria-grabbed` from DataTable, shared Draggable/FileBrowser activators and enabled Kanban cards while
   retaining `aria-pressed`, keyboard/pointer dragging, screen-reader instructions
@@ -115,6 +131,7 @@ dates are recorded only when confirmed.
 - Initial public release of React UI, forms, tables, providers and AI bindings,
   with ESM, CommonJS, TypeScript declarations and explicit styles.
 
+[0.3.1]: https://github.com/dataarthub/appkit/compare/appkit-react-v0.3.0...appkit-react-v0.3.1
 [0.3.0]: https://github.com/dataarthub/appkit/compare/appkit-react-v0.2.0...appkit-react-v0.3.0
 [0.2.0]: https://github.com/dataarthub/appkit/compare/v0.1.0...appkit-react-v0.2.0
 [0.1.0]: https://github.com/dataarthub/appkit/releases/tag/v0.1.0

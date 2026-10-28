@@ -1,5 +1,5 @@
-# Generated: github-docs/public/templates/private-actions/public; reviewed base 08b7e72ee44f3b6f469490903569bbd325a923b0 (local-reviewed).
-# Bundle SHA-256: d5251365e49bc3d17d71bdb44741f057e44610f0cd85487a6da07207d2442003
+# Generated: github-docs/public/templates/private-actions/public; reviewed base 612b785efe4a5e571d59ae0a138a1cbe0060d0d0 (local-reviewed).
+# Bundle SHA-256: 17b91fb4c515b39249db50a65fb034f1e6bf78f256305cc4b603b511cf33af1f
 # Project adapter: .github/workflow-adapter.json; source: scripts/workflow-project/roles.json
 # Run workflow:generate explicitly; workflow:check never repairs output.
 name: "Shared package quality"
@@ -72,29 +72,59 @@ jobs:
           restore-keys: "${{ runner.os }}-${{ runner.arch }}-appkit-two-node${{ matrix.node }}-"
         name: "Shared: actions/cache/restore@v4"
       -
+        name: "Project: Authenticate immutable source check receipts"
+        id: "verification-proof"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+        run: "node scripts/verification-evidence.mjs restore"
+      -
         name: "Project: Select checks since the last successful main ancestor"
         id: "selection"
         env:
           GITHUB_TOKEN: "${{ github.token }}"
+          SOURCE_CHECKS_RESTORE_TRUSTED: "${{ steps.verification-proof.outputs.restored == 'true' && '1' || '0' }}"
+          SOURCE_COMPLETE_INHERITED: "${{ steps.verification-proof.outputs.inherited }}"
         run: "node scripts/workflow-adapter.mjs plan"
       -
         name: "Project: Install pinned Chromium for Storybook verification"
         if: "matrix.node == 24 && steps.selection.outputs.browser == 'true'"
         run: "bunx --no-install playwright install --with-deps chromium"
       -
-        name: "Project: Run the same gate as local pre-push"
+        name: "Project: Verify selected Ready PR source checks"
         if: "matrix.node == 24"
         run: |
           bun run secrets:setup
-          bun run verify:push --ci-plan
+          bun run quality:ci --ci-plan
+        env:
+          SOURCE_CHECKS_RESTORE_TRUSTED: "${{ steps.verification-proof.outputs.restored == 'true' && '1' || '0' }}"
+          SOURCE_COMPLETE_INHERITED: "${{ steps.verification-proof.outputs.inherited }}"
       -
         name: "Project: Verify Node 26 compatibility"
         if: "matrix.node != 24"
         run: "node scripts/verification/run.mjs --ci-plan --node-compat"
+        env:
+          SOURCE_CHECKS_RESTORE_TRUSTED: "${{ steps.verification-proof.outputs.restored == 'true' && '1' || '0' }}"
+          SOURCE_COMPLETE_INHERITED: "${{ steps.verification-proof.outputs.inherited }}"
       -
         name: "Project: Verify isolated packed consumer when explicitly requested"
         if: "matrix.node == 24 && inputs.packed_consumer == true"
         run: "bun run test:consumer"
+      -
+        name: "Project: Verify independent public side after mandatory source checks"
+        if: "matrix.node == 24"
+        run: "node scripts/paired-public.mjs"
+      -
+        name: "Shared: Preserve public-only side evidence"
+        if: "matrix.node == 24"
+        uses: "actions/upload-artifact@v7"
+        with:
+          name: "appkit-public-side-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}"
+          path: |
+            ${{ runner.temp }}/appkit-public-side/public-plan.json
+            ${{ runner.temp }}/appkit-public-side/public-receipt.json
+            ${{ runner.temp }}/appkit-public-side/producer.json
+          if-no-files-found: "error"
+          retention-days: 7
       -
         uses: "actions/cache/save@v4"
         if: "${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && (!cancelled() && hashFiles('.turbo/cache/**') != '') }}"
@@ -102,6 +132,25 @@ jobs:
           path: ".turbo/cache"
           key: "${{ steps.tasks.outputs.cache-primary-key }}"
         name: "Shared: actions/cache/save@v4"
+      -
+        name: "Project: Seal source verification receipt"
+        env:
+          GITHUB_TOKEN: "${{ github.token }}"
+          SOURCE_VERIFICATION_CONCLUSION: "${{ job.status }}"
+        run: "node scripts/verification-evidence.mjs record"
+        if: "${{ !cancelled() }}"
+      -
+        name: "Shared: Preserve immutable source verification"
+        uses: "actions/upload-artifact@v7"
+        with:
+          name: "verification-node${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}"
+          path: |
+            .verification/records/ci-evidence/source.json
+            .verification/records/ci-evidence/checks.json
+          include-hidden-files: true
+          if-no-files-found: "error"
+          retention-days: 14
+        if: "${{ !cancelled() }}"
       -
         name: "Shared: Save successful download/task cache"
         if: "${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.shared-cache-5.outputs.cache-hit != 'true' }}"

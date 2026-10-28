@@ -32,14 +32,14 @@ function defaultFallback(issue: GenerativeUIIssue): ReactNode {
  * Block identity includes document ID, block ID/type and data.
  *
  *
- * @param props - Immutable response, explicit registry and optional localized fallback renderer.
- *
- * @returns Block wrappers and registered elements, or fallback content for invalid input.
- *
- * @remarks Requires React; registered components own any other providers or CSS.
+ * Requires React; registered components own any other providers or CSS.
  * The default fallback is an English status paragraph. Client error boundaries handle
  * descendant render failures; React server rendering errors are not isolated by them.
  * Fallback callback errors propagate. Changing registry identity remounts blocks.
+ *
+ * @param props - Immutable response, explicit registry and optional localized fallback renderer.
+ *
+ * @returns Block wrappers and registered elements, or fallback content for invalid input.
  *
  * @example
  * ```tsx

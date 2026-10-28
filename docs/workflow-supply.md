@@ -39,7 +39,7 @@ Common code owns naming, standard triggers, scoped credentials, main-only succes
 
 The project impact selector still selects packages, related Storybook stories and compatibility checks. It receives only a shared verified main ancestor; absent compatible evidence selects the full existing gate. Turbo reports actual cache hits.
 
-The mandatory secret-history check still runs. Selection requires a latest successful main run/attempt, successful jobs for every declared Node runtime and an unexpired immutable receipt with compatible execution identity. Failed intervening changes stay in scope. Missing/incompatible evidence, history or API access select full verification. Executed checks, exact-input local reuse and out-of-scope omissions are different outcomes. Local/PR success cannot satisfy a Release's official source-evidence requirement.
+The mandatory secret-history check still runs. Selection requires a latest successful main run/attempt, successful jobs for every declared Node runtime and an unexpired immutable receipt with compatible execution identity. Failed intervening changes stay in scope. Missing/incompatible evidence, history or API access select full verification. Executed checks, exact-input local reuse and out-of-scope omissions are different outcomes. Local success cannot satisfy official source evidence. Validated PR evidence can be inherited by main only after actual tree, producer, attempt, required jobs, artifact digest and execution identity match; Release still authenticates the resulting main source proof.
 
 Release verification requires Source quality success for the exact selected commit and keeps existing current-archive and registry checks. Release preparation reuses deterministic source suites only after validating the exact official main proof; it retains the real build and current archive/registry checks. Staging and completion retain the existing npm implementation, original run/attempt/artifact binding and manual bootstrap. No build or direct npm publish runs in registry-writing jobs. Human npm approval is separate; pending staging is not release success.
 
@@ -88,3 +88,90 @@ for the original Core candidate, single-use dispatch, manual exact-producer
 completion and the source/control provenance distinction. Local tests establish
 wiring and failure behavior; the maintained main CI and real staging run establish
 remote execution. Neither is evidence of the user's npm approval.
+
+## Independent public side evidence
+
+The project-owned source role runs `scripts/paired-public.mjs` in the required
+Node 24 verification job after its ordinary source gate and optional packed
+consumer check. It then uploads `appkit-public-side-<full-sha>-<run-id>-<attempt>`.
+Either side verification or artifact upload failure fails that existing job.
+Node 26 retains its compatibility checks. No additional source workflow or private
+access is needed.
+
+The public side plan selects bounded workflow conformance and source/side
+integration contract tests, each with a 60-second deadline. These checks supplement
+the preceding mandatory source checks; they do not replace product builds, types,
+unit tests, documentation, compatibility or selected browser coverage. The shared
+checker's CLI/failure tests run through `test:verification-tooling`, outside the
+side runner, because their own process-group fixtures must not nest inside its
+process-group cleanup boundary. They are tooling tests, not consumer adoption
+or publication evidence.
+
+The unchanged shared checker and adjacent test are attributed and content-pinned
+in `scripts/paired-maintenance-source.json`. Review upstream changes explicitly;
+normal source runs never download executable policy code. This integrates the
+[coordinated maintenance contract](https://tech-docs.alneas.com/policies/development-policy.md#coordinated-publicprivate-project-maintenance)
+and [shared kit](https://tech-docs.alneas.com/templates/paired-maintenance/README.md).
+
+The artifact contains only `public-plan.json`, `public-receipt.json` and
+`producer.json`, created under `$RUNNER_TEMP/appkit-public-side`, outside the
+checkout. The fixed task ID is `appkit-release-compatibility-v1`. The producer
+records repository, full source/workflow SHAs, workflow reference, run ID, attempt,
+event, ref, event head SHA and SHA-256 hashes of the plan and receipt. For pull
+requests the tested source is GitHub's merge SHA; `headShaFromEvent` separately
+records the PR branch head returned by the run API. The coordinator must validate
+both identities and fetch the selected merge revision rather than substituting
+the branch head. Plans and receipts contain
+public facts only; raw logs and `.verification/` are never uploaded. The source
+must be clean at the selected full SHA before and after the side checks. A rerun
+invalidates old files before attempting verification.
+
+Producer metadata and `reviewedBy` are declarations, not authenticated approval.
+A restricted coordinator must select the reviewed current public SHA, authenticate
+GitHub's `Source quality` run in `dataarthub/appkit` from `.github/workflows/ci.yml`,
+require its successful primary and compatibility jobs and latest run attempt,
+verify the exact immutable artifact identity/digest and plan/receipt hashes, and
+reject newer failures, superseded attempts and missing/expired artifacts. A
+candidate-uploaded JSON file alone cannot establish successful source verification.
+When provenance or supersession cannot be established, the protected coordinator
+must rerun the maintained side selection against the clean selected public SHA;
+it must use reviewed trusted checker/selection bytes and separately authenticate
+source quality. It must not execute a candidate's replacement verifier as its
+trust authority. Hosting required-check/review settings remain a separate owner
+responsibility; this change does not alter branch protection.
+
+The coordinator may build and verify candidate archives from that selected public
+SHA using existing build and isolated consumer commands. Such archives are
+verification inputs, never production dependency pins. This public workflow does
+not run the restricted pair mode, receive restricted evidence, or claim whole-task
+acceptance. Registry publication, exact published dependency adoption and actual
+delivery remain separate release prerequisites under `RELEASING.md`.
+
+## Exact-input source receipts
+
+Push checks now run only fresh secret-history and generated-workflow consistency
+checks. Ready PR source verification uses the existing impact runner; Drafts omit
+heavy jobs, and merge queues use their actual integration candidate. Commit gates
+remain staged/read-only. Before handoff, affected checks still need a successful
+local or PR execution (or validated matching-input receipt).
+
+The project-owned `scripts/verification-evidence.mjs` restores JSON check receipts
+from digest-verified immutable Actions artifacts. It checks the latest producing
+attempt, same repository, reviewed workflow/verifier controls, actual candidate
+Git tree, required Node jobs and execution identity. No downloaded code or task
+outputs are executed. Full identical-tree source evidence can be inherited after
+merge; changed trees only enable keyed individual checks. A failed workflow's
+completed independent checks remain partial evidence. Missing, expired or
+incompatible evidence means conservative execution. Historic logs without those
+bindings remain records and do not become invented cache hits.
+
+Unit evidence in `.verification/records/unit-checks` preserves Bun's shared-process
+group and uses dependency closures for isolated Vitest files. Unknown resource or
+import edges execute afresh. Runtime/memory/config/lockfile/runner changes invalidate
+matching evidence. JUnit, normal exit and cleanup remain mandatory before recording.
+Only the two sanitized JSON CI-envelope files are uploaded; other ignored records
+and raw logs are not a public artifact allowlist.
+
+Local tooling fixtures verify reuse and rejection paths; they do not claim GitHub
+execution or a measured CI speedup. First rollout must bootstrap the new receipts
+and verify current remote workflows before relying on them for delivery.

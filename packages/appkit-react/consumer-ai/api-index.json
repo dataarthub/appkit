@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "packageName": "@alneas/appkit-react",
-  "packageVersion": "0.3.0",
-  "inputDigest": "bb2430c88593092ccc4e50460353ce2f22dac2ac0e927dae4dce5da483b397eb",
+  "packageVersion": "0.3.1",
+  "inputDigest": "169b20eccc09d555afd116bf8d04f978cea54d3b7c20bb7c52c3f5d156d95ee9",
   "entries": [
     {
       "importPath": "@alneas/appkit-react",
@@ -22512,7 +22512,7 @@
       "tags": [
         {
           "name": "remarks",
-          "text": "Envelope validation snapshots input by reference. Pass immutable documents; replace\ninput when a response changes. Component validators run during rendering and must\nbe pure. Unknown types and invalid data get per-block fallbacks; malformed envelopes\nget a document fallback. MinimalErrorBoundary isolates client render failures.\nBlock identity includes document ID, block ID/type and data."
+          "text": "Envelope validation snapshots input by reference. Pass immutable documents; replace\ninput when a response changes. Component validators run during rendering and must\nbe pure. Unknown types and invalid data get per-block fallbacks; malformed envelopes\nget a document fallback. MinimalErrorBoundary isolates client render failures.\nBlock identity includes document ID, block ID/type and data.\n\n\nRequires React; registered components own any other providers or CSS.\nThe default fallback is an English status paragraph. Client error boundaries handle\ndescendant render failures; React server rendering errors are not isolated by them.\nFallback callback errors propagate. Changing registry identity remounts blocks."
         },
         {
           "name": "param",
@@ -22521,10 +22521,6 @@
         {
           "name": "returns",
           "text": "Block wrappers and registered elements, or fallback content for invalid input."
-        },
-        {
-          "name": "remarks",
-          "text": "Requires React; registered components own any other providers or CSS.\nThe default fallback is an English status paragraph. Client error boundaries handle\ndescendant render failures; React server rendering errors are not isolated by them.\nFallback callback errors propagate. Changing registry identity remounts blocks."
         },
         {
           "name": "example",
@@ -23508,15 +23504,11 @@
         },
         {
           "name": "remarks",
-          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions."
+          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions.\nOmitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "throws",
           "text": "Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator."
-        },
-        {
-          "name": "remarks",
-          "text": "Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "example",
@@ -26109,15 +26101,11 @@
         },
         {
           "name": "remarks",
-          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions."
+          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions.\nOmitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "throws",
           "text": "Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator."
-        },
-        {
-          "name": "remarks",
-          "text": "Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "example",
@@ -28462,15 +28450,11 @@
         },
         {
           "name": "remarks",
-          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions."
+          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions.\nOmitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "throws",
           "text": "Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator."
-        },
-        {
-          "name": "remarks",
-          "text": "Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "example",
@@ -30058,7 +30042,7 @@
       "tags": [
         {
           "name": "remarks",
-          "text": "Envelope validation snapshots input by reference. Pass immutable documents; replace\ninput when a response changes. Component validators run during rendering and must\nbe pure. Unknown types and invalid data get per-block fallbacks; malformed envelopes\nget a document fallback. MinimalErrorBoundary isolates client render failures.\nBlock identity includes document ID, block ID/type and data."
+          "text": "Envelope validation snapshots input by reference. Pass immutable documents; replace\ninput when a response changes. Component validators run during rendering and must\nbe pure. Unknown types and invalid data get per-block fallbacks; malformed envelopes\nget a document fallback. MinimalErrorBoundary isolates client render failures.\nBlock identity includes document ID, block ID/type and data.\n\n\nRequires React; registered components own any other providers or CSS.\nThe default fallback is an English status paragraph. Client error boundaries handle\ndescendant render failures; React server rendering errors are not isolated by them.\nFallback callback errors propagate. Changing registry identity remounts blocks."
         },
         {
           "name": "param",
@@ -30067,10 +30051,6 @@
         {
           "name": "returns",
           "text": "Block wrappers and registered elements, or fallback content for invalid input."
-        },
-        {
-          "name": "remarks",
-          "text": "Requires React; registered components own any other providers or CSS.\nThe default fallback is an English status paragraph. Client error boundaries handle\ndescendant render failures; React server rendering errors are not isolated by them.\nFallback callback errors propagate. Changing registry identity remounts blocks."
         },
         {
           "name": "example",
@@ -30742,15 +30722,11 @@
         },
         {
           "name": "remarks",
-          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions."
+          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions.\nOmitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "throws",
           "text": "Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator."
-        },
-        {
-          "name": "remarks",
-          "text": "Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "example",
@@ -33134,15 +33110,11 @@
         },
         {
           "name": "remarks",
-          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions."
+          "text": "Automatically selects draft-07/2020-12 based on $schema; compiled functions are not shared across instances.\nDo not modify schemas after compilation; provide a new schema object instead.\nThe returned ajv instance corresponds to the default draft. Specify draft explicitly when using addSchema/addKeyword.\nThe default path disables type coercion and does not insert defaults or remove\nkeys. Explicit ajvOptions can enable input mutation. Unknown x-* keywords are\nnot business validation rules merely because strict mode is disabled.\nCompilation/configuration failures throw; invalid data returns valid: false.\nRuntime compilation requires a host that permits AJV's generated functions.\nOmitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "throws",
           "text": "Throws Ajv configuration/format-registration failures during construction; later schema compilation failures propagate from the returned validator."
-        },
-        {
-          "name": "remarks",
-          "text": "Omitted options default to {}; draft-07, no explicit locale, and noncoercing data validation are used."
         },
         {
           "name": "example",
@@ -79375,7 +79347,7 @@
       "tags": [
         {
           "name": "remarks",
-          "text": "Retain forwardRef to compose native registration and caller refs, including\ncallback cleanup; this is not a direct DOM-ref passthrough."
+          "text": "Retain forwardRef to compose native registration and caller refs, including\ncallback cleanup; this is not a direct DOM-ref passthrough.\nRequires the native Kanban surface. Pointer intersection excludes outside\ndrops; WIP limits are presentational and do not reject a host status callback."
         },
         {
           "name": "param",
@@ -79388,10 +79360,6 @@
         {
           "name": "returns",
           "text": "A column div accepting Kanban task registrations."
-        },
-        {
-          "name": "remarks",
-          "text": "Requires the native Kanban surface. Pointer intersection excludes outside\ndrops; WIP limits are presentational and do not reject a host status callback."
         },
         {
           "name": "example",

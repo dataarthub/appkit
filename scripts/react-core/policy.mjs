@@ -1,3 +1,4 @@
+import {dependencyMinimum} from '../dependency-constraints.mjs';
 function version(value) {
   const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.exec(value ?? '');
   if (!match || match.slice(1, 4).some(n => !Number.isSafeInteger(Number(n))) ||
@@ -21,7 +22,8 @@ function compare(a, b) {
 }
 export function checkPolicy({core, react, policy, release = false}) {
   version(core.version); version(react.version);
-  const requiredCore = react.dependencies?.['@alneas/appkit-core'];
+  const coreConstraint = react.dependencies?.['@alneas/appkit-core'];
+  const requiredCore = dependencyMinimum(coreConstraint);
   version(requiredCore);
   if (policy?.schemaVersion !== 1 || !Array.isArray(policy.requirements)) throw Error('Invalid react-core-policy.json');
   const ids = new Set();
@@ -39,7 +41,7 @@ export function checkPolicy({core, react, policy, release = false}) {
       } else throw Error(`${entry.id}: React dependency must use Core ${entry.coreVersion} or newer. ${entry.reason}`);
     }
   }
-  return {requiredCore, candidateCore: core.version, pendingRequirements};
+  return {requiredCore, coreConstraint, candidateCore: core.version, pendingRequirements};
 }
 export function matrixVerdict({current, candidate}) {
   if (current === true && candidate === true) return {passed: true, reason: 'Both Core combinations passed.'};

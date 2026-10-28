@@ -1,3 +1,4 @@
+import {dependencyAccepts} from './dependency-constraints.mjs';
 import assert from 'node:assert/strict';
 import {candidateArtifactDirectory} from './consumer-artifacts.mjs';
 import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync,readdirSync,existsSync,lstatSync} from 'node:fs';
@@ -38,6 +39,13 @@ try {
  assert.equal(run(path.join(fixture,'node_modules/.bin/tsc6'),['--version'],fixture).trim(),'Version 6.0.3');
  assert.equal(run(path.join(fixture,'node_modules/.bin/tsc'),['--version'],fixture).trim(),'Version 7.0.2');
  for(const legacy of ['core','sortable','utilities'])assert(!existsSync(path.join(fixture,'node_modules/@dnd-kit',legacy)),'Legacy dnd-kit installed: '+legacy);
+ const reactManifest=JSON.parse(readFileSync(path.join(fixture,'node_modules/@alneas/appkit-react/package.json')));
+ const declaredCore=reactManifest.dependencies['@alneas/appkit-core'];
+ const selectedCore=records.packages['@alneas/appkit-core'].version;
+ const sharedCore=dependencyAccepts(declaredCore,selectedCore);
+ const minimumCore=declaredCore.replace(/^[~^]/,'');
+ writeFileSync(path.join(fixture,'core-resolution.cjs'),`const assert=require('node:assert/strict');const {createRequire}=require('node:module');const fs=require('node:fs');const host=createRequire(__filename);const react=createRequire(host.resolve('@alneas/appkit-react'));const resolved=react.resolve('@alneas/appkit-core');const manifest=JSON.parse(fs.readFileSync(require('node:path').resolve(require('node:path').dirname(resolved),'../package.json')));assert.equal(manifest.version,${JSON.stringify(sharedCore?selectedCore:minimumCore)});${sharedCore ? "assert.equal(resolved,host.resolve('@alneas/appkit-core'));" : ''}console.log(JSON.stringify({coreVersion:manifest.version,shared:resolved===host.resolve('@alneas/appkit-core')}));`);
+ run(process.execPath,[path.join(fixture,'core-resolution.cjs')],fixture);
  const bin=path.join(fixture,'node_modules/@alneas/appkit-core/dist/agent-cli.mjs');run(process.execPath,[bin,'search','ActionRegistry','--json'],fixture);run('npm',['exec','--yes','--package=node@24.0.0','--','node',bin,'search','ActionRegistry','--json'],fixture);
  const input=readFileSync(path.join(root,'packages/appkit-react/examples/request-form.tsx'),'utf8');writeFileSync(path.join(fixture,'RequestForm.tsx'),input);
  writeFileSync(path.join(fixture,'ai-errors.tsx'),"import {AIChatError,getAIErrorInfo,type ActionToolResult} from '@alneas/appkit-core/ai'; const legacy:ActionToolResult={callId:'x',name:'x',ok:false,code:'INVALID_INPUT',error:'original'}; const e:Error=new AIChatError('AI_INVALID_STREAM','original'); console.log(legacy,e,getAIErrorInfo('tool','INVALID_INPUT'));\n");

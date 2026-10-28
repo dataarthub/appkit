@@ -8,6 +8,7 @@ test('the actual CI command rejects a required fix before any installation or te
   const root = mkdtempSync(path.join(tmpdir(), 'appkit-required-fix-'));
   try {
     mkdirSync(path.join(root, 'scripts'), {recursive: true});
+    cpSync(path.resolve('scripts/dependency-constraints.mjs'), path.join(root, 'scripts/dependency-constraints.mjs'));
     cpSync(path.resolve('scripts/check-react-core.mjs'), path.join(root, 'scripts/check-react-core.mjs'));
     cpSync(path.resolve('scripts/react-core'), path.join(root, 'scripts/react-core'), {recursive: true});
     for (const name of ['appkit-core', 'appkit-react']) mkdirSync(path.join(root, 'packages', name), {recursive: true});
@@ -25,6 +26,7 @@ test('release mode rejects a pending adoption before attempting registry install
   const root = mkdtempSync(path.join(tmpdir(), 'appkit-release-fix-'));
   try {
     mkdirSync(path.join(root, 'scripts'), {recursive: true});
+    cpSync(path.resolve('scripts/dependency-constraints.mjs'), path.join(root, 'scripts/dependency-constraints.mjs'));
     cpSync(path.resolve('scripts/check-react-core.mjs'), path.join(root, 'scripts/check-react-core.mjs'));
     cpSync(path.resolve('scripts/react-core'), path.join(root, 'scripts/react-core'), {recursive: true});
     for (const name of ['appkit-core', 'appkit-react']) mkdirSync(path.join(root, 'packages', name), {recursive: true});

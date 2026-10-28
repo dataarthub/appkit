@@ -5,6 +5,24 @@ may be prepared before publication; confirm availability on the
 [npm package page](https://www.npmjs.com/package/@alneas/appkit-core). Publication
 dates are recorded only when confirmed.
 
+## [0.2.2]
+
+### Fixed
+
+- Combine createAjvValidator documentation into one remarks block, preserving its
+  validation defaults and host/runtime requirements. Strict TypeDoc consumers can
+  process the published declarations without duplicate-tag warnings. Callable
+  types, runtime statements, exports and production dependencies are unchanged.
+
+### Upgrade from 0.2.1
+
+- This is an independently prepared documentation patch; confirm npm publication
+  before adopting it. Existing 0.2.1 archives and tags remain immutable.
+- Publish Core 0.2.2 first. Only after publication may the prepared React 0.3.1
+  dependency change from published Core 0.2.1 to exact 0.2.2; refresh and verify its
+  lockfile and consumers before React publication. Source preparation is not
+  publication evidence and does not authorize registry writes.
+
 ## [0.2.1]
 
 ### Changed

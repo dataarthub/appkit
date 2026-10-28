@@ -44,7 +44,7 @@ export function loadAdapter(root,path='.github/workflow-adapter.json'){
  for(const name of adapter.vars??[])assert(!['NODE_AUTH_TOKEN','GH_TOKEN','GITHUB_TOKEN','NODE_OPTIONS','FORCE_JAVASCRIPT_ACTIONS_TO_NODE24'].includes(name)&&!name.startsWith('GITHUB_')&&!name.startsWith('RUNNER_')&&!name.startsWith('WORKFLOW_'),'Reserved shared environment variable: '+name);
  if(adapter.runtime.goVersionFile)contained(root,adapter.runtime.goVersionFile,{allowMissing:false});
  const scripts=JSON.parse(readFileSync(join(root,'package.json'),'utf8')).scripts??{};
- for(const command of [...Object.values(adapter.setup),...Object.values(adapter.phases),...Object.values(adapter.evidence??{})]){
+ for(const command of [...Object.values(adapter.setup),...Object.values(adapter.phases),...Object.values(adapter.evidence??{}),...Object.values(adapter.verification??{})]){
   if(typeof command==='string')assert(Object.hasOwn(scripts,command),'Missing package script '+command);
   else {
    assert(['node','bun','python3'].includes(command[0]),'Unsupported phase executable');

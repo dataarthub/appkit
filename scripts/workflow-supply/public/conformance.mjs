@@ -22,7 +22,7 @@ export function checkProject(root,{configurationOnly=false}={}){
  require(!/--write|git\s+(?:add|stash|reset)/.test(scripts['quality:commit']??''),'quality.entrypoints','Commit gate must be read-only');
  const sourceText=JSON.stringify(p.source.jobs.verify.steps);
  require(/bun run (?:quality:ci|verify:push)/.test(sourceText),'quality.entrypoints','CI does not reach the maintained local gate');
- require(/workflow-supply\/public\/quality.mjs/.test(scripts['quality:push']??'')||/scripts\/workflow-adapter.mjs source/.test(scripts['quality:push']??''),'quality.selection','Push gate does not use the maintained selector adapter');
+ require(/workflow-supply\/public\/quality.mjs/.test(scripts['quality:ci']??'')||/scripts\/workflow-adapter.mjs source/.test(scripts['quality:ci']??''),'quality.selection','CI gate does not use the maintained selector adapter');
  const behavior=p.conformance?.behaviorCommands;
  require(Array.isArray(behavior)&&behavior.length>0,'quality.failure','Project behavior probes are not connected');
  for(const command of behavior??[])require(Array.isArray(command)&&command[0]==='bun'&&command[1]==='run'&&Object.hasOwn(scripts,command[2]),'quality.failure','Missing maintained behavior probe');
