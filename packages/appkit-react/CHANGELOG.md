@@ -25,6 +25,11 @@ dates are recorded only when confirmed.
 - This entry describes release preparation. Confirm npm availability before
   adopting React 0.3.1; published React 0.3.0 continues to require Core 0.2.0.
 
+- Remove deprecated `aria-grabbed` from DataTable, shared Draggable/FileBrowser activators and enabled Kanban cards while
+  retaining `aria-pressed`, keyboard/pointer dragging, screen-reader instructions
+  and live announcements. This correction requires a new React package release;
+  published 0.3.0 archives do not contain it.
+
 ## [0.3.0]
 
 ### Breaking changes

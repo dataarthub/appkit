@@ -40,6 +40,24 @@ test('pull request producer distinguishes tested merge source from API head SHA'
   } finally {rmSync(dir,{recursive:true,force:true});}
 });
 
+test('merge queue producer binds its tested candidate and rejects mismatched event heads', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'appkit-public-queue-'));
+  try {
+    const path = join(dir, 'event.json');
+    const queueEnv = {...env, GITHUB_EVENT_NAME:'merge_group', GITHUB_REF:'refs/heads/gh-readonly-queue/main/pr-22', GITHUB_EVENT_PATH:path};
+    writeFileSync(path, JSON.stringify({merge_group:{head_sha:env.GITHUB_SHA}}));
+    const producer = module.producerIdentity(queueEnv);
+    assert.equal(producer.sourceSha, env.GITHUB_SHA);
+    assert.equal(producer.headShaFromEvent, env.GITHUB_SHA);
+    assert.equal(producer.eventName, 'merge_group');
+    assert.equal(module.publicPlan(queueEnv).revision, env.GITHUB_SHA);
+    for (const head_sha of ['b'.repeat(40), 'missing', undefined]) {
+      writeFileSync(path, JSON.stringify({merge_group:{head_sha}}));
+      assert.throws(() => module.producerIdentity(queueEnv));
+    }
+  } finally {rmSync(dir,{recursive:true,force:true});}
+});
+
 test('dirty or mismatched source removes obsolete evidence instead of retaining a pass', () => {
   assert.equal(typeof module.runPublicSide, 'function');
   const dir = mkdtempSync(join(tmpdir(), 'appkit-public-side-test-'));

@@ -12,9 +12,13 @@ export function producerIdentity(env) {
   for (const key of ['GITHUB_SHA', 'GITHUB_WORKFLOW_SHA']) assert.match(env[key] ?? '', /^[a-f0-9]{40}$/, 'Full source/workflow SHA required');
   for (const key of ['GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT']) assert.match(env[key] ?? '', /^[1-9][0-9]*$/, 'Run and attempt required');
   assert.match(env.GITHUB_WORKFLOW_REF ?? '', /^dataarthub\/appkit\/\.github\/workflows\/ci\.yml@refs\//, 'Maintained source workflow required');
-  assert.ok(['push', 'pull_request', 'workflow_dispatch'].includes(env.GITHUB_EVENT_NAME), 'Source event required');
+  assert.ok(['push', 'pull_request', 'merge_group', 'workflow_dispatch'].includes(env.GITHUB_EVENT_NAME), 'Source event required');
   assert.match(env.GITHUB_REF ?? '', /^refs\//, 'Source ref required');
-  const headShaFromEvent = env.GITHUB_EVENT_NAME === 'pull_request' ? JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, 'utf8')).pull_request?.head?.sha : env.GITHUB_SHA;
+  let headShaFromEvent = env.GITHUB_EVENT_NAME === 'pull_request' ? JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, 'utf8')).pull_request?.head?.sha : env.GITHUB_SHA;
+  if (env.GITHUB_EVENT_NAME === 'merge_group') {
+    headShaFromEvent = JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, 'utf8')).merge_group?.head_sha;
+    assert.equal(headShaFromEvent, env.GITHUB_SHA, 'Merge queue head must match tested source');
+  }
   assert.match(headShaFromEvent ?? '', /^[a-f0-9]{40}$/, 'Full event head SHA required');
   return {schemaVersion: 1, headShaFromEvent, repository: env.GITHUB_REPOSITORY, sourceSha: env.GITHUB_SHA, workflowRef: env.GITHUB_WORKFLOW_REF, workflowSha: env.GITHUB_WORKFLOW_SHA, runId: env.GITHUB_RUN_ID, runAttempt: env.GITHUB_RUN_ATTEMPT, eventName: env.GITHUB_EVENT_NAME, ref: env.GITHUB_REF};
 }

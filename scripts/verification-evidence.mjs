@@ -151,9 +151,10 @@ export async function restoreEvidence(root,{env=process.env,request,readBundle}=
  return outcome;
 }
 /** Read-only pre-merge gate; never merges or substitutes a partial checkpoint. */
-export async function checkReadySource({repository,pullNumber,nodes,bunVersion,expectedControls,request,readBundle}) {
+export async function checkReadySource({repository,pullNumber,nodes,bunVersion,expectedHead,expectedControls,request,readBundle}) {
  assert(Number.isSafeInteger(pullNumber)&&pullNumber>0,'Positive PR number required');
  const pull=await request(`/pulls/${pullNumber}`),base=await request('/git/ref/heads/main');
+ assert.equal(pull.head.sha,expectedHead,'Current PR head differs from reviewed checkout');
  const listed=await request(`/actions/workflows/ci.yml/runs?head_sha=${pull.head.sha}&per_page=30`);
  const latest=listed.workflow_runs.filter(r=>r.path==='.github/workflows/ci.yml'&&r.event==='pull_request'&&r.head_repository?.full_name===repository&&r.pull_requests?.some(p=>p.number===pullNumber)).sort((a,b)=>b.id-a.id)[0];
  assert(latest,'Missing current Source quality');const run=await request(`/actions/runs/${latest.id}`);assert(run.run_attempt===latest.run_attempt&&run.status==='completed'&&run.conclusion==='success','Latest Source quality has not passed');
@@ -184,7 +185,7 @@ export async function main(mode,root=process.cwd(),env=process.env,{args=process
   console.log(`[verification] ${outcome.reason}`);if(env.GITHUB_OUTPUT)(await import('node:fs')).appendFileSync(env.GITHUB_OUTPUT,`inherited=${outcome.inherited}\nrestored=${outcome.restored}\n`);return outcome;
  }
  if(mode==='record') {for(const name of ['source.json','checks.json'])rmSync(join(directory,name),{force:true});const receipt=await currentReceipt(root,env,request);if(env.SOURCE_VERIFICATION_CONCLUSION!=='success'||receipt.event==='workflow_dispatch')receipt.status='checks-only';if(existsSync(join(directory,'restored.json')))receipt.reuse=read(join(directory,'restored.json'));writeFileSync(join(directory,'source.json'),JSON.stringify(receipt)+'\n');writeFileSync(join(directory,'checks.json'),JSON.stringify(exportChecks(root))+'\n');return;}
- if(mode==='merge-check') {assert.equal(git(root,['status','--porcelain','--untracked-files=all']),'','Review and commit changes before merge verification');assert(args.length===2&&args[0]==='--pr'&&/^[1-9]\d*$/.test(args[1]),'Use merge-check --pr <number>');const result=await checkReadySource({repository:adapter.repository,pullNumber:Number(args[1]),nodes:adapter.runtime.nodeVersions,bunVersion:adapter.runtime.bunVersion,expectedControls:localControls(root),request,readBundle:async artifact=>unpack(await artifactData(adapter.repository,artifact,{token:env.GH_TOKEN??env.GITHUB_TOKEN}))});console.log(JSON.stringify(result));return result;}
+ if(mode==='merge-check') {assert.equal(git(root,['status','--porcelain','--untracked-files=all']),'','Review and commit changes before merge verification');assert(args.length===2&&args[0]==='--pr'&&/^[1-9]\d*$/.test(args[1]),'Use merge-check --pr <number>');const result=await checkReadySource({repository:adapter.repository,pullNumber:Number(args[1]),nodes:adapter.runtime.nodeVersions,bunVersion:adapter.runtime.bunVersion,expectedHead:git(root,['rev-parse','HEAD']),expectedControls:localControls(root),request,readBundle:async artifact=>unpack(await artifactData(adapter.repository,artifact,{token:env.GH_TOKEN??env.GITHUB_TOKEN}))});console.log(JSON.stringify(result));return result;}
  throw Error('Use restore, record or merge-check');
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)main(process.argv[2]).catch(error=>{console.error(error.message);process.exitCode=1;});

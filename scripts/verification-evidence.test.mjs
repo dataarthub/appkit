@@ -83,7 +83,9 @@ test('pre-merge source gate checks every runtime, actual candidate and freshness
   throw Error(path);
  };
  const readBundle=async a=>{reads++;return {receipt:{...receipt,status:changed==='partial'?'checks-only':'passed',identity:{...identity,node:`v${a.id}.15.0`,controls}}};};
- const input={repository:'owner/project',pullNumber:3,nodes:[24,26],bunVersion:'1.4.0',expectedControls:controls,request,readBundle};
+ const input={repository:'owner/project',pullNumber:3,nodes:[24,26],bunVersion:'1.4.0',expectedHead:receipt.head,expectedControls:controls,request,readBundle};
  assert.equal((await checkReadySource(input)).sourceRun,12);assert.equal(reads,2);
+ await assert.rejects(()=>checkReadySource({...input,expectedHead:sha('f')}),/reviewed checkout/);
+ await assert.rejects(()=>checkReadySource({...input,expectedHead:undefined}),/reviewed checkout/);
  for(const reason of ['base','attempt','partial','new-run']) {changed=reason;reads=0;await assert.rejects(()=>checkReadySource(input));}
 });
